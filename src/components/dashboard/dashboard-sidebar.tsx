@@ -18,6 +18,7 @@ import {
 
 import { ThemeEditor } from "./theme-editor"
 import { TextEditor } from "./text-editor"
+import { PhraseEditor } from "./phrase-editor"
 import { ArtTools } from "./art-tools"
 import { DoodlePad } from "./doodle-pad"
 import { SocialLinksEditor } from "./social-links-editor"
@@ -111,6 +112,8 @@ export function DashboardSidebar({ profile }: { profile: any }) {
                             <p className="text-[11px] text-zinc-500 italic">Adicione elementos fundamentais ao seu mural.</p>
                         </header>
                         <TextEditor />
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+                        <PhraseEditor />
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
                         <GifPicker />
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
