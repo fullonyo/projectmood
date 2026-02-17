@@ -50,7 +50,10 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
             </div>
 
             <div className="space-y-4">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Cor Principal</h2>
+                <header>
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Cor dos Elementos</h2>
+                    <p className="text-[10px] text-zinc-500 italic leading-tight mt-1">Define a cor dos textos, ícones e detalhes do fundo.</p>
+                </header>
                 <div className="flex flex-wrap gap-2">
                     {['#000000', '#FF0000', '#22C55E', '#3B82F6', '#A855F7', '#EC4899'].map(color => (
                         <button
