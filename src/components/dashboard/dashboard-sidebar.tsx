@@ -35,7 +35,7 @@ export function DashboardSidebar({ profile }: { profile: any }) {
     ]
 
     return (
-        <aside className="w-80 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col h-full overflow-hidden z-10">
+        <aside className="w-80 border-r border-zinc-200/50 dark:border-zinc-800/50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl flex flex-col h-full overflow-hidden z-10 shadow-2xl">
             {/* Top Categories Navigation */}
             <nav className="grid grid-cols-4 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
                 {tabs.map((tab) => (

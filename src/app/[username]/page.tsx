@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import { Instagram, Twitter, Github, Linkedin, Youtube, MessageSquare, Link as LinkIcon } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon } from "@/components/icons";
 
 const ICONS: Record<string, any> = {
@@ -60,7 +63,7 @@ export default async function PublicMoodPage({
     return (
         <div
             className={cn(
-                "min-h-screen w-full relative overflow-x-hidden transition-all duration-1000",
+                "h-screen w-full relative overflow-hidden transition-all duration-1000",
                 profile.theme === "dark" ? "bg-[#050505] text-white" : "bg-[#fafafa] text-zinc-900",
                 profile.fontStyle === 'serif' ? 'font-serif' : profile.fontStyle === 'mono' ? 'font-mono' : 'font-sans'
             )}
@@ -70,8 +73,13 @@ export default async function PublicMoodPage({
             }}
         >
             {/* Dynamic Background Effect */}
-            <div className="fixed inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
-                style={{ backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+            <div
+                className="fixed inset-0 opacity-[0.03] dark:opacity-[0.08] pointer-events-none transition-opacity duration-1000"
+                style={{
+                    backgroundImage: `radial-gradient(currentColor 1px, transparent 1px)`,
+                    backgroundSize: '40px 40px'
+                }}
+            />
 
             {/* Floating Header */}
             <header className="fixed top-8 left-8 z-50 mix-blend-difference">
@@ -87,7 +95,7 @@ export default async function PublicMoodPage({
             </header>
 
             {/* The Canvas Reality */}
-            <main className="relative w-full min-h-screen">
+            <main className="relative w-full h-full">
                 {moodBlocks.map((block: any) => (
                     <div
                         key={block.id}

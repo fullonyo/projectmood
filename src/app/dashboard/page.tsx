@@ -2,8 +2,7 @@ import { auth, signOut } from "@/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
-import { MoodCanvas } from "@/components/dashboard/mood-canvas";
+import { DashboardClientLayout } from "@/components/dashboard/dashboard-client-layout";
 import Link from "next/link";
 import { ExternalLink, LogOut, Monitor, Laptop } from "lucide-react";
 
@@ -11,66 +10,58 @@ export default async function DashboardPage() {
     const session = await auth();
 
     if (!session?.user) {
-        redirect("/auth/login");
+        redirect("/login");
     }
 
-    const user = session.user as any;
-
-    const dbUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { username: true }
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        include: { profile: true }
     });
 
-    if (!dbUser) return null;
+    if (!user || !user.profile) {
+        redirect("/onboarding");
+    }
 
-    const profile = await prisma.profile.findUnique({
-        where: { userId: user.id },
-    });
+    const { profile, username } = user;
 
     const moodBlocks = await prisma.moodBlock.findMany({
-        where: { userId: user.id },
-        orderBy: { order: "asc" },
+        where: { userId: session.user.id },
+        orderBy: { order: 'asc' },
     });
 
-    if (!profile) return null;
-
     return (
-        <div className="flex flex-col h-screen bg-zinc-50 dark:bg-black overflow-hidden font-sans">
-            <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 flex items-center justify-between shrink-0 z-20">
+        <div className="h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden">
+            {/* Fixed Dashboard Header */}
+            <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 px-6 flex items-center justify-between shrink-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md z-30">
                 <div className="flex items-center gap-4">
-                    <div className="text-xl font-black tracking-tighter">MOOD.</div>
+                    <Link href="/" className="text-xl font-black tracking-tighter">MOOD.</Link>
                     <div className="h-4 w-[1px] bg-zinc-200 dark:bg-zinc-800" />
-                    <nav className="flex gap-4 text-sm font-medium">
-                        <span className="text-black dark:text-white border-b-2 border-black dark:border-white pb-1">Canvas Editor</span>
-                        <Link href={`/${dbUser.username}`} className="text-zinc-400 hover:text-black dark:hover:text-white transition-colors">
-                            Explorar
-                        </Link>
-                    </nav>
+                    <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                        <Monitor className="w-3 h-3" />
+                        <span>Editor Mode</span>
+                    </div>
                 </div>
+
                 <div className="flex items-center gap-3">
-                    <form action={async () => { "use server"; await signOut(); }}>
-                        <Button variant="ghost" size="sm" className="gap-2 text-zinc-500 hover:text-red-500 transition-colors">
-                            <LogOut className="w-4 h-4" />
-                            Sair
-                        </Button>
-                    </form>
-                    <Link href={`/${dbUser.username}`} target="_blank">
-                        <Button size="sm" className="gap-2 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-full px-5">
-                            Ver Espaço <ExternalLink className="w-3 h-3" />
+                    <Link href={`/${username}`} target="_blank">
+                        <Button variant="ghost" size="sm" className="gap-2 text-xs">
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            Ver Mural Público
                         </Button>
                     </Link>
+                    <form action={async () => {
+                        "use server"
+                        await signOut()
+                    }}>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-zinc-400 hover:text-red-500">
+                            <LogOut className="w-4 h-4" />
+                        </Button>
+                    </form>
                 </div>
             </header>
 
-            <main className="flex-1 flex overflow-hidden">
-                {/* New Tabbed Sidebar */}
-                <DashboardSidebar profile={profile} />
-
-                {/* Canvas Section */}
-                <section className="flex-1 bg-zinc-100 dark:bg-[#050505] overflow-hidden flex flex-col">
-                    <MoodCanvas blocks={moodBlocks} />
-                </section>
-            </main>
+            {/* Client Layout with Sidebar and Canvas */}
+            <DashboardClientLayout profile={profile} moodBlocks={moodBlocks} />
         </div>
     );
 }

@@ -23,16 +23,28 @@ const ICONS: Record<string, any> = {
 
 interface MoodCanvasProps {
     blocks: any[]
+    profile: any
 }
 
-export function MoodCanvas({ blocks }: MoodCanvasProps) {
+export function MoodCanvas({ blocks, profile }: MoodCanvasProps) {
+    const isDark = profile.theme === 'dark'
+    const bgColor = isDark ? '#050505' : (profile.backgroundColor || '#fafafa')
+    const primaryColor = profile.primaryColor || (isDark ? '#fff' : '#18181b')
+
     return (
-        <div className="relative w-full h-full bg-[#fafafa] dark:bg-[#050505] overflow-hidden cursor-crosshair">
+        <div
+            className="relative w-full h-full overflow-hidden cursor-crosshair transition-colors duration-500"
+            style={{ backgroundColor: bgColor, color: primaryColor }}
+        >
             {/* Canvas Grid/Background */}
             <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
-                style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+                style={{
+                    backgroundImage: `radial-gradient(${primaryColor} 1px, transparent 1px)`,
+                    backgroundSize: '30px 30px'
+                }}
+            />
 
-            <div className="relative w-full h-full p-20">
+            <div className="relative w-full h-full">
                 {blocks.map((block) => (
                     <CanvasItem key={block.id} block={block} />
                 ))}
@@ -110,7 +122,7 @@ function CanvasItem({ block }: { block: any }) {
             initial={{ x: block.x, y: block.y, rotate: block.rotation }}
             animate={{ x: pos.x, y: pos.y, rotate: rotation }}
             className={cn(
-                "absolute cursor-grab active:cursor-grabbing z-10 select-none",
+                "absolute top-0 left-0 cursor-grab active:cursor-grabbing z-10 select-none",
                 isDragging && "z-50"
             )}
         >
