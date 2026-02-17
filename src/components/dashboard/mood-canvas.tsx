@@ -4,7 +4,7 @@ import { motion, useDragControls } from "framer-motion"
 import { updateMoodBlockLayout, deleteMoodBlock } from "@/actions/profile"
 import { Trash2, GripHorizontal, RotateCw, Instagram, Twitter, Github, Linkedin, Youtube, MessageSquare, Link as LinkIcon } from "lucide-react"
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon } from "@/components/icons"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
 const ICONS: Record<string, any> = {
@@ -27,15 +27,44 @@ interface MoodCanvasProps {
 }
 
 export function MoodCanvas({ blocks, profile }: MoodCanvasProps) {
+    const canvasRef = useRef<HTMLDivElement>(null)
+    const [maxZ, setMaxZ] = useState(10)
+    const [isSaving, setIsSaving] = useState(false)
+
     const isDark = profile.theme === 'dark'
     const bgColor = isDark ? '#050505' : (profile.backgroundColor || '#fafafa')
     const primaryColor = profile.primaryColor || (isDark ? '#fff' : '#18181b')
 
+    // Sync maxZ with blocks changes
+    useEffect(() => {
+        if (blocks.length > 0) {
+            const currentMax = Math.max(...blocks.map(b => b.zIndex || 1))
+            setMaxZ(prev => Math.max(prev, currentMax))
+        }
+    }, [blocks])
+
+    const bringToFront = async (blockId: string) => {
+        const newZ = maxZ + 1
+        setMaxZ(newZ)
+        setIsSaving(true)
+        await updateMoodBlockLayout(blockId, { zIndex: newZ })
+        setIsSaving(false)
+    }
+
     return (
         <div
+            ref={canvasRef}
             className="relative w-full h-full overflow-hidden cursor-crosshair transition-colors duration-500"
             style={{ backgroundColor: bgColor, color: primaryColor }}
         >
+            {/* Saving Indicator */}
+            <div className={cn(
+                "absolute top-20 right-8 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 transition-all duration-300 pointer-events-none",
+                isSaving ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+            )}>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Sincronizando...</span>
+            </div>
             {/* Canvas Grid/Background */}
             <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
                 style={{
@@ -46,7 +75,14 @@ export function MoodCanvas({ blocks, profile }: MoodCanvasProps) {
 
             <div className="relative w-full h-full">
                 {blocks.map((block) => (
-                    <CanvasItem key={block.id} block={block} />
+                    <CanvasItem
+                        key={block.id}
+                        block={block}
+                        canvasRef={canvasRef}
+                        onInteract={() => bringToFront(block.id)}
+                        onSavingStart={() => setIsSaving(true)}
+                        onSavingEnd={() => setIsSaving(false)}
+                    />
                 ))}
             </div>
 
@@ -86,45 +122,85 @@ function SocialBlock({ content }: { content: any }) {
     )
 }
 
-function CanvasItem({ block }: { block: any }) {
-    const [pos, setPos] = useState({ x: block.x, y: block.y })
-    const [rotation, setRotation] = useState(block.rotation || 0)
+// Helper to keep rescue positions stable
+const stableHash = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return Math.abs(hash);
+};
+
+function CanvasItem({ block, canvasRef, onInteract, onSavingStart, onSavingEnd }: {
+    block: any,
+    canvasRef: React.RefObject<HTMLDivElement | null>,
+    onInteract: () => void,
+    onSavingStart: () => void,
+    onSavingEnd: () => void
+}) {
+    // block.x and block.y are now percentages (0-100)
     const [isDragging, setIsDragging] = useState(false)
-    const constraintsRef = useRef(null)
+    const [localRotation, setLocalRotation] = useState(block.rotation || 0)
+
+    const handleDragStart = () => {
+        setIsDragging(true)
+        onInteract()
+    }
 
     const handleDragEnd = async (event: any, info: any) => {
         setIsDragging(false)
-        const newX = Math.round(pos.x + info.offset.x)
-        const newY = Math.round(pos.y + info.offset.y)
-        setPos({ x: newX, y: newY })
+        if (!canvasRef.current) return
 
-        await updateMoodBlockLayout(block.id, { x: newX, y: newY })
+        const canvasRect = canvasRef.current.getBoundingClientRect()
+
+        // Convert current pixel position to percentage
+        const xPercent = (info.point.x - canvasRect.left) / canvasRect.width * 100
+        const yPercent = (info.point.y - canvasRect.top) / canvasRect.height * 100
+
+        onSavingStart()
+        await updateMoodBlockLayout(block.id, {
+            x: Math.max(0, Math.min(100, xPercent)),
+            y: Math.max(0, Math.min(100, yPercent))
+        })
+        onSavingEnd()
     }
 
     const handleDelete = async () => {
         if (confirm("Deletar item?")) {
+            onSavingStart()
             await deleteMoodBlock(block.id)
+            onSavingEnd()
         }
     }
 
     const rotate = async () => {
-        const newRotation = (rotation + 15) % 360
-        setRotation(newRotation)
+        const newRotation = (localRotation + 15) % 360
+        setLocalRotation(newRotation)
+        onSavingStart()
         await updateMoodBlockLayout(block.id, { rotation: newRotation })
+        onSavingEnd()
     }
+
+    // Auto-rescue logic: if blocks are in pixels (>100), bring them to a stable center area
+    const hash = stableHash(block.id);
+    const displayX = block.x > 100 ? (20 + (hash % 60)) : block.x
+    const displayY = block.y > 100 ? (20 + (hash % 60)) : block.y
 
     return (
         <motion.div
             drag
             dragMomentum={false}
-            onDragStart={() => setIsDragging(true)}
+            onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            initial={{ x: block.x, y: block.y, rotate: block.rotation }}
-            animate={{ x: pos.x, y: pos.y, rotate: rotation }}
+            initial={false}
+            animate={{
+                left: `${displayX}%`,
+                top: `${displayY}%`,
+                rotate: localRotation,
+                zIndex: isDragging ? 999 : (block.zIndex || 1)
+            }}
             className={cn(
-                "absolute top-0 left-0 cursor-grab active:cursor-grabbing z-10 select-none",
-                isDragging && "z-50"
+                "absolute cursor-grab active:cursor-grabbing select-none"
             )}
+            style={{ zIndex: isDragging ? 999 : (block.zIndex || 1) }}
         >
             <div className="group relative">
                 {/* Control Overlay */}

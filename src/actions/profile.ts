@@ -37,8 +37,8 @@ export async function addMoodBlock(type: string, content: any, initialPos = { x:
                 userId: session.user.id,
                 type,
                 content,
-                x: initialPos.x,
-                y: initialPos.y,
+                x: Math.round(initialPos.x),
+                y: Math.round(initialPos.y),
             },
         });
 
@@ -55,11 +55,21 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
 
+    // Validation & Rounding for Prisma Int
+    const validatedData: any = { ...data };
+    if (typeof validatedData.x === 'number') validatedData.x = Math.round(Math.max(0, Math.min(100, validatedData.x)));
+    if (typeof validatedData.y === 'number') validatedData.y = Math.round(Math.max(0, Math.min(100, validatedData.y)));
+
     try {
         await prisma.moodBlock.update({
             where: { id: blockId, userId: session.user.id },
-            data,
+            data: validatedData,
         });
+
+        const username = (session.user as any).username;
+        revalidatePath("/dashboard");
+        if (username) revalidatePath(`/${username}`);
+
         return { success: true };
     } catch (error) {
         return { error: "Erro ao salvar posição" };
@@ -80,6 +90,25 @@ export async function deleteMoodBlock(blockId: string) {
         return { success: true };
     } catch (error) {
         return { error: "Erro ao excluir bloco" };
+    }
+}
+
+export async function clearMoodBlocks() {
+    const session = await auth();
+    if (!session?.user?.id) return { error: "Não autorizado" };
+
+    try {
+        await prisma.moodBlock.deleteMany({
+            where: { userId: session.user.id }
+        });
+
+        const username = (session.user as any).username;
+        revalidatePath("/dashboard");
+        if (username) revalidatePath(`/${username}`);
+
+        return { success: true };
+    } catch (error) {
+        return { error: "Erro ao limpar mural" };
     }
 }
 

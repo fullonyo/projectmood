@@ -65,7 +65,7 @@ export function DoodlePad() {
 
         const dataUrl = canvas.toDataURL("image/png")
         startTransition(async () => {
-            await addMoodBlock('doodle', { image: dataUrl }, { x: 100, y: 100 })
+            await addMoodBlock('doodle', { image: dataUrl }, { x: 50, y: 50 })
             clear()
         })
     }

@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import { Instagram, Twitter, Github, Linkedin, Youtube, MessageSquare, Link as LinkIcon } from "lucide-react";
+import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon } from "@/components/icons";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon } from "@/components/icons";
 
 const ICONS: Record<string, any> = {
     instagram: Instagram,
@@ -96,118 +96,130 @@ export default async function PublicMoodPage({
 
             {/* The Canvas Reality */}
             <main className="relative w-full h-full">
-                {moodBlocks.map((block: any) => (
-                    <div
-                        key={block.id}
-                        className="absolute select-none pointer-events-auto"
-                        style={{
-                            left: `${block.x}px`,
-                            top: `${block.y}px`,
-                            transform: `rotate(${block.rotation || 0}deg)`,
-                            zIndex: block.zIndex || 1
-                        }}
-                    >
-                        {block.type === 'text' && (
-                            <div
-                                className={cn(
-                                    "p-6 shadow-2xl transition-all duration-300 min-w-[220px] max-w-[450px]",
-                                    (block.content as any).style === 'postit' && "bg-[#ffff88] text-zinc-900 rotate-[-1deg] shadow-yellow-900/20 rounded-sm border-b-[20px] border-b-black/5",
-                                    (block.content as any).style === 'ripped' && "bg-white text-zinc-900 shadow-zinc-300/80",
-                                    (block.content as any).style === 'typewriter' && "bg-transparent border-2 border-dashed border-current rounded-none",
-                                    (block.content as any).style === 'simple' && "bg-white/10 dark:bg-zinc-900/10 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl"
-                                )}
-                                style={{
-                                    backgroundColor: (block.content as any).bgColor,
-                                    clipPath: (block.content as any).style === 'ripped' ? 'polygon(0% 2%, 98% 0%, 100% 100%, 2% 98%, 0% 50%)' : 'none',
-                                    textAlign: (block.content as any).align as any || 'center'
-                                }}
-                            >
-                                <p className={cn(
-                                    "leading-relaxed transition-all",
-                                    (block.content as any).fontSize === 'sm' && "text-base",
-                                    (block.content as any).fontSize === 'xl' && "text-3xl font-serif italic",
-                                    (block.content as any).fontSize === '3xl' && "text-5xl font-black tracking-tighter font-mono uppercase",
-                                    (block.content as any).style === 'typewriter' && "font-mono underline decoration-dotted"
-                                )}>
-                                    {(block.content as any).text}
-                                </p>
-                            </div>
-                        )}
+                {moodBlocks.map((block: any) => {
+                    const stableHash = (str: string) => {
+                        let hash = 0;
+                        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                        return Math.abs(hash);
+                    };
 
-                        {block.type === 'gif' && (
-                            <div className="p-1 bg-white/20 dark:bg-black/20 backdrop-blur-md rounded-2xl shadow-xl border border-white/10">
-                                <img src={(block.content as any).url} alt="gif" className="rounded-xl w-48 h-auto" />
-                            </div>
-                        )}
+                    const hash = stableHash(block.id);
+                    const displayX = block.x > 100 ? (20 + (hash % 60)) : block.x
+                    const displayY = block.y > 100 ? (20 + (hash % 60)) : block.y
 
-                        {block.type === 'tape' && (
-                            <div
-                                className="w-32 h-8 shadow-sm backdrop-blur-[2px]"
-                                style={{
-                                    backgroundColor: (block.content as any).color,
-                                    backgroundImage: (block.content as any).pattern === 'dots' ? 'radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)' : 'none',
-                                    backgroundSize: '4px 4px',
-                                    clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 98%)'
-                                }}
-                            />
-                        )}
-
-                        {block.type === 'weather' && (
-                            <div className="p-6 bg-white/10 dark:bg-zinc-900/10 backdrop-blur-3xl border border-white/10 rounded-sm shadow-sm min-w-[180px] text-center space-y-2">
-                                <p className="text-[10px] uppercase tracking-[0.4em] font-bold opacity-30">Current Mood</p>
-                                <p className="text-xl font-serif italic">{(block.content as any).vibe}</p>
-                                <div className="h-[1px] w-6 bg-current mx-auto opacity-10" />
-                                <p className="text-[10px] font-medium opacity-50 uppercase tracking-widest">{(block.content as any).location}</p>
-                            </div>
-                        )}
-
-                        {block.type === 'media' && (
-                            <div className={cn(
-                                "p-4 py-8 min-w-[140px] max-w-[200px] shadow-2xl relative transition-transform",
-                                (block.content as any).category === 'book' ? "bg-[#f5f5dc] text-zinc-900 rounded-r-md border-l-[6px] border-zinc-400" : "bg-black text-white rounded-md border-2 border-zinc-800"
-                            )}>
-                                <div className="absolute top-2 left-3 text-[8px] opacity-30 uppercase font-black">
-                                    {(block.content as any).category}
+                    return (
+                        <div
+                            key={block.id}
+                            className="absolute select-none pointer-events-auto"
+                            style={{
+                                left: `${displayX}%`,
+                                top: `${displayY}%`,
+                                transform: `rotate(${block.rotation || 0}deg)`,
+                                zIndex: block.zIndex || 1
+                            }}
+                        >
+                            {block.type === 'text' && (
+                                <div
+                                    className={cn(
+                                        "p-6 shadow-2xl transition-all duration-300 min-w-[220px] max-w-[450px]",
+                                        (block.content as any).style === 'postit' && "bg-[#ffff88] text-zinc-900 rotate-[-1deg] shadow-yellow-900/20 rounded-sm border-b-[20px] border-b-black/5",
+                                        (block.content as any).style === 'ripped' && "bg-white text-zinc-900 shadow-zinc-300/80",
+                                        (block.content as any).style === 'typewriter' && "bg-transparent border-2 border-dashed border-current rounded-none",
+                                        (block.content as any).style === 'simple' && "bg-white/10 dark:bg-zinc-900/10 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl"
+                                    )}
+                                    style={{
+                                        backgroundColor: (block.content as any).bgColor,
+                                        clipPath: (block.content as any).style === 'ripped' ? 'polygon(0% 2%, 98% 0%, 100% 100%, 2% 98%, 0% 50%)' : 'none',
+                                        textAlign: (block.content as any).align as any || 'center'
+                                    }}
+                                >
+                                    <p className={cn(
+                                        "leading-relaxed transition-all",
+                                        (block.content as any).fontSize === 'sm' && "text-base",
+                                        (block.content as any).fontSize === 'xl' && "text-3xl font-serif italic",
+                                        (block.content as any).fontSize === '3xl' && "text-5xl font-black tracking-tighter font-mono uppercase",
+                                        (block.content as any).style === 'typewriter' && "font-mono underline decoration-dotted"
+                                    )}>
+                                        {(block.content as any).text}
+                                    </p>
                                 </div>
-                                <p className="text-sm font-black text-center mt-2 leading-tight uppercase font-mono tracking-tighter">
-                                    {(block.content as any).title}
-                                </p>
-                                <div className="mt-6 pt-6 border-t border-zinc-500/10 text-[10px] italic text-center opacity-60">
-                                    {(block.content as any).review}
+                            )}
+
+                            {block.type === 'gif' && (
+                                <div className="p-1 bg-white/20 dark:bg-black/20 backdrop-blur-md rounded-2xl shadow-xl border border-white/10">
+                                    <img src={(block.content as any).url} alt="gif" className="rounded-xl w-48 h-auto" />
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {block.type === 'doodle' && (
-                            <img
-                                src={(block.content as any).image}
-                                alt="doodle"
-                                className="w-48 h-auto dark:invert contrast-125 brightness-110 pointer-events-none"
-                            />
-                        )}
-
-                        {block.type === 'social' && (
-                            <a
-                                href={(block.content as any).url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block transition-transform hover:scale-110 active:scale-95 group/social"
-                            >
-                                <SocialBlockPublic content={block.content} />
-                            </a>
-                        )}
-
-                        {block.type === 'music' && (
-                            <div className="w-80 p-2 bg-black/90 rounded-[2rem] shadow-2xl border border-white/20">
-                                <iframe
-                                    src={`https://open.spotify.com/embed/track/${(block.content as any).trackId}`}
-                                    width="100%" height="80" frameBorder="0" allow="encrypted-media"
-                                    className="rounded-2xl"
+                            {block.type === 'tape' && (
+                                <div
+                                    className="w-32 h-8 shadow-sm backdrop-blur-[2px]"
+                                    style={{
+                                        backgroundColor: (block.content as any).color,
+                                        backgroundImage: (block.content as any).pattern === 'dots' ? 'radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)' : 'none',
+                                        backgroundSize: '4px 4px',
+                                        clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 98%)'
+                                    }}
                                 />
-                            </div>
-                        )}
-                    </div>
-                ))}
+                            )}
+
+                            {block.type === 'weather' && (
+                                <div className="p-6 bg-white/10 dark:bg-zinc-900/10 backdrop-blur-3xl border border-white/10 rounded-sm shadow-sm min-w-[180px] text-center space-y-2">
+                                    <p className="text-[10px] uppercase tracking-[0.4em] font-bold opacity-30">Current Mood</p>
+                                    <p className="text-xl font-serif italic">{(block.content as any).vibe}</p>
+                                    <div className="h-[1px] w-6 bg-current mx-auto opacity-10" />
+                                    <p className="text-[10px] font-medium opacity-50 uppercase tracking-widest">{(block.content as any).location}</p>
+                                </div>
+                            )}
+
+                            {block.type === 'media' && (
+                                <div className={cn(
+                                    "p-4 py-8 min-w-[140px] max-w-[200px] shadow-2xl relative transition-transform",
+                                    (block.content as any).category === 'book' ? "bg-[#f5f5dc] text-zinc-900 rounded-r-md border-l-[6px] border-zinc-400" : "bg-black text-white rounded-md border-2 border-zinc-800"
+                                )}>
+                                    <div className="absolute top-2 left-3 text-[8px] opacity-30 uppercase font-black">
+                                        {(block.content as any).category}
+                                    </div>
+                                    <p className="text-sm font-black text-center mt-2 leading-tight uppercase font-mono tracking-tighter">
+                                        {(block.content as any).title}
+                                    </p>
+                                    <div className="mt-6 pt-6 border-t border-zinc-500/10 text-[10px] italic text-center opacity-60">
+                                        {(block.content as any).review}
+                                    </div>
+                                </div>
+                            )}
+
+                            {block.type === 'doodle' && (
+                                <img
+                                    src={(block.content as any).image}
+                                    alt="doodle"
+                                    className="w-48 h-auto dark:invert contrast-125 brightness-110 pointer-events-none"
+                                />
+                            )}
+
+                            {block.type === 'social' && (
+                                <a
+                                    href={(block.content as any).url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block transition-transform hover:scale-110 active:scale-95 group/social"
+                                >
+                                    <SocialBlockPublic content={block.content} />
+                                </a>
+                            )}
+
+                            {block.type === 'music' && (
+                                <div className="w-80 p-2 bg-black/90 rounded-[2rem] shadow-2xl border border-white/20">
+                                    <iframe
+                                        src={`https://open.spotify.com/embed/track/${(block.content as any).trackId}`}
+                                        width="100%" height="80" frameBorder="0" allow="encrypted-media"
+                                        className="rounded-2xl"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </main>
 
             {/* Branding Footer */}

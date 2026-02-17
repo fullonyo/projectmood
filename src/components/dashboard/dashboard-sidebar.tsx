@@ -11,7 +11,9 @@ import {
     Image as ImageIcon,
     PenTool,
     Share2,
-    CloudSun
+    CloudSun,
+    Trash2,
+    Bomb
 } from "lucide-react"
 
 import { ThemeEditor } from "./theme-editor"
@@ -21,6 +23,8 @@ import { DoodlePad } from "./doodle-pad"
 import { SocialLinksEditor } from "./social-links-editor"
 import { GifPicker } from "./gif-picker"
 import { SpotifySearch } from "./spotify-search"
+import { clearMoodBlocks } from "@/actions/profile"
+import { Button } from "../ui/button"
 
 type TabType = 'style' | 'content' | 'art' | 'social'
 
@@ -73,6 +77,30 @@ export function DashboardSidebar({ profile }: { profile: any }) {
                             currentPrimaryColor={profile.primaryColor || '#000'}
                             currentFontStyle={profile.fontStyle || 'sans'}
                         />
+
+                        <div className="pt-10 space-y-4">
+                            <div className="h-[1px] bg-red-100 dark:bg-red-900/20" />
+                            <header>
+                                <h3 className="text-sm font-bold text-red-500 uppercase flex items-center gap-2">
+                                    <Bomb className="w-4 h-4" />
+                                    Danger Zone
+                                </h3>
+                                <p className="text-[10px] text-zinc-500 mt-1">Ações que não podem ser desfeitas.</p>
+                            </header>
+
+                            <Button
+                                variant="outline"
+                                className="w-full border-red-200 dark:border-red-900/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-2 h-12 rounded-xl text-xs font-bold"
+                                onClick={async () => {
+                                    if (confirm("TEM CERTEZA? Isso vai deletar TODOS os blocos do seu mural permanentemente.")) {
+                                        await clearMoodBlocks()
+                                    }
+                                }}
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Limpar Todo o Mural
+                            </Button>
+                        </div>
                     </div>
                 )}
 

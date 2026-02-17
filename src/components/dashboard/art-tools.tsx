@@ -23,7 +23,7 @@ export function ArtTools() {
             await addMoodBlock('tape', {
                 color: tape.color,
                 pattern: tape.pattern
-            }, { x: 150, y: 150 })
+            }, { x: 20, y: 20 })
         })
     }
 
@@ -33,7 +33,7 @@ export function ArtTools() {
         if (!location || !vibe) return
 
         startTransition(async () => {
-            await addMoodBlock('weather', { location, vibe }, { x: 200, y: 200 })
+            await addMoodBlock('weather', { location, vibe }, { x: 30, y: 30 })
         })
     }
 
@@ -43,7 +43,7 @@ export function ArtTools() {
         if (!title || !review) return
 
         startTransition(async () => {
-            await addMoodBlock('media', { title, category, review }, { x: 250, y: 250 })
+            await addMoodBlock('media', { title, category, review }, { x: 40, y: 40 })
         })
     }
 

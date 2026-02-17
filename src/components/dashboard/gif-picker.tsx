@@ -36,7 +36,7 @@ export function GifPicker() {
             await addMoodBlock('gif', {
                 url: gif.url,
                 title: gif.title
-            }, { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 })
+            }, { x: Math.random() * 40 + 30, y: Math.random() * 40 + 30 })
         })
     }
 
