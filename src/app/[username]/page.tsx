@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import { Instagram, Twitter, Github, Linkedin, Youtube, MessageSquare, Link as LinkIcon } from "lucide-react";
-import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon } from "@/components/icons";
+import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -13,6 +13,7 @@ const ICONS: Record<string, any> = {
     twitter: Twitter,
     discord: DiscordIcon,
     tiktok: TikTokIcon,
+    steam: SteamIcon,
     spotify: SpotifyIcon,
     twitch: TwitchIcon,
     pinterest: PinterestIcon,

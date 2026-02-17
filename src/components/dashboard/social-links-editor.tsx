@@ -14,13 +14,14 @@ import {
     Link as LinkIcon,
     Plus
 } from "lucide-react"
-import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon } from "@/components/icons"
+import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
 
 const PLATFORMS = [
     { id: 'instagram', icon: Instagram, label: 'Instagram', color: '#E4405F' },
     { id: 'twitter', icon: Twitter, label: 'Twitter/X', color: '#000000' },
     { id: 'discord', icon: DiscordIcon, label: 'Discord', color: '#5865F2' },
     { id: 'tiktok', icon: TikTokIcon, label: 'TikTok', color: '#000000' },
+    { id: 'steam', icon: SteamIcon, label: 'Steam', color: '#171a21' },
     { id: 'spotify', icon: SpotifyIcon, label: 'Spotify', color: '#1DB954' },
     { id: 'twitch', icon: TwitchIcon, label: 'Twitch', color: '#9146FF' },
     { id: 'pinterest', icon: PinterestIcon, label: 'Pinterest', color: '#E60023' },

@@ -3,7 +3,7 @@
 import { motion, useDragControls } from "framer-motion"
 import { updateMoodBlockLayout, deleteMoodBlock } from "@/actions/profile"
 import { Trash2, GripHorizontal, RotateCw, Instagram, Twitter, Github, Linkedin, Youtube, MessageSquare, Link as LinkIcon } from "lucide-react"
-import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon } from "@/components/icons"
+import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
 import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
@@ -12,6 +12,7 @@ const ICONS: Record<string, any> = {
     twitter: Twitter,
     discord: DiscordIcon,
     tiktok: TikTokIcon,
+    steam: SteamIcon,
     spotify: SpotifyIcon,
     twitch: TwitchIcon,
     pinterest: PinterestIcon,
