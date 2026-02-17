@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String      @id @default(cuid())
+  name      String?
+  email     String      @unique
+  username  String      @unique
+  password  String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  profile   Profile?
+  moodBlocks MoodBlock[]
+
+  @@index([username])
+}
+
+model Profile {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme           String  @default("light")
+  backgroundColor String? @default("#ffffff")
+  primaryColor    String? @default("#000000")
+  fontStyle       String? @default("sans")
+  backgroundImage String?
+  updatedAt       DateTime @default(now()) @updatedAt
+}
+
+model MoodBlock {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type    String // text, image, music, link
+  content Json
+  order   Int    @default(0)
+  updatedAt DateTime @default(now()) @updatedAt
+}
