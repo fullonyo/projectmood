@@ -22,28 +22,30 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
     return (
         <div className="space-y-6">
             <div className="space-y-4">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Tema</h2>
-                <div className="grid grid-cols-2 gap-3">
-                    <button
-                        onClick={() => handleUpdate({ theme: 'light' })}
-                        disabled={isPending}
-                        className={cn(
-                            "h-12 rounded-xl border-2 transition-all",
-                            currentTheme === 'light' ? "bg-white border-black" : "bg-white border-transparent shadow-sm"
-                        )}
-                    >
-                        <span className="text-xs font-bold text-black">Claro</span>
-                    </button>
-                    <button
-                        onClick={() => handleUpdate({ theme: 'dark' })}
-                        disabled={isPending}
-                        className={cn(
-                            "h-12 rounded-xl border-2 transition-all",
-                            currentTheme === 'dark' ? "bg-zinc-800 border-white" : "bg-zinc-800 border-transparent shadow-sm"
-                        )}
-                    >
-                        <span className="text-xs font-bold text-white">Escuro</span>
-                    </button>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Vibes do Mural</h2>
+                <div className="grid grid-cols-2 gap-2">
+                    {[
+                        { id: 'light', label: 'Classic', colors: 'bg-white border-zinc-200' },
+                        { id: 'dark', label: 'Midnight', colors: 'bg-zinc-900 border-zinc-800' },
+                        { id: 'vintage', label: 'Vintage', colors: 'bg-[#f4ead5] border-[#d3c4a1]', data: { theme: 'vintage', backgroundColor: '#f4ead5', primaryColor: '#5d4037' } },
+                        { id: 'notebook', label: 'Notebook', colors: 'bg-[#fafafa] border-blue-100', data: { theme: 'notebook', backgroundColor: '#fafafa', primaryColor: '#1e3a8a' } },
+                        { id: 'blueprint', label: 'Blueprint', colors: 'bg-[#1a3a5f] border-[#2d5a8e]', data: { theme: 'blueprint', backgroundColor: '#1a3a5f', primaryColor: '#ffffff' } },
+                        { id: 'canvas', label: 'Canvas', colors: 'bg-[#e7e5e4] border-[#d6d3d1]', data: { theme: 'canvas', backgroundColor: '#e7e5e4', primaryColor: '#44403c' } },
+                        { id: 'cyberpunk', label: 'Cyberpunk', colors: 'bg-black border-pink-500/30', data: { theme: 'cyberpunk', backgroundColor: '#000000', primaryColor: '#ff00ff' } },
+                    ].map((vibe) => (
+                        <button
+                            key={vibe.id}
+                            onClick={() => handleUpdate(vibe.data || { theme: vibe.id })}
+                            disabled={isPending}
+                            className={cn(
+                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all group",
+                                currentTheme === vibe.id ? "border-black dark:border-white scale-[1.02]" : "border-transparent opacity-70 hover:opacity-100 shadow-sm"
+                            )}
+                        >
+                            <div className={cn("w-full h-8 rounded-md mb-2 border", vibe.colors)} />
+                            <span className="text-[10px] font-black uppercase tracking-tighter">{vibe.label}</span>
+                        </button>
+                    ))}
                 </div>
             </div>
 
