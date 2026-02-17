@@ -34,11 +34,20 @@ model Profile {
 }
 
 model MoodBlock {
-  id      String @id @default(cuid())
-  userId  String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type    String // text, image, music, link
-  content Json
-  order   Int    @default(0)
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // text, image, music, link, gif
+  content   Json
+  order     Int      @default(0)
+  
+  // Canvas positioning
+  x         Int      @default(0)
+  y         Int      @default(0)
+  width     Int?
+  height    Int?
+  zIndex    Int      @default(1)
+  rotation  Float    @default(0)
+  
   updatedAt DateTime @default(now()) @updatedAt
 }

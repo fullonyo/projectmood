@@ -11,72 +11,72 @@ export async function updateProfile(data: {
     fontStyle?: string;
 }) {
     const session = await auth();
-
-    if (!session?.user?.id) {
-        return { error: "Não autorizado" };
-    }
+    if (!session?.user?.id) return { error: "Não autorizado" };
 
     try {
         await prisma.profile.update({
             where: { userId: session.user.id },
             data,
         });
-
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
         if (username) revalidatePath(`/${username}`);
-
         return { success: true };
     } catch (error) {
         return { error: "Erro ao atualizar perfil" };
     }
 }
 
-export async function addMoodBlock(type: string, content: any) {
+export async function addMoodBlock(type: string, content: any, initialPos = { x: 50, y: 50 }) {
     const session = await auth();
-
-    if (!session?.user?.id) {
-        return { error: "Não autorizado" };
-    }
+    if (!session?.user?.id) return { error: "Não autorizado" };
 
     try {
-        await prisma.moodBlock.create({
+        const block = await prisma.moodBlock.create({
             data: {
                 userId: session.user.id,
                 type,
                 content,
+                x: initialPos.x,
+                y: initialPos.y,
             },
         });
 
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
         if (username) revalidatePath(`/${username}`);
-
-        return { success: true };
+        return { success: true, block };
     } catch (error) {
         return { error: "Erro ao adicionar bloco" };
     }
 }
 
+export async function updateMoodBlockLayout(blockId: string, data: { x?: number, y?: number, width?: number, height?: number, zIndex?: number, rotation?: number }) {
+    const session = await auth();
+    if (!session?.user?.id) return { error: "Não autorizado" };
+
+    try {
+        await prisma.moodBlock.update({
+            where: { id: blockId, userId: session.user.id },
+            data,
+        });
+        return { success: true };
+    } catch (error) {
+        return { error: "Erro ao salvar posição" };
+    }
+}
+
 export async function deleteMoodBlock(blockId: string) {
     const session = await auth();
-
-    if (!session?.user?.id) {
-        return { error: "Não autorizado" };
-    }
+    if (!session?.user?.id) return { error: "Não autorizado" };
 
     try {
         await prisma.moodBlock.delete({
-            where: {
-                id: blockId,
-                userId: session.user.id
-            },
+            where: { id: blockId, userId: session.user.id },
         });
-
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
         if (username) revalidatePath(`/${username}`);
-
         return { success: true };
     } catch (error) {
         return { error: "Erro ao excluir bloco" };
@@ -85,10 +85,7 @@ export async function deleteMoodBlock(blockId: string) {
 
 export async function reorderMoodBlocks(blocks: { id: string, order: number }[]) {
     const session = await auth();
-
-    if (!session?.user?.id) {
-        return { error: "Não autorizado" };
-    }
+    if (!session?.user?.id) return { error: "Não autorizado" };
 
     try {
         await prisma.$transaction(
@@ -99,11 +96,9 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
                 })
             )
         );
-
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
         if (username) revalidatePath(`/${username}`);
-
         return { success: true };
     } catch (error) {
         return { error: "Erro ao reordenar blocos" };
