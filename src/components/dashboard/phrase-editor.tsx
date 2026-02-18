@@ -42,7 +42,15 @@ const COLORS = [
     { name: 'Red', value: '#ff0000' },
 ]
 
-export function PhraseEditor({ block, onUpdate }: { block?: any, onUpdate?: (id: string, content: any) => void }) {
+export function PhraseEditor({
+    block,
+    onUpdate,
+    highlight
+}: {
+    block?: any,
+    onUpdate?: (id: string, content: any) => void,
+    highlight?: boolean
+}) {
     const [selectedType, setSelectedType] = useState(PHRASE_STYLES[0].id)
     const [text, setText] = useState("")
     const [textColor, setTextColor] = useState('#ffffff')
@@ -136,7 +144,10 @@ export function PhraseEditor({ block, onUpdate }: { block?: any, onUpdate?: (id:
     const currentConfig = PHRASE_STYLES.find(t => t.id === selectedType)
 
     return (
-        <div className="space-y-6">
+        <div className={cn(
+            "space-y-6 transition-all duration-500 rounded-2xl",
+            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-4 -m-4" : ""
+        )}>
             <header className="flex items-center gap-2">
                 <Type className="w-4 h-4 text-zinc-400" />
                 <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Diário Vivo</h2>

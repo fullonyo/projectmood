@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { updateMoodBlockLayout, deleteMoodBlock } from "@/actions/profile"
-import { Trash2, RotateCw, Instagram, Twitter, Github, Linkedin, Youtube, Link as LinkIcon } from "lucide-react"
+import { Trash2, RotateCw, Instagram, Twitter, Github, Linkedin, Youtube, Link as LinkIcon, Pencil, Move } from "lucide-react"
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
 import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
@@ -324,6 +324,10 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onSavingStart, onS
                 e.stopPropagation()
                 onSelect()
             }}
+            onDoubleClick={(e) => {
+                e.stopPropagation()
+                onSelect()
+            }}
             initial={false}
             className={cn(
                 "absolute select-none group touch-none",
@@ -346,14 +350,26 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onSavingStart, onS
                     style={{ borderColor: profile.primaryColor || '#3b82f6', opacity: 0.5 }}
                 />
             )}
-            {/* Controls Bar */}
+            {/* Action Toolbar */}
             {isSelected && (
                 <div className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200 dark:border-zinc-800 z-[1001] animate-in fade-in zoom-in duration-200 pointer-events-auto">
-                    <button onClick={rotate} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                    <button
+                        onClick={onSelect}
+                        className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors group/edit"
+                        title="Editar"
+                    >
+                        <Pencil className="w-3.5 h-3.5 text-zinc-500 group-hover/edit:text-blue-500" />
+                    </button>
+                    <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
+                    <div className="p-1.5 cursor-move rounded-lg transition-colors" title="Mover">
+                        <Move className="w-3.5 h-3.5 text-zinc-500" />
+                    </div>
+                    <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
+                    <button onClick={rotate} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors" title="Girar">
                         <RotateCw className="w-3.5 h-3.5 text-zinc-500" />
                     </button>
                     <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
-                    <button onClick={handleDelete} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors group/del">
+                    <button onClick={handleDelete} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors group/del" title="Excluir">
                         <Trash2 className="w-3.5 h-3.5 text-zinc-500 group-hover/del:text-red-500" />
                     </button>
                 </div>
@@ -460,8 +476,30 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onSavingStart, onS
                 )}
 
                 {block.type === 'gif' && (
-                    <div className="bg-white dark:bg-zinc-900 shadow-2xl rounded-2xl border border-zinc-100 dark:border-zinc-800 h-full w-full overflow-hidden">
-                        <img src={(block.content as any).url} alt="gif" className="w-full h-full object-cover pointer-events-none" />
+                    <div className="bg-white dark:bg-zinc-900 shadow-2xl rounded-2xl border border-zinc-100 dark:border-zinc-800 h-full w-full overflow-hidden flex items-center justify-center">
+                        {(block.content as any).url ? (
+                            <img
+                                src={(block.content as any).url}
+                                alt="gif"
+                                className="w-full h-full object-cover pointer-events-none"
+                                key={(block.content as any).url} // Forçar re-render se a URL mudar
+                            />
+                        ) : (
+                            <div className="animate-pulse bg-zinc-100 dark:bg-zinc-800 w-full h-full" />
+                        )}
+                    </div>
+                )}
+
+                {block.type === 'video' && (
+                    <div className="bg-black shadow-2xl rounded-2xl overflow-hidden h-full w-full relative group/video">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${(block.content as any).videoId}?autoplay=1&mute=1&loop=1&playlist=${(block.content as any).videoId}&controls=0&rel=0&modestbranding=1`}
+                            className="w-full h-full border-none"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                        {/* Overlay to allow interaction with the block instead of the iframe */}
+                        <div className="absolute inset-0 bg-transparent z-10" />
                     </div>
                 )}
 

@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { cn } from "@/lib/utils"
+// ... keep other imports ...
 import {
     Layout,
     Type,
@@ -30,6 +31,7 @@ import { DoodlePad } from "./doodle-pad"
 import { SocialLinksEditor } from "./social-links-editor"
 import { GifPicker } from "./gif-picker"
 import { SpotifySearch } from "./spotify-search"
+import { YoutubeEditor } from "./youtube-editor"
 import { clearMoodBlocks } from "@/actions/profile"
 import { Button } from "../ui/button"
 
@@ -49,16 +51,52 @@ export function DashboardSidebar({
     onUpdateProfile: (data: any) => void
 }) {
     const [activeTab, setActiveTab] = useState<TabType>('content')
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+    // Refs for each editor section
+    const textEditorRef = useRef<HTMLDivElement>(null)
+    const phraseEditorRef = useRef<HTMLDivElement>(null)
+    const socialEditorRef = useRef<HTMLDivElement>(null)
+    const artToolsRef = useRef<HTMLDivElement>(null)
+    const themeEditorRef = useRef<HTMLDivElement>(null)
+    const gifPickerRef = useRef<HTMLDivElement>(null)
+    const youtubeEditorRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (!selectedBlock) return
 
+        let newTab: TabType = activeTab
+        let targetRef: React.RefObject<HTMLDivElement | null> | null = null
+
         if (selectedBlock.type === 'social') {
-            setActiveTab('social')
-        } else if (['text', 'ticker', 'subtitle', 'floating', 'gif', 'music'].includes(selectedBlock.type)) {
-            setActiveTab('content')
+            newTab = 'social'
+            targetRef = socialEditorRef
+        } else if (['text'].includes(selectedBlock.type)) {
+            newTab = 'content'
+            targetRef = textEditorRef
+        } else if (['ticker', 'subtitle', 'floating'].includes(selectedBlock.type)) {
+            newTab = 'content'
+            targetRef = phraseEditorRef
+        } else if (selectedBlock.type === 'gif') {
+            newTab = 'content'
+            targetRef = gifPickerRef
+        } else if (selectedBlock.type === 'video') {
+            newTab = 'content'
+            targetRef = youtubeEditorRef
         } else if (['doodle', 'tape', 'weather', 'media'].includes(selectedBlock.type)) {
-            setActiveTab('art')
+            newTab = 'art'
+            targetRef = artToolsRef
+        }
+
+        if (newTab !== activeTab) {
+            setActiveTab(newTab)
+        }
+
+        // Scroll to editor with a small delay to allow tab switching animation
+        if (targetRef) {
+            setTimeout(() => {
+                targetRef?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }, 100)
         }
     }, [selectedBlock])
 
@@ -160,11 +198,32 @@ export function DashboardSidebar({
                             <h3 className="text-xl font-black tracking-tighter uppercase">Creativity Block</h3>
                             <p className="text-[11px] text-zinc-500 italic">Adicione elementos fundamentais ao seu mural.</p>
                         </header>
-                        <TextEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                        <div ref={textEditorRef}>
+                            <TextEditor
+                                block={selectedBlock}
+                                onUpdate={onUpdateBlock}
+                                highlight={selectedBlock?.type === 'text'}
+                            />
+                        </div>
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <PhraseEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                        <div ref={phraseEditorRef}>
+                            <PhraseEditor
+                                block={selectedBlock}
+                                onUpdate={onUpdateBlock}
+                                highlight={['ticker', 'subtitle', 'floating'].includes(selectedBlock?.type)}
+                            />
+                        </div>
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <GifPicker />
+                        <div ref={gifPickerRef}>
+                            <GifPicker
+                                highlight={selectedBlock?.type === 'gif'}
+                            />
+                        </div>
+                        <div ref={youtubeEditorRef}>
+                            <YoutubeEditor
+                                highlight={selectedBlock?.type === 'video'}
+                            />
+                        </div>
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
                         <SpotifySearch />
                     </div>
@@ -176,7 +235,9 @@ export function DashboardSidebar({
                             <h3 className="text-xl font-black tracking-tighter uppercase">The Art Studio</h3>
                             <p className="text-[11px] text-zinc-500 italic">Ferramentas para transformar um mural em Scrapbook.</p>
                         </header>
-                        <ArtTools />
+                        <div ref={artToolsRef}>
+                            <ArtTools highlight={['tape', 'weather', 'media'].includes(selectedBlock?.type)} />
+                        </div>
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
                         <DoodlePad />
                     </div>
@@ -188,7 +249,13 @@ export function DashboardSidebar({
                             <h3 className="text-xl font-black tracking-tighter uppercase">Connected</h3>
                             <p className="text-[11px] text-zinc-500 italic">Espalhe suas redes e transforme o mural num hub.</p>
                         </header>
-                        <SocialLinksEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                        <div ref={socialEditorRef}>
+                            <SocialLinksEditor
+                                block={selectedBlock}
+                                onUpdate={onUpdateBlock}
+                                highlight={selectedBlock?.type === 'social'}
+                            />
+                        </div>
                     </div>
                 )}
 

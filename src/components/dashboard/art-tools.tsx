@@ -15,7 +15,7 @@ const TAPES = [
     { name: 'Washi Dot', color: 'rgba(255, 255, 255, 0.5)', pattern: 'dots' },
 ]
 
-export function ArtTools() {
+export function ArtTools({ highlight }: { highlight?: boolean }) {
     const [isPending, startTransition] = useTransition()
 
     const addTape = (tape: typeof TAPES[0]) => {
@@ -48,7 +48,10 @@ export function ArtTools() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className={cn(
+            "space-y-6 transition-all duration-500 rounded-2xl",
+            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-4 -m-4" : ""
+        )}>
             <div className="space-y-4">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Scrapbook Tools</h2>
 

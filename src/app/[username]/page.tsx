@@ -4,7 +4,9 @@ import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import { Instagram, Twitter, Github, Linkedin, Youtube, MessageSquare, Link as LinkIcon } from "lucide-react";
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons";
-import { motion } from "framer-motion";
+import { TickerBlockPublic } from "@/components/dashboard/ticker-block-public";
+import { SubtitleBlockPublic } from "@/components/dashboard/subtitle-block-public";
+import { FloatingBlockPublic } from "@/components/dashboard/floating-block-public";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -261,7 +263,12 @@ export default async function PublicMoodPage({
                                     rel="noopener noreferrer"
                                     className="block transition-transform hover:scale-110 active:scale-95 group/social"
                                 >
-                                    <SocialBlockPublic content={block.content} />
+                                    <div className="p-4 bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-center shadow-xl">
+                                        {(() => {
+                                            const Icon = ICONS[(block.content as any).platform] || LinkIcon;
+                                            return <Icon className="w-8 h-8" />;
+                                        })()}
+                                    </div>
                                 </a>
                             )}
 
@@ -274,134 +281,28 @@ export default async function PublicMoodPage({
                                     />
                                 </div>
                             )}
-                            {block.type === 'ticker' && (
-                                <div
-                                    className={cn(
-                                        "py-3 overflow-hidden whitespace-nowrap shadow-2xl min-w-[300px] transition-all duration-500",
-                                        (block.content as any).style === 'neon' && "border-y border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)]",
-                                        (block.content as any).style === 'glass' && "backdrop-blur-md border-y border-white/10"
-                                    )}
-                                    style={{ backgroundColor: (block.content as any).bgColor }}
-                                >
-                                    <motion.div
-                                        animate={{
-                                            x: (block.content as any).direction === 'right' ? ["-50%", "0%"] : ["0%", "-50%"]
-                                        }}
-                                        transition={{
-                                            duration: (block.content as any).speed || 20,
-                                            repeat: Infinity,
-                                            ease: "linear"
-                                        }}
-                                        className="inline-block"
-                                    >
-                                        <span
-                                            className={cn(
-                                                "text-sm font-black uppercase tracking-[0.2em] px-4",
-                                                (block.content as any).style === 'neon' && "animate-pulse"
-                                            )}
-                                            style={{ color: (block.content as any).textColor }}
-                                        >
-                                            {(block.content as any).text} • {(block.content as any).text} • {(block.content as any).text} • {(block.content as any).text} •
-                                        </span>
-                                    </motion.div>
+
+                            {block.type === 'video' && (
+                                <div className="w-96 aspect-video bg-black rounded-3xl shadow-2xl overflow-hidden border border-white/10">
+                                    <iframe
+                                        src={`https://www.youtube.com/embed/${(block.content as any).videoId}?autoplay=1&mute=1&loop=1&playlist=${(block.content as any).videoId}&controls=1&rel=0`}
+                                        width="100%" height="100%" frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        className="opacity-90"
+                                    />
                                 </div>
+                            )}
+                            {block.type === 'ticker' && (
+                                <TickerBlockPublic content={block.content} />
                             )}
 
                             {block.type === 'subtitle' && (
-                                <div className="p-6 max-w-[450px]">
-                                    <motion.div
-                                        initial="hidden"
-                                        animate="visible"
-                                        variants={{
-                                            hidden: { opacity: 1 },
-                                            visible: {
-                                                opacity: 1,
-                                                transition: {
-                                                    staggerChildren: (block.content as any).speed || 0.05,
-                                                }
-                                            }
-                                        }}
-                                        className={cn(
-                                            "px-10 py-6 shadow-2xl relative overflow-hidden transition-all duration-500",
-                                            (block.content as any).style === 'vhs' && "bg-[#050505] border-l-[8px] border-l-red-600 rounded-sm shadow-[8px_8px_0_rgba(0,0,0,0.5)]",
-                                            (block.content as any).style === 'minimal' && "bg-transparent border-none rounded-none text-xl font-normal tracking-tight",
-                                            (block.content as any).style === 'modern' && "bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800"
-                                        )}
-                                        style={{
-                                            backgroundColor: (block.content as any).style !== 'minimal' ? (block.content as any).bgColor : 'transparent',
-                                        }}
-                                    >
-                                        <p
-                                            className={cn(
-                                                "text-center leading-relaxed whitespace-pre-wrap",
-                                                (block.content as any).style === 'vhs' && "font-mono font-bold italic tracking-tighter uppercase",
-                                                (block.content as any).style === 'minimal' && "font-serif italic",
-                                                (block.content as any).style === 'modern' && "font-sans font-medium"
-                                            )}
-                                            style={{ color: (block.content as any).textColor }}
-                                        >
-                                            {(block.content as any).text.split("").map((char: string, i: number) => (
-                                                <motion.span
-                                                    key={i}
-                                                    variants={{
-                                                        hidden: { opacity: 0, display: 'none' },
-                                                        visible: { opacity: 1, display: 'inline' }
-                                                    }}
-                                                >
-                                                    {char}
-                                                </motion.span>
-                                            ))}
-                                            <motion.span
-                                                animate={{ opacity: [1, 0] }}
-                                                transition={{ duration: 0.8, repeat: Infinity }}
-                                                className={cn(
-                                                    "inline-block ml-1 h-[1.2em] align-middle",
-                                                    (block.content as any).cursorType === 'block' && "w-[0.5em] bg-current",
-                                                    (block.content as any).cursorType === 'bar' && "w-[2px] bg-current",
-                                                    (block.content as any).cursorType === 'underline' && "w-[0.6em] h-[2px] mt-[1em] bg-current"
-                                                )}
-                                            />
-                                        </p>
-
-                                        {(block.content as any).style === 'vhs' && (
-                                            <div className="absolute top-2 right-4 flex gap-1 opacity-50">
-                                                <div className="w-1 h-3 bg-red-500 animate-[pulse_0.5s_infinite]" />
-                                                <span className="text-[8px] font-mono text-white">PLAY</span>
-                                            </div>
-                                        )}
-                                    </motion.div>
-                                </div>
+                                <SubtitleBlockPublic content={block.content} />
                             )}
 
                             {block.type === 'floating' && (
-                                <div className="p-10 select-none">
-                                    <motion.div
-                                        animate={
-                                            (block.content as any).style === 'ghost'
-                                                ? { opacity: [0.3, 0.6, 0.3], scale: [0.98, 1, 0.98] }
-                                                : { y: [-10, 10] }
-                                        }
-                                        transition={{
-                                            duration: (block.content as any).speed || 3,
-                                            repeat: Infinity,
-                                            repeatType: "reverse",
-                                            ease: "easeInOut"
-                                        }}
-                                        className="relative flex items-center justify-center min-w-[200px]"
-                                    >
-                                        <p
-                                            className={cn(
-                                                "text-center text-4xl font-light tracking-tight transition-all duration-1000",
-                                                (block.content as any).style === 'focus' && "animate-focus",
-                                                (block.content as any).style === 'clean' && "font-serif italic",
-                                                (block.content as any).style === 'ghost' && "font-mono font-bold tracking-tighter"
-                                            )}
-                                            style={{ color: (block.content as any).textColor }}
-                                        >
-                                            {(block.content as any).text}
-                                        </p>
-                                    </motion.div>
-                                </div>
+                                <FloatingBlockPublic content={block.content} />
                             )}
                         </div>
                     );

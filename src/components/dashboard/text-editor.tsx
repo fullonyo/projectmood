@@ -18,7 +18,15 @@ const COLORS = [
     '#ffffff', '#ffff88', '#ffb3ba', '#bae1ff', '#baffc9', '#e0b0ff'
 ]
 
-export function TextEditor({ block, onUpdate }: { block?: any, onUpdate?: (id: string, content: any) => void }) {
+export function TextEditor({
+    block,
+    onUpdate,
+    highlight
+}: {
+    block?: any,
+    onUpdate?: (id: string, content: any) => void,
+    highlight?: boolean
+}) {
     const [text, setText] = useState("")
     const [selectedStyle, setSelectedStyle] = useState('simple')
     const [bgColor, setBgColor] = useState('#ffffff')
@@ -93,7 +101,10 @@ export function TextEditor({ block, onUpdate }: { block?: any, onUpdate?: (id: s
     }
 
     return (
-        <div className="space-y-6">
+        <div className={cn(
+            "space-y-6 transition-all duration-500 rounded-2xl",
+            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-4 -m-4" : ""
+        )}>
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Typography & Notes</h2>
 
             <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 space-y-4">

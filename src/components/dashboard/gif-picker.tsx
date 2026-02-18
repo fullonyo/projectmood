@@ -5,8 +5,9 @@ import { searchGifs, getTrendingGifs } from "@/actions/giphy"
 import { addMoodBlock } from "@/actions/profile"
 import { Input } from "@/components/ui/input"
 import { Search, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-export function GifPicker() {
+export function GifPicker({ highlight }: { highlight?: boolean }) {
     const [query, setQuery] = useState("")
     const [gifs, setGifs] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -41,7 +42,10 @@ export function GifPicker() {
     }
 
     return (
-        <div className="space-y-4">
+        <div className={cn(
+            "space-y-4 transition-all duration-500 rounded-2xl",
+            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-4 -m-4" : ""
+        )}>
             <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Gifs & Stickers</h2>
 
             <form onSubmit={handleSearch} className="relative">
