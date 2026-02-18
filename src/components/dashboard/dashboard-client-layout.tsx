@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Menu } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
 import { DashboardSidebar } from "./dashboard-sidebar";
+import { ActionsSidebar } from "./actions-sidebar";
 import { MoodCanvas } from "./mood-canvas";
 import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
@@ -13,10 +14,12 @@ import { FontLoader } from "./font-loader";
 interface DashboardClientLayoutProps {
     profile: any;
     moodBlocks: any[];
+    username: string;
 }
 
-export function DashboardClientLayout({ profile, moodBlocks }: DashboardClientLayoutProps) {
+export function DashboardClientLayout({ profile, moodBlocks, username }: DashboardClientLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [localBlocks, setLocalBlocks] = useState(moodBlocks);
     const [localProfile, setLocalProfile] = useState(profile);
@@ -98,6 +101,43 @@ export function DashboardClientLayout({ profile, moodBlocks }: DashboardClientLa
                     animate={{ x: 0, opacity: 1 }}
                     onClick={() => setIsSidebarOpen(true)}
                     className="absolute top-1/2 left-4 -translate-y-1/2 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center shadow-2xl z-30 hover:scale-110 transition-transform"
+                >
+                    <Menu className="w-5 h-5" />
+                </motion.button>
+            )}
+
+            {/* Floating Actions Sidebar Container (Right Side - layer 20) */}
+            <AnimatePresence>
+                {isRightSidebarOpen && (
+                    <motion.div
+                        initial={{ x: 320, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 320, opacity: 0 }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+                        className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
+                    >
+                        <div className="pointer-events-auto h-full shadow-2xl relative">
+                            <ActionsSidebar username={username} />
+
+                            {/* Inner Collapse Button */}
+                            <button
+                                onClick={() => setIsRightSidebarOpen(false)}
+                                className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-l-xl flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors pointer-events-auto shadow-md group"
+                            >
+                                <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Floating Expand Button Right (Visible when right sidebar is closed) */}
+            {!isRightSidebarOpen && (
+                <motion.button
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    onClick={() => setIsRightSidebarOpen(true)}
+                    className="absolute top-1/2 right-4 -translate-y-1/2 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center shadow-2xl z-30 hover:scale-110 transition-transform"
                 >
                     <Menu className="w-5 h-5" />
                 </motion.button>
