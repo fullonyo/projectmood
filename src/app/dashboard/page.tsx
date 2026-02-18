@@ -46,7 +46,7 @@ export default async function DashboardPage() {
     return (
         <div className="h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden">
             {/* Fixed Dashboard Header */}
-            <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 px-6 flex items-center justify-between shrink-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md z-30">
+            <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 px-6 flex items-center justify-between shrink-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md z-[1100]">
                 <div className="flex items-center gap-4">
                     <Link href="/" className="text-xl font-black tracking-tighter hover:opacity-60 transition-opacity">MOOD.</Link>
                     <div className="h-4 w-[1px] bg-zinc-200 dark:bg-zinc-800" />

@@ -100,21 +100,23 @@ export default async function PublicMoodPage({
             </header>
 
             {/* The Canvas Reality */}
-            <main className="relative w-full h-full">
-                {moodBlocks.map((block: any) => (
-                    <div
-                        key={block.id}
-                        className="absolute select-none pointer-events-auto"
-                        style={{
-                            left: `${block.x}%`,
-                            top: `${block.y}%`,
-                            transform: `rotate(${block.rotation || 0}deg)`,
-                            zIndex: block.zIndex || 1
-                        }}
-                    >
-                        <BlockRenderer block={block} isPublic={true} />
-                    </div>
-                ))}
+            <main className="relative w-full h-full pt-16">
+                <div className="relative w-full h-full p-10">
+                    {moodBlocks.map((block: any) => (
+                        <div
+                            key={block.id}
+                            className="absolute select-none pointer-events-auto"
+                            style={{
+                                left: `${block.x}%`,
+                                top: `${block.y}%`,
+                                transform: `rotate(${block.rotation || 0}deg)`,
+                                zIndex: block.zIndex || 1
+                            }}
+                        >
+                            <BlockRenderer block={block} isPublic={true} />
+                        </div>
+                    ))}
+                </div>
             </main>
 
             {/* Analytics Display */}

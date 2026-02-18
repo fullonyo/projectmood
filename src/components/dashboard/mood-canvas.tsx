@@ -67,7 +67,6 @@ export function MoodCanvas({
 
     return (
         <div
-            ref={canvasRef}
             onClick={handleCanvasClick}
             className="relative w-full h-full overflow-hidden cursor-crosshair transition-colors duration-1000"
             style={{ backgroundColor: bgColor, color: primaryColor }}
@@ -98,7 +97,10 @@ export function MoodCanvas({
                 }}
             />
 
-            <div className="relative w-full h-full canvas-items-wrapper">
+            <div
+                ref={canvasRef}
+                className="relative w-full h-full p-10 canvas-items-wrapper"
+            >
                 {blocks.map((block) => (
                     <CanvasItem
                         key={block.id}
