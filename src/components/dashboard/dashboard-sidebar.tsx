@@ -122,10 +122,19 @@ export function DashboardSidebar({
             setActiveTab(newTab)
         }
 
-        // Scroll to editor with a small delay to allow tab switching animation
-        if (targetRef) {
+        // Scroll to editor inside the sidebar container without affecting the main page scroll
+        if (targetRef && scrollContainerRef.current && targetRef.current) {
+            const container = scrollContainerRef.current
+            const target = targetRef.current
+
+            // Calculate position relative to container
+            const targetTop = target.offsetTop
+
             setTimeout(() => {
-                targetRef?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                container.scrollTo({
+                    top: targetTop - 20, // 20px margin
+                    behavior: 'smooth'
+                })
             }, 100)
         }
     }, [selectedBlock])
@@ -181,7 +190,10 @@ export function DashboardSidebar({
             </nav>
 
             {/* Scrollable Editor Area */}
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-8 animate-in fade-in slide-in-from-left-2 duration-300">
+            <div
+                ref={scrollContainerRef}
+                className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-8 animate-in fade-in slide-in-from-left-2 duration-300"
+            >
 
                 {activeTab === 'style' && (
                     <div className="space-y-8">

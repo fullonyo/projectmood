@@ -177,12 +177,12 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
         const canvasRect = canvasRef.current.getBoundingClientRect()
 
         // Calculate the new percentage position
-        // We use the block's current position + the delta moved
         const deltaXPercent = (info.offset.x / canvasRect.width) * 100
         const deltaYPercent = (info.offset.y / canvasRect.height) * 100
 
-        const newX = Math.max(0, Math.min(100, block.x + deltaXPercent))
-        const newY = Math.max(0, Math.min(100, block.y + deltaYPercent))
+        // Use toFixed(2) and parseFloat to round to 2 decimal places
+        const newX = parseFloat(Math.max(0, Math.min(100, block.x + deltaXPercent)).toFixed(2))
+        const newY = parseFloat(Math.max(0, Math.min(100, block.y + deltaYPercent)).toFixed(2))
 
         // Optimistic update
         onUpdate({ x: newX, y: newY })
@@ -266,6 +266,12 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
             dragElastic={0}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
+            animate={{ x: 0, y: 0 }}
+            whileDrag={{
+                scale: 1.05,
+                zIndex: 1000,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+            }}
             onClick={(e) => {
                 e.stopPropagation()
                 onSelect()
