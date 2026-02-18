@@ -3,7 +3,23 @@
 import { useTransition, useState } from 'react'
 import { Label } from "@/components/ui/label"
 import { updateProfile } from "@/actions/profile"
-import { MousePointer2, Sparkles, Wallpaper, Loader2, Check } from "lucide-react"
+import {
+    MousePointer2,
+    Sparkles,
+    Wallpaper,
+    Loader2,
+    Check,
+    ArrowUpRight,
+    Heart,
+    LayoutGrid,
+    Ghost,
+    Ban,
+    Grid2X2,
+    Palette,
+    Tv,
+    Waves,
+    Grid3X3
+} from "lucide-react"
 
 interface EffectsEditorProps {
     profile: any
@@ -26,25 +42,25 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
     }
 
     const cursors = [
-        { id: 'auto', name: 'Padrão', icon: '👆' },
-        { id: 'retro', name: 'Retro', icon: '↗️' },
-        { id: 'heart', name: 'Heart', icon: '💖' },
-        { id: 'pixel', name: 'Pixel', icon: '👾' },
-        { id: 'ghost', name: 'Ghost', icon: '👻' },
+        { id: 'auto', name: 'Padrão', icon: MousePointer2 },
+        { id: 'retro', name: 'Retro', icon: ArrowUpRight },
+        { id: 'heart', name: 'Heart', icon: Heart },
+        { id: 'pixel', name: 'Pixel', icon: LayoutGrid },
+        { id: 'ghost', name: 'Ghost', icon: Ghost },
     ]
 
     const trails = [
-        { id: 'none', name: 'Nenhum', icon: '🚫' },
-        { id: 'sparkles', name: 'Brilhos', icon: '✨' },
-        { id: 'ghost', name: 'Fantasma', icon: '👻' },
-        { id: 'pixel-dust', name: 'Pixel Dust', icon: '👾' },
+        { id: 'none', name: 'Nenhum', icon: Ban },
+        { id: 'sparkles', name: 'Brilhos', icon: Sparkles },
+        { id: 'ghost', name: 'Fantasma', icon: Ghost },
+        { id: 'pixel-dust', name: 'Pixel Dust', icon: Grid2X2 },
     ]
 
     const backgrounds = [
-        { id: 'none', name: 'Cor Sólida', icon: '🎨' },
-        { id: 'noise', name: 'Noise (Granulado)', icon: '📺' },
-        { id: 'aurora', name: 'Aurora Boreal', icon: '🌌' },
-        { id: 'grid-move', name: 'Retro Grid', icon: '🌐' },
+        { id: 'none', name: 'Cor Sólida', icon: Palette },
+        { id: 'noise', name: 'Noise (Granulado)', icon: Tv },
+        { id: 'aurora', name: 'Aurora Boreal', icon: Waves },
+        { id: 'grid-move', name: 'Retro Grid', icon: Grid3X3 },
     ]
 
     return (
@@ -69,7 +85,7 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                                 }
                             `}
                         >
-                            <span className="text-xl">{c.icon}</span>
+                            <c.icon className="w-5 h-5 text-white/70" />
                             <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">{c.name}</span>
                         </button>
                     ))}
@@ -96,7 +112,7 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                                 }
                             `}
                         >
-                            <span className="text-lg">{t.icon}</span>
+                            <t.icon className="w-4 h-4 text-white/70" />
                             <span className="text-xs font-medium opacity-80">{t.name}</span>
                         </button>
                     ))}
@@ -126,7 +142,9 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                             `}
                             >
                                 <div className="flex items-center gap-3 z-10 relative">
-                                    <span className="text-lg p-2 bg-black/20 rounded-full">{b.icon}</span>
+                                    <div className="p-2 bg-black/20 rounded-full">
+                                        <b.icon className="w-4 h-4 text-white/70" />
+                                    </div>
                                     <span className="text-sm font-medium">{b.name}</span>
                                 </div>
 

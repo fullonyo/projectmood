@@ -11,12 +11,26 @@ Este arquivo centraliza a documentação de funcionalidades e componentes para f
 - **Componentes**: Botões Shadcn/UI, Link do Next.js.
 - **Destaque**: Layout responsivo com cards rotacionados e animações de pulse.
 
+### Dashboard & Sidebar
+- **Estrutura**: O Dashboard é composto por um Header fixo e um Layout com Sidebar colapsável.
+- **Sidebar (`src/components/dashboard/dashboard-sidebar.tsx`)**:
+  - Organizada em 4 abas: `Estilo`, `Escrita`, `Mídia` e `Criativo`.
+  - **Aba Estilo**: Gerencia temas, cores (com extrator) e efeitos visuais mágicos. Possui a "Danger Zone" para resetar o mural.
+  - **Aba Escrita**: Ferramentas para Textos, Tickers, Subtítulos e Citações.
+  - **Aba Mídia**: Integrações com YouTube, Spotify, GIFs, Fotos e Guestbook.
+  - **Aba Criativo**: Ferramentas de Scrapbook (Doodles, Tapes), Links Sociais, Status Visual e Countdowns.
+  - **Comportamento Contextual**: A sidebar detecta o bloco selecionado no mural e alterna automaticamente para a aba e editor correspondente.
+- **Header (`src/app/dashboard/page.tsx`)**:
+  - Contém o botão de Logout, Share Profile e botão para ver o espaço público.
+
 ### Auth & Middleware
 - **Autenticação**: Provedor de `credentials` configurado em `src/auth.ts`.
 - **Middleware (`src/middleware.ts`)**:
   - Protege rotas de `/dashboard`.
   - Redireciona usuários logados das rotas de `/auth` e da raiz `/` diretamente para `/dashboard`.
   - Garante que a Landing Page só seja vista por usuários não autenticados.
+
+- **Padrão de Design**: Não utilizamos emojis em elementos de interface (labels, botões, ícones de seletor). O padrão do projeto é utilizar a biblioteca `lucide-react` ou SVGs customizados.
 
 ---
 *Documentação atualizada por Antigravity em 18/02/2026.*
