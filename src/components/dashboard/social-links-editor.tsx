@@ -11,7 +11,8 @@ import {
     Linkedin,
     Youtube,
     Link as LinkIcon,
-    Plus
+    Plus,
+    Share2
 } from "lucide-react"
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
@@ -115,15 +116,19 @@ export function SocialLinksEditor({
             }
         })
     }
-
     return (
         <div className={cn(
-            "space-y-6 transition-all duration-500 rounded-2xl",
-            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-4 -m-4" : ""
+            "space-y-6 transition-all duration-500 rounded-3xl",
+            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-6 -m-6" : ""
         )}>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400 px-1">Social Connect</h2>
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                    <Share2 className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                </div>
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Social Connect</h3>
+            </div>
 
-            <div className="space-y-4 bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700">
+            <div className="space-y-4 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
                 <div className="grid grid-cols-6 gap-2">
                     {PLATFORMS.map((p) => (
                         <button
@@ -144,13 +149,13 @@ export function SocialLinksEditor({
                         placeholder="Link (URL)"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        className="h-10 text-xs bg-white dark:bg-zinc-900 border-none rounded-xl"
+                        className="h-10 text-xs bg-white dark:bg-zinc-900 border-none rounded-xl shadow-inner"
                     />
                     <Input
                         placeholder="Nome Exibido (Ex: Meu Insta)"
                         value={label}
                         onChange={(e) => setLabel(e.target.value)}
-                        className="h-10 text-xs bg-white dark:bg-zinc-900 border-none rounded-xl"
+                        className="h-10 text-xs bg-white dark:bg-zinc-900 border-none rounded-xl shadow-inner"
                     />
                 </div>
 
@@ -172,7 +177,7 @@ export function SocialLinksEditor({
                 <Button
                     onClick={handleAction}
                     disabled={isPending || !url}
-                    className="w-full rounded-xl bg-zinc-900 dark:bg-zinc-100 hover:scale-[1.02] transition-transform h-10 border-none"
+                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
                 >
                     <Plus className="w-4 h-4 mr-2" />
                     {block?.id ? 'Atualizar Link' : 'Adicionar ao Mural'}

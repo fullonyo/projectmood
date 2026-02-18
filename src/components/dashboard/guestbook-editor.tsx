@@ -26,14 +26,14 @@ export function GuestbookEditor({ highlight }: { highlight?: boolean }) {
 
     return (
         <div className={cn(
-            "space-y-4 transition-all duration-500 rounded-2xl",
-            highlight ? "ring-2 ring-purple-500/30 bg-purple-50/50 dark:bg-purple-900/10 p-4 -m-4" : ""
+            "space-y-6 transition-all duration-500 rounded-3xl",
+            highlight ? "ring-2 ring-purple-500/30 bg-purple-50/50 dark:bg-purple-900/10 p-6 -m-6" : ""
         )}>
-            <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                    <MessageSquare className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                    <MessageSquare className="w-4 h-4 text-purple-600" />
                 </div>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">Guestbook</h2>
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Mural de Recados</h3>
             </div>
 
             <div className="space-y-3">
@@ -43,7 +43,7 @@ export function GuestbookEditor({ highlight }: { highlight?: boolean }) {
                         placeholder="Ex: Deixe um recado!"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                        className="bg-white dark:bg-zinc-900 border-none rounded-xl text-xs h-10 shadow-inner"
                     />
                 </div>
 
@@ -74,10 +74,10 @@ export function GuestbookEditor({ highlight }: { highlight?: boolean }) {
                 <Button
                     onClick={handleAdd}
                     isLoading={isPending}
-                    className="w-full bg-black dark:bg-white text-white dark:text-black font-black uppercase tracking-widest text-[10px] h-11 rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
+                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    Adicionar ao Mural
+                    Ativar Mural
                 </Button>
             </div>
 

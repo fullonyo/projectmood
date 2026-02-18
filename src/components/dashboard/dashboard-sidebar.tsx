@@ -37,7 +37,7 @@ import { clearMoodBlocks } from "@/actions/profile"
 import { Button } from "../ui/button"
 import { ConfirmModal } from "../ui/confirm-modal"
 
-type TabType = 'style' | 'content' | 'art' | 'social'
+type TabType = 'style' | 'writing' | 'media' | 'art'
 
 export function DashboardSidebar({
     profile,
@@ -52,7 +52,7 @@ export function DashboardSidebar({
     onUpdateBlock: (id: string, content: any) => void,
     onUpdateProfile: (data: any) => void
 }) {
-    const [activeTab, setActiveTab] = useState<TabType>('content')
+    const [activeTab, setActiveTab] = useState<TabType>('writing')
     const [showClearConfirm, setShowClearConfirm] = useState(false)
     const [isClearing, setIsClearing] = useState(false)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -74,22 +74,22 @@ export function DashboardSidebar({
         let targetRef: React.RefObject<HTMLDivElement | null> | null = null
 
         if (selectedBlock.type === 'social') {
-            newTab = 'social'
+            newTab = 'art'
             targetRef = socialEditorRef
         } else if (['text'].includes(selectedBlock.type)) {
-            newTab = 'content'
+            newTab = 'writing'
             targetRef = textEditorRef
         } else if (['ticker', 'subtitle', 'floating'].includes(selectedBlock.type)) {
-            newTab = 'content'
+            newTab = 'writing'
             targetRef = phraseEditorRef
         } else if (selectedBlock.type === 'gif') {
-            newTab = 'content'
+            newTab = 'media'
             targetRef = gifPickerRef
         } else if (selectedBlock.type === 'video') {
-            newTab = 'content'
+            newTab = 'media'
             targetRef = youtubeEditorRef
         } else if (selectedBlock.type === 'guestbook') {
-            newTab = 'content'
+            newTab = 'media'
             targetRef = guestbookEditorRef
         } else if (['doodle', 'tape', 'weather', 'media'].includes(selectedBlock.type)) {
             newTab = 'art'
@@ -109,10 +109,10 @@ export function DashboardSidebar({
     }, [selectedBlock])
 
     const tabs = [
-        { id: 'style', label: 'Estilo', icon: Palette, description: 'Cores e Fontes' },
-        { id: 'content', label: 'Blocos', icon: PlusSquare, description: 'Textos e Mídia' },
-        { id: 'art', label: 'Arte', icon: Sparkles, description: 'Scrapbook Tools' },
-        { id: 'social', label: 'Links', icon: Share2, description: 'Social Connect' },
+        { id: 'style', label: 'Estilo', icon: Palette, description: 'Luz e Cor' },
+        { id: 'writing', label: 'Escrita', icon: Type, description: 'Textos' },
+        { id: 'media', label: 'Mídia', icon: Zap, description: 'Conteúdo' },
+        { id: 'art', label: 'Criativo', icon: Sparkles, description: 'Assets' },
     ]
 
     return (
@@ -196,11 +196,11 @@ export function DashboardSidebar({
                     </div>
                 )}
 
-                {activeTab === 'content' && (
+                {activeTab === 'writing' && (
                     <div className="space-y-10">
                         <header>
-                            <h3 className="text-xl font-black tracking-tighter uppercase">Creativity Block</h3>
-                            <p className="text-[11px] text-zinc-500 italic">Adicione elementos fundamentais ao seu mural.</p>
+                            <h3 className="text-xl font-black tracking-tighter uppercase italic">Writing Desk</h3>
+                            <p className="text-[11px] text-zinc-500">Dê voz às suas ideias no mural.</p>
                         </header>
                         <div ref={textEditorRef}>
                             <TextEditor
@@ -217,47 +217,55 @@ export function DashboardSidebar({
                                 highlight={['ticker', 'subtitle', 'floating'].includes(selectedBlock?.type)}
                             />
                         </div>
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <div ref={gifPickerRef}>
-                            <GifPicker
-                                highlight={selectedBlock?.type === 'gif'}
-                            />
-                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'media' && (
+                    <div className="space-y-10">
+                        <header>
+                            <h3 className="text-xl font-black tracking-tighter uppercase italic">Media Hub</h3>
+                            <p className="text-[11px] text-zinc-500">Músicas, vídeos e interatividade.</p>
+                        </header>
+
                         <div ref={youtubeEditorRef}>
                             <YoutubeEditor
                                 highlight={selectedBlock?.type === 'video'}
                             />
                         </div>
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+
+                        <SpotifySearch />
+
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+
+                        <div ref={gifPickerRef}>
+                            <GifPicker
+                                highlight={selectedBlock?.type === 'gif'}
+                            />
+                        </div>
+
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+
                         <div ref={guestbookEditorRef}>
                             <GuestbookEditor
                                 highlight={selectedBlock?.type === 'guestbook'}
                             />
                         </div>
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <SpotifySearch />
                     </div>
                 )}
 
                 {activeTab === 'art' && (
                     <div className="space-y-10">
                         <header>
-                            <h3 className="text-xl font-black tracking-tighter uppercase">The Art Studio</h3>
-                            <p className="text-[11px] text-zinc-500 italic">Ferramentas para transformar um mural em Scrapbook.</p>
+                            <h3 className="text-xl font-black tracking-tighter uppercase italic">Atelier</h3>
+                            <p className="text-[11px] text-zinc-500">Ferramentas de arte e scrapbook.</p>
                         </header>
                         <div ref={artToolsRef}>
                             <ArtTools highlight={['tape', 'weather', 'media'].includes(selectedBlock?.type)} />
                         </div>
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
                         <DoodlePad />
-                    </div>
-                )}
-
-                {activeTab === 'social' && (
-                    <div className="space-y-10">
-                        <header>
-                            <h3 className="text-xl font-black tracking-tighter uppercase">Connected</h3>
-                            <p className="text-[11px] text-zinc-500 italic">Espalhe suas redes e transforme o mural num hub.</p>
-                        </header>
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
                         <div ref={socialEditorRef}>
                             <SocialLinksEditor
                                 block={selectedBlock}

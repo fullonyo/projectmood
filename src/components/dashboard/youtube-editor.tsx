@@ -34,18 +34,18 @@ export function YoutubeEditor({ highlight }: { highlight?: boolean }) {
 
     return (
         <div className={cn(
-            "space-y-4 transition-all duration-500 rounded-2xl",
-            highlight ? "ring-2 ring-red-500/30 bg-red-50/50 dark:bg-red-900/10 p-4 -m-4" : ""
+            "space-y-6 transition-all duration-500 rounded-3xl",
+            highlight ? "ring-2 ring-red-500/30 bg-red-50/50 dark:bg-red-900/10 p-6 -m-6" : ""
         )}>
-            <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                    <Youtube className="w-4 h-4 text-red-600 dark:text-red-400" />
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                    <Youtube className="w-4 h-4 text-red-600" />
                 </div>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">YouTube Video</h2>
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">YouTube Video</h3>
             </div>
 
-            <div className="flex gap-2">
-                <div className="relative flex-1">
+            <div className="space-y-3 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
+                <div className="relative">
                     <Input
                         placeholder="Cole o link do vídeo..."
                         value={url}
@@ -55,19 +55,20 @@ export function YoutubeEditor({ highlight }: { highlight?: boolean }) {
                         }}
                         onKeyDown={(e) => e.key === 'Enter' && handleAddVideo()}
                         className={cn(
-                            "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 pr-10",
-                            error && "border-red-500 ring-1 ring-red-500"
+                            "bg-white dark:bg-zinc-900 border-none rounded-xl pr-10 text-xs h-10 shadow-inner",
+                            error && "ring-1 ring-red-500"
                         )}
                     />
                     <Video className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                 </div>
+
                 <Button
-                    size="sm"
                     onClick={handleAddVideo}
                     isLoading={isPending}
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold px-4"
+                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
                 >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Vídeo
                 </Button>
             </div>
 

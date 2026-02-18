@@ -5,7 +5,8 @@ import { searchSpotifyTracks } from "@/actions/spotify"
 import { addMoodBlock } from "@/actions/profile"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Music } from "lucide-react"
+import { Search, Music, Plus } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export function SpotifySearch() {
     const [query, setQuery] = useState("")
@@ -36,21 +37,38 @@ export function SpotifySearch() {
     }
 
     return (
-        <div className="space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Adicionar Música</h2>
-            <div className="flex gap-2">
-                <Input
-                    placeholder="Busque uma música..."
-                    value={query}
-                    onChange={(e) => {
-                        setQuery(e.target.value)
-                        if (error) setError(null)
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className={error ? "border-red-500 ring-1 ring-red-500" : ""}
-                />
-                <Button size="sm" onClick={handleSearch} isLoading={isLoading}>
-                    <Search className="w-4 h-4" />
+        <div className="space-y-6">
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                    <Music className="w-4 h-4 text-[#1DB954]" />
+                </div>
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Spotify Music</h3>
+            </div>
+            <div className="space-y-3 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
+                <div className="relative">
+                    <Input
+                        placeholder="Busque uma música ou artista..."
+                        value={query}
+                        onChange={(e) => {
+                            setQuery(e.target.value)
+                            if (error) setError(null)
+                        }}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                        className={cn(
+                            "bg-white dark:bg-zinc-900 border-none rounded-xl pr-10 text-xs h-10 shadow-inner",
+                            error && "ring-1 ring-red-500"
+                        )}
+                    />
+                    <Music className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+                </div>
+
+                <Button
+                    onClick={handleSearch}
+                    isLoading={isLoading}
+                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
+                >
+                    <Search className="w-4 h-4 mr-2" />
+                    Buscar Música
                 </Button>
             </div>
 
@@ -61,20 +79,22 @@ export function SpotifySearch() {
             )}
 
             {results.length > 0 && (
-                <div className="mt-4 space-y-2 border rounded-2xl p-2 bg-zinc-50 dark:bg-zinc-800">
+                <div className="mt-4 space-y-2 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-3 bg-white dark:bg-zinc-900 shadow-xl max-h-64 overflow-y-auto custom-scrollbar">
                     {results.map((track) => (
                         <button
                             key={track.id}
                             onClick={() => handleSelect(track.id)}
                             disabled={isPending}
-                            className="w-full flex items-center gap-3 p-2 hover:bg-white dark:hover:bg-zinc-700 rounded-xl transition-colors text-left"
+                            className="w-full flex items-center gap-3 p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-2xl transition-all text-left group"
                         >
-                            <img src={track.albumArt} alt={track.name} className="w-10 h-10 rounded-lg shrink-0" />
+                            <img src={track.albumArt} alt={track.name} className="w-10 h-10 rounded-xl shrink-0 shadow-sm transition-transform group-hover:scale-105" />
                             <div className="overflow-hidden">
-                                <p className="text-sm font-bold truncate">{track.name}</p>
-                                <p className="text-xs text-zinc-500 truncate">{track.artist}</p>
+                                <p className="text-[11px] font-black uppercase truncate leading-tight">{track.name}</p>
+                                <p className="text-[9px] text-zinc-500 uppercase tracking-tighter truncate">{track.artist}</p>
                             </div>
-                            <Music className="w-4 h-4 ml-auto shrink-0 text-zinc-300" />
+                            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Plus className="w-4 h-4 text-zinc-400" />
+                            </div>
                         </button>
                     ))}
                 </div>

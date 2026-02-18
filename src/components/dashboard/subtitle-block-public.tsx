@@ -56,10 +56,10 @@ export function SubtitleBlockPublic({ content }: SubtitleBlockProps) {
                         animate={{ opacity: [1, 0] }}
                         transition={{ duration: 0.8, repeat: Infinity }}
                         className={cn(
-                            "inline-block ml-1 h-[1.2em] align-middle",
-                            content.cursorType === 'block' && "w-[0.5em] bg-current",
-                            content.cursorType === 'bar' && "w-[2px] bg-current",
-                            content.cursorType === 'underline' && "w-[0.6em] h-[2px] mt-[1em] bg-current"
+                            "inline-block ml-0.5 align-middle",
+                            content.cursorType === 'block' && "w-[0.5em] h-[1.1em] bg-current",
+                            content.cursorType === 'bar' && "w-[2px] h-[1.2em] bg-current",
+                            content.cursorType === 'underline' && "w-[0.6em] h-[2px] bg-current translate-y-[0.4em]"
                         )}
                     />
                 </p>

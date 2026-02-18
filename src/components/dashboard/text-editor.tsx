@@ -102,10 +102,15 @@ export function TextEditor({
 
     return (
         <div className={cn(
-            "space-y-6 transition-all duration-500 rounded-2xl",
-            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-4 -m-4" : ""
+            "space-y-6 transition-all duration-500 rounded-3xl",
+            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-6 -m-6" : ""
         )}>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Typography & Notes</h2>
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                    <Type className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                </div>
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Typography & Notes</h3>
+            </div>
 
             <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 space-y-4">
                 <Textarea
@@ -178,9 +183,9 @@ export function TextEditor({
                 <Button
                     onClick={handleAddText}
                     disabled={isPending || !text.trim()}
-                    className="w-full bg-zinc-900 dark:bg-zinc-100 rounded-xl h-12 font-black tracking-tighter hover:scale-[1.02] transition-all"
+                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
                 >
-                    POSTAR NO MURAL
+                    Postar no Mural
                 </Button>
             </div>
         </div>

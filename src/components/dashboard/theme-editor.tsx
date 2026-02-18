@@ -2,6 +2,7 @@
 
 import { updateProfile } from "@/actions/profile"
 import { useTransition } from "react"
+import { Palette, MousePointer2, Type } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface ThemeEditorProps {
@@ -23,9 +24,14 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <div className="space-y-4">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Vibes do Mural</h2>
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                        <Palette className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                    </div>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Vibes do Mural</h3>
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                     {[
                         { id: 'light', label: 'Classic', colors: 'bg-white border-zinc-200' },
@@ -53,10 +59,13 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
             </div>
 
             <div className="space-y-4">
-                <header>
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Cor dos Elementos</h2>
-                    <p className="text-[10px] text-zinc-500 italic leading-tight mt-1">Define a cor dos textos, ícones e detalhes do fundo.</p>
-                </header>
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                        <MousePointer2 className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                    </div>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Cor dos Elementos</h3>
+                </div>
+                <p className="text-[10px] text-zinc-500 italic leading-tight px-1">Define a cor dos textos, ícones e detalhes do fundo.</p>
                 <div className="flex flex-wrap gap-2">
                     {['#000000', '#FF0000', '#22C55E', '#3B82F6', '#A855F7', '#EC4899'].map(color => (
                         <button
@@ -74,7 +83,12 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
             </div>
 
             <div className="space-y-4">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Tipografia</h2>
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                        <Type className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                    </div>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Tipografia</h3>
+                </div>
                 <div className="grid grid-cols-3 gap-2">
                     {[
                         { id: 'sans', label: 'Sans', font: 'font-sans' },

@@ -43,18 +43,23 @@ export function GifPicker({ highlight }: { highlight?: boolean }) {
 
     return (
         <div className={cn(
-            "space-y-4 transition-all duration-500 rounded-2xl",
-            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-4 -m-4" : ""
+            "space-y-6 transition-all duration-500 rounded-3xl",
+            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-6 -m-6" : ""
         )}>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Gifs & Stickers</h2>
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                    <Search className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                </div>
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Gifs & Stickers</h3>
+            </div>
 
             <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <Input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search Giphy..."
-                    className="pl-10 rounded-full bg-zinc-50 dark:bg-zinc-800 border-none focus-visible:ring-1 ring-zinc-300 dark:ring-zinc-700"
+                    className="pl-10 rounded-2xl bg-white dark:bg-zinc-900 border-none h-11 text-xs focus-visible:ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-inner"
                 />
             </form>
 

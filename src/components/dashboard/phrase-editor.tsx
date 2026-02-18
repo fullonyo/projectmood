@@ -145,15 +145,17 @@ export function PhraseEditor({
 
     return (
         <div className={cn(
-            "space-y-6 transition-all duration-500 rounded-2xl",
-            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-4 -m-4" : ""
+            "space-y-6 transition-all duration-500 rounded-3xl",
+            highlight ? "ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/10 p-6 -m-6" : ""
         )}>
-            <header className="flex items-center gap-2">
-                <Type className="w-4 h-4 text-zinc-400" />
-                <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Diário Vivo</h2>
-            </header>
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                    <Type className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                </div>
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Diário Vivo</h3>
+            </div>
 
-            <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 space-y-6">
+            <div className="bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 space-y-6">
                 {/* Type Selection */}
                 <div className="grid grid-cols-3 gap-1">
                     {PHRASE_STYLES.map((t) => (
@@ -304,10 +306,10 @@ export function PhraseEditor({
                 <Button
                     onClick={handleAction}
                     disabled={isPending || !text}
-                    className="w-full rounded-xl bg-zinc-900 dark:bg-zinc-100 hover:scale-[1.02] transition-transform h-10 border-none outline-none"
+                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    {block?.id ? 'Atualizar Frase' : 'Adicionar Frase'}
+                    {block?.id ? 'Atualizar Frase' : 'Adicionar ao Mural'}
                 </Button>
             </div>
         </div>
