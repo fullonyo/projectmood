@@ -70,3 +70,14 @@ model GuestbookMessage {
   
   @@index([blockId])
 }
+
+model ProfileAnalytics {
+  id          String    @id @default(cuid())
+  profileId   String    @unique
+  views       Int       @default(0)
+  lastViewAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([profileId])
+}

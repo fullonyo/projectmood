@@ -33,6 +33,11 @@ import { GifPicker } from "./gif-picker"
 import { SpotifySearch } from "./spotify-search"
 import { YoutubeEditor } from "./youtube-editor"
 import { GuestbookEditor } from "./guestbook-editor"
+import { QuoteEditor } from "./quote-editor"
+import { PhotoEditor } from "./photo-editor"
+import { MoodStatusEditor } from "./mood-status-editor"
+import { CountdownEditor } from "./countdown-editor"
+import { ColorPaletteExtractor } from "./color-palette-extractor"
 import { clearMoodBlocks } from "@/actions/profile"
 import { Button } from "../ui/button"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -66,6 +71,10 @@ export function DashboardSidebar({
     const gifPickerRef = useRef<HTMLDivElement>(null)
     const youtubeEditorRef = useRef<HTMLDivElement>(null)
     const guestbookEditorRef = useRef<HTMLDivElement>(null)
+    const quoteEditorRef = useRef<HTMLDivElement>(null)
+    const photoEditorRef = useRef<HTMLDivElement>(null)
+    const moodStatusEditorRef = useRef<HTMLDivElement>(null)
+    const countdownEditorRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (!selectedBlock) return
@@ -82,6 +91,9 @@ export function DashboardSidebar({
         } else if (['ticker', 'subtitle', 'floating'].includes(selectedBlock.type)) {
             newTab = 'writing'
             targetRef = phraseEditorRef
+        } else if (selectedBlock.type === 'quote') {
+            newTab = 'writing'
+            targetRef = quoteEditorRef
         } else if (selectedBlock.type === 'gif') {
             newTab = 'media'
             targetRef = gifPickerRef
@@ -91,9 +103,18 @@ export function DashboardSidebar({
         } else if (selectedBlock.type === 'guestbook') {
             newTab = 'media'
             targetRef = guestbookEditorRef
+        } else if (selectedBlock.type === 'photo') {
+            newTab = 'media'
+            targetRef = photoEditorRef
         } else if (['doodle', 'tape', 'weather', 'media'].includes(selectedBlock.type)) {
             newTab = 'art'
             targetRef = artToolsRef
+        } else if (selectedBlock.type === 'moodStatus') {
+            newTab = 'art'
+            targetRef = moodStatusEditorRef
+        } else if (selectedBlock.type === 'countdown') {
+            newTab = 'art'
+            targetRef = countdownEditorRef
         }
 
         if (newTab !== activeTab) {
@@ -174,6 +195,15 @@ export function DashboardSidebar({
                             onUpdate={onUpdateProfile}
                         />
 
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+
+                        <ColorPaletteExtractor onApplyPalette={async (colors) => {
+                            // Apply first color as primary
+                            if (colors[0]) {
+                                await onUpdateProfile({ primaryColor: colors[0] })
+                            }
+                        }} />
+
                         <div className="pt-10 space-y-4">
                             <div className="h-[1px] bg-red-100 dark:bg-red-900/20" />
                             <header>
@@ -217,6 +247,16 @@ export function DashboardSidebar({
                                 highlight={['ticker', 'subtitle', 'floating'].includes(selectedBlock?.type)}
                             />
                         </div>
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+                        <div ref={quoteEditorRef}>
+                            <QuoteEditor onAdd={async (content) => {
+                                const { addMoodBlock } = await import('@/actions/profile')
+                                await addMoodBlock('quote', content, {
+                                    x: Math.random() * 40 + 30,
+                                    y: Math.random() * 40 + 30
+                                })
+                            }} />
+                        </div>
                     </div>
                 )}
 
@@ -235,6 +275,18 @@ export function DashboardSidebar({
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
 
                         <SpotifySearch />
+
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+
+                        <div ref={photoEditorRef}>
+                            <PhotoEditor onAdd={async (content) => {
+                                const { addMoodBlock } = await import('@/actions/profile')
+                                await addMoodBlock('photo', content, {
+                                    x: Math.random() * 40 + 30,
+                                    y: Math.random() * 40 + 30
+                                })
+                            }} />
+                        </div>
 
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
 
@@ -272,6 +324,30 @@ export function DashboardSidebar({
                                 onUpdate={onUpdateBlock}
                                 highlight={selectedBlock?.type === 'social'}
                             />
+                        </div>
+
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+
+                        <div ref={moodStatusEditorRef}>
+                            <MoodStatusEditor onAdd={async (content) => {
+                                const { addMoodBlock } = await import('@/actions/profile')
+                                await addMoodBlock('moodStatus', content, {
+                                    x: Math.random() * 40 + 30,
+                                    y: Math.random() * 40 + 30
+                                })
+                            }} />
+                        </div>
+
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+
+                        <div ref={countdownEditorRef}>
+                            <CountdownEditor onAdd={async (content) => {
+                                const { addMoodBlock } = await import('@/actions/profile')
+                                await addMoodBlock('countdown', content, {
+                                    x: Math.random() * 40 + 30,
+                                    y: Math.random() * 40 + 30
+                                })
+                            }} />
                         </div>
                     </div>
                 )}

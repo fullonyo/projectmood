@@ -14,7 +14,11 @@ export const MoodBlockTypeSchema = z.enum([
     'doodle',
     'weather',
     'media',
-    'music'
+    'music',
+    'quote',
+    'photo',
+    'moodStatus',
+    'countdown'
 ])
 
 // Validação de conteúdo de bloco (JSON flexível)
@@ -60,9 +64,47 @@ export const ProfileUpdateSchema = z.object({
     fontStyle: z.enum(['sans', 'serif', 'mono']).optional()
 })
 
+// Validação específica para Quote Block
+export const QuoteBlockContentSchema = z.object({
+    text: z.string().min(1, "Citação não pode ser vazia").max(500, "Citação muito longa"),
+    author: z.string().max(100).optional(),
+    style: z.enum(['minimal', 'bold', 'serif', 'modern']).default('minimal'),
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+    bgColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+    showQuotes: z.boolean().default(true)
+})
+
+// Validação específica para Photo Block
+export const PhotoBlockContentSchema = z.object({
+    imageUrl: z.string().min(1, "Imagem é obrigatória"),
+    alt: z.string().max(200).optional(),
+    filter: z.enum(['none', 'vintage', 'bw', 'warm', 'cool']).default('none'),
+    frame: z.enum(['none', 'polaroid', 'border', 'shadow']).default('none'),
+    caption: z.string().max(100).optional()
+})
+
+// Validação específica para Mood Status Block
+export const MoodStatusBlockContentSchema = z.object({
+    emoji: z.string().min(1, "Emoji é obrigatório"),
+    text: z.string().min(1, "Texto não pode ser vazio").max(50, "Máximo 50 caracteres"),
+    timestamp: z.string().optional()
+})
+
+// Validação específica para Countdown Block
+export const CountdownBlockContentSchema = z.object({
+    title: z.string().min(1, "Título é obrigatório").max(50, "Máximo 50 caracteres"),
+    targetDate: z.string().min(1, "Data é obrigatória"),
+    emoji: z.string().optional(),
+    style: z.enum(['minimal', 'bold', 'neon']).default('minimal')
+})
+
 // Types exportados
 export type MoodBlockType = z.infer<typeof MoodBlockTypeSchema>
 export type CreateMoodBlockInput = z.infer<typeof CreateMoodBlockSchema>
 export type UpdateMoodBlockLayoutInput = z.infer<typeof UpdateMoodBlockLayoutSchema>
 export type GuestbookMessageInput = z.infer<typeof GuestbookMessageSchema>
 export type ProfileUpdateInput = z.infer<typeof ProfileUpdateSchema>
+export type QuoteBlockContent = z.infer<typeof QuoteBlockContentSchema>
+export type PhotoBlockContent = z.infer<typeof PhotoBlockContentSchema>
+export type MoodStatusBlockContent = z.infer<typeof MoodStatusBlockContentSchema>
+export type CountdownBlockContent = z.infer<typeof CountdownBlockContentSchema>

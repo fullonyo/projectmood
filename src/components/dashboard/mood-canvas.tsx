@@ -174,7 +174,7 @@ export function MoodCanvas({ blocks, profile, selectedId, setSelectedId, onUpdat
             </div>
 
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-[10px] font-bold tracking-widest uppercase text-zinc-400">
-                Lona de Criatividade Livre
+                Zona de Criatividade Livre
             </div>
 
             <ConfirmModal
@@ -669,6 +669,116 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
                         >
                             {(block.content as any).text}
                         </motion.div>
+                    </div>
+                )}
+
+                {block.type === 'quote' && (
+                    <div
+                        className="p-6 rounded-2xl shadow-lg relative overflow-hidden h-full w-full flex flex-col justify-center"
+                        style={{
+                            backgroundColor: (block.content as any).bgColor || '#ffffff',
+                            color: (block.content as any).color || '#000000'
+                        }}
+                    >
+                        {(block.content as any).showQuotes && (
+                            <div className="absolute top-2 left-2 opacity-10 text-6xl font-serif pointer-events-none">
+                                "
+                            </div>
+                        )}
+
+                        <div className="relative z-10 space-y-3">
+                            <p className={cn(
+                                "leading-normal",
+                                (block.content as any).style === 'bold' && "text-2xl font-black leading-tight",
+                                (block.content as any).style === 'serif' && "text-xl font-serif italic leading-relaxed",
+                                (block.content as any).style === 'modern' && "text-lg font-medium tracking-tight leading-snug",
+                                (block.content as any).style === 'minimal' && "text-base font-normal"
+                            )}>
+                                {(block.content as any).showQuotes && <span className="opacity-50">"</span>}
+                                {(block.content as any).text}
+                                {(block.content as any).showQuotes && <span className="opacity-50">"</span>}
+                            </p>
+
+                            {(block.content as any).author && (
+                                <p className="text-sm font-medium opacity-70 mt-3">
+                                    — {(block.content as any).author}
+                                </p>
+                            )}
+                        </div>
+
+                        {(block.content as any).showQuotes && (
+                            <div className="absolute bottom-2 right-2 opacity-10 text-6xl font-serif rotate-180 pointer-events-none">
+                                "
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {block.type === 'photo' && (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                        <div className={cn(
+                            "rounded-lg overflow-hidden",
+                            (block.content as any).frame === 'polaroid' && "bg-white p-3 pb-12 shadow-xl",
+                            (block.content as any).frame === 'border' && "border-4 border-white shadow-lg",
+                            (block.content as any).frame === 'shadow' && "shadow-2xl"
+                        )}>
+                            <img
+                                src={(block.content as any).imageUrl}
+                                alt={(block.content as any).alt || ''}
+                                className="w-full h-full object-cover"
+                                style={{
+                                    filter: (block.content as any).filter === 'vintage' ? 'sepia(50%) contrast(110%)' :
+                                        (block.content as any).filter === 'bw' ? 'grayscale(100%)' :
+                                            (block.content as any).filter === 'warm' ? 'saturate(130%) hue-rotate(-10deg)' :
+                                                (block.content as any).filter === 'cool' ? 'saturate(110%) hue-rotate(10deg)' :
+                                                    'none'
+                                }}
+                            />
+                            {(block.content as any).caption && (block.content as any).frame === 'polaroid' && (
+                                <div className="absolute bottom-3 left-3 right-3 text-center">
+                                    <p className="text-sm text-zinc-700 font-medium">{(block.content as any).caption}</p>
+                                </div>
+                            )}
+                        </div>
+                        {(block.content as any).caption && (block.content as any).frame !== 'polaroid' && (
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-3 text-center italic">
+                                {(block.content as any).caption}
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {block.type === 'moodStatus' && (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6">
+                        <div className="bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-900 rounded-3xl p-8 shadow-xl border border-zinc-200 dark:border-zinc-700">
+                            <div className="text-center space-y-4">
+                                <div className="text-7xl animate-bounce">
+                                    {(block.content as any).emoji}
+                                </div>
+                                <p className="text-lg font-medium text-zinc-800 dark:text-zinc-200">
+                                    {(block.content as any).text}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {block.type === 'countdown' && (
+                    <div className="w-full h-full flex items-center justify-center p-4">
+                        <div className={cn(
+                            "rounded-3xl p-6 text-center space-y-4",
+                            (block.content as any).style === 'neon' && "bg-black border-2 border-purple-500",
+                            (block.content as any).style === 'bold' && "bg-gradient-to-br from-orange-500 to-pink-500 text-white",
+                            (block.content as any).style === 'minimal' && "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+                        )}>
+                            {(block.content as any).emoji && (
+                                <div className="text-5xl">{(block.content as any).emoji}</div>
+                            )}
+                            <h3 className="font-bold text-lg">{(block.content as any).title}</h3>
+                            <div className="text-xs text-zinc-500">
+                                {new Date((block.content as any).targetDate).toLocaleDateString('pt-BR')}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

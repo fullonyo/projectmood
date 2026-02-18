@@ -8,6 +8,12 @@ import { TickerBlockPublic } from "@/components/dashboard/ticker-block-public";
 import { SubtitleBlockPublic } from "@/components/dashboard/subtitle-block-public";
 import { FloatingBlockPublic } from "@/components/dashboard/floating-block-public";
 import { GuestbookBlock } from "@/components/dashboard/guestbook-block";
+import { QuoteBlockPublic } from "@/components/dashboard/quote-block-public";
+import { PhotoBlockPublic } from "@/components/dashboard/photo-block-public";
+import { MoodStatusBlockPublic } from "@/components/dashboard/mood-status-block-public";
+import { CountdownBlockPublic } from "@/components/dashboard/countdown-block-public";
+import { AnalyticsDisplay } from "@/components/dashboard/analytics-display";
+import { NowPlayingSpotify } from "@/components/dashboard/now-playing-spotify";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -306,10 +312,32 @@ export default async function PublicMoodPage({
                             {block.type === 'floating' && (
                                 <FloatingBlockPublic content={block.content} />
                             )}
+
+                            {block.type === 'quote' && (
+                                <QuoteBlockPublic content={block.content} />
+                            )}
+
+                            {block.type === 'photo' && (
+                                <PhotoBlockPublic content={block.content} />
+                            )}
+
+                            {block.type === 'moodStatus' && (
+                                <MoodStatusBlockPublic content={block.content} />
+                            )}
+
+                            {block.type === 'countdown' && (
+                                <CountdownBlockPublic content={block.content} />
+                            )}
                         </div>
                     );
                 })}
             </main>
+
+            {/* Analytics Display */}
+            <AnalyticsDisplay profileId={user.profile.id} />
+
+            {/* Now Playing Spotify */}
+            <NowPlayingSpotify userId={user.id} />
 
             {/* Branding Footer */}
             <footer className="fixed bottom-8 right-8 z-50">
