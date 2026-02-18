@@ -1,42 +1,45 @@
 "use client"
 
 import { useState } from "react"
-import dynamic from "next/dynamic"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Smile } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Smile, Meh, Frown, Sparkles, Flame, Coffee, PartyPopper, Moon, Heart, Ghost, Check } from "lucide-react"
 
-// Dynamic import to avoid SSR issues with emoji picker
-const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false })
+const ICONS = [
+    { name: 'Smile', icon: Smile },
+    { name: 'Meh', icon: Meh },
+    { name: 'Frown', icon: Frown },
+    { name: 'Sparkles', icon: Sparkles },
+    { name: 'Flame', icon: Flame },
+    { name: 'Coffee', icon: Coffee },
+    { name: 'PartyPopper', icon: PartyPopper },
+    { name: 'Moon', icon: Moon },
+    { name: 'Heart', icon: Heart },
+    { name: 'Ghost', icon: Ghost },
+]
 
 interface MoodStatusEditorProps {
     onAdd: (content: any) => void
 }
 
 export function MoodStatusEditor({ onAdd }: MoodStatusEditorProps) {
-    const [emoji, setEmoji] = useState("😊")
+    const [selectedIcon, setSelectedIcon] = useState("Smile")
     const [text, setText] = useState("")
-    const [showPicker, setShowPicker] = useState(false)
 
     const handleAdd = () => {
         if (!text.trim()) return
 
         onAdd({
-            emoji,
+            emoji: selectedIcon, // Mantendo o nome da prop como 'emoji' para compatibilidade, mas enviando o nome do ícone
             text: text.trim(),
             timestamp: new Date().toISOString()
         })
 
         // Reset form
         setText("")
-        setEmoji("😊")
-    }
-
-    const handleEmojiClick = (emojiData: any) => {
-        setEmoji(emojiData.emoji)
-        setShowPicker(false)
+        setSelectedIcon("Smile")
     }
 
     return (
@@ -48,44 +51,30 @@ export function MoodStatusEditor({ onAdd }: MoodStatusEditorProps) {
 
             <div className="space-y-4">
                 <div className="space-y-2">
-                    <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Emoji</Label>
-                    <div className="flex flex-col gap-3">
-                        {/* Quick Selection Row */}
-                        <div className="flex flex-wrap gap-2 p-2 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                            {['😊', '✨', '🔥', '🍕', '🎉', '😴', '🧠', '🌈', '💖', '💀'].map(e => (
-                                <button
-                                    key={e}
-                                    onClick={() => setEmoji(e)}
-                                    className={cn(
-                                        "w-8 h-8 flex items-center justify-center text-lg rounded-lg transition-all hover:scale-125",
-                                        emoji === e ? "bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-700" : "opacity-60 hover:opacity-100"
-                                    )}
-                                >
-                                    {e}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="relative group">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Escolha o Ícone</Label>
+                    <div className="flex flex-wrap gap-2 p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                        {ICONS.map(({ name, icon: Icon }) => (
                             <button
-                                type="button"
-                                onClick={() => setShowPicker(!showPicker)}
-                                className="w-full h-14 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center text-4xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border-2 border-dashed border-zinc-200 dark:border-zinc-700"
+                                key={name}
+                                onClick={() => setSelectedIcon(name)}
+                                className={cn(
+                                    "w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:scale-110 relative",
+                                    selectedIcon === name ? "bg-white dark:bg-zinc-800 shadow-md ring-1 ring-zinc-200 dark:ring-zinc-700" : "opacity-40 hover:opacity-100 bg-white/50 dark:bg-black/20"
+                                )}
                             >
-                                {emoji}
-                                <span className="absolute bottom-1 right-2 text-[8px] font-black uppercase opacity-0 group-hover:opacity-40 tracking-tighter">Escolher Outro</span>
+                                <Icon className={cn("w-5 h-5", selectedIcon === name ? "text-zinc-900 dark:text-white" : "text-zinc-500")} />
+                                {selectedIcon === name && (
+                                    <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-0.5 shadow-sm">
+                                        <Check className="w-2 h-2 text-white" />
+                                    </div>
+                                )}
                             </button>
-                            {showPicker && (
-                                <div className="absolute z-50 mt-2 left-0 right-0">
-                                    <EmojiPicker onEmojiClick={handleEmojiClick} width="100%" />
-                                </div>
-                            )}
-                        </div>
+                        ))}
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
                         Seu mood agora
                     </Label>
                     <Input
@@ -93,14 +82,17 @@ export function MoodStatusEditor({ onAdd }: MoodStatusEditorProps) {
                         onChange={(e) => setText(e.target.value)}
                         placeholder="Ex: Inspirado e criativo!"
                         maxLength={50}
+                        className="bg-white dark:bg-zinc-950 border-none rounded-xl h-11 shadow-inner text-xs"
                     />
-                    <span className="text-[10px] text-zinc-400">{text.length}/50</span>
+                    <div className="flex justify-end">
+                        <span className="text-[9px] font-bold text-zinc-400 uppercase">{text.length}/50</span>
+                    </div>
                 </div>
 
                 <Button
                     onClick={handleAdd}
                     disabled={!text.trim()}
-                    className="w-full bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black"
+                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
                 >
                     Adicionar Status
                 </Button>

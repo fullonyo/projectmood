@@ -2,6 +2,10 @@
 
 Este arquivo centraliza a documentação de funcionalidades e componentes para facilitar o contexto da IA.
 
+## Padronização Visual
+- **Ícones**: NUNCA usar emojis para ícones de interface (labels, botões, seletores). Use sempre `lucide-react` ou SVGs customizados. Isso se aplica a labels, botões e seletores.
+- **Consistência**: Todos os editores da sidebar devem seguir o padrão de espaçamento, tipografia e iconografia estabelecido.
+
 ## Telas Analisadas
 
 ### Tela Principal (Landing Page)
