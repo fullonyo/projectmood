@@ -1,0 +1,37 @@
+# Dependências e Builds
+node_modules
+.next
+out
+
+# Git
+.git
+.github
+
+# IDEs e Ferramentas
+.vscode
+.idea
+.fleet
+.hooks
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Variáveis de Ambiente (Segurança)
+.env
+.env.local
+.env.production
+.env.development
+*.env*
+
+# Docker específicos (não precisam estar na imagem)
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Outros
+README.md
+LICENSE
+public/uploads/*
