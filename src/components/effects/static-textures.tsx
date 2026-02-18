@@ -18,7 +18,7 @@ export function StaticTextures({ type }: StaticTexturesProps) {
     return (
         <div
             className={cn(
-                "fixed inset-0 pointer-events-none z-[1] mix-blend-multiply",
+                "fixed inset-0 pointer-events-none z-[1] mix-blend-soft-light",
                 textureClass
             )}
         />

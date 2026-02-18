@@ -69,12 +69,16 @@ export default async function PublicMoodPage({
             <FontLoader fontFamily={(profile as any).customFont} />
             <CustomCursor type={profile.customCursor || 'auto'} />
             <MouseTrails type={profile.mouseTrails || 'none'} />
-            <BackgroundEffect type={profile.backgroundEffect || 'none'} primaryColor={profile.primaryColor || undefined} />
-            <StaticTextures type={(profile as any).staticTexture || 'none'} />
+            <div className="fixed inset-0 z-0">
+                <BackgroundEffect type={profile.backgroundEffect || 'none'} primaryColor={profile.primaryColor || undefined} />
+            </div>
+            <div className="fixed inset-0 z-[1]">
+                <StaticTextures type={(profile as any).staticTexture || 'none'} />
+            </div>
 
-            {/* Dynamic Background Effect */}
+            {/* Dynamic Background Effect / Grid */}
             <div
-                className={cn("fixed inset-0 pointer-events-none transition-opacity duration-1000", config.gridOpacity)}
+                className={cn("fixed inset-0 z-[2] pointer-events-none transition-opacity duration-1000", config.gridOpacity)}
                 style={{
                     backgroundImage: config.grid,
                     backgroundSize: config.bgSize,

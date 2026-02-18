@@ -72,8 +72,12 @@ export function MoodCanvas({
             className="relative w-full h-full overflow-hidden cursor-crosshair transition-colors duration-1000"
             style={{ backgroundColor: bgColor, color: primaryColor }}
         >
-            <BackgroundEffect type={backgroundEffect} primaryColor={profile.primaryColor} />
-            <StaticTextures type={profile.staticTexture || 'none'} />
+            <div className="absolute inset-0 z-0">
+                <BackgroundEffect type={backgroundEffect} primaryColor={profile.primaryColor} />
+            </div>
+            <div className="absolute inset-0 z-[1]">
+                <StaticTextures type={profile.staticTexture || 'none'} />
+            </div>
 
             {/* Saving Indicator */}
             <div className={cn(
@@ -86,7 +90,7 @@ export function MoodCanvas({
 
             {/* Canvas Grid Layer */}
             <div
-                className={cn("absolute inset-0 pointer-events-none transition-opacity duration-1000", gridOpacity)}
+                className={cn("absolute inset-0 z-[2] pointer-events-none transition-opacity duration-1000", gridOpacity)}
                 style={{
                     backgroundImage: config.grid,
                     backgroundSize: config.bgSize,
