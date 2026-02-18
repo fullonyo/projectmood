@@ -180,6 +180,125 @@ export const STARS_SHADER = `
     }
 `
 
+export const RAIN_SHADER = `
+    precision highp float;
+    uniform float iTime;
+    uniform vec2 iResolution;
+
+    float hash(vec2 p) {
+        p = fract(p * vec2(123.34, 456.21));
+        p += dot(p, p + 45.32);
+        return fract(p.x * p.y);
+    }
+
+    void main() {
+        vec2 uv = gl_FragCoord.xy / iResolution.xy;
+        vec2 p = uv;
+        p.x *= iResolution.x / iResolution.y;
+        
+        float t = iTime * 0.5;
+        vec2 rainUV = p * 4.0;
+        rainUV.y += t * 0.5;
+        
+        vec2 id = floor(rainUV);
+        vec2 gv = fract(rainUV) - 0.5;
+        
+        float h = hash(id);
+        gv.y += h * 2.0;
+        
+        float drop = smoothstep(0.05, 0.0, length(gv * vec2(1.0, 0.15)));
+        float trail = smoothstep(0.03, 0.0, length(gv.x)) * smoothstep(0.5, -0.5, gv.y) * 0.5;
+        
+        vec3 col = vec3(0.05, 0.05, 0.1);
+        col += (drop + trail) * 0.2;
+        
+        gl_FragColor = vec4(col, 0.3 + drop * 0.4);
+    }
+`
+
+export const RHYTHM_SHADER = `
+    precision highp float;
+    uniform float iTime;
+    uniform vec2 iResolution;
+    uniform vec3 uColor;
+
+    void main() {
+        vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / min(iResolution.y, iResolution.x);
+        float t = iTime * 1.5;
+        
+        float dist = length(uv);
+        float wave = sin(dist * 20.0 - t) * 0.5 + 0.5;
+        wave *= exp(-dist * 2.0);
+        
+        vec3 color = uColor * wave;
+        gl_FragColor = vec4(color, wave * 0.2);
+    }
+`
+
+export const VINTAGE_SHADER = `
+    precision highp float;
+    uniform float iTime;
+    uniform vec2 iResolution;
+
+    float random(vec2 p) {
+        return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+    }
+
+    void main() {
+        vec2 uv = gl_FragCoord.xy / iResolution.xy;
+        
+        float grain = random(uv + iTime * 0.1);
+        float vignette = 1.0 - length(uv - 0.5) * 1.5;
+        
+        float scratch = step(0.999, random(vec2(uv.x, iTime * 0.001)));
+        scratch *= random(vec2(uv.x, iTime)) * 0.5;
+        
+        vec3 color = vec3(0.4, 0.35, 0.3); // Sepia base
+        color *= vignette;
+        color += grain * 0.08;
+        color += scratch * 1.0;
+        
+        gl_FragColor = vec4(color, 0.2);
+    }
+`
+
+export const UNIVERSE_SHADER = `
+    precision highp float;
+    uniform float iTime;
+    uniform vec2 iResolution;
+    uniform vec3 uColor;
+
+    float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+    }
+
+    void main() {
+        vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / min(iResolution.y, iResolution.x);
+        float t = iTime * 0.05;
+        
+        vec3 color = vec3(0.0);
+        
+        for(float i=1.0; i<4.0; i++) {
+            float speed = i * 0.2;
+            vec2 l_uv = uv * (i * 10.0) + vec2(t * speed, 0.0);
+            vec2 id = floor(l_uv);
+            vec2 gv = fract(l_uv) - 0.5;
+            
+            float h = hash(id);
+            if(h > 0.98) {
+                float size = 0.01 * h;
+                float star = smoothstep(size, 0.0, length(gv));
+                color += star * uColor * (1.0/i);
+            }
+        }
+        
+        float n = sin(uv.x * 2.0 + t) * cos(uv.y * 2.0 - t);
+        color += uColor * n * 0.1;
+        
+        gl_FragColor = vec4(color, length(color) * 0.5);
+    }
+`
+
 export const initShader = (gl: WebGLRenderingContext, source: string, type: number) => {
     const shader = gl.createShader(type)
     if (!shader) return null

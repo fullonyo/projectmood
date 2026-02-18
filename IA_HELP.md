@@ -40,7 +40,8 @@ Este arquivo centraliza a documentação de funcionalidades e componentes para f
 - **Efeitos de Fundo (`src/components/effects/background-effect.tsx`)**:
     - Renderizados via WebGL (Canvas) para garantir fluidez total (60 FPS).
     - **Interatividade**: Suporte a uniformes de mouse (`uMouse`) e sincronização com a cor primária do tema (`uColor`).
-    - **Efeitos Disponíveis**: `aurora`, `noise`, `liquid`, `mesh-gradient` (fluido), `metaballs` (interativo), `hyperspeed` (viagem espacial), `stars`, `grid-move`.
+    - **Efeitos Dinâmicos**: `aurora`, `noise`, `liquid`, `mesh-gradient`, `metaballs`, `hyperspeed`, `rain` (melancólico), `rhythm` (musical), `vintage` (grão clássico), `stars`, `grid-move`.
+    - **Texturas Estáticas**: `museum-paper`, `raw-canvas`, `fine-sand`. Servem para dar profundidade tátil ao mural.
 
 ### Melhorias de Performance
 - **Otimização de Imagens**: Todas as fotos e doodles são comprimidos no cliente (`browser-image-compression`) antes do upload para reduzir latência e consumo de banda.

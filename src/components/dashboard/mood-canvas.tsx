@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { themeConfigs } from "@/lib/themes"
 import { BlockRenderer } from "./block-renderer"
 import { BackgroundEffect } from "../effects/background-effect"
+import { StaticTextures } from "../effects/static-textures"
 
 
 interface MoodCanvasProps {
@@ -72,6 +73,7 @@ export function MoodCanvas({
             style={{ backgroundColor: bgColor, color: primaryColor }}
         >
             <BackgroundEffect type={backgroundEffect} primaryColor={profile.primaryColor} />
+            <StaticTextures type={profile.staticTexture || 'none'} />
 
             {/* Saving Indicator */}
             <div className={cn(

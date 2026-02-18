@@ -37,6 +37,7 @@ model Profile {
   mouseTrails     String?   @default("none")
   backgroundEffect String?  @default("none")
   customFont       String?  @default("Inter")
+  staticTexture    String?  @default("none")
 
   updatedAt       DateTime @default(now()) @updatedAt
   

@@ -21,7 +21,11 @@ import {
     Grid3X3,
     Droplets,
     Wand2,
-    Zap
+    Zap,
+    CloudRain,
+    Music,
+    History,
+    Telescope
 } from "lucide-react"
 
 interface EffectsEditorProps {
@@ -67,6 +71,10 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
         { id: 'mesh-gradient', name: 'Mesh Gradient', icon: Wand2 },
         { id: 'metaballs', name: 'MetaBalls (Mouse)', icon: MousePointer2 },
         { id: 'hyperspeed', name: 'Hyperspeed', icon: Zap },
+        { id: 'rain', name: 'Chuva Melancólica', icon: CloudRain },
+        { id: 'rhythm', name: 'Ritmo (Ondas)', icon: Music },
+        { id: 'vintage', name: 'Vintage Movie', icon: History },
+        { id: 'universe', name: 'Universo Profundo', icon: Telescope },
         { id: 'grid-move', name: 'Retro Grid', icon: Grid3X3 },
         { id: 'stars', name: 'Starfield', icon: Sparkles },
     ]

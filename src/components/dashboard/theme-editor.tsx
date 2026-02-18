@@ -2,7 +2,14 @@
 
 import { updateProfile } from "@/actions/profile"
 import { useTransition } from "react"
-import { Palette, MousePointer2, Type } from "lucide-react"
+import { Palette, Type, Layout, Wand2, Scroll, Layers, Feather, MousePointer2 } from "lucide-react"
+
+const textures = [
+    { id: 'none', name: 'Plano', icon: Palette },
+    { id: 'museum-paper', name: 'Papel Museu', icon: Scroll },
+    { id: 'raw-canvas', name: 'Canvas Cru', icon: Layers },
+    { id: 'fine-sand', name: 'Areia Fina', icon: Feather },
+]
 import { cn } from "@/lib/utils"
 
 interface ThemeEditorProps {

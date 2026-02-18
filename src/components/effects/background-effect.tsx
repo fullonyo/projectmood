@@ -10,6 +10,10 @@ import {
     HYPERSPEED_SHADER,
     GRID_SHADER,
     STARS_SHADER,
+    RAIN_SHADER,
+    RHYTHM_SHADER,
+    VINTAGE_SHADER,
+    UNIVERSE_SHADER,
     createProgram
 } from "@/lib/shaders"
 
@@ -21,7 +25,11 @@ const SHADER_MAP: Record<string, string> = {
     metaballs: METABALLS_SHADER,
     hyperspeed: HYPERSPEED_SHADER,
     'grid-move': GRID_SHADER,
-    'stars': STARS_SHADER
+    'stars': STARS_SHADER,
+    'rain': RAIN_SHADER,
+    'rhythm': RHYTHM_SHADER,
+    'vintage': VINTAGE_SHADER,
+    'universe': UNIVERSE_SHADER
 }
 
 interface BackgroundEffectProps {

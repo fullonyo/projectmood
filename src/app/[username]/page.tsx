@@ -7,6 +7,7 @@ import { AnalyticsDisplay } from "@/components/dashboard/analytics-display";
 import { themeConfigs } from "@/lib/themes";
 import { BlockRenderer } from "@/components/dashboard/block-renderer";
 import { BackgroundEffect } from "@/components/effects/background-effect";
+import { StaticTextures } from "@/components/effects/static-textures";
 import { CustomCursor } from "@/components/effects/custom-cursor";
 import { MouseTrails } from "@/components/effects/mouse-trails";
 import { FontLoader } from "@/components/dashboard/font-loader";
@@ -69,6 +70,7 @@ export default async function PublicMoodPage({
             <CustomCursor type={profile.customCursor || 'auto'} />
             <MouseTrails type={profile.mouseTrails || 'none'} />
             <BackgroundEffect type={profile.backgroundEffect || 'none'} primaryColor={profile.primaryColor || undefined} />
+            <StaticTextures type={(profile as any).staticTexture || 'none'} />
 
             {/* Dynamic Background Effect */}
             <div
