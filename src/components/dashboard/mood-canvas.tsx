@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { updateMoodBlockLayout, deleteMoodBlock } from "@/actions/profile"
 import { Trash2, RotateCw, Instagram, Twitter, Github, Linkedin, Youtube, Link as LinkIcon, Pencil, Move } from "lucide-react"
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
+import { ConfirmModal } from "@/components/ui/confirm-modal"
 import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
@@ -79,12 +80,14 @@ interface MoodCanvasProps {
     profile: any
     selectedId: string | null
     setSelectedId: (id: string | null) => void
+    onUpdateBlock: (id: string, content: any) => void
 }
 
-export function MoodCanvas({ blocks, profile, selectedId, setSelectedId }: MoodCanvasProps) {
+export function MoodCanvas({ blocks, profile, selectedId, setSelectedId, onUpdateBlock }: MoodCanvasProps) {
     const canvasRef = useRef<HTMLDivElement>(null)
     const [maxZ, setMaxZ] = useState(10)
     const [isSaving, setIsSaving] = useState(false)
+    const [blockToDelete, setBlockToDelete] = useState<string | null>(null)
 
     const theme = profile.theme || 'light'
     const config = themeConfigs[theme] || themeConfigs.light
@@ -161,6 +164,8 @@ export function MoodCanvas({ blocks, profile, selectedId, setSelectedId }: MoodC
                             setSelectedId(block.id)
                             bringToFront(block.id)
                         }}
+                        onUpdate={(content) => onUpdateBlock(block.id, content)}
+                        onDeleteRequest={(id) => setBlockToDelete(id)}
                         onSavingStart={() => setIsSaving(true)}
                         onSavingEnd={() => setIsSaving(false)}
                     />
@@ -170,6 +175,24 @@ export function MoodCanvas({ blocks, profile, selectedId, setSelectedId }: MoodC
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-[10px] font-bold tracking-widest uppercase text-zinc-400">
                 Lona de Criatividade Livre
             </div>
+
+            <ConfirmModal
+                isOpen={!!blockToDelete}
+                onClose={() => setBlockToDelete(null)}
+                onConfirm={async () => {
+                    if (blockToDelete) {
+                        setIsSaving(true)
+                        await deleteMoodBlock(blockToDelete)
+                        setIsSaving(false)
+                        setBlockToDelete(null)
+                    }
+                }}
+                title="Deletar Item?"
+                message="Essa ação não pode ser desfeita. O item será removido permanentemente do seu mural."
+                confirmText="Excluir"
+                type="danger"
+                isLoading={isSaving}
+            />
         </div>
     )
 }
@@ -209,15 +232,17 @@ const stableHash = (str: string) => {
     return Math.abs(hash);
 };
 
-function CanvasItem({ block, canvasRef, isSelected, onSelect, onSavingStart, onSavingEnd, profile, themeConfig }: {
+function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSavingStart, onSavingEnd, profile, themeConfig, onDeleteRequest }: {
     block: any,
     canvasRef: React.RefObject<HTMLDivElement | null>,
     isSelected: boolean,
     onSelect: () => void,
+    onUpdate: (content: any) => void,
     onSavingStart: () => void,
     onSavingEnd: () => void,
     profile: any,
-    themeConfig: any
+    themeConfig: any,
+    onDeleteRequest: (id: string) => void
 }) {
     const [isDragging, setIsDragging] = useState(false)
     const [isResizing, setIsResizing] = useState(false)
@@ -238,20 +263,21 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onSavingStart, onS
 
         const canvasRect = canvasRef.current.getBoundingClientRect()
 
-        // Calculate based on the movement (delta) to avoid the "jump" to mouse
-        // We take the current visual position and convert it back to percentages
-        const element = event.target as HTMLElement
-        const currentLeft = element.offsetLeft + info.offset.x
-        const currentTop = element.offsetTop + info.offset.y
+        // Calculate the new percentage position
+        // We use the block's current position + the delta moved
+        const deltaXPercent = (info.offset.x / canvasRect.width) * 100
+        const deltaYPercent = (info.offset.y / canvasRect.height) * 100
 
-        // Convert pixel delta to percentages
-        const xPercent = (block.x + (info.offset.x / canvasRect.width * 100))
-        const yPercent = (block.y + (info.offset.y / canvasRect.height * 100))
+        let newX = Math.max(0, Math.min(100, block.x + deltaXPercent))
+        let newY = Math.max(0, Math.min(100, block.y + deltaYPercent))
+
+        // Optimistic update
+        onUpdate({ x: newX, y: newY })
 
         onSavingStart()
         await updateMoodBlockLayout(block.id, {
-            x: Math.max(0, Math.min(100, xPercent)),
-            y: Math.max(0, Math.min(100, yPercent))
+            x: newX,
+            y: newY
         })
         onSavingEnd()
     }
@@ -286,38 +312,46 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onSavingStart, onS
 
     const handleResizeEnd = async () => {
         setIsResizing(false)
-        onSavingStart()
-        await updateMoodBlockLayout(block.id, {
+
+        const updates = {
             width: typeof size.width === 'number' ? Math.round(size.width) : undefined,
             height: typeof size.height === 'number' ? Math.round(size.height) : undefined
-        })
+        }
+
+        // Optimistic update
+        onUpdate(updates)
+
+        onSavingStart()
+        await updateMoodBlockLayout(block.id, updates)
         onSavingEnd()
     }
 
     const handleDelete = async () => {
-        if (confirm("Deletar item?")) {
-            onSavingStart()
-            await deleteMoodBlock(block.id)
-            onSavingEnd()
-        }
+        onDeleteRequest(block.id)
     }
 
     const rotate = async () => {
         const newRotation = (localRotation + 15) % 360
         setLocalRotation(newRotation)
+
+        // Optimistic update
+        onUpdate({ rotation: newRotation })
+
         onSavingStart()
         await updateMoodBlockLayout(block.id, { rotation: newRotation })
         onSavingEnd()
     }
 
     const hash = stableHash(block.id)
-    const displayX = block.x > 100 ? (20 + (hash % 60)) : block.x
-    const displayY = block.y > 100 ? (20 + (hash % 60)) : block.y
+    const displayX = block.x
+    const displayY = block.y
 
     return (
         <motion.div
             drag={!isResizing}
             dragMomentum={false}
+            dragConstraints={canvasRef}
+            dragElastic={0}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onClick={(e) => {
@@ -493,7 +527,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onSavingStart, onS
                 {block.type === 'video' && (
                     <div className="bg-black shadow-2xl rounded-2xl overflow-hidden h-full w-full relative group/video">
                         <iframe
-                            src={`https://www.youtube.com/embed/${(block.content as any).videoId}?autoplay=1&mute=1&loop=1&playlist=${(block.content as any).videoId}&controls=0&rel=0&modestbranding=1`}
+                            src={`https://www.youtube.com/embed/${(block.content as any).videoId}?autoplay=1&loop=1&playlist=${(block.content as any).videoId}&controls=0&rel=0&modestbranding=1`}
                             className="w-full h-full border-none"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen

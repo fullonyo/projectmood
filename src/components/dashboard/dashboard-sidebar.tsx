@@ -34,6 +34,7 @@ import { SpotifySearch } from "./spotify-search"
 import { YoutubeEditor } from "./youtube-editor"
 import { clearMoodBlocks } from "@/actions/profile"
 import { Button } from "../ui/button"
+import { ConfirmModal } from "../ui/confirm-modal"
 
 type TabType = 'style' | 'content' | 'art' | 'social'
 
@@ -51,6 +52,8 @@ export function DashboardSidebar({
     onUpdateProfile: (data: any) => void
 }) {
     const [activeTab, setActiveTab] = useState<TabType>('content')
+    const [showClearConfirm, setShowClearConfirm] = useState(false)
+    const [isClearing, setIsClearing] = useState(false)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     // Refs for each editor section
@@ -179,11 +182,7 @@ export function DashboardSidebar({
                             <Button
                                 variant="outline"
                                 className="w-full border-red-200 dark:border-red-900/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-2 h-12 rounded-xl text-xs font-bold"
-                                onClick={async () => {
-                                    if (confirm("TEM CERTEZA? Isso vai deletar TODOS os blocos do seu mural permanentemente.")) {
-                                        await clearMoodBlocks()
-                                    }
-                                }}
+                                onClick={() => setShowClearConfirm(true)}
                             >
                                 <Trash2 className="w-4 h-4" />
                                 Limpar Todo o Mural
@@ -260,6 +259,22 @@ export function DashboardSidebar({
                 )}
 
             </div>
+
+            <ConfirmModal
+                isOpen={showClearConfirm}
+                onClose={() => setShowClearConfirm(false)}
+                onConfirm={async () => {
+                    setIsClearing(true)
+                    await clearMoodBlocks()
+                    setIsClearing(false)
+                    setShowClearConfirm(false)
+                }}
+                isLoading={isClearing}
+                title="Limpar Mural?"
+                message="Isso vai deletar todos os seus blocos permanentemente. Tem certeza absoluta?"
+                confirmText="Sim, deletar tudo"
+                type="danger"
+            />
 
             {/* Bottom Tip Overlay (Conditional) */}
             <div className="p-4 bg-zinc-50 dark:bg-zinc-800/20 border-t border-zinc-100 dark:border-zinc-800 shrink-0">

@@ -10,15 +10,17 @@ import { Search, Music } from "lucide-react"
 export function SpotifySearch() {
     const [query, setQuery] = useState("")
     const [results, setResults] = useState<any[]>([])
+    const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [isPending, startTransition] = useTransition()
 
     const handleSearch = async () => {
         if (!query) return
+        setError(null)
         setIsLoading(true)
         const tracks = await searchSpotifyTracks(query)
         if ('error' in tracks) {
-            alert(tracks.error)
+            setError(tracks.error as string)
         } else {
             setResults(tracks)
         }
@@ -40,13 +42,23 @@ export function SpotifySearch() {
                 <Input
                     placeholder="Busque uma música..."
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={(e) => {
+                        setQuery(e.target.value)
+                        if (error) setError(null)
+                    }}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className={error ? "border-red-500 ring-1 ring-red-500" : ""}
                 />
                 <Button size="sm" onClick={handleSearch} isLoading={isLoading}>
                     <Search className="w-4 h-4" />
                 </Button>
             </div>
+
+            {error && (
+                <p className="text-[10px] text-red-500 font-bold animate-in fade-in slide-in-from-top-1">
+                    {error}
+                </p>
+            )}
 
             {results.length > 0 && (
                 <div className="mt-4 space-y-2 border rounded-2xl p-2 bg-zinc-50 dark:bg-zinc-800">

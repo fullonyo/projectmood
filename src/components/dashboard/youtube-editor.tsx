@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 
 export function YoutubeEditor({ highlight }: { highlight?: boolean }) {
     const [url, setUrl] = useState("")
+    const [error, setError] = useState<string | null>(null)
     const [isPending, startTransition] = useTransition()
 
     const extractYoutubeId = (url: string) => {
@@ -18,9 +19,10 @@ export function YoutubeEditor({ highlight }: { highlight?: boolean }) {
     }
 
     const handleAddVideo = () => {
+        setError(null)
         const videoId = extractYoutubeId(url)
         if (!videoId) {
-            alert("URL do YouTube inválida! Tente colar o link direto do vídeo.")
+            setError("Link do YouTube inválido!")
             return
         }
 
@@ -47,9 +49,15 @@ export function YoutubeEditor({ highlight }: { highlight?: boolean }) {
                     <Input
                         placeholder="Cole o link do vídeo..."
                         value={url}
-                        onChange={(e) => setUrl(e.target.value)}
+                        onChange={(e) => {
+                            setUrl(e.target.value)
+                            if (error) setError(null)
+                        }}
                         onKeyDown={(e) => e.key === 'Enter' && handleAddVideo()}
-                        className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 pr-10"
+                        className={cn(
+                            "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 pr-10",
+                            error && "border-red-500 ring-1 ring-red-500"
+                        )}
                     />
                     <Video className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                 </div>
@@ -62,6 +70,12 @@ export function YoutubeEditor({ highlight }: { highlight?: boolean }) {
                     <Plus className="w-4 h-4" />
                 </Button>
             </div>
+
+            {error && (
+                <p className="text-[10px] text-red-500 font-bold animate-in fade-in slide-in-from-top-1">
+                    {error}
+                </p>
+            )}
             <p className="text-[10px] text-zinc-500 italic">
                 Suporta links: youtu.be, youtube.com/watch ou link de embed.
             </p>

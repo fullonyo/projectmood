@@ -163,8 +163,8 @@ export default async function PublicMoodPage({
                     };
 
                     const hash = stableHash(block.id);
-                    const displayX = block.x > 100 ? (20 + (hash % 60)) : block.x
-                    const displayY = block.y > 100 ? (20 + (hash % 60)) : block.y
+                    const displayX = block.x
+                    const displayY = block.y
 
                     return (
                         <div
@@ -263,12 +263,7 @@ export default async function PublicMoodPage({
                                     rel="noopener noreferrer"
                                     className="block transition-transform hover:scale-110 active:scale-95 group/social"
                                 >
-                                    <div className="p-4 bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-center shadow-xl">
-                                        {(() => {
-                                            const Icon = ICONS[(block.content as any).platform] || LinkIcon;
-                                            return <Icon className="w-8 h-8" />;
-                                        })()}
-                                    </div>
+                                    <SocialBlockPublic content={block.content} />
                                 </a>
                             )}
 
@@ -285,7 +280,7 @@ export default async function PublicMoodPage({
                             {block.type === 'video' && (
                                 <div className="w-96 aspect-video bg-black rounded-3xl shadow-2xl overflow-hidden border border-white/10">
                                     <iframe
-                                        src={`https://www.youtube.com/embed/${(block.content as any).videoId}?autoplay=1&mute=1&loop=1&playlist=${(block.content as any).videoId}&controls=1&rel=0`}
+                                        src={`https://www.youtube.com/embed/${(block.content as any).videoId}?autoplay=1&loop=1&playlist=${(block.content as any).videoId}&controls=1&rel=0`}
                                         width="100%" height="100%" frameBorder="0"
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         allowFullScreen
@@ -325,21 +320,20 @@ function SocialBlockPublic({ content }: { content: any }) {
 
     return (
         <div className={cn(
-            "flex items-center gap-3 px-4 py-2.5 transition-all duration-300 shadow-xl",
-            style === 'tag' && "bg-[#fefefe] dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-[2px] border border-zinc-200 dark:border-zinc-700 border-l-[6px] border-l-black dark:border-l-white",
+            "flex items-center gap-3 px-4 py-2.5 transition-all duration-300 shadow-xl min-w-[160px]",
+            style === 'tag' && "bg-[#fefefe] dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-[2px] border border-zinc-200 dark:border-zinc-700 border-l-[6px] border-l-black dark:border-l-white font-serif italic",
             style === 'glass' && "bg-white/10 dark:bg-black/10 backdrop-blur-xl rounded-2xl border border-white/20 text-current group-hover/social:bg-white/20",
             style === 'minimal' && "bg-transparent text-current font-black tracking-tighter text-xl",
             style === 'neon' && "bg-black text-green-400 rounded-full border-2 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)] group-hover/social:shadow-[0_0_25px_rgba(34,197,94,0.5)]"
         )}>
             <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center",
+                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
                 style === 'minimal' ? "bg-black text-white dark:bg-white dark:text-black shadow-lg" : "bg-zinc-100 dark:bg-zinc-700/50"
             )}>
                 <Icon className="w-4 h-4" />
             </div>
             <span className={cn(
-                "text-sm font-bold",
-                style === 'tag' && "font-serif italic",
+                "text-sm font-bold truncate",
                 style === 'minimal' && "uppercase tracking-[0.3em] text-[10px]"
             )}>
                 {label}

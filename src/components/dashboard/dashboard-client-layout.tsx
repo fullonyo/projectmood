@@ -47,6 +47,7 @@ export function DashboardClientLayout({ profile, moodBlocks }: DashboardClientLa
                     profile={localProfile}
                     selectedId={selectedId}
                     setSelectedId={setSelectedId}
+                    onUpdateBlock={handleUpdateLocalBlock}
                 />
             </div>
 
