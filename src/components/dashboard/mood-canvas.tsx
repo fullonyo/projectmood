@@ -5,6 +5,7 @@ import { updateMoodBlockLayout, deleteMoodBlock } from "@/actions/profile"
 import { Trash2, RotateCw, Instagram, Twitter, Github, Linkedin, Youtube, Link as LinkIcon, Pencil, Move } from "lucide-react"
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
+import { GuestbookBlock } from "./guestbook-block"
 import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
@@ -534,6 +535,13 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
                         />
                         {/* Overlay to allow interaction with the block instead of the iframe */}
                         <div className="absolute inset-0 bg-transparent z-10" />
+                    </div>
+                )}
+
+                {block.type === 'guestbook' && (
+                    <div className="h-full w-full pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
+                        <GuestbookBlock block={block} />
+                        <div className="absolute inset-0 z-10 bg-transparent select-none" />
                     </div>
                 )}
 

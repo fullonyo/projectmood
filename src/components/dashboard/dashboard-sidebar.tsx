@@ -32,6 +32,7 @@ import { SocialLinksEditor } from "./social-links-editor"
 import { GifPicker } from "./gif-picker"
 import { SpotifySearch } from "./spotify-search"
 import { YoutubeEditor } from "./youtube-editor"
+import { GuestbookEditor } from "./guestbook-editor"
 import { clearMoodBlocks } from "@/actions/profile"
 import { Button } from "../ui/button"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -64,6 +65,7 @@ export function DashboardSidebar({
     const themeEditorRef = useRef<HTMLDivElement>(null)
     const gifPickerRef = useRef<HTMLDivElement>(null)
     const youtubeEditorRef = useRef<HTMLDivElement>(null)
+    const guestbookEditorRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (!selectedBlock) return
@@ -86,6 +88,9 @@ export function DashboardSidebar({
         } else if (selectedBlock.type === 'video') {
             newTab = 'content'
             targetRef = youtubeEditorRef
+        } else if (selectedBlock.type === 'guestbook') {
+            newTab = 'content'
+            targetRef = guestbookEditorRef
         } else if (['doodle', 'tape', 'weather', 'media'].includes(selectedBlock.type)) {
             newTab = 'art'
             targetRef = artToolsRef
@@ -221,6 +226,11 @@ export function DashboardSidebar({
                         <div ref={youtubeEditorRef}>
                             <YoutubeEditor
                                 highlight={selectedBlock?.type === 'video'}
+                            />
+                        </div>
+                        <div ref={guestbookEditorRef}>
+                            <GuestbookEditor
+                                highlight={selectedBlock?.type === 'guestbook'}
                             />
                         </div>
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />

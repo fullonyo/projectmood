@@ -7,6 +7,7 @@ import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamI
 import { TickerBlockPublic } from "@/components/dashboard/ticker-block-public";
 import { SubtitleBlockPublic } from "@/components/dashboard/subtitle-block-public";
 import { FloatingBlockPublic } from "@/components/dashboard/floating-block-public";
+import { GuestbookBlock } from "@/components/dashboard/guestbook-block";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -286,6 +287,12 @@ export default async function PublicMoodPage({
                                         allowFullScreen
                                         className="opacity-90"
                                     />
+                                </div>
+                            )}
+
+                            {block.type === 'guestbook' && (
+                                <div className="w-[350px] h-[400px]">
+                                    <GuestbookBlock block={block} isPublic={true} />
                                 </div>
                             )}
                             {block.type === 'ticker' && (

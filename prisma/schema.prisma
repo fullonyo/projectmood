@@ -37,7 +37,7 @@ model MoodBlock {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // text, image, music, link, gif
+  type      String   // text, image, music, link, gif, guestbook
   content   Json
   order     Int      @default(0)
   
@@ -49,5 +49,19 @@ model MoodBlock {
   zIndex    Int      @default(1)
   rotation  Float    @default(0)
   
+  messages  GuestbookMessage[]
   updatedAt DateTime @default(now()) @updatedAt
+}
+
+model GuestbookMessage {
+  id        String   @id @default(cuid())
+  content   String
+  author    String   // Nome real ou anônimo gerado
+  isAdmin   Boolean  @default(false)
+  
+  blockId   String
+  block     MoodBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  
+  userId    String?  // Opcional: link com usuário logado
+  createdAt DateTime @default(now())
 }

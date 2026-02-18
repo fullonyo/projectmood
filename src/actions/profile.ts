@@ -27,18 +27,22 @@ export async function updateProfile(data: {
     }
 }
 
-export async function addMoodBlock(type: string, content: any, initialPos = { x: 50, y: 50 }) {
+export async function addMoodBlock(type: string, content: any, options: { x?: number, y?: number, width?: number, height?: number } = {}) {
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
 
+    const { x = 50, y = 50, width, height } = options;
+
     try {
-        const block = await prisma.moodBlock.create({
+        const block = await (prisma.moodBlock as any).create({
             data: {
                 userId: session.user.id,
                 type,
                 content,
-                x: Math.round(initialPos.x),
-                y: Math.round(initialPos.y),
+                x: Math.round(x),
+                y: Math.round(y),
+                width: width ? Math.round(width) : null,
+                height: height ? Math.round(height) : null,
             },
         });
 
