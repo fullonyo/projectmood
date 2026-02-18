@@ -32,7 +32,7 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                     </div>
                     <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Vibes do Mural</h3>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex gap-3 overflow-x-auto pb-4 pt-2 -mx-1 px-1 custom-scrollbar snap-x">
                     {[
                         { id: 'light', label: 'Classic', colors: 'bg-white border-zinc-200' },
                         { id: 'dark', label: 'Midnight', colors: 'bg-zinc-900 border-zinc-800' },
@@ -47,12 +47,14 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                             onClick={() => handleUpdate(vibe.data || { theme: vibe.id })}
                             disabled={isPending}
                             className={cn(
-                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all group",
-                                currentTheme === vibe.id ? "border-black dark:border-white scale-[1.02]" : "border-transparent opacity-70 hover:opacity-100 shadow-sm"
+                                "flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all min-w-[100px] snap-start shrink-0 group",
+                                currentTheme === vibe.id
+                                    ? "border-black dark:border-white bg-zinc-50 dark:bg-zinc-900 scale-[1.05] shadow-md"
+                                    : "border-transparent opacity-60 hover:opacity-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 shadow-sm"
                             )}
                         >
-                            <div className={cn("w-full h-8 rounded-md mb-2 border", vibe.colors)} />
-                            <span className="text-[10px] font-black uppercase tracking-tighter">{vibe.label}</span>
+                            <div className={cn("w-full h-12 rounded-xl mb-3 border shadow-inner transition-transform group-hover:scale-95", vibe.colors)} />
+                            <span className="text-[10px] font-black uppercase tracking-widest leading-none">{vibe.label}</span>
                         </button>
                     ))}
                 </div>

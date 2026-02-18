@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Image as ImageIcon, Upload, X } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface PhotoEditorProps {
     onAdd: (content: any) => void
@@ -151,37 +152,62 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Filtro</Label>
-                            <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-3 pb-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Filtro de Época</Label>
+                            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 custom-scrollbar snap-x">
                                 {(['none', 'vintage', 'bw', 'warm', 'cool'] as const).map((f) => (
                                     <button
                                         key={f}
                                         onClick={() => setFilter(f)}
-                                        className={`px-3 py-2 rounded-lg text-xs font-medium transition-all capitalize ${filter === f
-                                            ? 'bg-black text-white dark:bg-white dark:text-black'
-                                            : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400'
-                                            }`}
+                                        className={cn(
+                                            "flex flex-col items-center gap-2 p-2 rounded-xl transition-all min-w-[70px] snap-start shrink-0 border-2",
+                                            filter === f
+                                                ? "border-black dark:border-white bg-white dark:bg-zinc-800 shadow-sm outline-none"
+                                                : "border-transparent opacity-60 hover:opacity-100"
+                                        )}
                                     >
-                                        {f === 'none' ? 'Original' : f === 'bw' ? 'P&B' : f}
+                                        <div
+                                            className="w-12 h-12 rounded-lg bg-zinc-200 dark:bg-zinc-700 shadow-inner overflow-hidden"
+                                            style={{
+                                                backgroundImage: `url(${imageUrl})`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center',
+                                                filter: f === 'vintage' ? 'sepia(50%) contrast(110%)' : f === 'bw' ? 'grayscale(100%)' : f === 'warm' ? 'saturate(130%) hue-rotate(-10deg)' : f === 'cool' ? 'saturate(110%) hue-rotate(10deg)' : 'none'
+                                            }}
+                                        />
+                                        <span className="text-[9px] font-black uppercase tracking-tighter">
+                                            {f === 'none' ? 'Original' : f === 'bw' ? 'P&B' : f}
+                                        </span>
                                     </button>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Moldura</Label>
-                            <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-3 pb-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Borda & Estilo</Label>
+                            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 custom-scrollbar snap-x">
                                 {(['none', 'polaroid', 'border', 'shadow'] as const).map((frm) => (
                                     <button
                                         key={frm}
                                         onClick={() => setFrame(frm)}
-                                        className={`px-3 py-2 rounded-lg text-xs font-medium transition-all capitalize ${frame === frm
-                                            ? 'bg-black text-white dark:bg-white dark:text-black'
-                                            : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400'
-                                            }`}
+                                        className={cn(
+                                            "flex flex-col items-center gap-2 p-2 rounded-xl transition-all min-w-[70px] snap-start shrink-0 border-2",
+                                            frame === frm
+                                                ? "border-black dark:border-white bg-white dark:bg-zinc-800 shadow-sm outline-none"
+                                                : "border-transparent opacity-60 hover:opacity-100"
+                                        )}
                                     >
-                                        {frm === 'none' ? 'Nenhuma' : frm}
+                                        <div className={cn(
+                                            "w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 border flex items-center justify-center p-1",
+                                            frm === 'polaroid' && "bg-white p-1 border-zinc-200 pb-2 flex-col",
+                                            frm === 'border' && "border-4 border-zinc-300 dark:border-zinc-700",
+                                            frm === 'shadow' && "shadow-xl border-zinc-100 dark:border-zinc-800",
+                                        )}>
+                                            <div className="w-full h-full bg-zinc-300 dark:bg-zinc-600 rounded-sm" />
+                                        </div>
+                                        <span className="text-[9px] font-black uppercase tracking-tighter">
+                                            {frm === 'none' ? 'Nenhuma' : frm}
+                                        </span>
                                     </button>
                                 ))}
                             </div>

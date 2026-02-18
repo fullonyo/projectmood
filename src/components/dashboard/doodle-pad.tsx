@@ -94,36 +94,56 @@ export function DoodlePad() {
                     className="w-full bg-white dark:bg-zinc-950 rounded-2xl cursor-crosshair touch-none shadow-inner border border-zinc-100 dark:border-zinc-900"
                 />
 
-                <div className="flex items-center justify-between gap-2">
-                    <div className="flex gap-1.5 flex-shrink-0">
-                        {['#000', '#FF0000', '#3B82F6', '#10B981', '#F59E0B'].map(c => (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex gap-1.5 p-1 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-100 dark:border-zinc-700">
+                            {[2, 4, 8, 12].map(size => (
+                                <button
+                                    key={size}
+                                    onClick={() => {
+                                        const ctx = canvasRef.current?.getContext("2d")
+                                        if (ctx) ctx.lineWidth = size
+                                    }}
+                                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all"
+                                >
+                                    <div
+                                        className="bg-zinc-400 rounded-full"
+                                        style={{ width: size, height: size }}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex gap-1.5">
+                            <button
+                                onClick={clear}
+                                className="p-2 hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-all border border-transparent hover:border-zinc-100 dark:hover:border-zinc-700 shadow-sm"
+                                title="Limpar"
+                            >
+                                <Eraser className="w-4 h-4 text-zinc-400" />
+                            </button>
+                            <Button
+                                onClick={save}
+                                disabled={isPending}
+                                className="bg-black dark:bg-white text-white dark:text-black rounded-xl w-10 h-10 p-0 flex items-center justify-center hover:scale-[1.05] transition-all shadow-md"
+                                title="Colar no mural"
+                            >
+                                <Plus className="w-4 h-4" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-1.5 overflow-x-auto custom-scrollbar pb-2 -mx-1 px-1">
+                        {['#000', '#666', '#FF0000', '#FF7F00', '#FFD700', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#ffffff'].map(c => (
                             <button
                                 key={c}
                                 onClick={() => setColor(c)}
                                 className={cn(
-                                    "w-5 h-5 rounded-full border border-black/5 transition-all hover:scale-110 flex-shrink-0",
-                                    color === c && "ring-2 ring-zinc-400 scale-110"
+                                    "w-6 h-6 rounded-full border border-black/5 transition-all hover:scale-125 shrink-0",
+                                    color === c && "ring-2 ring-zinc-400 scale-125 z-10 mx-1"
                                 )}
                                 style={{ backgroundColor: c }}
                             />
                         ))}
-                    </div>
-                    <div className="flex gap-1.5 flex-shrink-0">
-                        <button
-                            onClick={clear}
-                            className="p-2 hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-all border border-transparent hover:border-zinc-100 dark:hover:border-zinc-700 shadow-sm flex-shrink-0"
-                            title="Limpar"
-                        >
-                            <Eraser className="w-4 h-4 text-zinc-400" />
-                        </button>
-                        <Button
-                            onClick={save}
-                            disabled={isPending}
-                            className="bg-black dark:bg-white text-white dark:text-black rounded-xl w-10 h-10 p-0 flex items-center justify-center hover:scale-[1.05] transition-all shadow-md flex-shrink-0"
-                            title="Colar no mural"
-                        >
-                            <Plus className="w-4 h-4" />
-                        </Button>
                     </div>
                 </div>
             </div>

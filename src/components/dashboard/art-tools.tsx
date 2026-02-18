@@ -103,18 +103,39 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                     <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Clima Poético</h3>
                 </div>
 
-                <div className="space-y-3 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 max-w-full">
+                <div className="space-y-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 max-w-full">
+                    <div className="flex flex-wrap gap-2 pb-2">
+                        {[
+                            { icon: '☀️', vibe: 'Ensolarado e calmo' },
+                            { icon: '🌧️', vibe: 'Chuvoso e reflexivo' },
+                            { icon: '❄️', vibe: 'Frio e aconchegante' },
+                            { icon: '☁️', vibe: 'Nublado e urbano' },
+                            { icon: '⚡', vibe: 'Tempestuoso e intenso' },
+                        ].map((w) => (
+                            <button
+                                key={w.icon}
+                                onClick={() => setWeatherVibe(w.vibe)}
+                                className={cn(
+                                    "w-9 h-9 flex items-center justify-center text-lg rounded-xl transition-all hover:scale-110",
+                                    weatherVibe === w.vibe ? "bg-white dark:bg-zinc-800 shadow-md ring-1 ring-zinc-200 dark:ring-zinc-700" : "bg-white/40 dark:bg-zinc-950/40 opacity-60 hover:opacity-100"
+                                )}
+                                title={w.vibe}
+                            >
+                                {w.icon}
+                            </button>
+                        ))}
+                    </div>
                     <Input
                         placeholder="Aonde você está?"
                         value={weatherLoc}
                         onChange={(e) => setWeatherLoc(e.target.value)}
-                        className="bg-white dark:bg-zinc-900 text-xs h-10 w-full"
+                        className="bg-white dark:bg-zinc-900 text-xs h-10 w-full rounded-xl border-none shadow-inner"
                     />
                     <Input
                         placeholder="Como está o clima aí?"
                         value={weatherVibe}
                         onChange={(e) => setWeatherVibe(e.target.value)}
-                        className="bg-white dark:bg-zinc-900 text-xs h-10 w-full"
+                        className="bg-white dark:bg-zinc-900 text-xs h-10 w-full rounded-xl border-none shadow-inner"
                     />
                     <Button
                         size="sm"
