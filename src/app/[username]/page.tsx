@@ -36,13 +36,8 @@ export default async function PublicMoodPage({
 }: Props) {
     const { username } = await params;
 
-    const user = await prisma.user.findUnique({
-        where: { username },
-        include: {
-            profile: true,
-            moodBlocks: { orderBy: { order: "asc" } },
-        },
-    });
+    const { getPublicProfileCached } = await import("@/lib/data-fetching");
+    const user = await getPublicProfileCached(username);
 
     if (!user || !user.profile) notFound();
 

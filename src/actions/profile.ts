@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import {
     ProfileUpdateSchema,
     CreateMoodBlockSchema,
@@ -31,7 +31,10 @@ export async function updateProfile(data: {
         });
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
-        if (username) revalidatePath(`/${username}`);
+        if (username) {
+            revalidatePath(`/${username}`);
+            revalidateTag(`profile:${username}`);
+        }
         return { success: true };
     } catch (error) {
         console.error('[updateProfile]', error);
@@ -66,7 +69,10 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
 
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
-        if (username) revalidatePath(`/${username}`);
+        if (username) {
+            revalidatePath(`/${username}`);
+            revalidateTag(`profile:${username}`);
+        }
         return { success: true, block };
     } catch (error) {
         console.error('[addMoodBlock]', error);
@@ -97,7 +103,10 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
 
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
-        if (username) revalidatePath(`/${username}`);
+        if (username) {
+            revalidatePath(`/${username}`);
+            revalidateTag(`profile:${username}`);
+        }
 
         return { success: true };
     } catch (error) {
@@ -116,7 +125,10 @@ export async function deleteMoodBlock(blockId: string) {
         });
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
-        if (username) revalidatePath(`/${username}`);
+        if (username) {
+            revalidatePath(`/${username}`);
+            revalidateTag(`profile:${username}`);
+        }
         return { success: true };
     } catch (error) {
         console.error('[deleteMoodBlock]', error);
@@ -135,7 +147,10 @@ export async function clearMoodBlocks() {
 
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
-        if (username) revalidatePath(`/${username}`);
+        if (username) {
+            revalidatePath(`/${username}`);
+            revalidateTag(`profile:${username}`);
+        }
 
         return { success: true };
     } catch (error) {
@@ -161,7 +176,10 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
         );
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
-        if (username) revalidatePath(`/${username}`);
+        if (username) {
+            revalidatePath(`/${username}`);
+            revalidateTag(`profile:${username}`);
+        }
         return { success: true };
     } catch (error) {
         console.error('[reorderMoodBlocks]', error);
