@@ -44,12 +44,15 @@ jobs:
             SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}
             EOF
 
-            # Build e Deploy (usando docker-compose.prod.yml)
+            # Build e Deploy com BuildKit e Cache Inline
+            export DOCKER_BUILDKIT=1
+            export COMPOSE_DOCKER_CLI_BUILD=1
             docker compose -f docker-compose.prod.yml up -d --build
             
             # Roda as migrações/push do Prisma dentro do container do app
             # Forçando a versão 5.22.0 via npx para garantir compatibilidade com o schema e evitar a v7 (breaking changes)
             docker exec moodspace_app npx prisma@5.22.0 db push
             
-            # Limpeza de imagens antigas para economizar espaço em disco
-            docker image prune -f
+            # Limpeza inteligente: remove imagens 'dangling' (sem tag) e containers parados.
+            # O parâmetro -a remove imagens não usadas, mas isso mataria o cache. Usamos sem -a para manter cache.
+            docker system prune -f
