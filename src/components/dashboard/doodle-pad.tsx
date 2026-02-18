@@ -119,10 +119,10 @@ export function DoodlePad() {
                         <Button
                             onClick={save}
                             disabled={isPending}
-                            className="bg-black dark:bg-white text-white dark:text-black rounded-2xl h-10 px-3 font-black uppercase tracking-widest text-[9px] hover:scale-[1.02] transition-all shadow-md flex-shrink-0"
+                            className="bg-black dark:bg-white text-white dark:text-black rounded-xl w-10 h-10 p-0 flex items-center justify-center hover:scale-[1.05] transition-all shadow-md flex-shrink-0"
+                            title="Colar no mural"
                         >
-                            <Plus className="w-3 h-3 mr-1" />
-                            Colar
+                            <Plus className="w-4 h-4" />
                         </Button>
                     </div>
                 </div>
