@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react"
 import { useDropzone } from "react-dropzone"
+import imageCompression from 'browser-image-compression'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,29 +21,38 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
     const [frame, setFrame] = useState<'none' | 'polaroid' | 'border' | 'shadow'>('none')
     const [isUploading, setIsUploading] = useState(false)
 
-    const onDrop = useCallback((acceptedFiles: File[]) => {
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
         const file = acceptedFiles[0]
         if (!file) return
 
-        // Check file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert("Arquivo muito grande! Máximo 5MB.")
-            return
-        }
-
         setIsUploading(true)
 
-        // Convert to base64
-        const reader = new FileReader()
-        reader.onload = () => {
-            setImageUrl(reader.result as string)
+        try {
+            // Opções de compressão
+            const options = {
+                maxSizeMB: 1, // (max 1MB)
+                maxWidthOrHeight: 1200,
+                useWebWorker: true
+            }
+
+            const compressedFile = await imageCompression(file, options)
+
+            // Convert to base64
+            const reader = new FileReader()
+            reader.onload = () => {
+                setImageUrl(reader.result as string)
+                setIsUploading(false)
+            }
+            reader.onerror = () => {
+                alert("Erro ao carregar imagem")
+                setIsUploading(false)
+            }
+            reader.readAsDataURL(compressedFile)
+        } catch (error) {
+            console.error("Erro na compressão:", error)
+            alert("Erro ao processar imagem")
             setIsUploading(false)
         }
-        reader.onerror = () => {
-            alert("Erro ao carregar imagem")
-            setIsUploading(false)
-        }
-        reader.readAsDataURL(file)
     }, [])
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({

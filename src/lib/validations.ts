@@ -64,7 +64,8 @@ export const ProfileUpdateSchema = z.object({
     fontStyle: z.enum(['sans', 'serif', 'mono']).optional(),
     customCursor: z.enum(['auto', 'retro', 'heart', 'pixel', 'ghost']).optional(),
     mouseTrails: z.enum(['none', 'sparkles', 'ghost', 'pixel-dust', 'emoji']).optional(),
-    backgroundEffect: z.enum(['none', 'aurora', 'noise', 'grid-move', 'stars']).optional()
+    backgroundEffect: z.enum(['none', 'noise', 'aurora', 'liquid', 'mesh-gradient', 'metaballs', 'hyperspeed', 'grid-move', 'stars']).optional(),
+    customFont: z.string().optional()
 })
 
 // Validação específica para Quote Block

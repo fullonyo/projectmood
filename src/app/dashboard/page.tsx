@@ -11,7 +11,7 @@ export default async function DashboardPage() {
     const session = await auth();
 
     if (!session?.user) {
-        redirect("/login");
+        redirect("/auth/login");
     }
 
     const user = await prisma.user.findUnique({
@@ -19,11 +19,24 @@ export default async function DashboardPage() {
         include: { profile: true }
     });
 
-    if (!user || !user.profile) {
-        redirect("/onboarding");
+    if (!user) {
+        redirect("/auth/register"); // Se o user sumiu do banco mas tem sessão, forçamos re-registro ou login
     }
 
-    const { profile, username } = user;
+    let currentProfile = user.profile;
+
+    // Auto-reparo: Se o usuário existe mas não tem perfil, criamos um padrão agora.
+    if (!currentProfile) {
+        currentProfile = await prisma.profile.create({
+            data: {
+                userId: user.id,
+                theme: "light",
+            }
+        });
+    }
+
+    const { username } = user;
+    const profile = currentProfile;
 
     const moodBlocks = await prisma.moodBlock.findMany({
         where: { userId: session.user.id },

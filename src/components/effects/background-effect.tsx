@@ -1,63 +1,162 @@
 "use client"
 
-interface BackgroundEffectProps {
-    type: string
+import { useEffect, useRef } from "react"
+import {
+    AURORA_SHADER,
+    NOISE_SHADER,
+    LIQUID_SHADER,
+    MESH_GRADIENT_SHADER,
+    METABALLS_SHADER,
+    HYPERSPEED_SHADER,
+    GRID_SHADER,
+    STARS_SHADER,
+    createProgram
+} from "@/lib/shaders"
+
+const SHADER_MAP: Record<string, string> = {
+    aurora: AURORA_SHADER,
+    noise: NOISE_SHADER,
+    liquid: LIQUID_SHADER,
+    'mesh-gradient': MESH_GRADIENT_SHADER,
+    metaballs: METABALLS_SHADER,
+    hyperspeed: HYPERSPEED_SHADER,
+    'grid-move': GRID_SHADER,
+    'stars': STARS_SHADER
 }
 
-export function BackgroundEffect({ type }: BackgroundEffectProps) {
+interface BackgroundEffectProps {
+    type: string
+    primaryColor?: string
+}
+
+// Utility to convert hex to RGB for shaders
+const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16) / 255,
+        g: parseInt(result[2], 16) / 255,
+        b: parseInt(result[3], 16) / 255
+    } : { r: 0, g: 0, b: 0 };
+}
+
+export function BackgroundEffect({ type, primaryColor = '#000000' }: BackgroundEffectProps) {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const mousePos = useRef({ x: 0, y: 0 })
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            mousePos.current = { x: e.clientX, y: e.clientY }
+        }
+        window.addEventListener('mousemove', handleMouseMove)
+        return () => window.removeEventListener('mousemove', handleMouseMove)
+    }, [])
+
+    useEffect(() => {
+        const canvas = canvasRef.current
+        if (!canvas || type === 'none') return
+
+        const gl = canvas.getContext('webgl')
+        if (!gl) return
+
+        const shaderSource = SHADER_MAP[type]
+        if (!shaderSource) return
+
+        const vertexSource = `
+            attribute vec2 position;
+            void main() {
+                gl_Position = vec4(position, 0.0, 1.0);
+            }
+        `
+
+        const program = createProgram(gl, vertexSource, shaderSource)
+        if (!program) return
+
+        const positionBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1.0, -1.0,
+            1.0, -1.0,
+            -1.0, 1.0,
+            -1.0, 1.0,
+            1.0, -1.0,
+            1.0, 1.0
+        ]), gl.STATIC_DRAW)
+
+        const positionLocation = gl.getAttribLocation(program, 'position')
+        gl.enableVertexAttribArray(positionLocation)
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0)
+
+        const iTimeLocation = gl.getUniformLocation(program, 'iTime')
+        const iResolutionLocation = gl.getUniformLocation(program, 'iResolution')
+        const uMouseLocation = gl.getUniformLocation(program, 'uMouse')
+        const uColorLocation = gl.getUniformLocation(program, 'uColor')
+
+        const rgb = hexToRgb(primaryColor)
+
+        let animationFrameId: number
+        const render = (time: number) => {
+            if (!canvasRef.current) return
+
+            // Handle resizing
+            const rect = canvas.getBoundingClientRect()
+            if (canvas.width !== rect.width || canvas.height !== rect.height) {
+                canvas.width = rect.width
+                canvas.height = rect.height
+                gl.viewport(0, 0, canvas.width, canvas.height)
+            }
+
+            gl.useProgram(program)
+            gl.uniform1f(iTimeLocation, time * 0.001)
+            gl.uniform2f(iResolutionLocation, canvas.width, canvas.height)
+            gl.uniform2f(uMouseLocation, mousePos.current.x, canvas.height - mousePos.current.y)
+            gl.uniform3f(uColorLocation, rgb.r, rgb.g, rgb.b)
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6)
+            animationFrameId = requestAnimationFrame(render)
+        }
+
+        animationFrameId = requestAnimationFrame(render)
+
+        return () => {
+            cancelAnimationFrame(animationFrameId)
+            if (gl) {
+                gl.deleteProgram(program)
+            }
+        }
+    }, [type])
+
     if (!type || type === 'none') return null
 
+    // Legacy CSS Effects (or Fallback)
+    if (type === 'grid-move') {
+        return (
+            <div className="absolute inset-0 z-0 perspective-[500px] pointer-events-none">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] animate-grid-flow" />
+                <style jsx>{`
+                    @keyframes grid-flow {
+                        0% { transform: translateY(0); }
+                        100% { transform: translateY(40px); }
+                    }
+                    .animate-grid-flow { animation: grid-flow 2s linear infinite; }
+                `}</style>
+            </div>
+        )
+    }
+
+    if (type === 'stars') {
+        return (
+            <div className="absolute inset-0 z-0 bg-black pointer-events-none">
+                <div className="stars-layer-1 absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-50 animate-pulse" />
+            </div>
+        )
+    }
+
+    // WebGL Canvas Effects
     return (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-            {type === 'noise' && (
-                <div className="absolute inset-0 opacity-[0.03] z-0 mix-blend-overlay"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
-                    }}
-                />
-            )}
-
-            {type === 'aurora' && (
-                <div className="absolute inset-0 z-0">
-                    <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] animate-aurora opacity-50 blur-[100px] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full mix-blend-multiply filter" />
-                    <div className="absolute top-[-50%] right-[-50%] w-[200%] h-[200%] animate-aurora-rev opacity-50 blur-[100px] bg-gradient-to-l from-indigo-500 via-teal-500 to-emerald-500 rounded-full mix-blend-multiply filter" style={{ animationDelay: '2s' }} />
-                </div>
-            )}
-
-            {type === 'grid-move' && (
-                <div className="absolute inset-0 z-0 perspective-[500px]">
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] animate-grid-flow" />
-                </div>
-            )}
-
-            {type === 'stars' && (
-                <div className="absolute inset-0 z-0 bg-black">
-                    <div className="stars-layer-1 absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-50 animate-pulse" />
-                </div>
-            )}
-
-            <style jsx global>{`
-                @keyframes aurora {
-                    0% { transform: rotate(0deg) translate(0, 0); }
-                    50% { transform: rotate(180deg) translate(100px, 50px); }
-                    100% { transform: rotate(360deg) translate(0, 0); }
-                }
-                @keyframes aurora-rev {
-                    0% { transform: rotate(360deg) translate(0, 0); }
-                    50% { transform: rotate(180deg) translate(-100px, -50px); }
-                    100% { transform: rotate(0deg) translate(0, 0); }
-                }
-                .animate-aurora { animation: aurora 20s linear infinite; }
-                .animate-aurora-rev { animation: aurora-rev 25s linear infinite; }
-                
-                @keyframes grid-flow {
-                    0% { transform: translateY(0); }
-                    100% { transform: translateY(40px); }
-                }
-                .animate-grid-flow {
-                    animation: grid-flow 2s linear infinite;
-                }
-            `}</style>
-        </div>
+        <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full pointer-events-none z-0"
+            style={{ mixBlendMode: type === 'noise' ? 'overlay' : 'normal' }}
+        />
     )
 }

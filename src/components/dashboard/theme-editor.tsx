@@ -9,10 +9,22 @@ interface ThemeEditorProps {
     currentTheme: string
     currentPrimaryColor: string
     currentFontStyle: string
+    currentCustomFont?: string
     onUpdate?: (data: any) => void
 }
 
-export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyle, onUpdate }: ThemeEditorProps) {
+const GOOGLE_FONTS = [
+    { name: 'Inter', family: 'Inter' },
+    { name: 'Outfit', family: 'Outfit' },
+    { name: 'Playfair', family: 'Playfair Display' },
+    { name: 'Mono', family: 'JetBrains Mono' },
+    { name: 'Bangers', family: 'Bangers' },
+    { name: 'Unbounded', family: 'Unbounded' },
+    { name: 'Vibur', family: 'Vibur' },
+    { name: 'Space', family: 'Space Grotesk' },
+]
+
+export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyle, currentCustomFont, onUpdate }: ThemeEditorProps) {
     const [isPending, startTransition] = useTransition()
 
     const handleUpdate = (data: any) => {
@@ -89,7 +101,32 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                     <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
                         <Type className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
                     </div>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Tipografia</h3>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Google Fonts</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                    {GOOGLE_FONTS.map(font => (
+                        <button
+                            key={font.family}
+                            onClick={() => handleUpdate({ customFont: font.family })}
+                            disabled={isPending}
+                            className={cn(
+                                "h-11 px-3 rounded-xl border-2 transition-all flex items-center justify-between group",
+                                currentCustomFont === font.family ? "bg-zinc-100 dark:bg-zinc-800 border-black dark:border-white shadow-sm" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 opacity-70 hover:opacity-100"
+                            )}
+                        >
+                            <span className="text-[10px] font-bold truncate pr-2 uppercase tracking-tighter" style={{ fontFamily: font.family }}>{font.name}</span>
+                            <div className={cn("w-1.5 h-1.5 rounded-full", currentCustomFont === font.family ? "bg-black dark:bg-white" : "bg-zinc-200 dark:bg-zinc-700")} />
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                        <Type className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                    </div>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Base System</h3>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                     {[

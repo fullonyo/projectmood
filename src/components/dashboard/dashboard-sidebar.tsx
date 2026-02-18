@@ -193,6 +193,7 @@ export function DashboardSidebar({
                             currentTheme={profile.theme}
                             currentPrimaryColor={profile.primaryColor || '#000'}
                             currentFontStyle={profile.fontStyle || 'sans'}
+                            currentCustomFont={profile.customFont}
                             onUpdate={onUpdateProfile}
                         />
 

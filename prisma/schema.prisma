@@ -36,6 +36,7 @@ model Profile {
   customCursor    String?   @default("auto")
   mouseTrails     String?   @default("none")
   backgroundEffect String?  @default("none")
+  customFont       String?  @default("Inter")
 
   updatedAt       DateTime @default(now()) @updatedAt
   

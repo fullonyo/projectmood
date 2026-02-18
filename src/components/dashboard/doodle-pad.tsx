@@ -5,6 +5,7 @@ import { addMoodBlock } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
 import { Brush, Eraser, Undo2, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import imageCompression from 'browser-image-compression'
 
 export function DoodlePad() {
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -60,14 +61,37 @@ export function DoodlePad() {
         }
     }
 
-    const save = () => {
+    const save = async () => {
         const canvas = canvasRef.current
         if (!canvas) return
 
         const dataUrl = canvas.toDataURL("image/png")
+
         startTransition(async () => {
-            await addMoodBlock('doodle', { image: dataUrl }, { x: 50, y: 50 })
-            clear()
+            try {
+                // Convert base64 to Blob
+                const response = await fetch(dataUrl)
+                const blob = await response.blob()
+
+                // Compress
+                const compressedFile = await imageCompression(blob as File, {
+                    maxSizeMB: 0.2, // Doodles são pequenos, 200KB é mais que suficiente
+                    maxWidthOrHeight: 800,
+                    useWebWorker: true
+                })
+
+                const reader = new FileReader()
+                reader.onloadend = async () => {
+                    await addMoodBlock('doodle', { image: reader.result as string }, { x: 50, y: 50 })
+                    clear()
+                }
+                reader.readAsDataURL(compressedFile)
+            } catch (error) {
+                console.error("Erro ao salvar doodle:", error)
+                // Fallback para original se falhar
+                await addMoodBlock('doodle', { image: dataUrl }, { x: 50, y: 50 })
+                clear()
+            }
         })
     }
 

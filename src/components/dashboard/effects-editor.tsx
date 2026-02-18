@@ -18,7 +18,10 @@ import {
     Palette,
     Tv,
     Waves,
-    Grid3X3
+    Grid3X3,
+    Droplets,
+    Wand2,
+    Zap
 } from "lucide-react"
 
 interface EffectsEditorProps {
@@ -60,7 +63,12 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
         { id: 'none', name: 'Cor Sólida', icon: Palette },
         { id: 'noise', name: 'Noise (Granulado)', icon: Tv },
         { id: 'aurora', name: 'Aurora Boreal', icon: Waves },
+        { id: 'liquid', name: 'Liquid Flow', icon: Droplets },
+        { id: 'mesh-gradient', name: 'Mesh Gradient', icon: Wand2 },
+        { id: 'metaballs', name: 'MetaBalls (Mouse)', icon: MousePointer2 },
+        { id: 'hyperspeed', name: 'Hyperspeed', icon: Zap },
         { id: 'grid-move', name: 'Retro Grid', icon: Grid3X3 },
+        { id: 'stars', name: 'Starfield', icon: Sparkles },
     ]
 
     return (

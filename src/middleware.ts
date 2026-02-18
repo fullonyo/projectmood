@@ -10,7 +10,7 @@ export default auth((req) => {
         return Response.redirect(new URL("/auth/login", req.nextUrl))
     }
 
-    if ((isAuthPage || isRootPage) && isLoggedIn) {
+    if (isRootPage && isLoggedIn) {
         return Response.redirect(new URL("/dashboard", req.nextUrl))
     }
 })

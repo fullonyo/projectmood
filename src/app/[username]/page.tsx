@@ -9,6 +9,7 @@ import { BlockRenderer } from "@/components/dashboard/block-renderer";
 import { BackgroundEffect } from "@/components/effects/background-effect";
 import { CustomCursor } from "@/components/effects/custom-cursor";
 import { MouseTrails } from "@/components/effects/mouse-trails";
+import { FontLoader } from "@/components/dashboard/font-loader";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -64,9 +65,10 @@ export default async function PublicMoodPage({
                 color: finalPrimary
             }}
         >
+            <FontLoader fontFamily={(profile as any).customFont} />
             <CustomCursor type={profile.customCursor || 'auto'} />
             <MouseTrails type={profile.mouseTrails || 'none'} />
-            <BackgroundEffect type={profile.backgroundEffect || 'none'} />
+            <BackgroundEffect type={profile.backgroundEffect || 'none'} primaryColor={profile.primaryColor || undefined} />
 
             {/* Dynamic Background Effect */}
             <div

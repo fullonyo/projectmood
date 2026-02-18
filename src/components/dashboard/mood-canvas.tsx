@@ -71,7 +71,7 @@ export function MoodCanvas({
             className="relative w-full h-full overflow-hidden cursor-crosshair transition-colors duration-1000"
             style={{ backgroundColor: bgColor, color: primaryColor }}
         >
-            <BackgroundEffect type={backgroundEffect} />
+            <BackgroundEffect type={backgroundEffect} primaryColor={profile.primaryColor} />
 
             {/* Saving Indicator */}
             <div className={cn(

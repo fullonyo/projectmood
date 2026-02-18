@@ -34,9 +34,21 @@ Este arquivo centraliza a documentação de funcionalidades e componentes para f
   - Redireciona usuários logados das rotas de `/auth` e da raiz `/` diretamente para `/dashboard`.
   - Garante que a Landing Page só seja vista por usuários não autenticados.
 
+### Padronização Visual
+- **Ícones**: NUNCA usar emojis para ícones de interface. Use ícones Lucide.
+- **Tipografia**: Suporte a Google Fonts dinâmico via `FontLoader`. O perfil armazena a fonte em `customFont`.
 - **Efeitos de Fundo (`src/components/effects/background-effect.tsx`)**:
-  - Renderizados internamente pelo `MoodCanvas` para evitar sobreposição por cores sólidas de tema.
-  - Utilizam `absolute inset-0` e `mix-blend-mode` para interagir com o fundo do mural.
+    - Renderizados via WebGL (Canvas) para garantir fluidez total (60 FPS).
+    - **Interatividade**: Suporte a uniformes de mouse (`uMouse`) e sincronização com a cor primária do tema (`uColor`).
+    - **Efeitos Disponíveis**: `aurora`, `noise`, `liquid`, `mesh-gradient` (fluido), `metaballs` (interativo), `hyperspeed` (viagem espacial), `stars`, `grid-move`.
+
+### Melhorias de Performance
+- **Otimização de Imagens**: Todas as fotos e doodles são comprimidos no cliente (`browser-image-compression`) antes do upload para reduzir latência e consumo de banda.
+- **WebGL Rendering**: O componente `BackgroundEffect` utiliza shaders matemáticos para evitar custos de renderização do DOM/CSS em efeitos complexos.
+
+- **Efeitos de Fundo (`src/components/effects/background-effect.tsx`)**:
+    - Renderizados via WebGL (Canvas) para garantir fluidez total.
+    - Utilizam biblioteca utilitária `src/lib/shaders.ts`.
 
 ---
 *Documentação atualizada por Antigravity em 18/02/2026.*

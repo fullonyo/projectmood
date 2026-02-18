@@ -8,6 +8,7 @@ import { MoodCanvas } from "./mood-canvas";
 import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
 import { BackgroundEffect } from "../effects/background-effect";
+import { FontLoader } from "./font-loader";
 
 interface DashboardClientLayoutProps {
     profile: any;
@@ -43,6 +44,7 @@ export function DashboardClientLayout({ profile, moodBlocks }: DashboardClientLa
 
     return (
         <main className="flex-1 relative overflow-hidden flex flex-col focus:outline-none">
+            <FontLoader fontFamily={localProfile.customFont} />
             <CustomCursor type={localProfile.customCursor || 'auto'} />
             <MouseTrails type={localProfile.mouseTrails || 'none'} />
 
