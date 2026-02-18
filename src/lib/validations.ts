@@ -61,7 +61,10 @@ export const ProfileUpdateSchema = z.object({
     theme: z.enum(['light', 'dark', 'vintage', 'notebook', 'blueprint', 'canvas', 'cyberpunk']).optional(),
     primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor inválida").optional(),
     backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor inválida").optional(),
-    fontStyle: z.enum(['sans', 'serif', 'mono']).optional()
+    fontStyle: z.enum(['sans', 'serif', 'mono']).optional(),
+    customCursor: z.enum(['auto', 'retro', 'heart', 'pixel', 'ghost']).optional(),
+    mouseTrails: z.enum(['none', 'sparkles', 'ghost', 'pixel-dust', 'emoji']).optional(),
+    backgroundEffect: z.enum(['none', 'aurora', 'noise', 'grid-move', 'stars']).optional()
 })
 
 // Validação específica para Quote Block

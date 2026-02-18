@@ -38,6 +38,7 @@ import { PhotoEditor } from "./photo-editor"
 import { MoodStatusEditor } from "./mood-status-editor"
 import { CountdownEditor } from "./countdown-editor"
 import { ColorPaletteExtractor } from "./color-palette-extractor"
+import { EffectsEditor } from "./effects-editor"
 import { clearMoodBlocks } from "@/actions/profile"
 import { Button } from "../ui/button"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -203,6 +204,14 @@ export function DashboardSidebar({
                                 await onUpdateProfile({ primaryColor: colors[0] })
                             }
                         }} />
+
+                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+
+                        <header>
+                            <h3 className="text-xl font-black tracking-tighter uppercase">Magic FX</h3>
+                            <p className="text-[11px] text-zinc-500 italic">Interatividade e Imersão.</p>
+                        </header>
+                        <EffectsEditor profile={profile} />
 
                         <div className="pt-10 space-y-4">
                             <div className="h-[1px] bg-red-100 dark:bg-red-900/20" />

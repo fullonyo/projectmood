@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Menu } from "lucide-react";
 import { DashboardSidebar } from "./dashboard-sidebar";
 import { MoodCanvas } from "./mood-canvas";
+import { CustomCursor } from "../effects/custom-cursor";
+import { MouseTrails } from "../effects/mouse-trails";
+import { BackgroundEffect } from "../effects/background-effect";
 
 interface DashboardClientLayoutProps {
     profile: any;
@@ -40,8 +43,12 @@ export function DashboardClientLayout({ profile, moodBlocks }: DashboardClientLa
 
     return (
         <main className="flex-1 relative overflow-hidden flex flex-col focus:outline-none">
+            <CustomCursor type={localProfile.customCursor || 'auto'} />
+            <MouseTrails type={localProfile.mouseTrails || 'none'} />
+
             {/* Fullscreen Canvas as Base Layer (layer 0) */}
             <div className="absolute inset-0 z-0">
+                <BackgroundEffect type={localProfile.backgroundEffect || 'none'} />
                 <MoodCanvas
                     blocks={localBlocks}
                     profile={localProfile}

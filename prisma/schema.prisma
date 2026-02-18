@@ -31,6 +31,12 @@ model Profile {
   primaryColor    String? @default("#000000")
   fontStyle       String? @default("sans")
   backgroundImage String?
+  
+  // Personalização Dinâmica
+  customCursor    String?   @default("auto")
+  mouseTrails     String?   @default("none")
+  backgroundEffect String?  @default("none")
+
   updatedAt       DateTime @default(now()) @updatedAt
   
   analytics       ProfileAnalytics?

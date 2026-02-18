@@ -6,6 +6,9 @@ import { AnalyticsDisplay } from "@/components/dashboard/analytics-display";
 // import { NowPlayingSpotify } from "@/components/dashboard/now-playing-spotify";
 import { themeConfigs } from "@/lib/themes";
 import { BlockRenderer } from "@/components/dashboard/block-renderer";
+import { BackgroundEffect } from "@/components/effects/background-effect";
+import { CustomCursor } from "@/components/effects/custom-cursor";
+import { MouseTrails } from "@/components/effects/mouse-trails";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -61,6 +64,10 @@ export default async function PublicMoodPage({
                 color: finalPrimary
             }}
         >
+            <CustomCursor type={profile.customCursor || 'auto'} />
+            <MouseTrails type={profile.mouseTrails || 'none'} />
+            <BackgroundEffect type={profile.backgroundEffect || 'none'} />
+
             {/* Dynamic Background Effect */}
             <div
                 className={cn("fixed inset-0 pointer-events-none transition-opacity duration-1000", config.gridOpacity)}
