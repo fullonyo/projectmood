@@ -1,0 +1,54 @@
+name: MoodSpace Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          script: |
+            # Garantir que a pasta do projeto existe
+            if [ ! -d "~/moodproject" ]; then
+              mkdir -p ~/moodproject
+            fi
+            
+            cd ~/moodproject
+            
+            # Inicializar ou atualizar o repositório
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/fullonyo/projectmood.git .
+            else
+              git pull origin main
+            fi
+            
+            # Criar arquivo .env de produção
+            cat <<EOF > .env
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            GIPHY_API_KEY=${{ secrets.GIPHY_API_KEY }}
+            SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}
+            SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}
+            EOF
+
+            # Build e Deploy (usando docker-compose.prod.yml)
+            docker compose -f docker-compose.prod.yml up -d --build
+            
+            # Roda as migrações/push do Prisma dentro do container do app
+            docker exec moodspace_app npx prisma db push
+            
+            # Limpeza de imagens antigas para economizar espaço em disco
+            docker image prune -f

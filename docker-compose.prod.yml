@@ -1,0 +1,47 @@
+services:
+  moodspace_db:
+    image: postgres:15-alpine
+    container_name: moodspace_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - moodspace_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - moodspace_network
+
+  moodspace_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: moodspace_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@moodspace_db:5432/${POSTGRES_DB}?schema=public
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      GIPHY_API_KEY: ${GIPHY_API_KEY}
+      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID}
+      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
+      AUTH_TRUST_HOST: "true"
+    depends_on:
+      moodspace_db:
+        condition: service_healthy
+    networks:
+      - moodspace_network
+
+networks:
+  moodspace_network:
+    driver: bridge
+
+volumes:
+  moodspace_postgres_data:

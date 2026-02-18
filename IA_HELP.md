@@ -1,51 +1,35 @@
-# Ajuda da IA - MOOD Project
+# Ajuda da IA - MoodSpace Studio 🌌✨🛡️
 
-Este arquivo centraliza a documentação de funcionalidades e componentes para facilitar o contexto da IA.
+Este arquivo centraliza a documentação de funcionalidades e componentes do **MoodSpace** para facilitar o contexto da IA e manter a consistência do ecossistema.
 
-## Padronização Visual
-- **Ícones**: NUNCA usar emojis para ícones de interface (labels, botões, seletores). Use sempre `lucide-react` ou SVGs customizados. Isso se aplica a labels, botões e seletores.
-- **Consistência**: Todos os editores da sidebar devem seguir o padrão de espaçamento, tipografia e iconografia estabelecido.
+## Padronização Visual & Marca
+- **Marca**: O projeto chama-se oficialmente **MoodSpace**. Evite referências a "MOOD Project" ou "Project Mood".
+- **Ícones**: NUNCA usar emojis para ícones de interface. Use sempre `lucide-react`.
+- **Estética**: Design "Studio" premium, minimalista, com alto uso de Glassmorphism (backdrop-blur) e tipografia fluida.
 
-## Telas Analisadas
+## Arquitetura de Telas
 
-### Tela Principal (Landing Page)
-- **Caminho**: `src/app/page.tsx`
-- **Descrição**: Página de entrada do projeto.
-- **Estilo**: Minimalista, alto contraste, uso extensivo de `zinc` e `black`.
-- **Componentes**: Botões Shadcn/UI, Link do Next.js.
-- **Destaque**: Layout responsivo com cards rotacionados e animações de pulse.
+### Landing Page & Auth
+- **Landing Page (`src/app/page.tsx`)**: Entrada imersiva com slogan dinâmico. Redireciona usuários logados diretamente para o Dashboard via Middleware.
+- **Autenticação**: NextAuth com provedor de credenciais. Formulários em `src/components/auth/`.
 
-### Dashboard & Sidebar
-- **Estrutura**: O Dashboard é composto por um Header fixo e um Layout com Sidebar colapsável.
-- **Sidebar (`src/components/dashboard/dashboard-sidebar.tsx`)**:
-  - Organizada em 4 abas: `Estilo`, `Escrita`, `Mídia` e `Criativo`.
-  - **Aba Estilo**: Gerencia temas, cores (com extrator) e efeitos visuais mágicos. Possui a "Danger Zone" para resetar o mural.
-  - **Aba Escrita**: Ferramentas para Textos, Tickers, Subtítulos e Citações.
-  - **Aba Mídia**: Integrações com YouTube, Spotify, GIFs, Fotos e Guestbook.
-  - **Aba Criativo**: Ferramentas de Scrapbook (Doodles, Tapes), Links Sociais, Status Visual e Countdowns.
-  - **Comportamento Contextual**: A sidebar detecta o bloco selecionado no mural e alterna automaticamente para a aba e editor correspondente.
-- **Header (`src/app/dashboard/page.tsx`)**:
-  - Contém o botão de Logout, Share Profile e botão para ver o espaço público.
+### Dashboard Studio
+- **Layout Simétrico**: O dashboard não possui mais header superior. Agora utiliza duas sidebars flutuantes:
+  - **Sidebar Esquerda (Ferramentas)**: Criar e editar blocos (Estilo, Escrita, Mídia, Criativo).
+  - **Actions Sidebar (Direita)**: Gestão de perfil, visualização pública, Share e Logout. Contém o **User Card** com saudações dinâmicas.
+- **Avatar Personalizado**: Sistema de upload no cliente com compressão automática (`browser-image-compression`) e armazenamento em Base64 no banco de dados. Clique no avatar na sidebar direita para trocar.
 
-### Auth & Middleware
-- **Autenticação**: Provedor de `credentials` configurado em `src/auth.ts`.
-- **Middleware (`src/middleware.ts`)**:
-  - Protege rotas de `/dashboard`.
-  - Redireciona usuários logados das rotas de `/auth` e da raiz `/` diretamente para `/dashboard`.
-  - Garante que a Landing Page só seja vista por usuários não autenticados.
+## Core Tecnológico
 
-### Padronização Visual
-- **Ícones**: NUNCA usar emojis para ícones de interface. Use ícones Lucide.
-- **Tipografia**: Suporte a Google Fonts dinâmico via `FontLoader`. O perfil armazena a fonte em `customFont`.
-- **Efeitos de Fundo (`src/components/effects/background-effect.tsx`)**:
-    - Renderizados via WebGL (Canvas) para garantir fluidez total (60 FPS).
-    - **Interatividade**: Suporte a uniformes de mouse (`uMouse`) e sincronização com a cor primária do tema (`uColor`).
-    - **Efeitos Dinâmicos**: `aurora`, `noise`, `liquid`, `mesh-gradient`, `metaballs`, `hyperspeed`, `rain` (chuva com refração), `rhythm` (ondas musicais), `vintage` (filme riscado e vinheta), `stars`, `universe` (cosmos com paralaxe), `grid-move`.
-    - **Texturas Estáticas**: `museum-paper`, `raw-canvas`, `fine-sand`. Utilizam `mix-blend-soft-light` para garantir visibilidade em qualquer cor de fundo.
+### Mood Canvas & WYSIWYG
+- **Mural (`src/components/dashboard/mood-canvas.tsx`)**: Sistema de Drag & Drop estabilizado com `framer-motion`. 
+- **Sincronia Total**: O editor e a página pública são visualmente idênticos, respeitando uma **Safe Area de 40px** nas bordas para evitar cortes de conteúdo.
+- **WebGL Backgrounds**: Efeitos de fundo (Aurora, Liquid, Universe, etc.) renderizados via Shaders para máxima performance (60 FPS).
 
-### Melhorias de Performance
-- **Otimização de Imagens**: Todas as fotos e doodles são comprimidos no cliente (`browser-image-compression`) antes do upload para reduzir latência e consumo de banda.
-- **WebGL Rendering**: O componente `BackgroundEffect` utiliza shaders matemáticos para evitar custos de renderização do DOM/CSS em efeitos complexos.
+### Infraestrutura & Deploy
+- **Docker Standalone**: Configuração otimizada para baixo consumo de recursos em instâncias AWS EC2.
+- **CI/CD (GitHub Actions)**: Deploy automático via SSH. O pipeline realiza `git pull`, rebuild de containers e migrações Prisma (`db push`) automaticamente ao dar push na branch `main`.
+- **Reverse Proxy**: Recomendado uso de Nginx no host da EC2 para SSL (Certbot) e encaminhamento para a porta 3000.
 
 ---
-*Documentação consolidada por Antigravity em 18/02/2026. Sinergia global verificada.*
+*Documentação atualizada por Antigravity em 18/02/2026. Identidade MoodSpace consolidada.*
