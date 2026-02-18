@@ -30,7 +30,9 @@ Este arquivo centraliza a documentação de funcionalidades e componentes para f
   - Redireciona usuários logados das rotas de `/auth` e da raiz `/` diretamente para `/dashboard`.
   - Garante que a Landing Page só seja vista por usuários não autenticados.
 
-- **Padrão de Design**: Não utilizamos emojis em elementos de interface (labels, botões, ícones de seletor). O padrão do projeto é utilizar a biblioteca `lucide-react` ou SVGs customizados.
+- **Efeitos de Fundo (`src/components/effects/background-effect.tsx`)**:
+  - Renderizados internamente pelo `MoodCanvas` para evitar sobreposição por cores sólidas de tema.
+  - Utilizam `absolute inset-0` e `mix-blend-mode` para interagir com o fundo do mural.
 
 ---
 *Documentação atualizada por Antigravity em 18/02/2026.*

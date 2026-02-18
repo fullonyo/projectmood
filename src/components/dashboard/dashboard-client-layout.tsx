@@ -48,10 +48,10 @@ export function DashboardClientLayout({ profile, moodBlocks }: DashboardClientLa
 
             {/* Fullscreen Canvas as Base Layer (layer 0) */}
             <div className="absolute inset-0 z-0">
-                <BackgroundEffect type={localProfile.backgroundEffect || 'none'} />
                 <MoodCanvas
                     blocks={localBlocks}
                     profile={localProfile}
+                    backgroundEffect={localProfile.backgroundEffect || 'none'}
                     selectedId={selectedId}
                     setSelectedId={setSelectedId}
                     onUpdateBlock={handleUpdateLocalBlock}

@@ -6,17 +6,26 @@ import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { themeConfigs } from "@/lib/themes"
 import { BlockRenderer } from "./block-renderer"
+import { BackgroundEffect } from "../effects/background-effect"
 
 
 interface MoodCanvasProps {
     blocks: any[]
     profile: any
+    backgroundEffect: string
     selectedId: string | null
     setSelectedId: (id: string | null) => void
     onUpdateBlock: (id: string, content: any) => void
 }
 
-export function MoodCanvas({ blocks, profile, selectedId, setSelectedId, onUpdateBlock }: MoodCanvasProps) {
+export function MoodCanvas({
+    blocks,
+    profile,
+    backgroundEffect,
+    selectedId,
+    setSelectedId,
+    onUpdateBlock
+}: MoodCanvasProps) {
     const canvasRef = useRef<HTMLDivElement>(null)
     const [maxZ, setMaxZ] = useState(10)
     const [isSaving, setIsSaving] = useState(false)
@@ -62,6 +71,8 @@ export function MoodCanvas({ blocks, profile, selectedId, setSelectedId, onUpdat
             className="relative w-full h-full overflow-hidden cursor-crosshair transition-colors duration-1000"
             style={{ backgroundColor: bgColor, color: primaryColor }}
         >
+            <BackgroundEffect type={backgroundEffect} />
+
             {/* Saving Indicator */}
             <div className={cn(
                 "absolute top-20 right-8 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 transition-all duration-300 pointer-events-none",

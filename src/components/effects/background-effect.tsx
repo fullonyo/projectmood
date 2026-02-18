@@ -8,7 +8,7 @@ export function BackgroundEffect({ type }: BackgroundEffectProps) {
     if (!type || type === 'none') return null
 
     return (
-        <div className="fixed inset-0 pointer-events-none -z-[1] overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
             {type === 'noise' && (
                 <div className="absolute inset-0 opacity-[0.03] z-0 mix-blend-overlay"
                     style={{
