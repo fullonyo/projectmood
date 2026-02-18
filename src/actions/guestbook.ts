@@ -3,6 +3,8 @@
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
+import { GuestbookMessageSchema } from "@/lib/validations"
+import DOMPurify from 'isomorphic-dompurify'
 
 const ADJECTIVES = [
     "Galáctico", "Vintage", "Grunge", "Punk", "Aesthetic",
@@ -25,9 +27,21 @@ function generateAnonymousName() {
 export async function addGuestbookMessage(blockId: string, content: string) {
     const session = await auth()
 
+    // Validação de entrada
+    const validation = GuestbookMessageSchema.safeParse({ blockId, content })
+    if (!validation.success) {
+        return { error: validation.error.issues[0].message }
+    }
+
+    // Sanitizar conteúdo (prevenir XSS)
+    const sanitizedContent = DOMPurify.sanitize(validation.data.content, {
+        ALLOWED_TAGS: [], // Apenas texto
+        ALLOWED_ATTR: []
+    })
+
     // Buscar o dono do bloco para marcar se é admin
     const block = await prisma.moodBlock.findUnique({
-        where: { id: blockId },
+        where: { id: validation.data.blockId },
         select: { userId: true }
     })
 
@@ -39,10 +53,10 @@ export async function addGuestbookMessage(blockId: string, content: string) {
     try {
         const message = await (prisma as any).guestbookMessage.create({
             data: {
-                content,
+                content: sanitizedContent,
                 author,
                 isAdmin,
-                blockId,
+                blockId: validation.data.blockId,
                 userId: session?.user?.id || null
             }
         })
@@ -52,6 +66,7 @@ export async function addGuestbookMessage(blockId: string, content: string) {
 
         return { success: true, message }
     } catch (error) {
+        console.error('[addGuestbookMessage]', error)
         return { error: "Falha ao enviar mensagem" }
     }
 }
@@ -64,6 +79,7 @@ export async function getGuestbookMessages(blockId: string) {
         })
         return messages
     } catch (error) {
+        console.error('[getGuestbookMessages]', error)
         return []
     }
 }

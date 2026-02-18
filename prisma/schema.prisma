@@ -51,6 +51,9 @@ model MoodBlock {
   
   messages  GuestbookMessage[]
   updatedAt DateTime @default(now()) @updatedAt
+  
+  @@index([userId])
+  @@index([userId, type])
 }
 
 model GuestbookMessage {
@@ -64,4 +67,6 @@ model GuestbookMessage {
   
   userId    String?  // Opcional: link com usuário logado
   createdAt DateTime @default(now())
+  
+  @@index([blockId])
 }

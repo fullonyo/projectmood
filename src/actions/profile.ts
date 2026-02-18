@@ -3,6 +3,11 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import {
+    ProfileUpdateSchema,
+    CreateMoodBlockSchema,
+    UpdateMoodBlockLayoutSchema
+} from "@/lib/validations";
 
 export async function updateProfile(data: {
     theme?: string;
@@ -13,16 +18,23 @@ export async function updateProfile(data: {
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
 
+    // Validação de entrada
+    const validation = ProfileUpdateSchema.safeParse(data);
+    if (!validation.success) {
+        return { error: "Dados inválidos: " + validation.error.issues[0].message };
+    }
+
     try {
         await prisma.profile.update({
             where: { userId: session.user.id },
-            data,
+            data: validation.data,
         });
         const username = (session.user as any).username;
         revalidatePath("/dashboard");
         if (username) revalidatePath(`/${username}`);
         return { success: true };
     } catch (error) {
+        console.error('[updateProfile]', error);
         return { error: "Erro ao atualizar perfil" };
     }
 }
@@ -31,14 +43,20 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
 
-    const { x = 50, y = 50, width, height } = options;
+    // Validação de entrada
+    const validation = CreateMoodBlockSchema.safeParse({ type, content, options });
+    if (!validation.success) {
+        return { error: "Dados inválidos: " + validation.error.issues[0].message };
+    }
+
+    const { x = 50, y = 50, width, height } = validation.data.options || {};
 
     try {
         const block = await (prisma.moodBlock as any).create({
             data: {
                 userId: session.user.id,
-                type,
-                content,
+                type: validation.data.type,
+                content: validation.data.content,
                 x: Math.round(x),
                 y: Math.round(y),
                 width: width ? Math.round(width) : null,
@@ -51,6 +69,7 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
         if (username) revalidatePath(`/${username}`);
         return { success: true, block };
     } catch (error) {
+        console.error('[addMoodBlock]', error);
         return { error: "Erro ao adicionar bloco" };
     }
 }
@@ -59,8 +78,14 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
 
+    // Validação de entrada
+    const validation = UpdateMoodBlockLayoutSchema.safeParse(data);
+    if (!validation.success) {
+        return { error: "Dados inválidos: " + validation.error.issues[0].message };
+    }
+
     // Validation & Rounding for Prisma Int
-    const validatedData: any = { ...data };
+    const validatedData: any = { ...validation.data };
     if (typeof validatedData.x === 'number') validatedData.x = Math.round(Math.max(0, Math.min(100, validatedData.x)));
     if (typeof validatedData.y === 'number') validatedData.y = Math.round(Math.max(0, Math.min(100, validatedData.y)));
 
@@ -76,6 +101,7 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
 
         return { success: true };
     } catch (error) {
+        console.error('[updateMoodBlockLayout]', error);
         return { error: "Erro ao salvar posição" };
     }
 }
@@ -93,6 +119,7 @@ export async function deleteMoodBlock(blockId: string) {
         if (username) revalidatePath(`/${username}`);
         return { success: true };
     } catch (error) {
+        console.error('[deleteMoodBlock]', error);
         return { error: "Erro ao excluir bloco" };
     }
 }
@@ -112,6 +139,7 @@ export async function clearMoodBlocks() {
 
         return { success: true };
     } catch (error) {
+        console.error('[clearMoodBlocks]', error);
         return { error: "Erro ao limpar mural" };
     }
 }
@@ -136,6 +164,7 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
         if (username) revalidatePath(`/${username}`);
         return { success: true };
     } catch (error) {
+        console.error('[reorderMoodBlocks]', error);
         return { error: "Erro ao reordenar blocos" };
     }
 }
