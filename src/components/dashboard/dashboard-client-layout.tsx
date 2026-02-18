@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Menu } from "lucide-react";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -13,12 +13,41 @@ interface DashboardClientLayoutProps {
 
 export function DashboardClientLayout({ profile, moodBlocks }: DashboardClientLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [localBlocks, setLocalBlocks] = useState(moodBlocks);
+    const [localProfile, setLocalProfile] = useState(profile);
+
+    // Sync with server data
+    useEffect(() => {
+        setLocalBlocks(moodBlocks);
+    }, [moodBlocks]);
+
+    useEffect(() => {
+        setLocalProfile(profile);
+    }, [profile]);
+
+    const handleUpdateLocalBlock = (id: string, content: any) => {
+        setLocalBlocks(prev => prev.map(block =>
+            block.id === id ? { ...block, content: { ...((block.content as any) || {}), ...content } } : block
+        ));
+    };
+
+    const handleUpdateLocalProfile = (data: any) => {
+        setLocalProfile((prev: any) => ({ ...prev, ...data }));
+    };
+
+    const selectedBlock = localBlocks.find(b => b.id === selectedId);
 
     return (
-        <main className="flex-1 relative overflow-hidden flex flex-col">
+        <main className="flex-1 relative overflow-hidden flex flex-col focus:outline-none">
             {/* Fullscreen Canvas as Base Layer (layer 0) */}
             <div className="absolute inset-0 z-0">
-                <MoodCanvas blocks={moodBlocks} profile={profile} />
+                <MoodCanvas
+                    blocks={localBlocks}
+                    profile={localProfile}
+                    selectedId={selectedId}
+                    setSelectedId={setSelectedId}
+                />
             </div>
 
             {/* Floating Sidebar Container (layer 20) */}
@@ -32,7 +61,13 @@ export function DashboardClientLayout({ profile, moodBlocks }: DashboardClientLa
                         className="absolute top-0 left-0 bottom-0 z-20 pointer-events-none"
                     >
                         <div className="pointer-events-auto h-full shadow-2xl relative">
-                            <DashboardSidebar profile={profile} />
+                            <DashboardSidebar
+                                profile={localProfile}
+                                selectedBlock={selectedBlock}
+                                setSelectedId={setSelectedId}
+                                onUpdateBlock={handleUpdateLocalBlock}
+                                onUpdateProfile={handleUpdateLocalProfile}
+                            />
 
                             {/* Inner Collapse Button */}
                             <button

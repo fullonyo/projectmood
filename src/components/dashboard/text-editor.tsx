@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { addMoodBlock } from "@/actions/profile"
+import { useState, useTransition, useEffect } from "react"
+import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Type, Palette, AlignLeft, AlignCenter, AlignRight } from "lucide-react"
@@ -18,7 +18,7 @@ const COLORS = [
     '#ffffff', '#ffff88', '#ffb3ba', '#bae1ff', '#baffc9', '#e0b0ff'
 ]
 
-export function TextEditor() {
+export function TextEditor({ block, onUpdate }: { block?: any, onUpdate?: (id: string, content: any) => void }) {
     const [text, setText] = useState("")
     const [selectedStyle, setSelectedStyle] = useState('simple')
     const [bgColor, setBgColor] = useState('#ffffff')
@@ -26,18 +26,69 @@ export function TextEditor() {
     const [align, setAlign] = useState("center")
     const [isPending, startTransition] = useTransition()
 
+    // 1. Sync with selected block
+    useEffect(() => {
+        if (block && block.type === 'text') {
+            const content = block.content as any
+            setText(content.text || "")
+            setSelectedStyle(content.style || 'simple')
+            setBgColor(content.bgColor || "#ffffff")
+            setFontSize(content.fontSize || "xl")
+            setAlign(content.align || "center")
+        }
+    }, [block?.id])
+
+    // 2. Real-time Preview
+    useEffect(() => {
+        if (!block?.id || !onUpdate) return
+
+        const content = {
+            text,
+            style: selectedStyle,
+            bgColor: selectedStyle === 'postit' ? '#ffff88' : bgColor,
+            fontSize,
+            align
+        }
+
+        onUpdate(block.id, content)
+    }, [text, selectedStyle, bgColor, fontSize, align])
+
+    // 3. Debounced Silent Save
+    useEffect(() => {
+        if (!block?.id || !text.trim()) return
+
+        const timer = setTimeout(async () => {
+            const content = {
+                text: text.trim(),
+                style: selectedStyle,
+                bgColor: selectedStyle === 'postit' ? '#ffff88' : bgColor,
+                fontSize,
+                align
+            }
+            await updateMoodBlockLayout(block.id, { content })
+        }, 800)
+
+        return () => clearTimeout(timer)
+    }, [text, selectedStyle, bgColor, fontSize, align, block?.id])
+
     const handleAddText = () => {
         if (!text.trim()) return
 
         startTransition(async () => {
-            await addMoodBlock('text', {
+            const content = {
                 text: text.trim(),
                 style: selectedStyle,
                 bgColor: selectedStyle === 'postit' ? '#ffff88' : bgColor,
                 fontSize: fontSize,
                 align: align
-            }, { x: 50, y: 50 })
-            setText("")
+            }
+
+            if (block?.id) {
+                await updateMoodBlockLayout(block.id, { content })
+            } else {
+                await addMoodBlock('text', content, { x: 50, y: 50 })
+                setText("")
+            }
         })
     }
 
@@ -49,7 +100,7 @@ export function TextEditor() {
                 <Textarea
                     placeholder="Escreva algo inigualável..."
                     value={text}
-                    onChange={(e) => setText(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
                     className="min-h-[120px] bg-white dark:bg-zinc-900 border-none rounded-xl text-lg resize-none placeholder:opacity-30 focus-visible:ring-1 ring-zinc-300"
                 />
 

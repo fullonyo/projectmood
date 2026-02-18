@@ -392,7 +392,7 @@ export default async function PublicMoodPage({
                                         <p
                                             className={cn(
                                                 "text-center text-4xl font-light tracking-tight transition-all duration-1000",
-                                                (block.content as any).style === 'focus' && "blur-[8px] animate-[focus_2s_forwards]",
+                                                (block.content as any).style === 'focus' && "animate-focus",
                                                 (block.content as any).style === 'clean' && "font-serif italic",
                                                 (block.content as any).style === 'ghost' && "font-mono font-bold tracking-tighter"
                                             )}
@@ -400,12 +400,6 @@ export default async function PublicMoodPage({
                                         >
                                             {(block.content as any).text}
                                         </p>
-
-                                        <style jsx>{`
-                                            @keyframes focus {
-                                                to { filter: blur(0px); opacity: 1; }
-                                            }
-                                        `}</style>
                                     </motion.div>
                                 </div>
                             )}

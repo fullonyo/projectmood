@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { addMoodBlock } from "@/actions/profile"
+import { useState, useTransition, useEffect } from "react"
+import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -10,7 +10,6 @@ import {
     Github,
     Linkedin,
     Youtube,
-    MessageSquare,
     Link as LinkIcon,
     Plus
 } from "lucide-react"
@@ -31,38 +30,86 @@ const PLATFORMS = [
 ]
 
 const STYLES = [
-    { id: 'tag', label: 'Etiqueta de Papel' },
-    { id: 'glass', label: 'Vidro (Glass)' },
-    { id: 'minimal', label: 'Minimalista' },
-    { id: 'neon', label: 'Neon Glow' }
+    { id: 'tag', label: 'Etiqueta' },
+    { id: 'glass', label: 'Glass' },
+    { id: 'minimal', label: 'Minimal' },
+    { id: 'neon', label: 'Neon' }
 ]
 
-export function SocialLinksEditor() {
+export function SocialLinksEditor({ block, onUpdate }: { block?: any, onUpdate?: (id: string, content: any) => void }) {
     const [selectedPlatform, setSelectedPlatform] = useState(PLATFORMS[0])
     const [url, setUrl] = useState("")
     const [label, setLabel] = useState("")
     const [style, setStyle] = useState('tag')
     const [isPending, startTransition] = useTransition()
 
-    const handleAdd = () => {
-        if (!url) return
+    // 1. Sync with selected block
+    useEffect(() => {
+        if (block && block.type === 'social') {
+            const platformId = (block.content as any).platform
+            const platform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0]
+            setSelectedPlatform(platform)
+            setUrl((block.content as any).url || "")
+            setLabel((block.content as any).label || "")
+            setStyle((block.content as any).style || 'tag')
+        }
+    }, [block?.id])
 
-        startTransition(async () => {
-            await addMoodBlock('social', {
+    // 2. Real-time Preview
+    useEffect(() => {
+        if (!block?.id || !onUpdate) return
+
+        const content = {
+            platform: selectedPlatform.id,
+            url,
+            label: label || selectedPlatform.label,
+            style
+        }
+
+        onUpdate(block.id, content)
+    }, [selectedPlatform, url, label, style])
+
+    // 3. Debounced Silent Save
+    useEffect(() => {
+        if (!block?.id || !url) return
+
+        const timer = setTimeout(async () => {
+            const content = {
                 platform: selectedPlatform.id,
                 url,
                 label: label || selectedPlatform.label,
                 style
-            }, { x: 300, y: 300 })
+            }
+            await updateMoodBlockLayout(block.id, { content })
+        }, 800)
 
-            setUrl("")
-            setLabel("")
+        return () => clearTimeout(timer)
+    }, [selectedPlatform, url, label, style, block?.id])
+
+    const handleAction = () => {
+        if (!url) return
+
+        startTransition(async () => {
+            const content = {
+                platform: selectedPlatform.id,
+                url,
+                label: label || selectedPlatform.label,
+                style
+            }
+
+            if (block?.id) {
+                await updateMoodBlockLayout(block.id, { content })
+            } else {
+                await addMoodBlock('social', content, { x: 300, y: 300 })
+                setUrl("")
+                setLabel("")
+            }
         })
     }
 
     return (
         <div className="space-y-6">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Social Connect</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400 px-1">Social Connect</h2>
 
             <div className="space-y-4 bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700">
                 <div className="grid grid-cols-6 gap-2">
@@ -71,8 +118,8 @@ export function SocialLinksEditor() {
                             key={p.id}
                             onClick={() => setSelectedPlatform(p)}
                             className={`p-2 rounded-xl flex items-center justify-center transition-all ${selectedPlatform.id === p.id
-                                ? 'bg-black text-white dark:bg-white dark:text-black scale-110'
-                                : 'bg-white dark:bg-zinc-700 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
+                                ? 'bg-black text-white dark:bg-white dark:text-black scale-110 shadow-lg'
+                                : 'bg-white dark:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 border border-zinc-100 dark:border-zinc-700'
                                 }`}
                         >
                             <p.icon className="w-4 h-4" />
@@ -85,22 +132,22 @@ export function SocialLinksEditor() {
                         placeholder="Link (URL)"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        className="h-9 text-xs bg-white dark:bg-zinc-900 border-none rounded-lg"
+                        className="h-10 text-xs bg-white dark:bg-zinc-900 border-none rounded-xl"
                     />
                     <Input
-                        placeholder="Texto (Opcional)"
+                        placeholder="Nome Exibido (Ex: Meu Insta)"
                         value={label}
                         onChange={(e) => setLabel(e.target.value)}
-                        className="h-9 text-xs bg-white dark:bg-zinc-900 border-none rounded-lg"
+                        className="h-10 text-xs bg-white dark:bg-zinc-900 border-none rounded-xl"
                     />
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 pt-2">
                     {STYLES.map((s) => (
                         <button
                             key={s.id}
                             onClick={() => setStyle(s.id)}
-                            className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase transition-all ${style === s.id
+                            className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase transition-all ${style === s.id
                                 ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                                 : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-500'
                                 }`}
@@ -111,12 +158,12 @@ export function SocialLinksEditor() {
                 </div>
 
                 <Button
-                    onClick={handleAdd}
+                    onClick={handleAction}
                     disabled={isPending || !url}
-                    className="w-full rounded-xl bg-zinc-900 dark:bg-zinc-100 hover:scale-[1.02] transition-transform h-10"
+                    className="w-full rounded-xl bg-zinc-900 dark:bg-zinc-100 hover:scale-[1.02] transition-transform h-10 border-none"
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    Adicionar Link
+                    {block?.id ? 'Atualizar Link' : 'Adicionar ao Mural'}
                 </Button>
             </div>
         </div>

@@ -8,14 +8,17 @@ interface ThemeEditorProps {
     currentTheme: string
     currentPrimaryColor: string
     currentFontStyle: string
+    onUpdate?: (data: any) => void
 }
 
-export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyle }: ThemeEditorProps) {
+export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyle, onUpdate }: ThemeEditorProps) {
     const [isPending, startTransition] = useTransition()
 
     const handleUpdate = (data: any) => {
+        if (onUpdate) onUpdate(data) // Instant Preview
+
         startTransition(async () => {
-            await updateProfile(data)
+            await updateProfile(data) // Server Sync
         })
     }
 

@@ -1,9 +1,8 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { addMoodBlock } from "@/actions/profile"
+import { useState, useTransition, useEffect } from "react"
+import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Type, Play, Quote, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -43,7 +42,7 @@ const COLORS = [
     { name: 'Red', value: '#ff0000' },
 ]
 
-export function PhraseEditor() {
+export function PhraseEditor({ block, onUpdate }: { block?: any, onUpdate?: (id: string, content: any) => void }) {
     const [selectedType, setSelectedType] = useState(PHRASE_STYLES[0].id)
     const [text, setText] = useState("")
     const [textColor, setTextColor] = useState('#ffffff')
@@ -54,24 +53,83 @@ export function PhraseEditor() {
     const [activeStyle, setActiveStyle] = useState('classic')
     const [isPending, startTransition] = useTransition()
 
-    const handleAdd = () => {
-        if (!text) return
+    // 1. Load data if block is selected
+    useEffect(() => {
+        if (block && (block.type === 'ticker' || block.type === 'subtitle' || block.type === 'floating')) {
+            setSelectedType(block.type)
+            const content = block.content as any
+            setText(content.text || "")
+            setTextColor(content.textColor || "#ffffff")
+            setBgColor(content.bgColor || "#000000")
 
-        startTransition(async () => {
-            await addMoodBlock(selectedType, {
+            let defaultSpeed = 20
+            if (block.type === 'subtitle') defaultSpeed = 10
+            if (block.type === 'floating') defaultSpeed = 3
+
+            setSpeed(content.speed || defaultSpeed)
+            setActiveStyle(content.style || 'classic')
+            setDirection(content.direction || 'left')
+            setCursorType(content.cursorType || 'block')
+        }
+    }, [block?.id]) // Only reload if ID changes to prevent loops
+
+    // 2. Real-time Preview logic
+    useEffect(() => {
+        if (!block?.id || !onUpdate) return
+
+        const content = {
+            text: text,
+            textColor,
+            bgColor,
+            speed: selectedType === 'ticker' ? speed : (selectedType === 'floating' ? speed : (speed / 5)),
+            style: activeStyle,
+            direction: selectedType === 'ticker' ? direction : undefined,
+            cursorType: selectedType === 'subtitle' ? cursorType : undefined
+        }
+
+        onUpdate(block.id, content)
+    }, [text, textColor, bgColor, speed, direction, cursorType, activeStyle])
+
+    // 3. Debounced Silent Save
+    useEffect(() => {
+        if (!block?.id || !text) return
+
+        const timer = setTimeout(async () => {
+            const content = {
                 text: text,
                 textColor,
                 bgColor,
-                speed: selectedType === 'ticker' ? speed : (speed / 5), // Adjust speed for typewriter
+                speed: selectedType === 'ticker' ? speed : (selectedType === 'floating' ? speed : (speed / 5)),
                 style: activeStyle,
                 direction: selectedType === 'ticker' ? direction : undefined,
                 cursorType: selectedType === 'subtitle' ? cursorType : undefined
-            }, {
-                x: 30,
-                y: 70
-            })
+            }
+            await updateMoodBlockLayout(block.id, { content })
+        }, 800) // 800ms debounce
 
-            setText("")
+        return () => clearTimeout(timer)
+    }, [text, textColor, bgColor, speed, direction, cursorType, activeStyle, block?.id])
+
+    const handleAction = () => {
+        if (!text) return
+
+        startTransition(async () => {
+            const content = {
+                text: text,
+                textColor,
+                bgColor,
+                speed: selectedType === 'ticker' ? speed : (selectedType === 'floating' ? speed : (speed / 5)),
+                style: activeStyle,
+                direction: selectedType === 'ticker' ? direction : undefined,
+                cursorType: selectedType === 'subtitle' ? cursorType : undefined
+            }
+
+            if (block?.id) {
+                await updateMoodBlockLayout(block.id, { content })
+            } else {
+                await addMoodBlock(selectedType, content, { x: 30, y: 70 })
+                setText("")
+            }
         })
     }
 
@@ -120,8 +178,6 @@ export function PhraseEditor() {
 
                 {/* Advanced Controls */}
                 <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-700">
-
-                    {/* Context Specific Controls */}
                     <div className="grid grid-cols-2 gap-2">
                         {selectedType === 'ticker' && (
                             <div className="col-span-2 space-y-2">
@@ -129,11 +185,11 @@ export function PhraseEditor() {
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setDirection('left')}
-                                        className={cn("flex-1 py-2 text-[9px] font-bold uppercase rounded-lg border", direction === 'left' ? "bg-black text-white" : "text-zinc-500")}
+                                        className={cn("flex-1 py-1.5 text-[9px] font-bold uppercase rounded-lg border", direction === 'left' ? "bg-black text-white" : "text-zinc-500")}
                                     >Esquerda</button>
                                     <button
                                         onClick={() => setDirection('right')}
-                                        className={cn("flex-1 py-2 text-[9px] font-bold uppercase rounded-lg border", direction === 'right' ? "bg-black text-white" : "text-zinc-500")}
+                                        className={cn("flex-1 py-1.5 text-[9px] font-bold uppercase rounded-lg border", direction === 'right' ? "bg-black text-white" : "text-zinc-500")}
                                     >Direita</button>
                                 </div>
                             </div>
@@ -146,7 +202,7 @@ export function PhraseEditor() {
                                         <button
                                             key={c}
                                             onClick={() => setCursorType(c)}
-                                            className={cn("flex-1 py-2 text-[9px] font-bold uppercase rounded-lg border", cursorType === c ? "bg-black text-white" : "text-zinc-500")}
+                                            className={cn("flex-1 py-1.5 text-[9px] font-bold uppercase rounded-lg border", cursorType === c ? "bg-black text-white" : "text-zinc-500")}
                                         >{c}</button>
                                     ))}
                                 </div>
@@ -154,7 +210,6 @@ export function PhraseEditor() {
                         )}
                     </div>
 
-                    {/* Visual Styles */}
                     <div className="space-y-2">
                         <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-1">Vibe Visual</p>
                         <div className="flex flex-wrap gap-2">
@@ -173,7 +228,6 @@ export function PhraseEditor() {
                         </div>
                     </div>
 
-                    {/* Color Selectors */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-1">Texto</p>
@@ -219,7 +273,6 @@ export function PhraseEditor() {
                         </div>
                     </div>
 
-                    {/* Speed Control */}
                     <div className="space-y-2">
                         <div className="flex justify-between px-1">
                             <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Velocidade</p>
@@ -232,18 +285,18 @@ export function PhraseEditor() {
                             step="1"
                             value={speed}
                             onChange={(e) => setSpeed(Number(e.target.value))}
-                            className="w-full accent-black dark:accent-white h-1 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                            className="w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
                         />
                     </div>
                 </div>
 
                 <Button
-                    onClick={handleAdd}
+                    onClick={handleAction}
                     disabled={isPending || !text}
                     className="w-full rounded-xl bg-zinc-900 dark:bg-zinc-100 hover:scale-[1.02] transition-transform h-10 border-none outline-none"
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    Adicionar Frase
+                    {block?.id ? 'Atualizar Frase' : 'Adicionar Frase'}
                 </Button>
             </div>
         </div>

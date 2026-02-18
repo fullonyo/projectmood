@@ -51,7 +51,7 @@ export async function addMoodBlock(type: string, content: any, initialPos = { x:
     }
 }
 
-export async function updateMoodBlockLayout(blockId: string, data: { x?: number, y?: number, width?: number, height?: number, zIndex?: number, rotation?: number }) {
+export async function updateMoodBlockLayout(blockId: string, data: { x?: number, y?: number, width?: number, height?: number, zIndex?: number, rotation?: number, content?: any }) {
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
 
@@ -116,11 +116,13 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
 
+    const userId = session.user.id;
+
     try {
         await prisma.$transaction(
             blocks.map((block) =>
                 prisma.moodBlock.update({
-                    where: { id: block.id, userId: session.user.id },
+                    where: { id: block.id, userId },
                     data: { order: block.order }
                 })
             )

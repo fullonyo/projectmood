@@ -1,18 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import {
+    Layout,
+    Type,
     Palette,
+    Plus,
+    Share2,
+    ChevronLeft,
+    ChevronRight,
+    Trash2,
+    Music,
+    Image as ImageIcon,
+    Cloud,
+    StickyNote,
+    ExternalLink,
+    Zap,
     PlusSquare,
     Sparkles,
-    Music,
-    Type,
-    Image as ImageIcon,
-    PenTool,
-    Share2,
-    CloudSun,
-    Trash2,
     Bomb
 } from "lucide-react"
 
@@ -29,8 +35,32 @@ import { Button } from "../ui/button"
 
 type TabType = 'style' | 'content' | 'art' | 'social'
 
-export function DashboardSidebar({ profile }: { profile: any }) {
+export function DashboardSidebar({
+    profile,
+    selectedBlock,
+    setSelectedId,
+    onUpdateBlock,
+    onUpdateProfile
+}: {
+    profile: any,
+    selectedBlock?: any,
+    setSelectedId: (id: string | null) => void,
+    onUpdateBlock: (id: string, content: any) => void,
+    onUpdateProfile: (data: any) => void
+}) {
     const [activeTab, setActiveTab] = useState<TabType>('content')
+
+    useEffect(() => {
+        if (!selectedBlock) return
+
+        if (selectedBlock.type === 'social') {
+            setActiveTab('social')
+        } else if (['text', 'ticker', 'subtitle', 'floating', 'gif', 'music'].includes(selectedBlock.type)) {
+            setActiveTab('content')
+        } else if (['doodle', 'tape', 'weather', 'media'].includes(selectedBlock.type)) {
+            setActiveTab('art')
+        }
+    }, [selectedBlock])
 
     const tabs = [
         { id: 'style', label: 'Estilo', icon: Palette, description: 'Cores e Fontes' },
@@ -40,7 +70,25 @@ export function DashboardSidebar({ profile }: { profile: any }) {
     ]
 
     return (
-        <aside className="w-80 border-r border-zinc-200/50 dark:border-zinc-800/50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl flex flex-col h-full overflow-hidden z-10 shadow-2xl">
+        <aside className="w-80 h-full bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shadow-2xl z-50">
+            {/* Sidebar Header */}
+            <div className="p-6 border-b border-zinc-100 dark:border-zinc-900">
+                <div className="flex items-center justify-between mb-2">
+                    <h1 className="text-2xl font-black tracking-tighter uppercase italic">Mood Studio</h1>
+                    {selectedBlock && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedId(null)}
+                            className="h-7 px-2 text-[10px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        >
+                            <Plus className="w-3 h-3 mr-1 rotate-45" />
+                            Novo
+                        </Button>
+                    )}
+                </div>
+                <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-zinc-400">Curadoria de Estética</p>
+            </div>
             {/* Top Categories Navigation */}
             <nav className="grid grid-cols-4 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
                 {tabs.map((tab) => (
@@ -77,6 +125,7 @@ export function DashboardSidebar({ profile }: { profile: any }) {
                             currentTheme={profile.theme}
                             currentPrimaryColor={profile.primaryColor || '#000'}
                             currentFontStyle={profile.fontStyle || 'sans'}
+                            onUpdate={onUpdateProfile}
                         />
 
                         <div className="pt-10 space-y-4">
@@ -111,9 +160,9 @@ export function DashboardSidebar({ profile }: { profile: any }) {
                             <h3 className="text-xl font-black tracking-tighter uppercase">Creativity Block</h3>
                             <p className="text-[11px] text-zinc-500 italic">Adicione elementos fundamentais ao seu mural.</p>
                         </header>
-                        <TextEditor />
+                        <TextEditor block={selectedBlock} onUpdate={onUpdateBlock} />
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <PhraseEditor />
+                        <PhraseEditor block={selectedBlock} onUpdate={onUpdateBlock} />
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
                         <GifPicker />
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
@@ -139,7 +188,7 @@ export function DashboardSidebar({ profile }: { profile: any }) {
                             <h3 className="text-xl font-black tracking-tighter uppercase">Connected</h3>
                             <p className="text-[11px] text-zinc-500 italic">Espalhe suas redes e transforme o mural num hub.</p>
                         </header>
-                        <SocialLinksEditor />
+                        <SocialLinksEditor block={selectedBlock} onUpdate={onUpdateBlock} />
                     </div>
                 )}
 
