@@ -2,7 +2,23 @@
 
 import { useTransition } from "react"
 import { deleteMoodBlock } from "@/actions/profile"
-import { Trash2, GripVertical, Music, Type, Image as ImageIcon } from "lucide-react"
+import {
+    Trash2,
+    GripVertical,
+    Music,
+    Type,
+    Image as ImageIcon,
+    Video,
+    Quote,
+    Sparkles,
+    Clock,
+    Share2,
+    Cloud,
+    Book,
+    Play,
+    Pencil,
+    MessageSquare
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface BlockManagerProps {
@@ -24,15 +40,40 @@ export function BlockManager({ blocks }: BlockManagerProps) {
             case 'text': return <Type className="w-4 h-4" />
             case 'music': return <Music className="w-4 h-4" />
             case 'photo': return <ImageIcon className="w-4 h-4" />
-            default: return null
+            case 'video': return <Video className="w-4 h-4" />
+            case 'quote': return <Quote className="w-4 h-4" />
+            case 'moodStatus': return <Sparkles className="w-4 h-4" />
+            case 'countdown': return <Clock className="w-4 h-4" />
+            case 'social': return <Share2 className="w-4 h-4" />
+            case 'weather': return <Cloud className="w-4 h-4" />
+            case 'media': return <Book className="w-4 h-4" />
+            case 'gif': return <Play className="w-4 h-4" />
+            case 'doodle': return <Pencil className="w-4 h-4" />
+            case 'guestbook': return <MessageSquare className="w-4 h-4" />
+            default: return <GripVertical className="w-4 h-4" />
         }
     }
 
     const getContentLabel = (block: any) => {
-        if (block.type === 'text') return block.content.text
-        if (block.type === 'music') return "Música do Spotify"
-        if (block.type === 'photo') return "Imagem"
-        return "Bloco"
+        const type = block.type
+        const content = block.content as any
+
+        switch (type) {
+            case 'text': return content.text || "Notas"
+            case 'music': return "Música do Spotify"
+            case 'photo': return "Imagem / Foto"
+            case 'video': return "Vídeo do YouTube"
+            case 'quote': return content.text || "Citação"
+            case 'moodStatus': return `Mood: ${content.status}`
+            case 'countdown': return content.title || "Contagem Regressiva"
+            case 'social': return `${content.platform} link`
+            case 'weather': return `Vibe: ${content.vibe}`
+            case 'media': return `${content.category === 'book' ? 'Livro' : 'Filme'}: ${content.title}`
+            case 'gif': return "GIF Animado"
+            case 'doodle': return "Desenho à mão"
+            case 'guestbook': return "Livro de Recados"
+            default: return "Bloco de Conteúdo"
+        }
     }
 
     return (

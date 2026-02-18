@@ -3,6 +3,8 @@
 import { useState, useTransition, useEffect } from "react"
 import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Type, Palette, AlignLeft, AlignCenter, AlignRight } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -120,34 +122,43 @@ export function TextEditor({
                     className="min-h-[120px] bg-white dark:bg-zinc-900 border-none rounded-xl text-lg resize-none placeholder:opacity-30 focus-visible:ring-1 ring-zinc-300"
                 />
 
-                <div className="flex flex-wrap gap-2">
-                    {TEXT_STYLES.map((s) => (
-                        <button
-                            key={s.id}
-                            onClick={() => setSelectedStyle(s.id)}
-                            className={cn(
-                                "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border",
-                                selectedStyle === s.id
-                                    ? "bg-black text-white dark:bg-white dark:text-black border-transparent"
-                                    : "bg-white dark:bg-zinc-700 text-zinc-400 border-zinc-100 dark:border-zinc-800"
-                            )}
-                        >
-                            {s.label}
-                        </button>
-                    ))}
+                <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Estilo do Papel</Label>
+                    <div className="flex gap-3 overflow-x-auto pb-4 pt-1 -mx-1 px-1 custom-scrollbar snap-x">
+                        {TEXT_STYLES.map((s) => (
+                            <button
+                                key={s.id}
+                                onClick={() => setSelectedStyle(s.id)}
+                                className={cn(
+                                    "flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all min-w-[100px] snap-start shrink-0 group",
+                                    selectedStyle === s.id
+                                        ? "border-black dark:border-white bg-white dark:bg-zinc-800 shadow-md scale-[1.05]"
+                                        : "border-transparent opacity-50 hover:opacity-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                )}
+                            >
+                                <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center text-[10px] font-black shadow-inner border border-black/5 overflow-hidden", s.bg)}>
+                                    <div className={cn("w-full h-full flex flex-col p-1 gap-1", s.id === 'ripped' ? "bg-[url('https://www.transparenttextures.com/patterns/rice-paper.png')]" : "")}>
+                                        <div className="h-1 w-2/3 bg-black/10 rounded-full" />
+                                        <div className="h-1 w-full bg-black/10 rounded-full" />
+                                    </div>
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-widest">{s.label}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="space-y-4 pt-2">
-                    <div className="flex flex-col gap-2">
-                        <span className="text-[10px] font-bold uppercase opacity-40">Cor de Fundo</span>
-                        <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col gap-3">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Cor de Fundo</Label>
+                        <div className="flex flex-wrap gap-2 p-2 bg-white dark:bg-zinc-900 rounded-2xl shadow-inner border border-zinc-100 dark:border-zinc-800">
                             {COLORS.map((c) => (
                                 <button
                                     key={c}
                                     onClick={() => setBgColor(c)}
                                     className={cn(
-                                        "w-6 h-6 rounded-full border border-black/5 transition-transform hover:scale-110",
-                                        bgColor === c ? "ring-2 ring-zinc-400" : ""
+                                        "w-7 h-7 rounded-full border border-black/5 transition-all hover:scale-125",
+                                        bgColor === c ? "ring-2 ring-zinc-400 scale-125 z-10 mx-1" : ""
                                     )}
                                     style={{ backgroundColor: c }}
                                 />
@@ -155,29 +166,34 @@ export function TextEditor({
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <span className="text-[10px] font-bold uppercase opacity-40">Tamanho da Fonte</span>
-                        <div className="flex gap-2">
-                            {['sm', 'xl', '3xl'].map((s) => (
-                                <button
-                                    key={s}
-                                    onClick={() => setFontSize(s)}
-                                    className={cn(
-                                        "flex-1 h-9 rounded-xl flex items-center justify-center text-xs font-bold transition-all",
-                                        fontSize === s ? "bg-black text-white dark:bg-white dark:text-black" : "bg-white dark:bg-zinc-700 text-zinc-400"
-                                    )}
-                                >
-                                    {s === 'sm' ? 'Pequeno' : s === 'xl' ? 'Médio' : 'Grande'}
-                                </button>
-                            ))}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Tamanho</Label>
+                            <div className="flex gap-1 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                                {['sm', 'xl', '3xl'].map((s) => (
+                                    <button
+                                        key={s}
+                                        onClick={() => setFontSize(s)}
+                                        className={cn(
+                                            "flex-1 h-8 rounded-lg flex items-center justify-center text-[9px] font-black uppercase transition-all",
+                                            fontSize === s ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white shadow-sm" : "text-zinc-400"
+                                        )}
+                                    >
+                                        {s === 'sm' ? 'P' : s === 'xl' ? 'M' : 'G'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Alinhamento</Label>
+                            <div className="flex gap-1 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                                <button onClick={() => setAlign("left")} className={cn("flex-1 h-8 rounded-lg flex items-center justify-center transition-all", align === "left" ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white shadow-sm" : "text-zinc-400")}><AlignLeft className="w-3.5 h-3.5" /></button>
+                                <button onClick={() => setAlign("center")} className={cn("flex-1 h-8 rounded-lg flex items-center justify-center transition-all", align === "center" ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white shadow-sm" : "text-zinc-400")}><AlignCenter className="w-3.5 h-3.5" /></button>
+                                <button onClick={() => setAlign("right")} className={cn("flex-1 h-8 rounded-lg flex items-center justify-center transition-all", align === "right" ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white shadow-sm" : "text-zinc-400")}><AlignRight className="w-3.5 h-3.5" /></button>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div className="flex gap-2">
-                    <Button onClick={() => setAlign("left")} variant={align === "left" ? "primary" : "ghost"} size="sm" className="flex-1"><AlignLeft className="w-4 h-4" /></Button>
-                    <Button onClick={() => setAlign("center")} variant={align === "center" ? "primary" : "ghost"} size="sm" className="flex-1"><AlignCenter className="w-4 h-4" /></Button>
-                    <Button onClick={() => setAlign("right")} variant={align === "right" ? "primary" : "ghost"} size="sm" className="flex-1"><AlignRight className="w-4 h-4" /></Button>
                 </div>
 
                 <Button

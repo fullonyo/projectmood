@@ -129,17 +129,27 @@ export function SocialLinksEditor({
             </div>
 
             <div className="space-y-4 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
-                <div className="grid grid-cols-6 gap-2">
+                <div className="flex gap-2 overflow-x-auto pb-4 pt-1 -mx-1 px-1 custom-scrollbar snap-x">
                     {PLATFORMS.map((p) => (
                         <button
                             key={p.id}
                             onClick={() => setSelectedPlatform(p)}
-                            className={`p-2 rounded-xl flex items-center justify-center transition-all ${selectedPlatform.id === p.id
-                                ? 'bg-black text-white dark:bg-white dark:text-black scale-110 shadow-lg'
-                                : 'bg-white dark:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 border border-zinc-100 dark:border-zinc-700'
-                                }`}
+                            className={cn(
+                                "flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all min-w-[80px] snap-start shrink-0 group",
+                                selectedPlatform.id === p.id
+                                    ? "border-black dark:border-white bg-white dark:bg-zinc-800 shadow-md scale-[1.05]"
+                                    : "border-transparent opacity-50 hover:opacity-100 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                            )}
                         >
-                            <p.icon className="w-4 h-4" />
+                            <div
+                                className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:rotate-6 group-active:scale-90"
+                                style={{ backgroundColor: p.color }}
+                            >
+                                <p.icon className="w-5 h-5" />
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-tighter text-zinc-500 whitespace-nowrap">
+                                {p.label === 'Link Personalizado' ? 'Link' : p.label}
+                            </span>
                         </button>
                     ))}
                 </div>

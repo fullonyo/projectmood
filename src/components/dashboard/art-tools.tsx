@@ -3,7 +3,20 @@
 import { useState, useTransition } from "react"
 import { addMoodBlock } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
-import { StickyNote, Cloud, Book, Film, Plus } from "lucide-react"
+import {
+    StickyNote,
+    Cloud,
+    Book,
+    Film,
+    Plus,
+    Sun,
+    CloudRain,
+    Snowflake,
+    Wind,
+    Palette,
+    Sparkles,
+    Upload
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 
@@ -106,22 +119,25 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                 <div className="space-y-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 max-w-full">
                     <div className="flex flex-wrap gap-2 pb-2">
                         {[
-                            { icon: '☀️', vibe: 'Ensolarado e calmo' },
-                            { icon: '🌧️', vibe: 'Chuvoso e reflexivo' },
-                            { icon: '❄️', vibe: 'Frio e aconchegante' },
-                            { icon: '☁️', vibe: 'Nublado e urbano' },
-                            { icon: '⚡', vibe: 'Tempestuoso e intenso' },
+                            { icon: Sun, id: 'sun', vibe: 'Ensolarado e calmo' },
+                            { icon: CloudRain, id: 'rain', vibe: 'Chuvoso e reflexivo' },
+                            { icon: Snowflake, id: 'snow', vibe: 'Frio e aconchegante' },
+                            { icon: Cloud, id: 'cloud', vibe: 'Nublado e urbano' },
+                            { icon: Wind, id: 'wind', vibe: 'Ventoso e dinâmico' },
                         ].map((w) => (
                             <button
-                                key={w.icon}
-                                onClick={() => setWeatherVibe(w.vibe)}
+                                key={w.id}
+                                onClick={() => {
+                                    setWeatherVibe(w.vibe)
+                                    // Adicionamos um estado local ou passamos direto no addMoodBlock
+                                }}
                                 className={cn(
-                                    "w-9 h-9 flex items-center justify-center text-lg rounded-xl transition-all hover:scale-110",
+                                    "w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:scale-110",
                                     weatherVibe === w.vibe ? "bg-white dark:bg-zinc-800 shadow-md ring-1 ring-zinc-200 dark:ring-zinc-700" : "bg-white/40 dark:bg-zinc-950/40 opacity-60 hover:opacity-100"
                                 )}
                                 title={w.vibe}
                             >
-                                {w.icon}
+                                <w.icon className="w-4 h-4" />
                             </button>
                         ))}
                     </div>
@@ -138,12 +154,27 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                         className="bg-white dark:bg-zinc-900 text-xs h-10 w-full rounded-xl border-none shadow-inner"
                     />
                     <Button
-                        size="sm"
-                        onClick={handleAddWeather}
-                        disabled={isPending || !weatherLoc || !weatherVibe}
-                        className="w-full bg-black dark:bg-white text-white dark:text-black font-black uppercase tracking-widest text-[9px] h-10 rounded-xl"
+                        onClick={() => {
+                            const icon = [
+                                { icon: Sun, id: 'sun', vibe: 'Ensolarado e calmo' },
+                                { icon: CloudRain, id: 'rain', vibe: 'Chuvoso e reflexivo' },
+                                { icon: Snowflake, id: 'snow', vibe: 'Frio e aconchegante' },
+                                { icon: Cloud, id: 'cloud', vibe: 'Nublado e urbano' },
+                                { icon: Wind, id: 'wind', vibe: 'Ventoso e dinâmico' },
+                            ].find(w => w.vibe === weatherVibe)?.id || 'cloud'
+
+                            startTransition(async () => {
+                                await addMoodBlock('weather', {
+                                    vibe: weatherVibe,
+                                    location: weatherLoc,
+                                    icon: icon
+                                }, { x: 70, y: 70 })
+                            })
+                        }}
+                        disabled={isPending || !weatherVibe || !weatherLoc}
+                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-xl h-10 font-bold uppercase tracking-widest text-[9px] hover:scale-[1.02] transition-all shadow-md"
                     >
-                        Adicionar Atmosfera
+                        Adicionar Clima
                     </Button>
                 </div>
             </section>

@@ -157,7 +157,7 @@ export function PhraseEditor({
 
             <div className="bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-3xl border border-zinc-100 dark:border-zinc-800 space-y-6">
                 {/* Type Selection */}
-                <div className="grid grid-cols-3 gap-1">
+                <div className="flex gap-2 overflow-x-auto pb-4 pt-1 -mx-1 px-1 custom-scrollbar snap-x">
                     {PHRASE_STYLES.map((t) => (
                         <button
                             key={t.id}
@@ -167,14 +167,16 @@ export function PhraseEditor({
                                 setSpeed(t.id === 'ticker' ? 20 : (t.id === 'floating' ? 3 : 10))
                             }}
                             className={cn(
-                                "flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all",
+                                "flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all min-w-[90px] snap-start shrink-0",
                                 selectedType === t.id
-                                    ? "bg-white dark:bg-zinc-800 border-black dark:border-white shadow-sm"
-                                    : "bg-transparent border-transparent opacity-60 hover:opacity-100"
+                                    ? "bg-white dark:bg-zinc-800 border-black dark:border-white shadow-md scale-[1.05]"
+                                    : "bg-transparent border-transparent opacity-50 hover:opacity-100"
                             )}
                         >
-                            <t.icon className="w-4 h-4" />
-                            <p className="text-[9px] font-black uppercase tracking-tighter text-center leading-none">{t.label}</p>
+                            <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center">
+                                <t.icon className="w-5 h-5 text-zinc-600 dark:text-zinc-300" />
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-tighter text-center leading-none">{t.label}</span>
                         </button>
                     ))}
                 </div>
@@ -185,60 +187,62 @@ export function PhraseEditor({
                         placeholder={currentConfig?.example}
                         value={text}
                         onChange={(e) => setText(e.target.value)}
-                        className="w-full min-h-[60px] p-3 text-xs bg-white dark:bg-zinc-900 border-none rounded-xl focus:ring-1 focus:ring-zinc-200 outline-none resize-none"
+                        className="w-full min-h-[80px] p-4 text-xs bg-white dark:bg-zinc-900 border-none rounded-2xl focus:ring-1 focus:ring-zinc-200 outline-none resize-none shadow-inner"
                     />
                 </div>
 
                 {/* Advanced Controls */}
-                <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-700">
-                    <div className="grid grid-cols-2 gap-2">
-                        {selectedType === 'ticker' && (
-                            <div className="col-span-2 space-y-2">
-                                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-1">Direção</p>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setDirection('left')}
-                                        className={cn("flex-1 py-1.5 text-[9px] font-bold uppercase rounded-lg border", direction === 'left' ? "bg-black text-white" : "text-zinc-500")}
-                                    >Esquerda</button>
-                                    <button
-                                        onClick={() => setDirection('right')}
-                                        className={cn("flex-1 py-1.5 text-[9px] font-bold uppercase rounded-lg border", direction === 'right' ? "bg-black text-white" : "text-zinc-500")}
-                                    >Direita</button>
-                                </div>
-                            </div>
-                        )}
-                        {selectedType === 'subtitle' && (
-                            <div className="col-span-2 space-y-2">
-                                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-1">Cursor</p>
-                                <div className="flex gap-2">
-                                    {['block', 'bar', 'underline'].map(c => (
-                                        <button
-                                            key={c}
-                                            onClick={() => setCursorType(c)}
-                                            className={cn("flex-1 py-1.5 text-[9px] font-bold uppercase rounded-lg border", cursorType === c ? "bg-black text-white" : "text-zinc-500")}
-                                        >{c}</button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
+                <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-700">
                     <div className="space-y-2">
-                        <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-1">Vibe Visual</p>
-                        <div className="flex flex-wrap gap-2">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">Vibe Visual</p>
+                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 custom-scrollbar snap-x">
                             {currentConfig?.styles.map(s => (
                                 <button
                                     key={s}
                                     onClick={() => setActiveStyle(s)}
                                     className={cn(
-                                        "px-3 py-1 rounded-full text-[9px] font-bold uppercase transition-all",
-                                        activeStyle === s ? "bg-black text-white dark:bg-white dark:text-black" : "bg-zinc-200 dark:bg-zinc-700 text-zinc-500"
+                                        "px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all snap-start shrink-0 border-2",
+                                        activeStyle === s
+                                            ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-md"
+                                            : "bg-white dark:bg-zinc-800 text-zinc-400 border-transparent hover:border-zinc-200"
                                     )}
                                 >
                                     {s}
                                 </button>
                             ))}
                         </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        {selectedType === 'ticker' && (
+                            <div className="col-span-2 space-y-2">
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">Direção</p>
+                                <div className="flex gap-2 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                                    <button
+                                        onClick={() => setDirection('left')}
+                                        className={cn("flex-1 py-2 text-[9px] font-black uppercase rounded-lg transition-all", direction === 'left' ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white shadow-sm" : "text-zinc-400")}
+                                    >Esquerda</button>
+                                    <button
+                                        onClick={() => setDirection('right')}
+                                        className={cn("flex-1 py-2 text-[9px] font-black uppercase rounded-lg transition-all", direction === 'right' ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white shadow-sm" : "text-zinc-400")}
+                                    >Direita</button>
+                                </div>
+                            </div>
+                        )}
+                        {selectedType === 'subtitle' && (
+                            <div className="col-span-2 space-y-2">
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">Estilo do Cursor</p>
+                                <div className="flex gap-2 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                                    {['block', 'bar', 'underline'].map(c => (
+                                        <button
+                                            key={c}
+                                            onClick={() => setCursorType(c)}
+                                            className={cn("flex-1 py-2 text-[9px] font-black uppercase rounded-lg transition-all", cursorType === c ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white shadow-sm" : "text-zinc-400")}
+                                        >{c}</button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

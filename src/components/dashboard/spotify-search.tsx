@@ -79,22 +79,26 @@ export function SpotifySearch() {
             )}
 
             {results.length > 0 && (
-                <div className="mt-4 space-y-2 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-3 bg-white dark:bg-zinc-900 shadow-xl max-h-64 overflow-y-auto custom-scrollbar">
+                <div className="mt-4 space-y-2 border border-zinc-100 dark:border-zinc-800 rounded-[2.5rem] p-4 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl shadow-2xl max-h-72 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 px-2 mb-3">Resultados da Busca</p>
                     {results.map((track) => (
                         <button
                             key={track.id}
                             onClick={() => handleSelect(track.id)}
                             disabled={isPending}
-                            className="w-full flex items-center gap-3 p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-2xl transition-all text-left group"
+                            className="w-full flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-[1.5rem] transition-all text-left group relative overflow-hidden"
                         >
-                            <img src={track.albumArt} alt={track.name} className="w-10 h-10 rounded-xl shrink-0 shadow-sm transition-transform group-hover:scale-105" />
-                            <div className="overflow-hidden">
-                                <p className="text-[11px] font-black uppercase truncate leading-tight">{track.name}</p>
-                                <p className="text-[9px] text-zinc-500 uppercase tracking-tighter truncate">{track.artist}</p>
+                            <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-2xl shrink-0 shadow-md transition-transform group-hover:scale-110 z-10" />
+                            <div className="overflow-hidden z-10">
+                                <p className="text-[11px] font-black uppercase truncate leading-tight group-hover:text-[#1DB954] transition-colors">{track.name}</p>
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-tight truncate opacity-60 group-hover:opacity-100 transition-opacity">{track.artist}</p>
                             </div>
-                            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Plus className="w-4 h-4 text-zinc-400" />
+                            <div className="ml-auto flex items-center justify-center w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 z-10">
+                                <Plus className="w-4 h-4 text-[#1DB954]" />
                             </div>
+
+                            {/* Premium Hover Glow */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                     ))}
                 </div>

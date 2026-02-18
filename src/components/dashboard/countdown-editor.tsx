@@ -87,19 +87,28 @@ export function CountdownEditor({ onAdd }: CountdownEditorProps) {
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Estilo</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                        {(['minimal', 'bold', 'neon'] as const).map((s) => (
+                <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Estilo do Contador</Label>
+                    <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 custom-scrollbar snap-x">
+                        {[
+                            { id: 'minimal', label: 'Minimal', preview: 'bg-zinc-100 dark:bg-zinc-800' },
+                            { id: 'bold', label: 'Bold', preview: 'bg-black dark:bg-white' },
+                            { id: 'neon', label: 'Neon', preview: 'bg-black ring-1 ring-pink-500 shadow-[0_0_10px_rgba(236,72,153,0.3)]' },
+                        ].map((s) => (
                             <button
-                                key={s}
-                                onClick={() => setStyle(s)}
-                                className={`px-3 py-2 rounded-lg text-xs font-medium transition-all capitalize ${style === s
-                                    ? 'bg-black text-white dark:bg-white dark:text-black'
-                                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400'
-                                    }`}
+                                key={s.id}
+                                onClick={() => setStyle(s.id as any)}
+                                className={cn(
+                                    "flex flex-col items-center gap-2 p-3 rounded-2xl transition-all min-w-[90px] snap-start shrink-0 border-2",
+                                    style === s.id
+                                        ? "border-black dark:border-white bg-white dark:bg-zinc-800 shadow-md scale-[1.02]"
+                                        : "border-transparent opacity-60 hover:opacity-100 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                                )}
                             >
-                                {s}
+                                <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-[8px] font-black overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-inner", s.preview)}>
+                                    <span className={cn(s.id === 'bold' ? 'text-white dark:text-black' : s.id === 'neon' ? 'text-pink-500' : 'text-zinc-500')}>00</span>
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-widest">{s.label}</span>
                             </button>
                         ))}
                     </div>

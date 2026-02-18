@@ -44,8 +44,9 @@ export function YoutubeEditor({ highlight }: { highlight?: boolean }) {
                 <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">YouTube Video</h3>
             </div>
 
-            <div className="space-y-3 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
-                <div className="relative">
+            <div className="space-y-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
+                <div className="relative group">
+                    <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-red-500 transition-colors" />
                     <Input
                         placeholder="Cole o link do vídeo..."
                         value={url}
@@ -55,12 +56,30 @@ export function YoutubeEditor({ highlight }: { highlight?: boolean }) {
                         }}
                         onKeyDown={(e) => e.key === 'Enter' && handleAddVideo()}
                         className={cn(
-                            "bg-white dark:bg-zinc-900 border-none rounded-xl pr-10 text-xs h-10 shadow-inner",
+                            "bg-white dark:bg-zinc-900 border-none rounded-xl pl-10 pr-10 text-xs h-11 shadow-inner",
                             error && "ring-1 ring-red-500"
                         )}
                     />
-                    <Video className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                 </div>
+
+                {url && extractYoutubeId(url) && (
+                    <div className="relative aspect-video rounded-2xl overflow-hidden bg-black shadow-lg animate-in fade-in zoom-in-95 duration-300">
+                        <img
+                            src={`https://img.youtube.com/vi/${extractYoutubeId(url)}/maxresdefault.jpg`}
+                            alt="YouTube Preview"
+                            className="w-full h-full object-cover opacity-80"
+                            onError={(e) => {
+                                // Fallback se o maxres não existir
+                                (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${extractYoutubeId(url)}/0.jpg`
+                            }}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-2xl">
+                                <Youtube className="w-6 h-6 text-white fill-current" />
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <Button
                     onClick={handleAddVideo}
