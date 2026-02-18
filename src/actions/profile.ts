@@ -17,6 +17,7 @@ export async function updateProfile(data: {
     customCursor?: string;
     mouseTrails?: string;
     backgroundEffect?: string;
+    avatarUrl?: string;
 }) {
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };

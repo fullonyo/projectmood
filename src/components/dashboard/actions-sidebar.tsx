@@ -1,12 +1,14 @@
 "use client"
 
-import { LogOut, ExternalLink, Share2, Eye, User, Settings, CheckCircle2 } from "lucide-react"
+import { LogOut, ExternalLink, Share2, Eye, User, Settings, CheckCircle2, Camera, Loader2 } from "lucide-react"
 import { Button } from "../ui/button"
 import { ShareProfileButton } from "./share-profile-button"
 import Link from "next/link"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import { updateProfile } from "@/actions/profile"
+import imageCompression from 'browser-image-compression'
 
 interface ActionsSidebarProps {
     username: string
@@ -15,6 +17,8 @@ interface ActionsSidebarProps {
 
 export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
     const [greeting, setGreeting] = useState("Bons ventos")
+    const [isUploading, setIsUploading] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         const hour = new Date().getHours()
@@ -23,10 +27,52 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
         else setGreeting("Boa noite")
     }, [])
 
+    const handleAvatarClick = () => {
+        fileInputRef.current?.click()
+    }
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setIsUploading(true)
+
+        try {
+            const options = {
+                maxSizeMB: 0.5,
+                maxWidthOrHeight: 400,
+                useWebWorker: true
+            }
+
+            const compressedFile = await imageCompression(file, options)
+            const reader = new FileReader()
+
+            reader.onload = async () => {
+                const base64 = reader.result as string
+                await updateProfile({ avatarUrl: base64 })
+                setIsUploading(false)
+            }
+            reader.readAsDataURL(compressedFile)
+        } catch (error) {
+            console.error("Erro no upload do avatar:", error)
+            setIsUploading(false)
+        }
+    }
+
     const firstName = profile.name?.split(' ')[0] || username
+    const avatarSrc = profile.avatarUrl || `https://avatar.vercel.sh/${username}`
 
     return (
         <aside className="w-80 h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-2xl z-50">
+            {/* Hidden File Input */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+            />
+
             {/* Sidebar Header - Studio Identity */}
             <div className="p-6 border-b border-zinc-100 dark:border-zinc-900 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
@@ -39,6 +85,7 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                         <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500">Studio</span>
                     </div>
                 </div>
+                <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-zinc-400">Gerenciamento de Espaço</p>
             </div>
 
             {/* Profile Context Card */}
@@ -46,13 +93,26 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                 <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 group hover:border-blue-500/30 transition-all duration-500 shadow-sm hover:shadow-md">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="relative">
-                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-zinc-800 shadow-xl group-hover:scale-110 transition-transform duration-500">
+                            <button
+                                onClick={handleAvatarClick}
+                                disabled={isUploading}
+                                className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-zinc-800 shadow-xl group-hover:scale-110 transition-all duration-500 group/avatar disabled:opacity-50"
+                            >
                                 <img
-                                    src={`https://avatar.vercel.sh/${username}`}
+                                    src={avatarSrc}
                                     alt={username}
                                     className="w-full h-full object-cover"
                                 />
-                            </div>
+                                {isUploading ? (
+                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                        <Loader2 className="w-4 h-4 text-white animate-spin" />
+                                    </div>
+                                ) : (
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity">
+                                        <Camera className="w-4 h-4 text-white" />
+                                    </div>
+                                )}
+                            </button>
                             <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white dark:border-zinc-900 flex items-center justify-center">
                                 <CheckCircle2 className="w-2 h-2 text-white" />
                             </div>

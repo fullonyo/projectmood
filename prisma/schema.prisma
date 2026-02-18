@@ -38,6 +38,7 @@ model Profile {
   backgroundEffect String?  @default("none")
   customFont       String?  @default("Inter")
   staticTexture    String?  @default("none")
+  avatarUrl        String?  @db.Text
 
   updatedAt       DateTime @default(now()) @updatedAt
   
