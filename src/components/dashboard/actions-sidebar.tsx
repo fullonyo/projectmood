@@ -78,7 +78,7 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                 <div className="flex items-center justify-between mb-2">
                     <Link href="/" className="text-2xl font-black tracking-tighter uppercase italic hover:opacity-70 transition-opacity flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-black dark:bg-white animate-pulse" />
-                        MOOD.
+                        MoodSpace
                     </Link>
                     <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
                         <Eye className="w-3 h-3 text-blue-500" />

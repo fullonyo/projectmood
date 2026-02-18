@@ -44,7 +44,7 @@ export default function LoginForm() {
         <div className="h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden">
             {/* Header */}
             <nav className="flex items-center justify-between px-6 py-4 md:px-12 border-b border-zinc-100 flex-shrink-0">
-                <div className="text-2xl font-black tracking-tighter">MOOD.</div>
+                <div className="text-2xl font-black tracking-tighter uppercase italic">MoodSpace</div>
                 <Link href="/">
                     <Button variant="ghost" className="text-sm">← Voltar</Button>
                 </Link>
@@ -112,7 +112,7 @@ export default function LoginForm() {
 
             {/* Footer */}
             <footer className="py-4 text-center text-zinc-400 border-t border-zinc-100 text-sm flex-shrink-0">
-                © 2026 MOOD Project. O seu espaço, o seu estilo.
+                © 2026 MoodSpace. O seu espaço, o seu estilo.
             </footer>
         </div>
     )

@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MoodSpace 🌌✨🛡️
+
+O MoodSpace é um Studio de Murais Estéticos imersivos, onde você pode criar e compartilhar sua identidade visual de forma fluida e artística.
 
 ## Getting Started
 
