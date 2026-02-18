@@ -117,7 +117,7 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                         className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
                     >
                         <div className="pointer-events-auto h-full shadow-2xl relative">
-                            <ActionsSidebar username={username} />
+                            <ActionsSidebar username={username} profile={localProfile} />
 
                             {/* Inner Collapse Button */}
                             <button
