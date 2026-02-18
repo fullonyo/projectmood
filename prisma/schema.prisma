@@ -31,13 +31,15 @@ model Profile {
   fontStyle       String? @default("sans")
   backgroundImage String?
   updatedAt       DateTime @default(now()) @updatedAt
+  
+  analytics       ProfileAnalytics?
 }
 
 model MoodBlock {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // text, image, music, link, gif, guestbook
+  type      String   // text, ticker, subtitle, floating, gif, video, social, guestbook, tape, doodle, weather, media, music, quote, photo, moodStatus, countdown
   content   Json
   order     Int      @default(0)
   
@@ -74,6 +76,7 @@ model GuestbookMessage {
 model ProfileAnalytics {
   id          String    @id @default(cuid())
   profileId   String    @unique
+  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
   views       Int       @default(0)
   lastViewAt  DateTime?
   createdAt   DateTime  @default(now())

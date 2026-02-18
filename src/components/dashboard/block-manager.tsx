@@ -23,7 +23,7 @@ export function BlockManager({ blocks }: BlockManagerProps) {
         switch (type) {
             case 'text': return <Type className="w-4 h-4" />
             case 'music': return <Music className="w-4 h-4" />
-            case 'image': return <ImageIcon className="w-4 h-4" />
+            case 'photo': return <ImageIcon className="w-4 h-4" />
             default: return null
         }
     }
@@ -31,7 +31,7 @@ export function BlockManager({ blocks }: BlockManagerProps) {
     const getContentLabel = (block: any) => {
         if (block.type === 'text') return block.content.text
         if (block.type === 'music') return "Música do Spotify"
-        if (block.type === 'image') return "Imagem"
+        if (block.type === 'photo') return "Imagem"
         return "Bloco"
     }
 

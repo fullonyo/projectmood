@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
+import { useDropzone } from "react-dropzone"
 import { Button } from "@/components/ui/button"
-import { Palette } from "lucide-react"
+import { Palette, Upload, X, Sparkles } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface ColorPaletteExtractorProps {
     onApplyPalette: (palette: string[]) => void
@@ -11,25 +13,7 @@ interface ColorPaletteExtractorProps {
 export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorProps) {
     const [extractedColors, setExtractedColors] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
-        setLoading(true)
-
-        // Convert to base64
-        const reader = new FileReader()
-        reader.onload = async () => {
-            const base64 = reader.result as string
-
-            // Simple color extraction using canvas
-            const colors = await extractColorsFromImage(base64)
-            setExtractedColors(colors)
-            setLoading(false)
-        }
-        reader.readAsDataURL(file)
-    }
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
     const extractColorsFromImage = (base64: string): Promise<string[]> => {
         return new Promise((resolve) => {
@@ -38,25 +22,29 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                 const canvas = document.createElement('canvas')
                 const ctx = canvas.getContext('2d')!
 
-                canvas.width = img.width
-                canvas.height = img.height
-                ctx.drawImage(img, 0, 0)
+                // Resize for performance
+                const scale = Math.min(1, 200 / Math.max(img.width, img.height))
+                canvas.width = img.width * scale
+                canvas.height = img.height * scale
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
                 const pixels = imageData.data
-
-                // Simple color extraction - get dominant colors
                 const colorMap = new Map<string, number>()
 
-                for (let i = 0; i < pixels.length; i += 4) {
+                // Sample pixels for performance
+                for (let i = 0; i < pixels.length; i += 16) {
                     const r = pixels[i]
                     const g = pixels[i + 1]
                     const b = pixels[i + 2]
-                    const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+                    // Quantize colors slightly to group similar ones
+                    const qr = Math.round(r / 10) * 10
+                    const qg = Math.round(g / 10) * 10
+                    const qb = Math.round(b / 10) * 10
+                    const hex = `#${((1 << 24) + (qr << 16) + (qg << 8) + qb).toString(16).slice(1)}`
                     colorMap.set(hex, (colorMap.get(hex) || 0) + 1)
                 }
 
-                // Get top 5 colors
                 const sortedColors = Array.from(colorMap.entries())
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 5)
@@ -68,55 +56,110 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
         })
     }
 
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
+        const file = acceptedFiles[0]
+        if (!file) return
+
+        setLoading(true)
+        const reader = new FileReader()
+        reader.onload = async () => {
+            const base64 = reader.result as string
+            setPreviewUrl(base64)
+            const colors = await extractColorsFromImage(base64)
+            setExtractedColors(colors)
+            setLoading(false)
+        }
+        reader.readAsDataURL(file)
+    }, [])
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        accept: { 'image/*': [] },
+        maxFiles: 1
+    })
+
+    const reset = () => {
+        setPreviewUrl(null)
+        setExtractedColors([])
+    }
+
     return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-zinc-200 dark:border-zinc-800">
-                <Palette className="w-4 h-4 text-zinc-500" />
-                <h3 className="font-bold text-sm uppercase tracking-wider">Paleta de Cores</h3>
-            </div>
-
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                        Upload de Imagem
-                    </label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="w-full text-sm"
-                    />
+        <div className="space-y-6">
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                    <Sparkles className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
                 </div>
-
-                {loading && <p className="text-xs text-zinc-500">Extraindo cores...</p>}
-
-                {extractedColors.length > 0 && (
-                    <div className="space-y-3">
-                        <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                            Cores Extraídas:
-                        </p>
-                        <div className="grid grid-cols-5 gap-2">
-                            {extractedColors.map((color, idx) => (
-                                <div key={idx} className="space-y-1">
-                                    <div
-                                        className="w-full h-12 rounded-lg border border-zinc-200 dark:border-zinc-700"
-                                        style={{ backgroundColor: color }}
-                                    />
-                                    <p className="text-[9px] text-center font-mono text-zinc-500">
-                                        {color}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                        <Button
-                            onClick={() => onApplyPalette(extractedColors)}
-                            className="w-full bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black"
-                        >
-                            Aplicar Paleta ao Perfil
-                        </Button>
-                    </div>
-                )}
+                <div>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Auto Palette</h3>
+                    <p className="text-[9px] text-zinc-400 uppercase tracking-tighter">Extraia cores de uma imagem</p>
+                </div>
             </div>
+
+            {!previewUrl ? (
+                <div
+                    {...getRootProps()}
+                    className={cn(
+                        "border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer group",
+                        isDragActive
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
+                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                    )}
+                >
+                    <input {...getInputProps()} />
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-zinc-400 group-hover:scale-110 transition-transform" />
+                    <p className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400">
+                        {isDragActive ? 'Solte para analisar' : 'Arraste uma imagem'}
+                    </p>
+                    <p className="text-[10px] text-zinc-400 mt-1">Extração inteligente de vibes</p>
+                </div>
+            ) : (
+                <div className="space-y-4 animate-in fade-in zoom-in duration-300">
+                    <div className="relative aspect-video rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 group">
+                        <img src={previewUrl} className="w-full h-full object-cover" alt="Source" />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button
+                                onClick={reset}
+                                className="p-2 bg-white/20 backdrop-blur-md rounded-full hover:bg-white/40 transition-colors"
+                            >
+                                <X className="w-4 h-4 text-white" />
+                            </button>
+                        </div>
+                        {loading && (
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white animate-pulse">
+                                    Analisando...
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    {extractedColors.length > 0 && (
+                        <div className="space-y-4">
+                            <div className="flex gap-1.5 justify-center">
+                                {extractedColors.map((color, idx) => (
+                                    <div key={idx} className="group relative">
+                                        <div
+                                            className="w-10 h-10 rounded-full border-2 border-white dark:border-zinc-900 shadow-sm transition-transform hover:scale-110"
+                                            style={{ backgroundColor: color }}
+                                        />
+                                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span className="text-[8px] font-mono uppercase bg-zinc-900 text-white px-1 rounded">
+                                                {color}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <Button
+                                onClick={() => onApplyPalette(extractedColors)}
+                                className="w-full bg-black text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-black h-11 rounded-xl text-xs font-black uppercase tracking-widest"
+                            >
+                                Aplicar no Mural
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

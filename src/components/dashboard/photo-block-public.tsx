@@ -45,7 +45,7 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
 
     return (
         <div className="w-full h-full flex flex-col items-center justify-center p-4">
-            <div className={`rounded-lg overflow-hidden ${getFrameClass()}`}>
+            <div className={`relative rounded-lg overflow-hidden ${getFrameClass()}`}>
                 <img
                     src={imageUrl}
                     alt={alt}

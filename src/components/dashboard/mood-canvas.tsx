@@ -1,80 +1,12 @@
-"use client"
-
 import { motion } from "framer-motion"
 import { updateMoodBlockLayout, deleteMoodBlock } from "@/actions/profile"
-import { Trash2, RotateCw, Instagram, Twitter, Github, Linkedin, Youtube, Link as LinkIcon, Pencil, Move } from "lucide-react"
-import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
+import { Trash2, RotateCw, Pencil, Move } from "lucide-react"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
-import { GuestbookBlock } from "./guestbook-block"
 import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { themeConfigs } from "@/lib/themes"
+import { BlockRenderer } from "./block-renderer"
 
-const ICONS: Record<string, any> = {
-    instagram: Instagram,
-    twitter: Twitter,
-    discord: DiscordIcon,
-    tiktok: TikTokIcon,
-    steam: SteamIcon,
-    spotify: SpotifyIcon,
-    twitch: TwitchIcon,
-    pinterest: PinterestIcon,
-    github: Github,
-    linkedin: Linkedin,
-    youtube: Youtube,
-    custom: LinkIcon
-}
-
-const themeConfigs: Record<string, any> = {
-    light: {
-        bg: '#fafafa',
-        primary: '#18181b',
-        grid: 'radial-gradient(currentColor 1px, transparent 1px)',
-        bgSize: '30px 30px',
-        opacity: 'opacity-[0.05]'
-    },
-    dark: {
-        bg: '#050505',
-        primary: '#ffffff',
-        grid: 'radial-gradient(currentColor 1px, transparent 1px)',
-        bgSize: '30px 30px',
-        opacity: 'opacity-[0.08]'
-    },
-    vintage: {
-        bg: '#f4ead5',
-        primary: '#5d4037',
-        grid: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
-        bgSize: '200px 200px',
-        opacity: 'opacity-25'
-    },
-    notebook: {
-        bg: '#ffffff',
-        primary: '#1e3a8a',
-        grid: 'linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, transparent 79px, #fca5a5 1px, #fca5a5 2px, transparent 81px)',
-        bgSize: '100% 30px',
-        opacity: 'opacity-100'
-    },
-    blueprint: {
-        bg: '#1a3a5f',
-        primary: '#ffffff',
-        grid: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
-        bgSize: '100px 100px, 100px 100px, 20px 20px, 20px 20px',
-        opacity: 'opacity-100'
-    },
-    canvas: {
-        bg: '#e7e5e4',
-        primary: '#44403c',
-        grid: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h20L0 20z\' fill=\'%23000\' fill-opacity=\'.03\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
-        bgSize: '40px 40px',
-        opacity: 'opacity-100'
-    },
-    cyberpunk: {
-        bg: '#000000',
-        primary: '#ff00ff',
-        grid: 'linear-gradient(to right, #1a1a1a 1px, transparent 1px), linear-gradient(to bottom, #1a1a1a 1px, transparent 1px), linear-gradient(0deg, rgba(255,0,255,0.03) 50%, transparent 50%)',
-        bgSize: '40px 40px, 40px 40px, 100% 4px',
-        opacity: 'opacity-100'
-    }
-}
 
 interface MoodCanvasProps {
     blocks: any[]
@@ -94,6 +26,7 @@ export function MoodCanvas({ blocks, profile, selectedId, setSelectedId, onUpdat
     const config = themeConfigs[theme] || themeConfigs.light
     const bgColor = config.bg
     const primaryColor = config.primary
+    const gridOpacity = config.gridOpacity
 
     useEffect(() => {
         if (blocks.length > 0) {
@@ -140,15 +73,11 @@ export function MoodCanvas({ blocks, profile, selectedId, setSelectedId, onUpdat
 
             {/* Canvas Grid Layer */}
             <div
-                id="canvas-grid-layer"
-                className={cn(
-                    "absolute inset-0 transition-opacity duration-1000",
-                    config.opacity
-                )}
+                className={cn("absolute inset-0 pointer-events-none transition-opacity duration-1000", gridOpacity)}
                 style={{
                     backgroundImage: config.grid,
                     backgroundSize: config.bgSize,
-                    filter: theme === 'vintage' ? 'contrast(110%) brightness(105%) sepia(20%)' : 'none',
+                    filter: theme === 'vintage' ? 'contrast(110%) brightness(105%) sepia(20%)' : 'none'
                 }}
             />
 
@@ -198,40 +127,6 @@ export function MoodCanvas({ blocks, profile, selectedId, setSelectedId, onUpdat
     )
 }
 
-function SocialBlock({ content }: { content: any }) {
-    const Icon = ICONS[content.platform] || LinkIcon
-    const { style, label } = content
-
-    return (
-        <div className={cn(
-            "flex items-center gap-3 px-4 py-2.5 transition-all duration-300 pointer-events-none shadow-xl h-full w-full",
-            style === 'tag' && "bg-[#fefefe] dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-[2px] border border-zinc-200 dark:border-zinc-700 border-l-[6px] border-l-black dark:border-l-white",
-            style === 'glass' && "bg-white/10 dark:bg-black/10 backdrop-blur-xl rounded-2xl border border-white/20 text-current",
-            style === 'minimal' && "bg-transparent text-current font-black tracking-tighter text-xl",
-            style === 'neon' && "bg-black text-green-400 rounded-full border-2 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
-        )}>
-            <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                style === 'minimal' ? "bg-black text-white dark:bg-white dark:text-black" : "bg-zinc-100 dark:bg-zinc-700/50"
-            )}>
-                <Icon className="w-4 h-4" />
-            </div>
-            <span className={cn(
-                "text-sm font-bold truncate",
-                style === 'tag' && "font-serif italic",
-                style === 'minimal' && "uppercase tracking-widest text-[10px]"
-            )}>
-                {label}
-            </span>
-        </div>
-    )
-}
-
-const stableHash = (str: string) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    return Math.abs(hash);
-};
 
 function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSavingStart, onSavingEnd, profile, themeConfig, onDeleteRequest }: {
     block: any,
@@ -269,8 +164,8 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
         const deltaXPercent = (info.offset.x / canvasRect.width) * 100
         const deltaYPercent = (info.offset.y / canvasRect.height) * 100
 
-        let newX = Math.max(0, Math.min(100, block.x + deltaXPercent))
-        let newY = Math.max(0, Math.min(100, block.y + deltaYPercent))
+        const newX = Math.max(0, Math.min(100, block.x + deltaXPercent))
+        const newY = Math.max(0, Math.min(100, block.y + deltaYPercent))
 
         // Optimistic update
         onUpdate({ x: newX, y: newY })
@@ -343,7 +238,6 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
         onSavingEnd()
     }
 
-    const hash = stableHash(block.id)
     const displayX = block.x
     const displayY = block.y
 
@@ -483,304 +377,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
                 "w-full h-full transition-transform duration-200 overflow-hidden",
                 isDragging && "scale-[1.02] rotate-1"
             )}>
-                {block.type === 'text' && (
-                    <div
-                        className={cn(
-                            "p-6 shadow-2xl transition-all duration-300 h-full w-full flex flex-col justify-center",
-                            (block.content as any).style === 'postit' && "bg-[#ffff88] text-zinc-900 rotate-[-1deg] shadow-yellow-900/10 rounded-sm border-b-[15px] border-b-black/5",
-                            (block.content as any).style === 'ripped' && "bg-white text-zinc-900 shadow-zinc-300/50",
-                            (block.content as any).style === 'typewriter' && "bg-transparent dark:text-white border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-none",
-                            (block.content as any).style === 'simple' && "bg-white dark:bg-zinc-900 dark:text-white rounded-lg border border-zinc-100 dark:border-zinc-800"
-                        )}
-                        style={{
-                            backgroundColor: (block.content as any).bgColor,
-                            clipPath: (block.content as any).style === 'ripped' ? 'polygon(0% 2%, 98% 0%, 100% 100%, 2% 98%, 0% 50%)' : 'none',
-                            textAlign: (block.content as any).align as any || 'center'
-                        }}
-                    >
-                        <p className={cn(
-                            "leading-relaxed transition-all",
-                            (block.content as any).fontSize === 'sm' && "text-sm",
-                            (block.content as any).fontSize === 'xl' && "text-2xl font-serif italic",
-                            (block.content as any).fontSize === '3xl' && "text-4xl font-black tracking-tighter font-mono uppercase",
-                            (block.content as any).style === 'typewriter' && "font-mono underline decoration-dotted"
-                        )}>
-                            {(block.content as any).text}
-                        </p>
-                    </div>
-                )}
-
-                {block.type === 'gif' && (
-                    <div className="bg-white dark:bg-zinc-900 shadow-2xl rounded-2xl border border-zinc-100 dark:border-zinc-800 h-full w-full overflow-hidden flex items-center justify-center">
-                        {(block.content as any).url ? (
-                            <img
-                                src={(block.content as any).url}
-                                alt="gif"
-                                className="w-full h-full object-cover pointer-events-none"
-                                key={(block.content as any).url} // Forçar re-render se a URL mudar
-                            />
-                        ) : (
-                            <div className="animate-pulse bg-zinc-100 dark:bg-zinc-800 w-full h-full" />
-                        )}
-                    </div>
-                )}
-
-                {block.type === 'video' && (
-                    <div className="bg-black shadow-2xl rounded-2xl overflow-hidden h-full w-full relative group/video">
-                        <iframe
-                            src={`https://www.youtube.com/embed/${(block.content as any).videoId}?autoplay=1&loop=1&playlist=${(block.content as any).videoId}&controls=0&rel=0&modestbranding=1`}
-                            className="w-full h-full border-none"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                        />
-                        {/* Overlay to allow interaction with the block instead of the iframe */}
-                        <div className="absolute inset-0 bg-transparent z-10" />
-                    </div>
-                )}
-
-                {block.type === 'guestbook' && (
-                    <div className="h-full w-full pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
-                        <GuestbookBlock block={block} />
-                        <div className="absolute inset-0 z-10 bg-transparent select-none" />
-                    </div>
-                )}
-
-                {block.type === 'tape' && (
-                    <div
-                        className="w-full h-full shadow-sm backdrop-blur-[2px]"
-                        style={{
-                            backgroundColor: (block.content as any).color,
-                            backgroundImage: (block.content as any).pattern === 'dots' ? 'radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)' : 'none',
-                            backgroundSize: '4px 4px',
-                            clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 98%)'
-                        }}
-                    />
-                )}
-
-                {block.type === 'weather' && (
-                    <div className="p-4 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/20 rounded-sm shadow-sm h-full w-full text-center space-y-1 flex flex-col justify-center">
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-40">Currently</p>
-                        <p className="font-serif italic text-zinc-900 dark:text-white truncate">{(block.content as any).vibe}</p>
-                        <div className="h-[1px] w-4 bg-black/20 dark:bg-white/20 mx-auto" />
-                        <p className="text-[9px] font-medium opacity-60 text-zinc-600 dark:text-zinc-400">{(block.content as any).location}</p>
-                    </div>
-                )}
-
-                {block.type === 'media' && (
-                    <div className={cn(
-                        "p-3 py-6 h-full w-full shadow-2xl relative transition-transform flex flex-col justify-center",
-                        (block.content as any).category === 'book' ? "bg-[#f5f5dc] text-zinc-800 rounded-r-md border-l-4 border-zinc-400" : "bg-black text-white rounded-md border-2 border-zinc-800"
-                    )}>
-                        <div className="absolute top-2 left-2 text-[8px] opacity-40 uppercase font-black">
-                            {(block.content as any).category}
-                        </div>
-                        <p className="text-xs font-black text-center mt-2 leading-tight uppercase font-mono tracking-tighter truncate">
-                            {(block.content as any).title}
-                        </p>
-                    </div>
-                )}
-
-                {block.type === 'doodle' && (
-                    <img
-                        src={(block.content as any).image}
-                        alt="doodle"
-                        className="w-full h-full object-contain dark:invert contrast-125 brightness-110 pointer-events-none"
-                    />
-                )}
-
-                {block.type === 'social' && <SocialBlock content={block.content} />}
-
-                {block.type === 'music' && (
-                    <div className="h-full w-full bg-zinc-950 rounded-[2rem] shadow-2xl overflow-hidden border border-white/10">
-                        <iframe
-                            src={`https://open.spotify.com/embed/track/${(block.content as any).trackId}`}
-                            width="100%" height="100%" frameBorder="0" allow="encrypted-media"
-                            className="pointer-events-none opacity-90"
-                        />
-                    </div>
-                )}
-
-                {block.type === 'ticker' && (
-                    <div
-                        className={cn(
-                            "py-3 overflow-hidden whitespace-nowrap shadow-2xl h-full w-full transition-all duration-500 flex items-center",
-                            (block.content as any).style === 'neon' && "border-y border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)]",
-                            (block.content as any).style === 'glass' && "backdrop-blur-md border-y border-white/10"
-                        )}
-                        style={{ backgroundColor: (block.content as any).bgColor }}
-                    >
-                        <motion.div
-                            animate={{
-                                x: (block.content as any).direction === 'right' ? ["-50%", "0%"] : ["0%", "-50%"]
-                            }}
-                            transition={{
-                                duration: (block.content as any).speed || 20,
-                                repeat: Infinity,
-                                ease: "linear"
-                            }}
-                            className="inline-block"
-                        >
-                            <span className={cn(
-                                "text-sm font-black uppercase tracking-[0.2em] px-4",
-                                (block.content as any).style === 'neon' && "animate-pulse"
-                            )} style={{ color: (block.content as any).textColor }}>
-                                {(block.content as any).text} • {(block.content as any).text} • {(block.content as any).text} • {(block.content as any).text} •
-                            </span>
-                        </motion.div>
-                    </div>
-                )}
-
-                {block.type === 'subtitle' && (
-                    <div className="h-full w-full p-4 flex items-center justify-center">
-                        <motion.div
-                            initial="hidden"
-                            animate="visible"
-                            variants={{
-                                hidden: { opacity: 1 },
-                                visible: { opacity: 1, transition: { staggerChildren: (block.content as any).speed || 0.05 } }
-                            }}
-                            className={cn(
-                                "px-10 py-6 shadow-2xl relative overflow-hidden transition-all duration-500 w-full",
-                                (block.content as any).style === 'vhs' && "bg-[#050505] border-l-[8px] border-l-red-600 rounded-sm",
-                                (block.content as any).style === 'minimal' && "bg-transparent border-none",
-                                (block.content as any).style === 'modern' && "bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800"
-                            )}
-                            style={{ backgroundColor: (block.content as any).style !== 'minimal' ? (block.content as any).bgColor : 'transparent' }}
-                        >
-                            <p className={cn(
-                                "text-center leading-relaxed whitespace-pre-wrap",
-                                (block.content as any).style === 'vhs' && "font-mono font-bold italic tracking-tighter uppercase",
-                                (block.content as any).style === 'minimal' && "font-serif italic",
-                                (block.content as any).style === 'modern' && "font-sans font-medium"
-                            )} style={{ color: (block.content as any).textColor }}>
-                                {(block.content as any).text}
-                            </p>
-                        </motion.div>
-                    </div>
-                )}
-
-                {block.type === 'floating' && (
-                    <div className="h-full w-full flex items-center justify-center p-4">
-                        <motion.div
-                            animate={(block.content as any).style === 'ghost' ? { opacity: [0.3, 0.6, 0.3], scale: [0.98, 1, 0.98] } : { y: [-10, 10] }}
-                            transition={{ duration: (block.content as any).speed || 3, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-                            className="text-4xl font-light tracking-tight text-center"
-                            style={{ color: (block.content as any).textColor }}
-                        >
-                            {(block.content as any).text}
-                        </motion.div>
-                    </div>
-                )}
-
-                {block.type === 'quote' && (
-                    <div
-                        className="p-6 rounded-2xl shadow-lg relative overflow-hidden h-full w-full flex flex-col justify-center"
-                        style={{
-                            backgroundColor: (block.content as any).bgColor || '#ffffff',
-                            color: (block.content as any).color || '#000000'
-                        }}
-                    >
-                        {(block.content as any).showQuotes && (
-                            <div className="absolute top-2 left-2 opacity-10 text-6xl font-serif pointer-events-none">
-                                "
-                            </div>
-                        )}
-
-                        <div className="relative z-10 space-y-3">
-                            <p className={cn(
-                                "leading-normal",
-                                (block.content as any).style === 'bold' && "text-2xl font-black leading-tight",
-                                (block.content as any).style === 'serif' && "text-xl font-serif italic leading-relaxed",
-                                (block.content as any).style === 'modern' && "text-lg font-medium tracking-tight leading-snug",
-                                (block.content as any).style === 'minimal' && "text-base font-normal"
-                            )}>
-                                {(block.content as any).showQuotes && <span className="opacity-50">"</span>}
-                                {(block.content as any).text}
-                                {(block.content as any).showQuotes && <span className="opacity-50">"</span>}
-                            </p>
-
-                            {(block.content as any).author && (
-                                <p className="text-sm font-medium opacity-70 mt-3">
-                                    — {(block.content as any).author}
-                                </p>
-                            )}
-                        </div>
-
-                        {(block.content as any).showQuotes && (
-                            <div className="absolute bottom-2 right-2 opacity-10 text-6xl font-serif rotate-180 pointer-events-none">
-                                "
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {block.type === 'photo' && (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                        <div className={cn(
-                            "rounded-lg overflow-hidden",
-                            (block.content as any).frame === 'polaroid' && "bg-white p-3 pb-12 shadow-xl",
-                            (block.content as any).frame === 'border' && "border-4 border-white shadow-lg",
-                            (block.content as any).frame === 'shadow' && "shadow-2xl"
-                        )}>
-                            <img
-                                src={(block.content as any).imageUrl}
-                                alt={(block.content as any).alt || ''}
-                                className="w-full h-full object-cover"
-                                style={{
-                                    filter: (block.content as any).filter === 'vintage' ? 'sepia(50%) contrast(110%)' :
-                                        (block.content as any).filter === 'bw' ? 'grayscale(100%)' :
-                                            (block.content as any).filter === 'warm' ? 'saturate(130%) hue-rotate(-10deg)' :
-                                                (block.content as any).filter === 'cool' ? 'saturate(110%) hue-rotate(10deg)' :
-                                                    'none'
-                                }}
-                            />
-                            {(block.content as any).caption && (block.content as any).frame === 'polaroid' && (
-                                <div className="absolute bottom-3 left-3 right-3 text-center">
-                                    <p className="text-sm text-zinc-700 font-medium">{(block.content as any).caption}</p>
-                                </div>
-                            )}
-                        </div>
-                        {(block.content as any).caption && (block.content as any).frame !== 'polaroid' && (
-                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-3 text-center italic">
-                                {(block.content as any).caption}
-                            </p>
-                        )}
-                    </div>
-                )}
-
-                {block.type === 'moodStatus' && (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                        <div className="bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-900 rounded-3xl p-8 shadow-xl border border-zinc-200 dark:border-zinc-700">
-                            <div className="text-center space-y-4">
-                                <div className="text-7xl animate-bounce">
-                                    {(block.content as any).emoji}
-                                </div>
-                                <p className="text-lg font-medium text-zinc-800 dark:text-zinc-200">
-                                    {(block.content as any).text}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {block.type === 'countdown' && (
-                    <div className="w-full h-full flex items-center justify-center p-4">
-                        <div className={cn(
-                            "rounded-3xl p-6 text-center space-y-4",
-                            (block.content as any).style === 'neon' && "bg-black border-2 border-purple-500",
-                            (block.content as any).style === 'bold' && "bg-gradient-to-br from-orange-500 to-pink-500 text-white",
-                            (block.content as any).style === 'minimal' && "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
-                        )}>
-                            {(block.content as any).emoji && (
-                                <div className="text-5xl">{(block.content as any).emoji}</div>
-                            )}
-                            <h3 className="font-bold text-lg">{(block.content as any).title}</h3>
-                            <div className="text-xs text-zinc-500">
-                                {new Date((block.content as any).targetDate).toLocaleDateString('pt-BR')}
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <BlockRenderer block={block} isPublic={false} />
             </div>
         </motion.div>
     )
