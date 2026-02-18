@@ -21,16 +21,16 @@ export default function Home() {
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 md:px-12 space-y-8 overflow-y-auto">
         <div className="space-y-4 max-w-3xl">
           <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-none text-balance">
-            Crie sua página, sinta seu <span className="text-zinc-400">mood.</span>
+            Crie seu <span className="bg-black text-white px-2">espaço</span>, sinta seu <span className="text-zinc-400">mood.</span>
           </h1>
           <p className="text-xl md:text-2xl text-zinc-500 max-w-xl mx-auto font-medium">
-            Uma página única para expressar quem você é hoje. Estilos, músicas, textos e o que mais você quiser.
+            Um espaço único para expressar quem você é hoje. Estilos, músicas, textos e o que mais você quiser.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
           <Link href="/auth/register">
-            <Button size="lg" className="px-12 py-8 text-xl">Criar Minha Page</Button>
+            <Button size="lg" className="px-12 py-8 text-xl">Criar Meu Espaço</Button>
           </Link>
         </div>
 
