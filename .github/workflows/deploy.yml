@@ -48,7 +48,8 @@ jobs:
             docker compose -f docker-compose.prod.yml up -d --build
             
             # Roda as migrações/push do Prisma dentro do container do app
-            docker exec moodspace_app npx prisma db push
+            # Usando o binário local do node_modules para garantir a versão correta (v5)
+            docker exec moodspace_app ./node_modules/.bin/prisma db push
             
             # Limpeza de imagens antigas para economizar espaço em disco
             docker image prune -f
