@@ -45,10 +45,10 @@ export function CountdownBlockPublic({ content }: CountdownBlockPublicProps) {
     return (
         <div className="w-full h-full flex flex-col items-center justify-center p-6">
             <div className={cn(
-                "rounded-3xl p-8 shadow-xl text-center space-y-6 min-w-[280px]",
+                "rounded-2xl p-6 shadow-xl text-center space-y-6 min-w-[280px]",
                 style === 'neon' && "bg-black border-2 border-pink-500 shadow-pink-500/20",
                 style === 'bold' && "bg-white dark:bg-zinc-900 border-4 border-black dark:border-white text-black dark:text-white",
-                style === 'minimal' && "bg-white/10 dark:bg-black/10 backdrop-blur-xl border border-white/20"
+                style === 'minimal' && "bg-white/10 dark:bg-black/10 backdrop-blur-xl border border-white/10"
             )}>
                 {Icon && (
                     <div className={cn(

@@ -40,16 +40,12 @@ Este arquivo centraliza a documentação de funcionalidades e componentes para f
 - **Efeitos de Fundo (`src/components/effects/background-effect.tsx`)**:
     - Renderizados via WebGL (Canvas) para garantir fluidez total (60 FPS).
     - **Interatividade**: Suporte a uniformes de mouse (`uMouse`) e sincronização com a cor primária do tema (`uColor`).
-    - **Efeitos Dinâmicos**: `aurora`, `noise`, `liquid`, `mesh-gradient`, `metaballs`, `hyperspeed`, `rain` (melancólico), `rhythm` (musical), `vintage` (grão clássico), `stars`, `grid-move`.
-    - **Texturas Estáticas**: `museum-paper`, `raw-canvas`, `fine-sand`. Servem para dar profundidade tátil ao mural.
+    - **Efeitos Dinâmicos**: `aurora`, `noise`, `liquid`, `mesh-gradient`, `metaballs`, `hyperspeed`, `rain` (chuva com refração), `rhythm` (ondas musicais), `vintage` (filme riscado e vinheta), `stars`, `universe` (cosmos com paralaxe), `grid-move`.
+    - **Texturas Estáticas**: `museum-paper`, `raw-canvas`, `fine-sand`. Utilizam `mix-blend-soft-light` para garantir visibilidade em qualquer cor de fundo.
 
 ### Melhorias de Performance
 - **Otimização de Imagens**: Todas as fotos e doodles são comprimidos no cliente (`browser-image-compression`) antes do upload para reduzir latência e consumo de banda.
 - **WebGL Rendering**: O componente `BackgroundEffect` utiliza shaders matemáticos para evitar custos de renderização do DOM/CSS em efeitos complexos.
 
-- **Efeitos de Fundo (`src/components/effects/background-effect.tsx`)**:
-    - Renderizados via WebGL (Canvas) para garantir fluidez total.
-    - Utilizam biblioteca utilitária `src/lib/shaders.ts`.
-
 ---
-*Documentação atualizada por Antigravity em 18/02/2026.*
+*Documentação consolidada por Antigravity em 18/02/2026. Sinergia global verificada.*
