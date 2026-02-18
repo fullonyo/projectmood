@@ -10,16 +10,15 @@ export function MoodStatusBlockPublic({ content }: MoodStatusBlockPublicProps) {
     const { emoji, text } = content
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-6">
-            <div className="bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-900 rounded-3xl p-8 shadow-xl border border-zinc-200 dark:border-zinc-700">
-                <div className="text-center space-y-4">
-                    <div className="text-7xl animate-bounce">
-                        {emoji}
-                    </div>
-                    <p className="text-lg font-medium text-zinc-800 dark:text-zinc-200">
-                        {text}
-                    </p>
+        <div className="w-full h-full flex items-center justify-center p-4">
+            <div className="bg-white/10 dark:bg-zinc-900/10 backdrop-blur-xl rounded-3xl p-4 px-6 shadow-2xl border border-white/20 flex items-center gap-4 transition-all hover:scale-105 group">
+                <div className="text-4xl animate-bounce group-hover:animate-none group-hover:scale-125 transition-transform">
+                    {emoji}
                 </div>
+                <div className="h-8 w-[1px] bg-zinc-400/20" />
+                <p className="text-base font-black tracking-tight text-current uppercase italic">
+                    {text}
+                </p>
             </div>
         </div>
     )

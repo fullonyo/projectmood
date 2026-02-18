@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Smile } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 // Dynamic import to avoid SSR issues with emoji picker
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false })
@@ -48,19 +49,38 @@ export function MoodStatusEditor({ onAdd }: MoodStatusEditorProps) {
             <div className="space-y-4">
                 <div className="space-y-2">
                     <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Emoji</Label>
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={() => setShowPicker(!showPicker)}
-                            className="w-full h-16 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center text-5xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-                        >
-                            {emoji}
-                        </button>
-                        {showPicker && (
-                            <div className="absolute z-50 mt-2">
-                                <EmojiPicker onEmojiClick={handleEmojiClick} />
-                            </div>
-                        )}
+                    <div className="flex flex-col gap-3">
+                        {/* Quick Selection Row */}
+                        <div className="flex flex-wrap gap-2 p-2 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                            {['😊', '✨', '🔥', '🍕', '🎉', '😴', '🧠', '🌈', '💖', '💀'].map(e => (
+                                <button
+                                    key={e}
+                                    onClick={() => setEmoji(e)}
+                                    className={cn(
+                                        "w-8 h-8 flex items-center justify-center text-lg rounded-lg transition-all hover:scale-125",
+                                        emoji === e ? "bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-700" : "opacity-60 hover:opacity-100"
+                                    )}
+                                >
+                                    {e}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="relative group">
+                            <button
+                                type="button"
+                                onClick={() => setShowPicker(!showPicker)}
+                                className="w-full h-14 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center text-4xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border-2 border-dashed border-zinc-200 dark:border-zinc-700"
+                            >
+                                {emoji}
+                                <span className="absolute bottom-1 right-2 text-[8px] font-black uppercase opacity-0 group-hover:opacity-40 tracking-tighter">Escolher Outro</span>
+                            </button>
+                            {showPicker && (
+                                <div className="absolute z-50 mt-2 left-0 right-0">
+                                    <EmojiPicker onEmojiClick={handleEmojiClick} width="100%" />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 

@@ -50,47 +50,63 @@ export function GifPicker({ highlight }: { highlight?: boolean }) {
                 <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
                     <Search className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
                 </div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Gifs & Stickers</h3>
+                <div>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Gifs & Stickers</h3>
+                    <p className="text-[9px] text-zinc-400 uppercase tracking-tighter">Powered by Giphy</p>
+                </div>
             </div>
 
-            <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <form onSubmit={handleSearch} className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
                 <Input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search Giphy..."
+                    placeholder="O que você está sentindo?..."
                     className="pl-10 rounded-2xl bg-white dark:bg-zinc-900 border-none h-11 text-xs focus-visible:ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-inner"
                 />
+                {query && (
+                    <button
+                        type="button"
+                        onClick={() => { setQuery(""); setGifs([]) }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                        <Loader2 className={cn("w-3 h-3 text-zinc-300", isLoading && "animate-spin")} />
+                    </button>
+                )}
             </form>
 
-            <div className="grid grid-cols-2 gap-2 h-64 overflow-y-auto custom-scrollbar pr-1">
+            <div className="h-[400px] overflow-y-auto custom-scrollbar pr-1 -mr-1">
                 {isLoading ? (
-                    <div className="col-span-2 flex items-center justify-center h-32">
-                        <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+                    <div className="flex flex-col items-center justify-center h-48 gap-3">
+                        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                        <p className="text-[10px] uppercase font-black tracking-widest text-zinc-400">Buscando Vibes...</p>
                     </div>
                 ) : gifs.length > 0 ? (
-                    gifs.map((gif) => (
-                        <button
-                            key={gif.id}
-                            onClick={() => handleAddGif(gif)}
-                            disabled={isAdding}
-                            className="relative aspect-square rounded-xl overflow-hidden hover:ring-2 ring-black dark:ring-white transition-all group"
-                        >
-                            <img src={gif.url} alt={gif.title} className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                <span className="text-[10px] font-bold text-white uppercase">Add</span>
-                            </div>
-                        </button>
-                    ))
+                    <div className="columns-2 gap-2 space-y-2">
+                        {gifs.map((gif) => (
+                            <button
+                                key={gif.id}
+                                onClick={() => handleAddGif(gif)}
+                                disabled={isAdding}
+                                className="relative w-full rounded-xl overflow-hidden hover:ring-2 ring-black dark:ring-white transition-all group break-inside-avoid shadow-sm"
+                            >
+                                <img
+                                    src={gif.url}
+                                    alt={gif.title}
+                                    className="w-full h-auto object-contain bg-zinc-100 dark:bg-zinc-800"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-[2px]">
+                                    <div className="bg-white text-black px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                                        Adicionar
+                                    </div>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
                 ) : (
-                    <div className="col-span-2 flex flex-col items-center justify-center h-32 text-zinc-500 gap-2">
-                        <span className="text-xs">Nenhum gif encontrado</span>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="text-[10px] uppercase font-bold hover:underline"
-                        >
-                            Tentar novamente
-                        </button>
+                    <div className="flex flex-col items-center justify-center h-48 text-zinc-500 gap-2">
+                        <span className="text-xs italic opacity-40">Nenhum gif encontrado</span>
                     </div>
                 )}
             </div>

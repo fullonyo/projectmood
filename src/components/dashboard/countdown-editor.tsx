@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface CountdownEditorProps {
     onAdd: (content: any) => void
@@ -63,12 +64,27 @@ export function CountdownEditor({ onAdd }: CountdownEditorProps) {
 
                 <div className="space-y-2">
                     <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Emoji (opcional)</Label>
-                    <Input
-                        value={emoji}
-                        onChange={(e) => setEmoji(e.target.value)}
-                        placeholder="🎉"
-                        maxLength={2}
-                    />
+                    <div className="flex flex-wrap gap-2 p-2 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                        {['🎉', '🎂', '📅', '🚀', '💖', '⏳', '✨', '🎈'].map(e => (
+                            <button
+                                key={e}
+                                onClick={() => setEmoji(e)}
+                                className={cn(
+                                    "w-8 h-8 flex items-center justify-center text-lg rounded-lg transition-all hover:scale-125",
+                                    emoji === e ? "bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-700" : "opacity-60 hover:opacity-100"
+                                )}
+                            >
+                                {e}
+                            </button>
+                        ))}
+                        <input
+                            value={emoji}
+                            onChange={(e) => setEmoji(e.target.value)}
+                            placeholder="Emoji"
+                            className="w-10 h-8 bg-transparent border-none text-center focus:ring-0 outline-none p-0"
+                            maxLength={2}
+                        />
+                    </div>
                 </div>
 
                 <div className="space-y-2">
@@ -79,8 +95,8 @@ export function CountdownEditor({ onAdd }: CountdownEditorProps) {
                                 key={s}
                                 onClick={() => setStyle(s)}
                                 className={`px-3 py-2 rounded-lg text-xs font-medium transition-all capitalize ${style === s
-                                        ? 'bg-black text-white dark:bg-white dark:text-black'
-                                        : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400'
+                                    ? 'bg-black text-white dark:bg-white dark:text-black'
+                                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400'
                                     }`}
                             >
                                 {s}
