@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-white text-black selection:bg-black selection:text-white">
+    <div className="h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden">
       {/* Header */}
-      <nav className="flex items-center justify-between px-6 py-6 md:px-12 border-b border-zinc-100">
+      <nav className="flex items-center justify-between px-6 py-6 md:px-12 border-b border-zinc-100 flex-shrink-0">
         <div className="text-2xl font-black tracking-tighter">MOOD.</div>
         <div className="flex gap-4">
           <Link href="/auth/login">
@@ -18,7 +18,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-6 md:px-12 space-y-10 py-20">
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-6 md:px-12 space-y-8 overflow-y-auto">
         <div className="space-y-4 max-w-3xl">
           <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-none text-balance">
             Crie sua página, sinta seu <span className="text-zinc-400">mood.</span>
@@ -35,7 +35,7 @@ export default function Home() {
         </div>
 
         {/* Floating elements simulation / Mood cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl pt-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl pb-8">
           <div className="p-8 rounded-[40px] bg-zinc-50 border border-zinc-100 space-y-4 rotate-[-2deg]">
             <div className="w-12 h-12 rounded-full bg-zinc-200 animate-pulse" />
             <div className="h-6 w-3/4 bg-zinc-200 rounded-full" />
@@ -55,7 +55,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 text-center text-zinc-400 border-t border-zinc-100 text-sm">
+      <footer className="py-6 text-center text-zinc-400 border-t border-zinc-100 text-sm flex-shrink-0">
         © 2026 MOOD Project. O seu espaço, o seu estilo.
       </footer>
     </div>
