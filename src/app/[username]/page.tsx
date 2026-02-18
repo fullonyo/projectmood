@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import { AnalyticsDisplay } from "@/components/dashboard/analytics-display";
-import { NowPlayingSpotify } from "@/components/dashboard/now-playing-spotify";
+// import { NowPlayingSpotify } from "@/components/dashboard/now-playing-spotify";
 import { themeConfigs } from "@/lib/themes";
 import { BlockRenderer } from "@/components/dashboard/block-renderer";
 
@@ -105,8 +105,8 @@ export default async function PublicMoodPage({
             {/* Analytics Display */}
             <AnalyticsDisplay profileId={user.profile.id} />
 
-            {/* Now Playing Spotify */}
-            <NowPlayingSpotify userId={user.id} />
+            {/* Now Playing Spotify - Removed (Merged into Music Block) */}
+            {/* <NowPlayingSpotify userId={user.id} /> */}
 
             {/* Branding Footer */}
             <footer className="fixed bottom-8 right-8 z-50">

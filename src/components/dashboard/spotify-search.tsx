@@ -28,9 +28,17 @@ export function SpotifySearch() {
         setIsLoading(false)
     }
 
-    const handleSelect = (trackId: string) => {
+    const handleSelect = (track: any) => {
         startTransition(async () => {
-            await addMoodBlock('music', { trackId })
+            // Save full metadata for the aesthetic card
+            await addMoodBlock('music', {
+                trackId: track.id,
+                name: track.name,
+                artist: track.artist,
+                albumArt: track.albumArt,
+                previewUrl: track.previewUrl,
+                spotifyUrl: track.spotifyUrl
+            })
             setResults([])
             setQuery("")
         })
@@ -84,7 +92,7 @@ export function SpotifySearch() {
                     {results.map((track) => (
                         <button
                             key={track.id}
-                            onClick={() => handleSelect(track.id)}
+                            onClick={() => handleSelect(track)}
                             disabled={isPending}
                             className="w-full flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-[1.5rem] transition-all text-left group relative overflow-hidden"
                         >

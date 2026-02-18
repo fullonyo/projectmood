@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Music2 } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Music2, Volume2, VolumeX, Pause, Play } from "lucide-react"
 
 interface NowPlayingSpotifyProps {
     userId: string
@@ -10,6 +10,9 @@ interface NowPlayingSpotifyProps {
 export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
     const [track, setTrack] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [isPlaying, setIsPlaying] = useState(false)
+    const [isMuted, setIsMuted] = useState(false) // Start UNMUTED (User request)
+    const audioRef = useRef<HTMLAudioElement | null>(null)
 
     useEffect(() => {
         const fetchNowPlaying = async () => {
@@ -17,8 +20,13 @@ export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
                 const res = await fetch(`/api/spotify/now-playing?userId=${userId}`)
                 const data = await res.json()
 
-                if (data.isPlaying && data.track) {
-                    setTrack(data.track)
+                if (data.track) {
+                    setTrack((prev: any) => {
+                        if (prev?.name !== data.track.name) {
+                            return data.track
+                        }
+                        return prev
+                    })
                 } else {
                     setTrack(null)
                 }
@@ -30,35 +38,133 @@ export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
         }
 
         fetchNowPlaying()
-        const interval = setInterval(fetchNowPlaying, 30000) // Update every 30s
-
-        return () => clearInterval(interval)
     }, [userId])
+
+    // Autoplay Logic - Aggressive
+    useEffect(() => {
+        if (track?.previewUrl && audioRef.current) {
+            audioRef.current.volume = 0.5
+            // audioRef.current.muted = true // User requested unmuted
+
+            const attemptPlay = async () => {
+                try {
+                    await audioRef.current?.play()
+                    setIsPlaying(true)
+                    setIsMuted(false)
+                } catch (error) {
+                    console.log("Autoplay blocked (needs interaction):", error)
+                    setIsPlaying(false)
+                }
+            }
+
+            attemptPlay()
+        }
+    }, [track])
+
+    const togglePlay = () => {
+        if (!audioRef.current) return
+        if (isPlaying && !isMuted) {
+            // Se está tocando com som, pausa
+            audioRef.current.pause()
+            setIsPlaying(false)
+        } else {
+            // Se está pausado OU mutado, toca com som
+            audioRef.current.muted = false
+            setIsMuted(false)
+            audioRef.current.play()
+            setIsPlaying(true)
+        }
+    }
+
+    const toggleMute = () => {
+        if (!audioRef.current) return
+        audioRef.current.muted = !isMuted
+        setIsMuted(!isMuted)
+    }
 
     if (loading || !track) return null
 
     return (
-        <div className="fixed top-4 right-4 z-50">
-            <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl px-4 py-3 shadow-2xl max-w-xs">
-                <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                        {track.albumArt ? (
-                            <img src={track.albumArt} alt={track.name} className="w-full h-full object-cover" />
+        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-4 fade-in duration-700">
+            {track.previewUrl && (
+                <audio
+                    ref={audioRef}
+                    src={track.previewUrl}
+                    loop
+                    onEnded={() => setIsPlaying(false)}
+                />
+            )}
+
+            {/* Main Widget */}
+            <div className={`bg-black/80 backdrop-blur-md text-white rounded-full pr-4 pl-1 py-1 shadow-2xl flex items-center gap-3 border border-white/10 overflow-hidden max-w-[300px] transition-all group ${isMuted && isPlaying ? 'ring-2 ring-yellow-400/50' : ''}`}>
+
+                {/* Album Art with Controls */}
+                <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 cursor-pointer" onClick={togglePlay}>
+                    {track.albumArt ? (
+                        <div className={`w-full h-full relative ${isPlaying ? 'animate-spin-slow' : ''}`}>
+                            <img src={track.albumArt} alt={track.name} className="w-full h-full object-cover opacity-80" />
+                        </div>
+                    ) : (
+                        <div className="w-full h-full bg-green-500 flex items-center justify-center">
+                            <Music2 className="w-4 h-4" />
+                        </div>
+                    )}
+
+                    {/* Overlay Icon */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity">
+                        {isMuted && isPlaying ? (
+                            <VolumeX className="w-4 h-4 text-yellow-400 animate-pulse" />
+                        ) : isPlaying ? (
+                            <Pause className="w-4 h-4 opacity-0 group-hover:opacity-100" />
                         ) : (
-                            <div className="w-full h-full bg-green-700 flex items-center justify-center">
-                                <Music2 className="w-6 h-6" />
+                            <Play className="w-4 h-4" />
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex-1 min-w-0 flex flex-col justify-center cursor-pointer" onClick={togglePlay}>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] uppercase font-bold text-green-400 tracking-wider">
+                            {isMuted ? "TAP TO UNMUTE" : "Now Playing"}
+                        </span>
+                        {isPlaying && !isMuted && (
+                            <div className="flex gap-[2px] items-end h-[8px]">
+                                {[1, 2, 3].map(i => (
+                                    <div key={i} className="w-[2px] bg-green-400 animate-music-bar" style={{ animationDelay: `${i * 0.1}s` }} />
+                                ))}
                             </div>
                         )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-[9px] uppercase tracking-wider opacity-80 mb-1">
-                            🎵 Tocando agora
-                        </p>
-                        <p className="text-sm font-bold truncate">{track.name}</p>
-                        <p className="text-xs opacity-90 truncate">{track.artist}</p>
+
+                    <div className="flex items-baseline gap-1 overflow-hidden">
+                        <span className="text-xs font-bold whitespace-nowrap">{track.name}</span>
+                        <span className="text-[10px] opacity-70 whitespace-nowrap">- {track.artist}</span>
                     </div>
                 </div>
+
+                {track.previewUrl && !isMuted && (
+                    <button onClick={(e) => { e.stopPropagation(); toggleMute(); }} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
+                        <Volume2 className="w-3 h-3 opacity-70" />
+                    </button>
+                )}
             </div>
+
+            <style jsx>{`
+                @keyframes spin-slow {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                .animate-spin-slow {
+                    animation: spin-slow 8s linear infinite;
+                }
+                @keyframes music-bar {
+                    0%, 100% { height: 2px; }
+                    50% { height: 8px; }
+                }
+                .animate-music-bar {
+                    animation: music-bar 0.5s ease-in-out infinite;
+                }
+            `}</style>
         </div>
     )
 }

@@ -25,6 +25,7 @@ import { SocialBlockPublic } from "./social-block-public"
 import { WeatherBlockPublic } from "./weather-block-public"
 import { MediaBlockPublic } from "./media-block-public"
 import { VideoBlockPublic } from "./video-block-public"
+import { MusicBlockPublic } from "./music-block-public"
 
 interface BlockRendererProps {
     block: any
@@ -77,15 +78,7 @@ export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
             return <SocialBlockPublic content={content} />
 
         case 'music':
-            return (
-                <div className="w-full max-w-[320px] p-2 bg-zinc-950 rounded-[2rem] shadow-2xl overflow-hidden border border-white/10">
-                    <iframe
-                        src={`https://open.spotify.com/embed/track/${content.trackId}`}
-                        width="100%" height="80" frameBorder="0" allow="encrypted-media"
-                        className="rounded-2xl pointer-events-none opacity-90"
-                    />
-                </div>
-            )
+            return <MusicBlockPublic content={content} />
 
         case 'video':
             return <VideoBlockPublic content={content} isPublic={isPublic} />

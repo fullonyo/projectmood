@@ -10,29 +10,18 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'User ID required' }, { status: 400 })
         }
 
-        // TODO: Implement real Spotify OAuth flow
-        // For now, return mock data structure
-
-        // Check if user has connected Spotify (would be in database)
-        // const spotifyAuth = await prisma.spotifyAuth.findUnique({ where: { userId } })
-        // if (!spotifyAuth) return NextResponse.json({ isPlaying: false })
-
-        // Fetch from Spotify API with access token
-        // const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-        //     headers: { 'Authorization': `Bearer ${spotifyAuth.accessToken}` }
-        // })
-
-        // Mock response for demonstration
+        // Mock response com MÚSICA DE DEMONSTRAÇÃO (Lo-fi Beat)
+        // Isso permite testar o player sem precisar configurar OAuth agora.
         return NextResponse.json({
-            isPlaying: false, // Change to true when OAuth is implemented
-            track: null
-            // When implemented:
-            // track: {
-            //     name: 'Song Name',
-            //     artist: 'Artist Name',
-            //     albumArt: 'https://...',
-            //     spotifyUrl: 'https://open.spotify.com/track/...'
-            // }
+            isPlaying: true,
+            track: {
+                name: 'Midnight City',
+                artist: 'M83',
+                albumArt: 'https://i.scdn.co/image/ab67616d0000b273295874283626117bd81d1203',
+                // Link oficial de preview do Spotify (pode expirar, mas serve para demo)
+                // Se falhar, usar link genérico de MP3
+                previewUrl: 'https://p.scdn.co/mp3-preview/f4c330df320645c088ef05021e96196f30a905bc?cid=cfe923b2d660439caf2b557b21f31221'
+            }
         })
     } catch (error) {
         console.error('Spotify API error:', error)

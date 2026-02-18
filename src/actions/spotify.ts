@@ -42,5 +42,7 @@ export async function searchSpotifyTracks(query: string) {
         name: track.name,
         artist: track.artists[0].name,
         albumArt: track.album.images[0]?.url,
+        previewUrl: track.preview_url,
+        spotifyUrl: track.external_urls.spotify,
     }));
 }

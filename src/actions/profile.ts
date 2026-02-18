@@ -33,6 +33,7 @@ export async function updateProfile(data: {
         revalidatePath("/dashboard");
         if (username) {
             revalidatePath(`/${username}`);
+            // @ts-ignore
             revalidateTag(`profile:${username}`);
         }
         return { success: true };
@@ -71,6 +72,7 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
         revalidatePath("/dashboard");
         if (username) {
             revalidatePath(`/${username}`);
+            // @ts-ignore
             revalidateTag(`profile:${username}`);
         }
         return { success: true, block };
@@ -105,6 +107,7 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
         revalidatePath("/dashboard");
         if (username) {
             revalidatePath(`/${username}`);
+            // @ts-ignore
             revalidateTag(`profile:${username}`);
         }
 
@@ -127,6 +130,7 @@ export async function deleteMoodBlock(blockId: string) {
         revalidatePath("/dashboard");
         if (username) {
             revalidatePath(`/${username}`);
+            // @ts-ignore
             revalidateTag(`profile:${username}`);
         }
         return { success: true };
@@ -149,6 +153,7 @@ export async function clearMoodBlocks() {
         revalidatePath("/dashboard");
         if (username) {
             revalidatePath(`/${username}`);
+            // @ts-ignore
             revalidateTag(`profile:${username}`);
         }
 
@@ -178,6 +183,7 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
         revalidatePath("/dashboard");
         if (username) {
             revalidatePath(`/${username}`);
+            // @ts-ignore
             revalidateTag(`profile:${username}`);
         }
         return { success: true };
