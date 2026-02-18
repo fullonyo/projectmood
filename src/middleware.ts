@@ -4,12 +4,13 @@ export default auth((req) => {
     const isLoggedIn = !!req.auth
     const isAuthPage = req.nextUrl.pathname.startsWith("/auth")
     const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard")
+    const isRootPage = req.nextUrl.pathname === "/"
 
     if (isDashboardPage && !isLoggedIn) {
         return Response.redirect(new URL("/auth/login", req.nextUrl))
     }
 
-    if (isAuthPage && isLoggedIn) {
+    if ((isAuthPage || isRootPage) && isLoggedIn) {
         return Response.redirect(new URL("/dashboard", req.nextUrl))
     }
 })
