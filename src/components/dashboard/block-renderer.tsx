@@ -63,7 +63,7 @@ export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
             return <WeatherBlockPublic content={content} />
 
         case 'media':
-            return <MediaBlockPublic content={content} />
+            return <MediaBlockPublic content={content} isPublic={isPublic} />
 
         case 'doodle':
             return (
@@ -75,7 +75,7 @@ export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
             )
 
         case 'social':
-            return <SocialBlockPublic content={content} />
+            return <SocialBlockPublic content={content} isPublic={isPublic} />
 
         case 'music':
             return <MusicBlockPublic content={content} isPublic={isPublic} />

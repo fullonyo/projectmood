@@ -32,9 +32,10 @@ interface SocialBlockPublicProps {
         url: string
         style: 'tag' | 'glass' | 'minimal' | 'neon'
     }
+    isPublic?: boolean
 }
 
-export function SocialBlockPublic({ content }: SocialBlockPublicProps) {
+export function SocialBlockPublic({ content, isPublic = false }: SocialBlockPublicProps) {
     const Icon = ICONS[content.platform] || LinkIcon
 
     return (
@@ -42,8 +43,10 @@ export function SocialBlockPublic({ content }: SocialBlockPublicProps) {
             href={content.url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => !isPublic && e.preventDefault()}
             className={cn(
                 "flex items-center gap-3 px-4 py-2.5 transition-all duration-300 shadow-xl min-w-[160px] group",
+                !isPublic && "pointer-events-none",
                 content.style === 'tag' && "bg-[#fefefe] dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-[2px] border border-zinc-200 dark:border-zinc-700 border-l-[6px] border-l-black dark:border-l-white font-serif italic hover:translate-x-1",
                 content.style === 'glass' && "bg-white/10 dark:bg-black/10 backdrop-blur-xl rounded-2xl border border-white/10 text-current hover:bg-white/20 hover:scale-[1.05]",
                 content.style === 'minimal' && "bg-transparent text-current font-black tracking-tighter text-xl hover:opacity-70",

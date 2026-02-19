@@ -36,7 +36,10 @@ export function GuestbookBlock({ block, isPublic = false }: { block: any, isPubl
     }
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border-2 border-zinc-200 dark:border-zinc-800 overflow-hidden font-sans">
+        <div className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border-2 border-zinc-200 dark:border-zinc-800 overflow-hidden font-sans relative">
+            {!isPublic && (
+                <div className="absolute inset-0 z-50 bg-transparent cursor-default" />
+            )}
             {/* Window Header */}
             <div
                 className="px-4 py-2 flex items-center justify-between border-b-2 border-zinc-200 dark:border-zinc-800"

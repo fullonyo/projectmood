@@ -10,9 +10,10 @@ interface MediaBlockPublicProps {
         review: string
         rating?: number
     }
+    isPublic?: boolean
 }
 
-export function MediaBlockPublic({ content }: MediaBlockPublicProps) {
+export function MediaBlockPublic({ content, isPublic = false }: MediaBlockPublicProps) {
     const isBook = content.category === 'book'
 
     return (
