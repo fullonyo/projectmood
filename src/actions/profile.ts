@@ -65,8 +65,8 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
                 userId: session.user.id,
                 type: validation.data.type,
                 content: validation.data.content,
-                x: Math.round(x),
-                y: Math.round(y),
+                x: x,
+                y: y,
                 width: width ? Math.round(width) : null,
                 height: height ? Math.round(height) : null,
             },
@@ -98,8 +98,8 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
 
     // Validation & Rounding for Prisma Int
     const validatedData: any = { ...validation.data };
-    if (typeof validatedData.x === 'number') validatedData.x = Math.round(Math.max(0, Math.min(100, validatedData.x)));
-    if (typeof validatedData.y === 'number') validatedData.y = Math.round(Math.max(0, Math.min(100, validatedData.y)));
+    if (typeof validatedData.x === 'number') validatedData.x = Math.max(0, Math.min(100, validatedData.x));
+    if (typeof validatedData.y === 'number') validatedData.y = Math.max(0, Math.min(100, validatedData.y));
 
     try {
         await prisma.moodBlock.update({

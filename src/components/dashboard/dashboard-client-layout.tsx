@@ -24,19 +24,41 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
     const [localBlocks, setLocalBlocks] = useState(moodBlocks);
     const [localProfile, setLocalProfile] = useState(profile);
 
-    // Sync with server data
+    const [lastInteraction, setLastInteraction] = useState(0);
+
+    // Sync with server data (with protection)
     useEffect(() => {
-        setLocalBlocks(moodBlocks);
-    }, [moodBlocks]);
+        const timeSinceLastInteraction = Date.now() - lastInteraction;
+        // Only sync if user hasn't interacted recently (blindagem de 2s)
+        if (timeSinceLastInteraction > 2000) {
+            setLocalBlocks(moodBlocks);
+        }
+    }, [moodBlocks, lastInteraction]);
 
     useEffect(() => {
         setLocalProfile(profile);
     }, [profile]);
 
-    const handleUpdateLocalBlock = (id: string, content: any) => {
-        setLocalBlocks(prev => prev.map(block =>
-            block.id === id ? { ...block, content: { ...((block.content as any) || {}), ...content } } : block
-        ));
+    const handleInteractionStart = () => {
+        setLastInteraction(Date.now());
+    };
+
+    const handleUpdateLocalBlock = (id: string, updates: any) => {
+        setLocalBlocks(prev => prev.map(block => {
+            if (block.id !== id) return block;
+
+            // Se updates contém 'content', fazemos merge profundo do content
+            if (updates.content) {
+                return {
+                    ...block,
+                    ...updates,
+                    content: { ...((block.content as any) || {}), ...updates.content }
+                };
+            }
+
+            // Senão, merge raso na raiz (para x, y, rotation, etc)
+            return { ...block, ...updates };
+        }));
     };
 
     const handleUpdateLocalProfile = (data: any) => {
@@ -60,6 +82,7 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                     selectedId={selectedId}
                     setSelectedId={setSelectedId}
                     onUpdateBlock={handleUpdateLocalBlock}
+                    onInteractionStart={handleInteractionStart}
                 />
             </div>
 

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import { toast } from "sonner"
 import { updateMoodBlockLayout, deleteMoodBlock } from "@/actions/profile"
 import { Trash2, RotateCw, Pencil, Move } from "lucide-react"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
@@ -18,6 +19,7 @@ interface MoodCanvasProps {
     selectedId: string | null
     setSelectedId: (id: string | null) => void
     onUpdateBlock: (id: string, content: any) => void
+    onInteractionStart: () => void
 }
 
 export function MoodCanvas({
@@ -26,7 +28,8 @@ export function MoodCanvas({
     backgroundEffect,
     selectedId,
     setSelectedId,
-    onUpdateBlock
+    onUpdateBlock,
+    onInteractionStart
 }: MoodCanvasProps) {
     const canvasRef = useRef<HTMLDivElement>(null)
     const [maxZ, setMaxZ] = useState(10)
@@ -115,6 +118,7 @@ export function MoodCanvas({
                         onDeleteRequest={(id) => setBlockToDelete(id)}
                         onSavingStart={() => setIsSaving(true)}
                         onSavingEnd={() => setIsSaving(false)}
+                        onInteractionStart={onInteractionStart}
                     />
                 ))}
             </BoardStage>
@@ -145,7 +149,7 @@ export function MoodCanvas({
 }
 
 
-function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSavingStart, onSavingEnd, profile, themeConfig, onDeleteRequest }: {
+function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSavingStart, onSavingEnd, profile, themeConfig, onDeleteRequest, onInteractionStart }: {
     block: any,
     canvasRef: React.RefObject<HTMLDivElement | null>,
     isSelected: boolean,
@@ -155,7 +159,8 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
     onSavingEnd: () => void,
     profile: any,
     themeConfig: any,
-    onDeleteRequest: (id: string) => void
+    onDeleteRequest: (id: string) => void,
+    onInteractionStart: () => void
 }) {
     const [isDragging, setIsDragging] = useState(false)
     const [isResizing, setIsResizing] = useState(false)
@@ -168,6 +173,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
     const handleDragStart = () => {
         setIsDragging(true)
         onSelect()
+        onInteractionStart()
     }
 
     const handleDragEnd = async (event: any, info: any) => {
@@ -180,23 +186,32 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
         const deltaXPercent = (info.offset.x / canvasRect.width) * 100
         const deltaYPercent = (info.offset.y / canvasRect.height) * 100
 
-        // Use toFixed(2) and parseFloat to round to 2 decimal places
-        const newX = parseFloat(Math.max(0, Math.min(100, block.x + deltaXPercent)).toFixed(2))
-        const newY = parseFloat(Math.max(0, Math.min(100, block.y + deltaYPercent)).toFixed(2))
+        // Use toFixed(4) and parseFloat to round to 4 decimal places for high precision
+        const newX = parseFloat(Math.max(0, Math.min(100, block.x + deltaXPercent)).toFixed(4))
+        const newY = parseFloat(Math.max(0, Math.min(100, block.y + deltaYPercent)).toFixed(4))
 
         // Optimistic update
         onUpdate({ x: newX, y: newY })
 
         onSavingStart()
-        await updateMoodBlockLayout(block.id, {
+        const result = await updateMoodBlockLayout(block.id, {
             x: newX,
             y: newY
         })
+
+        if (result?.error) {
+            toast.error("Erro ao salvar posição", {
+                description: "Verifique sua conexão e tente novamente."
+            })
+            // Rollback forces update to original position
+            onUpdate({ x: block.x, y: block.y })
+        }
         onSavingEnd()
     }
 
     const handleResize = (event: any, info: any, corner: 'br' | 'bl' | 'tr' | 'tl') => {
         setIsResizing(true)
+        onInteractionStart()
         const currentWidth = typeof size.width === 'number' ? size.width : event.target.parentElement.offsetWidth
         const currentHeight = typeof size.height === 'number' ? size.height : event.target.parentElement.offsetHeight
 
@@ -235,7 +250,12 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
         onUpdate(updates)
 
         onSavingStart()
-        await updateMoodBlockLayout(block.id, updates)
+        const result = await updateMoodBlockLayout(block.id, updates)
+
+        if (result?.error) {
+            toast.error("Erro ao salvar tamanho")
+            // Rollback visual state if possible, or just warn.
+        }
         onSavingEnd()
     }
 
@@ -244,6 +264,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
     }
 
     const rotate = async () => {
+        onInteractionStart()
         const newRotation = (localRotation + 15) % 360
         setLocalRotation(newRotation)
 
@@ -251,7 +272,14 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
         onUpdate({ rotation: newRotation })
 
         onSavingStart()
-        await updateMoodBlockLayout(block.id, { rotation: newRotation })
+        const result = await updateMoodBlockLayout(block.id, { rotation: newRotation })
+
+        if (result?.error) {
+            toast.error("Erro ao salvar rotação")
+            // Revert rotation locally
+            setLocalRotation(localRotation) // restoration to old state
+            onUpdate({ rotation: localRotation })
+        }
         onSavingEnd()
     }
 
