@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
+//teste
 export const metadata: Metadata = {
   title: "MoodSpace | Seu espaço, seu mood",
   description: "Crie e compartilhe seu mural pessoal estético e imersivo.",
