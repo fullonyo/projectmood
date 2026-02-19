@@ -100,6 +100,8 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
     const validatedData: any = { ...validation.data };
     if (typeof validatedData.x === 'number') validatedData.x = Math.max(0, Math.min(100, validatedData.x));
     if (typeof validatedData.y === 'number') validatedData.y = Math.max(0, Math.min(100, validatedData.y));
+    if (typeof validatedData.width === 'number') validatedData.width = Math.round(Math.max(40, Math.min(2000, validatedData.width)));
+    if (typeof validatedData.height === 'number') validatedData.height = Math.round(Math.max(40, Math.min(2000, validatedData.height)));
 
     try {
         await prisma.moodBlock.update({

@@ -28,8 +28,8 @@ export const MoodBlockContentSchema = z.any()
 export const CanvasPositionSchema = z.object({
     x: z.number().min(0).max(100).optional(),
     y: z.number().min(0).max(100).optional(),
-    width: z.number().positive().optional(),
-    height: z.number().positive().optional()
+    width: z.number().positive().int().max(2000).optional(),
+    height: z.number().positive().int().max(2000).optional()
 })
 
 // Validação para criar bloco
@@ -43,8 +43,8 @@ export const CreateMoodBlockSchema = z.object({
 export const UpdateMoodBlockLayoutSchema = z.object({
     x: z.number().min(0).max(100).optional(),
     y: z.number().min(0).max(100).optional(),
-    width: z.number().positive().optional(),
-    height: z.number().positive().optional(),
+    width: z.number().positive().int().max(2000).optional(),
+    height: z.number().positive().int().max(2000).optional(),
     zIndex: z.number().int().optional(),
     rotation: z.number().optional(),
     content: MoodBlockContentSchema.optional()

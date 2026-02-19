@@ -25,6 +25,8 @@ export function useCanvasManager(initialBlocks: Block[]) {
 
     // 3. PERSISTENCE QUEUE: Debounce saving
     const saveTimers = useRef<Record<string, NodeJS.Timeout>>({});
+    // 4. PENDING UPDATES: Accumulate updates between debounce cycles
+    const pendingUpdates = useRef<Record<string, Partial<Block>>>({});
 
     // Smart Sync from Server Props
     useEffect(() => {
@@ -41,6 +43,8 @@ export function useCanvasManager(initialBlocks: Block[]) {
                 const hasChanged =
                     Math.abs(initial.x - current.x) > 0.001 ||
                     Math.abs(initial.y - current.y) > 0.001 ||
+                    initial.width !== current.width ||
+                    initial.height !== current.height ||
                     initial.zIndex !== current.zIndex ||
                     initial.rotation !== current.rotation ||
                     JSON.stringify(initial.content) !== JSON.stringify(current.content);
@@ -68,16 +72,22 @@ export function useCanvasManager(initialBlocks: Block[]) {
             return updatedBlock;
         }));
 
+        // ACCUMULATE pending updates (don't lose previous ones!)
+        pendingUpdates.current[id] = { ...pendingUpdates.current[id], ...updates };
+
         // Debounced Backend Persistence
         if (saveTimers.current[id]) clearTimeout(saveTimers.current[id]);
 
         saveTimers.current[id] = setTimeout(async () => {
             setIsSaving(true);
+            // Grab ALL accumulated updates and clear
+            const mergedUpdates = { ...pendingUpdates.current[id] };
+            delete pendingUpdates.current[id];
+
+
             try {
-                // Here we pick the MOST RECENT values from our reference state
-                // But since we are in a closure, we use the values passed to updateBlock
-                // as a starting point, but we could also use a ref to the full state.
-                const result = await updateMoodBlockLayout(id, updates);
+                const result = await updateMoodBlockLayout(id, mergedUpdates);
+
                 if (result?.error) throw new Error(result.error);
 
                 // Release lock after stabilization

@@ -111,7 +111,9 @@ export function PublicMoodPageClient({ user, profile, moodBlocks, config, theme 
                             style={{
                                 left: `${block.x}%`,
                                 top: `${block.y}%`,
-                                rotate: block.rotation || 0,
+                                width: block.width || 'auto',
+                                height: block.height || 'auto',
+                                rotate: block.rotation ? `${block.rotation}deg` : undefined,
                                 zIndex: block.zIndex || 1,
                             }}
                         >

@@ -34,8 +34,8 @@ export default async function PublicMoodPage({
 }: Props) {
     const { username } = await params;
 
-    const { getPublicProfileCached } = await import("@/lib/data-fetching");
-    const user = await getPublicProfileCached(username);
+    const { getProfileWithTags } = await import("@/lib/data-fetching");
+    const user = await getProfileWithTags(username);
 
     if (!user || !user.profile) notFound();
 

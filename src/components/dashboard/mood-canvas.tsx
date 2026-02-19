@@ -11,6 +11,7 @@ import { BackgroundEffect } from "../effects/background-effect"
 import { StaticTextures } from "../effects/static-textures"
 import { BoardStage } from "./board-stage"
 import { useCanvasManager } from "@/hooks/use-canvas-manager"
+import { calculateResize, getResizeCursor, type ResizeHandle } from "@/lib/canvas-transforms"
 
 
 interface MoodCanvasProps {
@@ -156,15 +157,58 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     const [isDragging, setIsDragging] = useState(false)
     const [isResizing, setIsResizing] = useState(false)
     const [localRotation, setLocalRotation] = useState(block.rotation || 0)
+    const [shiftHeld, setShiftHeld] = useState(false)
     const [size, setSize] = useState({
-        width: block.width || 'auto',
-        height: block.height || 'auto'
+        width: block.width || 'auto' as number | 'auto',
+        height: block.height || 'auto' as number | 'auto'
     })
+    const [localPosition, setLocalPosition] = useState({ x: block.x, y: block.y })
+
+    // ─── REFS: Source of truth for gesture handlers (avoid stale closures) ───
+    const sizeRef = useRef(size)
+    const positionRef = useRef(localPosition)
+    const isResizingRef = useRef(false)
+
+    // Keep refs in sync with state
+    useEffect(() => { sizeRef.current = size }, [size])
+    useEffect(() => { positionRef.current = localPosition }, [localPosition])
 
     // 🏎️ GPU-ACCELERATED VALUES: MotionValues bypass the React Render cycle
-    // for silky smooth 60fps movement.
     const mvX = useMotionValue(0)
     const mvY = useMotionValue(0)
+
+    // Sync size with server props (when not actively resizing)
+    useEffect(() => {
+        if (!isResizingRef.current) {
+            const newSize = {
+                width: block.width || 'auto' as number | 'auto',
+                height: block.height || 'auto' as number | 'auto'
+            }
+            setSize(newSize)
+            sizeRef.current = newSize
+        }
+    }, [block.width, block.height])
+
+    // Sync position with server props (when not resizing/dragging)
+    useEffect(() => {
+        if (!isResizingRef.current && !isDragging) {
+            const newPos = { x: block.x, y: block.y }
+            setLocalPosition(newPos)
+            positionRef.current = newPos
+        }
+    }, [block.x, block.y, isDragging])
+
+    // Shift key tracking for aspect ratio lock
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(true) }
+        const onKeyUp = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(false) }
+        window.addEventListener('keydown', onKeyDown)
+        window.addEventListener('keyup', onKeyUp)
+        return () => {
+            window.removeEventListener('keydown', onKeyDown)
+            window.removeEventListener('keyup', onKeyUp)
+        }
+    }, [])
 
     const handleDragStart = () => {
         setIsDragging(true)
@@ -177,55 +221,73 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
 
         const canvasRect = canvasRef.current.getBoundingClientRect()
 
-        // Calculate final percentages
         const deltaXPercent = (info.offset.x / canvasRect.width) * 100
         const deltaYPercent = (info.offset.y / canvasRect.height) * 100
 
         const newX = parseFloat(Math.max(0, Math.min(100, block.x + deltaXPercent)).toFixed(4))
         const newY = parseFloat(Math.max(0, Math.min(100, block.y + deltaYPercent)).toFixed(4))
 
-        // Update the Sovereign Manager (Debounced saving happens in the hook)
         onUpdate({ x: newX, y: newY })
 
-        // Reset motion values so the 'left/top' props take over again
         mvX.set(0)
         mvY.set(0)
     }
 
-    const handleResize = (event: any, info: any, corner: 'br' | 'bl' | 'tr' | 'tl') => {
+    // ─── Figma-like Resize (reads from REFS to avoid stale closures) ────
+    const handleResize = (event: any, info: any, handle: ResizeHandle) => {
+        if (!canvasRef.current) return
         setIsResizing(true)
-        const currentWidth = typeof size.width === 'number' ? size.width : event.target.parentElement.offsetWidth
-        const currentHeight = typeof size.height === 'number' ? size.height : event.target.parentElement.offsetHeight
+        isResizingRef.current = true
 
-        let newWidth = currentWidth
-        let newHeight = currentHeight
+        const canvasRect = canvasRef.current.getBoundingClientRect()
 
-        if (corner === 'br') {
-            newWidth = currentWidth + info.delta.x
-            newHeight = currentHeight + info.delta.y
-        } else if (corner === 'bl') {
-            newWidth = currentWidth - info.delta.x
-            newHeight = currentHeight + info.delta.y
-        } else if (corner === 'tr') {
-            newWidth = currentWidth + info.delta.x
-            newHeight = currentHeight - info.delta.y
-        } else if (corner === 'tl') {
-            newWidth = currentWidth - info.delta.x
-            newHeight = currentHeight - info.delta.y
-        }
+        // Read from REFS (always latest values, immune to stale closures)
+        const currentSize = sizeRef.current
+        const currentPos = positionRef.current
 
-        setSize({
-            width: Math.max(60, newWidth),
-            height: Math.max(30, newHeight)
-        })
+        const currentWidth = typeof currentSize.width === 'number' ? currentSize.width : event.target.closest('.absolute')?.offsetWidth || 200
+        const currentHeight = typeof currentSize.height === 'number' ? currentSize.height : event.target.closest('.absolute')?.offsetHeight || 100
+
+        const result = calculateResize(
+            handle,
+            info.delta.x,
+            info.delta.y,
+            { x: currentPos.x, y: currentPos.y, width: currentWidth, height: currentHeight },
+            canvasRect.width,
+            canvasRect.height,
+            shiftHeld
+        )
+
+        // Update BOTH state (for React render) and refs (for next gesture frame)
+        const newSize = { width: result.width, height: result.height }
+        const newPos = { x: result.x, y: result.y }
+        setSize(newSize)
+        setLocalPosition(newPos)
+        sizeRef.current = newSize
+        positionRef.current = newPos
     }
 
-    const handleResizeEnd = () => {
+    const handleResizeEnd = (handle: ResizeHandle) => {
         setIsResizing(false)
-        onUpdate({
-            width: typeof size.width === 'number' ? Math.round(size.width) : undefined,
-            height: typeof size.height === 'number' ? Math.round(size.height) : undefined
-        })
+        isResizingRef.current = false
+
+        // Read from REFS (guaranteed latest values after gesture)
+        const finalSize = sizeRef.current
+        const finalPos = positionRef.current
+
+        const updates: any = {}
+
+        if (typeof finalSize.width === 'number') updates.width = Math.round(finalSize.width)
+        if (typeof finalSize.height === 'number') updates.height = Math.round(finalSize.height)
+
+        // Send position for handles that move position
+        if (['tl', 'bl', 'tr', 'top', 'left'].includes(handle)) {
+            updates.x = finalPos.x
+            updates.y = finalPos.y
+        }
+
+
+        onUpdate(updates)
     }
 
     const handleDelete = () => onDeleteRequest(block.id)
@@ -239,10 +301,56 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     const [isInteracting, setIsInteracting] = useState(false)
     const isInteractiveBlock = ['video', 'music', 'guestbook', 'media'].includes(block.type)
 
-    // Reset interaction when deselected
     useEffect(() => {
         if (!isSelected) setIsInteracting(false)
     }, [isSelected])
+
+    // ─── Render Resize Handle ───────────────────────────────────────────
+    const renderHandle = (handle: ResizeHandle) => {
+        const isCorner = ['br', 'bl', 'tr', 'tl'].includes(handle)
+        const handleSize = isCorner ? 'w-2.5 h-2.5' : (
+            handle === 'top' || handle === 'bottom' ? 'w-6 h-2' : 'w-2 h-6'
+        )
+
+        const positionClasses: Record<ResizeHandle, string> = {
+            br: '-bottom-1.5 -right-1.5',
+            bl: '-bottom-1.5 -left-1.5',
+            tr: '-top-1.5 -right-1.5',
+            tl: '-top-1.5 -left-1.5',
+            top: '-top-1 left-1/2 -translate-x-1/2',
+            bottom: '-bottom-1 left-1/2 -translate-x-1/2',
+            left: 'top-1/2 -left-1 -translate-y-1/2',
+            right: 'top-1/2 -right-1 -translate-y-1/2',
+        }
+
+        return (
+            <div
+                key={handle}
+                onPointerDown={(e) => {
+                    e.stopPropagation()
+                    setIsResizing(true)
+                }}
+                onPointerUp={() => setIsResizing(false)}
+                className={cn(
+                    "absolute z-[1002] pointer-events-auto",
+                    positionClasses[handle],
+                    handleSize,
+                    "bg-white border-2 rounded-sm shadow-sm",
+                    isCorner ? "border-blue-500" : "border-blue-400"
+                )}
+                style={{ cursor: getResizeCursor(handle) }}
+            >
+                <motion.div
+                    onPan={(e, i) => handleResize(e, i, handle)}
+                    onPanEnd={() => handleResizeEnd(handle)}
+                    className="w-full h-full"
+                />
+            </div>
+        )
+    }
+
+    // All handles: 4 corners + 4 edges
+    const allHandles: ResizeHandle[] = ['br', 'bl', 'tr', 'tl', 'top', 'bottom', 'left', 'right']
 
     return (
         <motion.div
@@ -255,8 +363,8 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             style={{
                 x: mvX,
                 y: mvY,
-                left: `${block.x}%`,
-                top: `${block.y}%`,
+                left: `${localPosition.x}%`,
+                top: `${localPosition.y}%`,
                 width: size.width,
                 height: size.height,
                 rotate: localRotation,
@@ -271,8 +379,6 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             onClick={(e) => {
                 if (isInteracting) return
                 e.stopPropagation()
-                // Evita o "toggle" que desmarca o bloco ao clicar nele. 
-                // Seleção mantida; deseleção apenas no canvas.
                 onSelect(false)
             }}
             onDoubleClick={(e) => {
@@ -286,7 +392,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 isSelected ? "cursor-default" : "cursor-grab active:cursor-grabbing"
             )}
         >
-            {/* Selection Border Outline (Standardized) */}
+            {/* Selection Border Outline */}
             {isSelected && (
                 <div
                     className={cn(
@@ -341,71 +447,10 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 </div>
             )}
 
-            {/* Resize Handles (Corners) */}
+            {/* Resize Handles — 4 Corners + 4 Edges */}
             {isSelected && (
                 <>
-                    {/* BR */}
-                    <div
-                        onPointerDown={(e) => {
-                            e.stopPropagation()
-                            setIsResizing(true)
-                        }}
-                        onPointerUp={() => setIsResizing(false)}
-                        className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-nwse-resize z-[1002] pointer-events-auto shadow-sm"
-                    >
-                        <motion.div
-                            onPan={(e, i) => handleResize(e, i, 'br')}
-                            onPanEnd={handleResizeEnd}
-                            className="w-full h-full"
-                        />
-                    </div>
-                    {/* BL */}
-                    <div
-                        onPointerDown={(e) => {
-                            e.stopPropagation()
-                            setIsResizing(true)
-                        }}
-                        onPointerUp={() => setIsResizing(false)}
-                        className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-nesw-resize z-[1002] pointer-events-auto shadow-sm"
-                    >
-                        <motion.div
-                            onPan={(e, i) => handleResize(e, i, 'bl')}
-                            onPanEnd={handleResizeEnd}
-                            className="w-full h-full"
-                        />
-                    </div>
-                    {/* TR */}
-                    <div
-                        onPointerDown={(e) => {
-                            e.stopPropagation()
-                            setIsResizing(true)
-                        }}
-                        onPointerUp={() => setIsResizing(false)}
-                        className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-nesw-resize z-[1002] pointer-events-auto shadow-sm"
-                    >
-                        <motion.div
-                            onPan={(e, i) => handleResize(e, i, 'tr')}
-                            onPanEnd={handleResizeEnd}
-                            className="w-full h-full"
-                        />
-                    </div>
-                    {/* TL */}
-                    <div
-                        onPointerDown={(e) => {
-                            e.stopPropagation()
-                            setIsResizing(true)
-                        }}
-                        onPointerUp={() => setIsResizing(false)}
-                        className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-nwse-resize z-[1002] pointer-events-auto shadow-sm"
-                    >
-                        <motion.div
-                            onPan={(e, i) => handleResize(e, i, 'tl')}
-                            onPanEnd={handleResizeEnd}
-                            className="w-full h-full"
-                        />
-                    </div>
-
-                    {/* Selection Border Overlay */}
+                    {allHandles.map(renderHandle)}
                     <div className="absolute inset-0 border border-blue-500/20 pointer-events-none" />
                 </>
             )}
