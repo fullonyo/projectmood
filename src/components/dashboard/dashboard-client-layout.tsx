@@ -24,40 +24,67 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
     const [localBlocks, setLocalBlocks] = useState(moodBlocks);
     const [localProfile, setLocalProfile] = useState(profile);
 
-    const [lastInteraction, setLastInteraction] = useState(0);
-
-    // Sync with server data (with protection)
+    // Sync with server data (Smart Merge Strategy)
     useEffect(() => {
-        const timeSinceLastInteraction = Date.now() - lastInteraction;
-        // Only sync if user hasn't interacted recently (blindagem de 2s)
-        if (timeSinceLastInteraction > 2000) {
-            setLocalBlocks(moodBlocks);
-        }
-    }, [moodBlocks, lastInteraction]);
+        setLocalBlocks(prevLocalBlocks => {
+            const now = Date.now();
+            const localMap = new Map(prevLocalBlocks.map(b => [b.id, b]));
+
+            // Se o servidor trouxe novos blocos, vamos mesclar
+            const mergedBlocks = moodBlocks.map(serverBlock => {
+                const localBlock = localMap.get(serverBlock.id);
+
+                // Se não temos localmente (novo do servidor), aceitamos
+                if (!localBlock) return serverBlock;
+
+                // Verificamos se houve edição local recente (Soberania Local - 5s)
+                const lastEdit = (localBlock as any)._localUpdatedAt || 0;
+                const isRecentlyEdited = (now - lastEdit) < 5000;
+
+                if (isRecentlyEdited) {
+                    // Mantemos a versão local para evitar "pulo" visual
+                    return localBlock;
+                }
+
+                // Se não foi editado recentemente, aceitamos a verdade do servidor (Sync)
+                // Mas preservamos o _localUpdatedAt para não perder referência num ciclo rápido
+                return {
+                    ...serverBlock,
+                    _localUpdatedAt: lastEdit
+                };
+            });
+
+            // Precisamos garantir que blocos criados otimistamente (ainda não no servidor) não sumam?
+            // A lógica anterior substituía tudo: setLocalBlocks(moodBlocks).
+            // Isso significava que criações otimistas dependiam de revalidate rápido ou eram adicionadas ao array moodBlocks antes.
+            // Vamos manter o comportamento de "fonte da verdade é o servidor" para adição/remoção,
+            // focando o Smart Merge apenas na ATUALIZAÇÃO de propriedades.
+
+            return mergedBlocks;
+        });
+    }, [moodBlocks]);
 
     useEffect(() => {
         setLocalProfile(profile);
     }, [profile]);
 
-    const handleInteractionStart = () => {
-        setLastInteraction(Date.now());
-    };
-
     const handleUpdateLocalBlock = (id: string, updates: any) => {
         setLocalBlocks(prev => prev.map(block => {
             if (block.id !== id) return block;
 
+            // Injeta timestamp de modificação local para o Smart Merge
+            const updatedBlock = {
+                ...block,
+                ...updates,
+                _localUpdatedAt: Date.now()
+            };
+
             // Se updates contém 'content', fazemos merge profundo do content
             if (updates.content) {
-                return {
-                    ...block,
-                    ...updates,
-                    content: { ...((block.content as any) || {}), ...updates.content }
-                };
+                updatedBlock.content = { ...((block.content as any) || {}), ...updates.content };
             }
 
-            // Senão, merge raso na raiz (para x, y, rotation, etc)
-            return { ...block, ...updates };
+            return updatedBlock;
         }));
     };
 
@@ -82,7 +109,6 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                     selectedId={selectedId}
                     setSelectedId={setSelectedId}
                     onUpdateBlock={handleUpdateLocalBlock}
-                    onInteractionStart={handleInteractionStart}
                 />
             </div>
 

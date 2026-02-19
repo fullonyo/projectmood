@@ -19,7 +19,6 @@ interface MoodCanvasProps {
     selectedId: string | null
     setSelectedId: (id: string | null) => void
     onUpdateBlock: (id: string, content: any) => void
-    onInteractionStart: () => void
 }
 
 export function MoodCanvas({
@@ -28,8 +27,7 @@ export function MoodCanvas({
     backgroundEffect,
     selectedId,
     setSelectedId,
-    onUpdateBlock,
-    onInteractionStart
+    onUpdateBlock
 }: MoodCanvasProps) {
     const canvasRef = useRef<HTMLDivElement>(null)
     const [maxZ, setMaxZ] = useState(10)
@@ -50,7 +48,6 @@ export function MoodCanvas({
     }, [blocks])
 
     const bringToFront = async (blockId: string) => {
-        onInteractionStart() // Renova blindagem
         const newZ = maxZ + 1
         setMaxZ(newZ)
 
@@ -112,7 +109,6 @@ export function MoodCanvas({
                         profile={profile}
                         themeConfig={config}
                         onSelect={(toggle = false) => {
-                            onInteractionStart() // Renova blindagem ao clicar/selecionar
                             if (toggle && selectedId === block.id) {
                                 // Se for toggle e já estiver selecionado, deselecionar
                                 setSelectedId(null)
@@ -128,7 +124,6 @@ export function MoodCanvas({
                         onDeleteRequest={(id) => setBlockToDelete(id)}
                         onSavingStart={() => setIsSaving(true)}
                         onSavingEnd={() => setIsSaving(false)}
-                        onInteractionStart={onInteractionStart}
                     />
                 ))}
             </BoardStage>
@@ -159,7 +154,7 @@ export function MoodCanvas({
 }
 
 
-function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSavingStart, onSavingEnd, profile, themeConfig, onDeleteRequest, onInteractionStart }: {
+function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSavingStart, onSavingEnd, profile, themeConfig, onDeleteRequest }: {
     block: any,
     canvasRef: React.RefObject<HTMLDivElement | null>,
     isSelected: boolean,
@@ -169,8 +164,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
     onSavingEnd: () => void,
     profile: any,
     themeConfig: any,
-    onDeleteRequest: (id: string) => void,
-    onInteractionStart: () => void
+    onDeleteRequest: (id: string) => void
 }) {
     const [isDragging, setIsDragging] = useState(false)
     const [isResizing, setIsResizing] = useState(false)
@@ -183,7 +177,6 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
     const handleDragStart = () => {
         setIsDragging(true)
         onSelect(false) // Force select on drag start (never toggle off)
-        onInteractionStart()
     }
 
     const handleDragEnd = async (event: any, info: any) => {
@@ -221,7 +214,6 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
 
     const handleResize = (event: any, info: any, corner: 'br' | 'bl' | 'tr' | 'tl') => {
         setIsResizing(true)
-        onInteractionStart()
         const currentWidth = typeof size.width === 'number' ? size.width : event.target.parentElement.offsetWidth
         const currentHeight = typeof size.height === 'number' ? size.height : event.target.parentElement.offsetHeight
 
@@ -274,7 +266,6 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
     }
 
     const rotate = async () => {
-        onInteractionStart()
         const newRotation = (localRotation + 15) % 360
         setLocalRotation(newRotation)
 
