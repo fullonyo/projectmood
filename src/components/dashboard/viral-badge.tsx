@@ -27,7 +27,7 @@ export function ViralBadge() {
                     </span>
                     <div className="flex items-center gap-1.5 opacity-40">
                         <span className="text-[6px] font-bold uppercase tracking-tighter italic">Registration open</span>
-                        <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                        <div className="w-1 h-1 bg-current animate-pulse" />
                     </div>
                 </div>
 

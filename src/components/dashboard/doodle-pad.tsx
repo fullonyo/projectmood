@@ -98,29 +98,31 @@ export function DoodlePad() {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
-                    <Brush className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                    <Brush className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">The Doodle Spot</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Doodle_Draft_Protocol</h3>
             </div>
 
-            <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl p-4 space-y-4 border border-zinc-100 dark:border-zinc-800 shadow-sm">
-                <canvas
-                    ref={canvasRef}
-                    width={240}
-                    height={200}
-                    onMouseDown={startPosition}
-                    onMouseUp={finishedPosition}
-                    onMouseMove={draw}
-                    onTouchStart={startPosition}
-                    onTouchEnd={finishedPosition}
-                    onTouchMove={draw}
-                    className="w-full bg-white dark:bg-zinc-950 rounded-2xl cursor-crosshair touch-none shadow-inner border border-zinc-100 dark:border-zinc-900"
-                />
+            <div className="border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
+                <div className="p-5 bg-zinc-50/50 dark:bg-zinc-900/30 border-b border-zinc-100 dark:border-zinc-900">
+                    <canvas
+                        ref={canvasRef}
+                        width={240}
+                        height={200}
+                        onMouseDown={startPosition}
+                        onMouseUp={finishedPosition}
+                        onMouseMove={draw}
+                        onTouchStart={startPosition}
+                        onTouchEnd={finishedPosition}
+                        onTouchMove={draw}
+                        className="w-full bg-white dark:bg-zinc-950 cursor-crosshair touch-none border border-zinc-200 dark:border-zinc-800 grayscale invert dark:invert-0"
+                    />
+                </div>
 
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex gap-1.5 p-1 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-100 dark:border-zinc-700">
+                <div className="p-5 space-y-6">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                             {[2, 4, 8, 12].map(size => (
                                 <button
                                     key={size}
@@ -128,50 +130,53 @@ export function DoodlePad() {
                                         const ctx = canvasRef.current?.getContext("2d")
                                         if (ctx) ctx.lineWidth = size
                                     }}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all"
+                                    className="w-8 h-8 flex items-center justify-center border-r last:border-r-0 border-zinc-100 dark:border-zinc-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all group"
                                 >
                                     <div
-                                        className="bg-zinc-400 rounded-full"
+                                        className="bg-current rounded-full transition-all"
                                         style={{ width: size, height: size }}
                                     />
                                 </button>
                             ))}
                         </div>
-                        <div className="flex gap-1.5">
+                        <div className="flex gap-2">
                             <button
                                 onClick={clear}
-                                className="p-2 hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-all border border-transparent hover:border-zinc-100 dark:hover:border-zinc-700 shadow-sm"
-                                title="Limpar"
+                                className="w-10 h-10 flex items-center justify-center border border-zinc-100 dark:border-zinc-900 bg-white/50 dark:bg-zinc-900 text-zinc-400 hover:text-black dark:hover:text-white transition-all"
+                                title="RESET_BUFFER"
                             >
-                                <Eraser className="w-4 h-4 text-zinc-400" />
+                                <Eraser className="w-4 h-4" />
                             </button>
                             <Button
                                 onClick={save}
                                 disabled={isPending}
-                                className="bg-black dark:bg-white text-white dark:text-black rounded-xl w-10 h-10 p-0 flex items-center justify-center hover:scale-[1.05] transition-all shadow-md"
-                                title="Colar no mural"
+                                className="bg-black dark:bg-white text-white dark:text-black rounded-none w-10 h-10 p-0 flex items-center justify-center hover:scale-[1.05] active:scale-95 transition-all shadow-none border border-black dark:border-white"
+                                title="MANIFEST_NODE"
                             >
                                 <Plus className="w-4 h-4" />
                             </Button>
                         </div>
                     </div>
 
-                    <div className="flex gap-1.5 overflow-x-auto custom-scrollbar pb-2 -mx-1 px-1">
-                        {['#000', '#666', '#FF0000', '#FF7F00', '#FFD700', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#ffffff'].map(c => (
-                            <button
-                                key={c}
-                                onClick={() => setColor(c)}
-                                className={cn(
-                                    "w-6 h-6 rounded-full border border-black/5 transition-all hover:scale-125 shrink-0",
-                                    color === c && "ring-2 ring-zinc-400 scale-125 z-10 mx-1"
-                                )}
-                                style={{ backgroundColor: c }}
-                            />
-                        ))}
+                    <div className="space-y-3">
+                        <p className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-400">Identity_Chrome_Nodes</p>
+                        <div className="flex gap-1.5 overflow-x-auto custom-scrollbar pb-2 -mx-1 px-1">
+                            {['#000', '#666', '#FF0000', '#FF7F00', '#FFD700', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#ffffff'].map(c => (
+                                <button
+                                    key={c}
+                                    onClick={() => setColor(c)}
+                                    className={cn(
+                                        "w-5 h-5 border border-black/10 transition-all hover:scale-125 shrink-0",
+                                        color === c && "ring-1 ring-black dark:ring-white scale-125 z-10 mx-0.5"
+                                    )}
+                                    style={{ backgroundColor: c }}
+                                />
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
-            <p className="text-[10px] text-zinc-500 italic text-center">Faça um rabisco e cole no mural</p>
+            <p className="text-[7px] text-zinc-400 font-black uppercase tracking-widest text-center opacity-30">Manifest_Doodle // Kinetic_Expression</p>
         </div>
     )
 }

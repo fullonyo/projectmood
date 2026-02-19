@@ -1,8 +1,8 @@
 "use client"
 
 import { useTransition, useState } from 'react'
-import { Label } from "@/components/ui/label"
 import { updateProfile } from "@/actions/profile"
+import { cn } from "@/lib/utils"
 import {
     MousePointer2,
     Sparkles,
@@ -81,67 +81,68 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
 
     return (
         <div className="space-y-8 p-1">
-            {/* Cursors */}
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 text-white/80">
-                    <MousePointer2 className="w-4 h-4" />
-                    <Label>Cursor Style</Label>
+            <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                        <MousePointer2 className="w-3.5 h-3.5 text-black dark:text-white" />
+                    </div>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Cursor_Node</h3>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 border border-zinc-200 dark:border-zinc-800">
                     {cursors.map((c) => (
                         <button
                             key={c.id}
                             disabled={isPending}
                             onClick={() => handleUpdate('customCursor', c.id)}
-                            className={`
-                                p-3 rounded-xl border flex flex-col items-center gap-2 transition-all
-                                ${profile.customCursor === c.id
-                                    ? 'bg-white/10 border-white/40 shadow-lg scale-105'
-                                    : 'bg-zinc-900/50 border-white/5 hover:bg-white/5 hover:border-white/20'
-                                }
-                            `}
+                            className={cn(
+                                "p-4 border-r last:border-r-0 border-zinc-200 dark:border-zinc-800 flex flex-col items-center gap-2 transition-all group",
+                                profile.customCursor === c.id
+                                    ? "bg-black text-white dark:bg-white dark:text-black"
+                                    : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
+                            )}
                         >
-                            <c.icon className="w-5 h-5 text-white/70" />
-                            <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">{c.name}</span>
+                            <c.icon className="w-4 h-4" />
+                            <span className="text-[8px] font-black uppercase tracking-[0.2em]">{c.name}</span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Mouse Trails */}
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 text-white/80">
-                    <Sparkles className="w-4 h-4" />
-                    <Label>Rastro do Mouse</Label>
+            <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                        <Sparkles className="w-3.5 h-3.5 text-black dark:text-white" />
+                    </div>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Interaction_Trails</h3>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 border border-zinc-200 dark:border-zinc-800">
                     {trails.map((t) => (
                         <button
                             key={t.id}
                             disabled={isPending}
                             onClick={() => handleUpdate('mouseTrails', t.id)}
-                            className={`
-                                p-3 rounded-xl border flex items-center gap-3 transition-all
-                                ${profile.mouseTrails === t.id
-                                    ? 'bg-white/10 border-white/40 shadow-lg'
-                                    : 'bg-zinc-900/50 border-white/5 hover:bg-white/5 hover:border-white/20'
-                                }
-                            `}
+                            className={cn(
+                                "p-4 border-r last:border-r-0 border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-3 transition-all group",
+                                profile.mouseTrails === t.id
+                                    ? "bg-black text-white dark:bg-white dark:text-black"
+                                    : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
+                            )}
                         >
-                            <t.icon className="w-4 h-4 text-white/70" />
-                            <span className="text-xs font-medium opacity-80">{t.name}</span>
+                            <t.icon className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
+                            <span className="text-[8px] font-black uppercase tracking-[0.2em]">{t.name}</span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Background Effects */}
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 text-white/80">
-                    <Wallpaper className="w-4 h-4" />
-                    <Label>Efeito de Fundo</Label>
+            <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                        <Wallpaper className="w-3.5 h-3.5 text-black dark:text-white" />
+                    </div>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Atmosphere_Registry</h3>
                 </div>
-                <div className="grid grid-cols-1 gap-2">
+                <div className="grid grid-cols-1 border border-zinc-200 dark:border-zinc-800">
                     {backgrounds.map((b) => {
                         const isSelected = profile.backgroundEffect === b.id
                         return (
@@ -149,28 +150,25 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                                 key={b.id}
                                 disabled={isPending}
                                 onClick={() => handleUpdate('backgroundEffect', b.id)}
-                                className={`
-                                w-full p-4 rounded-xl border flex items-center justify-between transition-all group relative overflow-hidden
-                                ${isSelected
-                                        ? 'bg-white/10 border-white/40'
-                                        : 'bg-zinc-900/50 border-white/5 hover:bg-white/5 hover:border-white/20'
-                                    }
-                            `}
+                                className={cn(
+                                    "w-full p-4 border-b last:border-b-0 border-zinc-200 dark:border-zinc-800 flex items-center justify-between transition-all group relative overflow-hidden",
+                                    isSelected
+                                        ? "bg-black text-white dark:bg-white dark:text-black"
+                                        : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
+                                )}
                             >
                                 <div className="flex items-center gap-3 z-10 relative">
-                                    <div className="p-2 bg-black/20 rounded-full">
-                                        <b.icon className="w-4 h-4 text-white/70" />
+                                    <div className="p-2 border border-current opacity-20">
+                                        <b.icon className="w-3.5 h-3.5" />
                                     </div>
-                                    <span className="text-sm font-medium">{b.name}</span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{b.name}</span>
                                 </div>
 
-                                {/* Preview mini-bg */}
-                                {b.id === 'aurora' && <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-blue-500 to-pink-500 pointer-events-none" />}
-                                {b.id === 'noise' && <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none" />}
-                                {b.id === 'grid-move' && <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none" />}
-
                                 {isSelected && (
-                                    <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)] z-10" />
+                                    <div className="flex items-center gap-1.5 z-10">
+                                        <div className="w-1.5 h-1.5 bg-current animate-pulse" />
+                                        <span className="text-[7px] font-mono opacity-50 uppercase tracking-tighter">Active Protocol</span>
+                                    </div>
                                 )}
                             </button>
                         )
@@ -178,18 +176,18 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                 </div>
             </div>
 
-            <div className="h-4 flex items-center justify-center">
+            <div className="h-6 flex items-center justify-center">
                 {isPending && (
-                    <div className="flex items-center justify-center gap-2 text-xs text-white/50 animate-pulse">
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        Salvando alterações...
+                    <div className="flex items-center justify-center gap-2 text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 animate-pulse">
+                        <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                        Synchronizing_Protocol
                     </div>
                 )}
 
                 {showSuccess && !isPending && (
-                    <div className="flex items-center justify-center gap-2 text-xs text-green-400 animate-in fade-in slide-in-from-bottom-1">
-                        <Check className="w-3 h-3" />
-                        Salvo com sucesso!
+                    <div className="flex items-center justify-center gap-2 text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500">
+                        <Check className="w-2.5 h-2.5" />
+                        Protocol_Deployed
                     </div>
                 )}
             </div>

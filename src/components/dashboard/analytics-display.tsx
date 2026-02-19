@@ -10,9 +10,9 @@ interface AnalyticsDisplayProps {
 
 export function AnalyticsDisplay({ views, loading }: AnalyticsDisplayProps) {
     const getVibeStatus = (count: number) => {
-        if (count > 1000) return { label: "Viral Atmosphere", color: "text-purple-500" }
-        if (count > 100) return { label: "High Vibration", color: "text-blue-500" }
-        return { label: "Curated Space", color: "text-zinc-400" }
+        if (count > 1000) return { label: "Atmosphere_Viral", color: "text-white" }
+        if (count > 100) return { label: "Atmosphere_High", color: "text-white" }
+        return { label: "Atmosphere_Stable", color: "text-zinc-500" }
     }
 
     const vibe = getVibeStatus(views)

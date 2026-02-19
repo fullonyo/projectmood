@@ -42,119 +42,125 @@ export function QuoteEditor({ onAdd }: QuoteEditorProps) {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-zinc-200 dark:border-zinc-800">
-                <QuoteIcon className="w-4 h-4 text-zinc-500" />
-                <h3 className="font-bold text-sm uppercase tracking-wider">Quote</h3>
+        <div className="space-y-6">
+            <div className="flex items-center gap-3">
+                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                    <QuoteIcon className="w-3.5 h-3.5 text-black dark:text-white" />
+                </div>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Quote_Manifest_Protocol</h3>
             </div>
 
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Citação</Label>
-                    <Textarea
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        placeholder="Escreva uma citação inspiradora..."
-                        className="min-h-[100px] resize-none"
-                        maxLength={500}
-                    />
-                    <span className="text-[10px] text-zinc-400">{text.length}/500</span>
+            <div className="space-y-6 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
+                <div className="p-5 space-y-4">
+                    <div className="space-y-3">
+                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Identify_Manifest_Buffer</Label>
+                        <Textarea
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                            placeholder="INPUT_TEXTUAL_DOMAIN..."
+                            className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none min-h-[120px] text-[10px] uppercase font-mono tracking-tight focus-visible:ring-0 resize-none p-4"
+                            maxLength={500}
+                        />
+                        <div className="flex justify-between items-center px-1">
+                            <span className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">{text.length} // 500</span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Attribution_Source_Node</Label>
+                        <Input
+                            value={author}
+                            onChange={(e) => setAuthor(e.target.value)}
+                            placeholder="INPUT_SOURCE_IDENTITY..."
+                            maxLength={100}
+                            className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none h-11 text-[10px] font-mono tracking-tight focus-visible:ring-0 uppercase"
+                        />
+                    </div>
                 </div>
 
-                <div className="space-y-2">
-                    <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Autor (opcional)</Label>
-                    <Input
-                        value={author}
-                        onChange={(e) => setAuthor(e.target.value)}
-                        placeholder="Nome do autor"
-                        maxLength={100}
-                    />
-                </div>
-
-                <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Estilo da Citação</Label>
-                    <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 custom-scrollbar snap-x">
+                <div className="p-5 border-y border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
+                    <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-4 block text-center">Styling_Identity_Matrix</Label>
+                    <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                         {[
-                            { id: 'minimal', label: 'Minimal', preview: 'font-sans italic' },
-                            { id: 'bold', label: 'Impacto', preview: 'font-black uppercase tracking-tighter' },
-                            { id: 'serif', label: 'Clássico', preview: 'font-serif italic' },
-                            { id: 'modern', label: 'Modern', preview: 'font-mono' },
+                            { id: 'minimal', label: 'Neutral' },
+                            { id: 'bold', label: 'Impact' },
+                            { id: 'serif', label: 'Legacy' },
+                            { id: 'modern', label: 'Mono' },
                         ].map((s) => (
                             <button
                                 key={s.id}
                                 onClick={() => setStyle(s.id as any)}
                                 className={cn(
-                                    "flex flex-col items-center gap-2 p-3 rounded-2xl transition-all min-w-[90px] snap-start shrink-0 border-2",
+                                    "h-12 flex flex-col items-center justify-center border-r last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all",
                                     style === s.id
-                                        ? "border-black dark:border-white bg-white dark:bg-zinc-800 shadow-md outline-none scale-[1.02]"
-                                        : "border-transparent opacity-60 hover:opacity-100 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                                        ? "bg-black text-white dark:bg-white dark:text-black"
+                                        : "opacity-40 hover:opacity-100"
                                 )}
                             >
-                                <div className={cn("w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center text-xs overflow-hidden border border-zinc-200 dark:border-zinc-600 shadow-inner", s.preview)}>
-                                    Aa
-                                </div>
-                                <span className="text-[9px] font-black uppercase tracking-widest">{s.label}</span>
+                                <span className="text-[7px] font-black uppercase tracking-widest">{s.label}</span>
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-3">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Texto</Label>
-                        <div className="flex gap-2 group p-1 bg-white dark:bg-zinc-900 rounded-2xl shadow-inner border border-zinc-100 dark:border-zinc-800">
-                            <input
-                                type="color"
-                                value={color}
-                                onChange={(e) => setColor(e.target.value)}
-                                className="w-8 h-8 rounded-xl cursor-pointer border-none bg-transparent"
-                            />
-                            <input
-                                value={color}
-                                onChange={(e) => setColor(e.target.value)}
-                                className="flex-1 bg-transparent border-none text-[10px] font-mono outline-none uppercase w-full"
-                            />
+                <div className="p-5 space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-3">
+                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Chrome_Content</Label>
+                            <div className="flex gap-2 p-1 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                                <input
+                                    type="color"
+                                    value={color}
+                                    onChange={(e) => setColor(e.target.value)}
+                                    className="w-8 h-8 rounded-none cursor-pointer border-none bg-transparent"
+                                />
+                                <input
+                                    value={color}
+                                    onChange={(e) => setColor(e.target.value)}
+                                    className="flex-1 bg-transparent border-none text-[9px] font-mono outline-none uppercase w-full bg-zinc-100/50 dark:bg-zinc-800/50 px-2"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Chrome_Substrate</Label>
+                            <div className="flex gap-2 p-1 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                                <input
+                                    type="color"
+                                    value={bgColor}
+                                    onChange={(e) => setBgColor(e.target.value)}
+                                    className="w-8 h-8 rounded-none cursor-pointer border-none bg-transparent"
+                                />
+                                <input
+                                    value={bgColor}
+                                    onChange={(e) => setBgColor(e.target.value)}
+                                    className="flex-1 bg-transparent border-none text-[9px] font-mono outline-none uppercase w-full bg-zinc-100/50 dark:bg-zinc-800/50 px-2"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-3">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Fundo</Label>
-                        <div className="flex gap-2 group p-1 bg-white dark:bg-zinc-900 rounded-2xl shadow-inner border border-zinc-100 dark:border-zinc-800">
-                            <input
-                                type="color"
-                                value={bgColor}
-                                onChange={(e) => setBgColor(e.target.value)}
-                                className="w-8 h-8 rounded-xl cursor-pointer border-none bg-transparent"
-                            />
-                            <input
-                                value={bgColor}
-                                onChange={(e) => setBgColor(e.target.value)}
-                                className="flex-1 bg-transparent border-none text-[10px] font-mono outline-none uppercase w-full"
-                            />
-                        </div>
+                    <div className="flex items-center gap-3 py-2 border-t border-zinc-100 dark:border-zinc-900">
+                        <input
+                            type="checkbox"
+                            id="showQuotes"
+                            checked={showQuotes}
+                            onChange={(e) => setShowQuotes(e.target.checked)}
+                            className="w-3.5 h-3.5 border border-zinc-300 rounded-none accent-black dark:accent-white"
+                        />
+                        <Label htmlFor="showQuotes" className="text-[8px] font-black uppercase tracking-[0.2em] cursor-pointer text-zinc-500">
+                            Manifest_Decorative_Quotes
+                        </Label>
                     </div>
-                </div>
 
-                <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        id="showQuotes"
-                        checked={showQuotes}
-                        onChange={(e) => setShowQuotes(e.target.checked)}
-                        className="w-4 h-4 rounded border-zinc-300"
-                    />
-                    <Label htmlFor="showQuotes" className="text-xs cursor-pointer">
-                        Mostrar aspas decorativas
-                    </Label>
+                    <Button
+                        onClick={handleAdd}
+                        disabled={!text.trim()}
+                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
+                    >
+                        Deploy_Quote_Manifest
+                    </Button>
                 </div>
-
-                <Button
-                    onClick={handleAdd}
-                    disabled={!text.trim()}
-                    className="w-full bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black"
-                >
-                    Adicionar Citação
-                </Button>
             </div>
         </div>
     )

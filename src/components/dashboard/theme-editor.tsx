@@ -46,10 +46,10 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
         <div className="space-y-8">
             <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
-                        <Palette className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                    <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                        <Palette className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Vibes do Mural</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Vibe Protocols</h3>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 pt-2 -mx-1 px-1 custom-scrollbar snap-x">
                     {[
@@ -66,14 +66,14 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                             onClick={() => handleUpdate(vibe.data || { theme: vibe.id })}
                             disabled={isPending}
                             className={cn(
-                                "flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all min-w-[100px] snap-start shrink-0 group",
+                                "flex flex-col items-center justify-center p-4 border border-zinc-200 dark:border-zinc-800 transition-all min-w-[100px] snap-start shrink-0 group relative",
                                 currentTheme === vibe.id
-                                    ? "border-black dark:border-white bg-zinc-50 dark:bg-zinc-900 scale-[1.05] shadow-md"
-                                    : "border-transparent opacity-60 hover:opacity-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 shadow-sm"
+                                    ? "bg-black text-white border-black dark:bg-white dark:text-black dark:border-white scale-105"
+                                    : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
                             )}
                         >
-                            <div className={cn("w-full h-12 rounded-xl mb-3 border shadow-inner transition-transform group-hover:scale-95", vibe.colors)} />
-                            <span className="text-[10px] font-black uppercase tracking-widest leading-none">{vibe.label}</span>
+                            <div className={cn("w-full h-10 border border-zinc-100 dark:border-zinc-800 mb-3 grayscale", vibe.colors)} />
+                            <span className="text-[8px] font-black uppercase tracking-[0.2em]">{vibe.label}</span>
                         </button>
                     ))}
                 </div>
@@ -81,34 +81,36 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
 
             <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
-                        <MousePointer2 className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                    <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                        <MousePointer2 className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Cor dos Elementos</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Node_Luminance</h3>
                 </div>
-                <p className="text-[10px] text-zinc-500 italic leading-tight px-1">Define a cor dos textos, ícones e detalhes do fundo.</p>
+                <p className="text-[8px] text-zinc-400 uppercase tracking-widest leading-tight">Define visual intensity for core nodes.</p>
                 <div className="flex flex-wrap gap-2">
-                    {['#000000', '#FF0000', '#22C55E', '#3B82F6', '#A855F7', '#EC4899'].map(color => (
+                    {['#000000', '#FFFFFF', '#666666', '#FF0000', '#22C55E', '#3B82F6'].map(color => (
                         <button
                             key={color}
                             onClick={() => handleUpdate({ primaryColor: color })}
                             disabled={isPending}
                             className={cn(
-                                "w-10 h-10 rounded-full border-2 transition-all",
-                                currentPrimaryColor === color ? "border-zinc-400 scale-110" : "border-transparent"
+                                "w-10 h-10 border border-zinc-200 dark:border-zinc-800 transition-all relative overflow-hidden",
+                                currentPrimaryColor === color && "ring-1 ring-black dark:ring-white ring-offset-2 scale-110"
                             )}
                             style={{ backgroundColor: color }}
-                        />
+                        >
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 bg-white" />
+                        </button>
                     ))}
                 </div>
             </div>
 
             <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
-                        <Type className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+                    <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                        <Type className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Google Fonts</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Atomic_Typography</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                     {GOOGLE_FONTS.map(font => (
@@ -117,12 +119,11 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                             onClick={() => handleUpdate({ customFont: font.family })}
                             disabled={isPending}
                             className={cn(
-                                "h-11 px-3 rounded-xl border-2 transition-all flex items-center justify-between group",
-                                currentCustomFont === font.family ? "bg-zinc-100 dark:bg-zinc-800 border-black dark:border-white shadow-sm" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 opacity-70 hover:opacity-100"
+                                "h-11 px-4 border border-zinc-200 dark:border-zinc-800 transition-all flex items-center justify-between group",
+                                currentCustomFont === font.family ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white" : "bg-white dark:bg-zinc-950 opacity-70 hover:opacity-100"
                             )}
                         >
-                            <span className="text-[10px] font-bold truncate pr-2 uppercase tracking-tighter" style={{ fontFamily: font.family }}>{font.name}</span>
-                            <div className={cn("w-1.5 h-1.5 rounded-full", currentCustomFont === font.family ? "bg-black dark:bg-white" : "bg-zinc-200 dark:bg-zinc-700")} />
+                            <span className="text-[9px] font-black truncate pr-2 uppercase tracking-tighter" style={{ fontFamily: font.family }}>{font.name}</span>
                         </button>
                     ))}
                 </div>
@@ -135,22 +136,22 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                     </div>
                     <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Base System</h3>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 border border-zinc-200 dark:border-zinc-800">
                     {[
-                        { id: 'sans', label: 'Sans', font: 'font-sans' },
-                        { id: 'serif', label: 'Serif', font: 'font-serif' },
-                        { id: 'mono', label: 'Mono', font: 'font-mono' }
+                        { id: 'sans', label: 'SANS', font: 'font-sans' },
+                        { id: 'serif', label: 'SERIF', font: 'font-serif' },
+                        { id: 'mono', label: 'MONO', font: 'font-mono' }
                     ].map(f => (
                         <button
                             key={f.id}
                             onClick={() => handleUpdate({ fontStyle: f.id })}
                             disabled={isPending}
                             className={cn(
-                                "h-10 rounded-xl border-2 transition-all flex items-center justify-center",
-                                currentFontStyle === f.id ? "bg-zinc-100 dark:bg-zinc-800 border-black dark:border-white" : "bg-transparent border-transparent opacity-60 hover:opacity-100"
+                                "h-12 transition-all flex items-center justify-center border-r last:border-r-0 border-zinc-200 dark:border-zinc-800",
+                                currentFontStyle === f.id ? "bg-black text-white dark:bg-white dark:text-black" : "bg-transparent opacity-60 hover:opacity-100"
                             )}
                         >
-                            <span className={cn("text-xs font-medium", f.font)}>{f.label}</span>
+                            <span className={cn("text-[8px] font-black uppercase tracking-widest", f.font)}>{f.label}</span>
                         </button>
                     ))}
                 </div>

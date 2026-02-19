@@ -55,39 +55,39 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
         <div className="relative">
             <div className="flex items-center gap-2">
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={handleCopyLink}
-                    className="gap-2 text-xs"
+                    className="h-10 rounded-none border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-[0.2em] px-4 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                 >
                     {copied ? (
                         <>
-                            <Copy className="w-3.5 h-3.5 text-green-500" />
-                            Copiado!
+                            <Copy className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white" />
+                            // Copied
                         </>
                     ) : (
                         <>
                             <Copy className="w-3.5 h-3.5" />
-                            Copiar Link
+                            Share Link
                         </>
                     )}
                 </Button>
 
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => setShowQR(!showQR)}
-                    className="gap-2 text-xs"
+                    className="h-10 rounded-none border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-[0.2em] px-4 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                 >
                     <QrCode className="w-3.5 h-3.5" />
-                    QR Code
+                    QR CODE
                 </Button>
             </div>
 
             {showQR && (
-                <div className="absolute top-full right-0 mt-2 p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 z-50">
-                    <div className="space-y-3">
-                        <div className="bg-white p-3 rounded-lg">
+                <div className="absolute top-full right-0 mt-4 p-6 bg-white dark:bg-zinc-950 rounded-none border border-black dark:border-white z-50 shadow-2xl">
+                    <div className="space-y-4">
+                        <div className="bg-white p-4 border border-zinc-100">
                             <QRCodeSVG
                                 id="qr-code-svg"
                                 value={profileUrl}
@@ -97,18 +97,20 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <p className="text-xs text-zinc-500 text-center font-mono break-all px-2">
-                                {profileUrl}
-                            </p>
+                        <div className="space-y-4">
+                            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                                <p className="text-[8px] text-zinc-400 text-center font-mono break-all uppercase tracking-widest leading-relaxed">
+                                    {profileUrl}
+                                </p>
+                            </div>
 
                             <Button
                                 onClick={handleDownloadQR}
                                 size="sm"
-                                className="w-full gap-2"
+                                className="w-full h-12 bg-black dark:bg-white text-white dark:text-black rounded-none text-[10px] font-black uppercase tracking-[0.3em] hover:scale-[1.02] active:scale-95 transition-all"
                             >
-                                <Download className="w-3.5 h-3.5" />
-                                Baixar QR Code
+                                <Download className="w-3.5 h-3.5 mr-2" />
+                                Save Protocol QR
                             </Button>
                         </div>
                     </div>

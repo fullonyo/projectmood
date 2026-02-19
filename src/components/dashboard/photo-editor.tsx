@@ -102,82 +102,102 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-zinc-200 dark:border-zinc-800">
-                <ImageIcon className="w-4 h-4 text-zinc-500" />
-                <h3 className="font-bold text-sm uppercase tracking-wider">Foto</h3>
+        <div className="space-y-6">
+            <div className="flex items-center gap-3">
+                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                    <ImageIcon className="w-3.5 h-3.5 text-black dark:text-white" />
+                </div>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Image_Injection_Protocol</h3>
             </div>
 
             <div className="space-y-4">
                 {!imageUrl ? (
                     <div
                         {...getRootProps()}
-                        className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${isDragActive
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
-                            : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600'
-                            }`}
+                        className={cn(
+                            "border border-dashed p-10 text-center transition-all cursor-pointer bg-zinc-50/50 dark:bg-zinc-900/20",
+                            isDragActive
+                                ? 'border-black dark:border-white bg-zinc-100 dark:bg-zinc-800/50'
+                                : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
+                        )}
                     >
                         <input {...getInputProps()} />
-                        <Upload className="w-10 h-10 mx-auto mb-3 text-zinc-400" />
-                        <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                            {isDragActive ? 'Solte a imagem aqui' : 'Arraste uma imagem ou clique'}
+                        <Upload className="w-8 h-8 mx-auto mb-4 text-zinc-400 opacity-40" />
+                        <p className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-500">
+                            {isDragActive ? 'Drop_Link_Detected' : 'Inject_Visual_Buffer'}
                         </p>
-                        <p className="text-xs text-zinc-500 mt-1">PNG, JPG, WEBP, GIF (máx. 5MB)</p>
-                        {isUploading && <p className="text-xs text-blue-500 mt-2">Carregando...</p>}
+                        <p className="text-[7px] text-zinc-400 font-mono mt-2">S_FORMAT // PNG, JPG, WEBP</p>
+                        {isUploading && (
+                            <div className="mt-4 flex items-center justify-center gap-2">
+                                <div className="w-1 h-3 bg-black dark:bg-white animate-pulse" />
+                                <p className="text-[7px] text-black dark:text-white font-black uppercase tracking-widest">Processing_Buffer...</p>
+                            </div>
+                        )}
                     </div>
                 ) : (
-                    <div className="space-y-3">
-                        <div className="relative rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                    <div className="space-y-6">
+                        <div className="relative border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-100 dark:bg-zinc-900 group/preview">
                             <img
                                 src={imageUrl}
                                 alt="Preview"
-                                className="w-full h-48 object-cover"
+                                className="w-full h-56 object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                                 style={{ filter: getFilterClass() }}
                             />
+                            {/* Technical scanline overlay */}
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20" />
+
                             <button
                                 onClick={handleRemoveImage}
-                                className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors"
+                                className="absolute top-4 right-4 w-8 h-8 bg-black/80 hover:bg-white hover:text-black border border-white/20 flex items-center justify-center transition-all"
                             >
-                                <X className="w-4 h-4 text-white" />
+                                <X className="w-3.5 h-3.5" />
                             </button>
+
+                            <div className="absolute bottom-4 left-4 px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10">
+                                <span className="text-[7px] font-black uppercase tracking-widest text-white/70">Buffer_Live_Preview</span>
+                            </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Legenda (opcional)</Label>
-                            <Input
-                                value={caption}
-                                onChange={(e) => setCaption(e.target.value)}
-                                placeholder="Adicione uma legenda..."
-                                maxLength={100}
-                            />
+                        <div className="grid grid-cols-1 gap-5">
+                            <div className="space-y-3">
+                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Caption_Metadata</Label>
+                                <Input
+                                    value={caption}
+                                    onChange={(e) => setCaption(e.target.value)}
+                                    placeholder="Input textual context..."
+                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-none text-[10px] uppercase font-mono h-11 focus-visible:ring-0"
+                                    maxLength={100}
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Alt_Text_Protocol</Label>
+                                <Input
+                                    value={alt}
+                                    onChange={(e) => setAlt(e.target.value)}
+                                    placeholder="Define accessibility string..."
+                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-none text-[10px] uppercase font-mono h-11 focus-visible:ring-0"
+                                    maxLength={200}
+                                />
+                            </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Texto Alternativo</Label>
-                            <Input
-                                value={alt}
-                                onChange={(e) => setAlt(e.target.value)}
-                                placeholder="Descrição da imagem"
-                                maxLength={200}
-                            />
-                        </div>
-
-                        <div className="space-y-3 pb-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Filtro de Época</Label>
-                            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 custom-scrollbar snap-x">
+                        <div className="space-y-3">
+                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Filter_Vibe_Protocol</Label>
+                            <div className="grid grid-cols-5 border border-zinc-200 dark:border-zinc-800">
                                 {(['none', 'vintage', 'bw', 'warm', 'cool'] as const).map((f) => (
                                     <button
                                         key={f}
                                         onClick={() => setFilter(f)}
                                         className={cn(
-                                            "flex flex-col items-center gap-2 p-2 rounded-xl transition-all min-w-[70px] snap-start shrink-0 border-2",
+                                            "flex flex-col items-center gap-3 p-3 border-r last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all",
                                             filter === f
-                                                ? "border-black dark:border-white bg-white dark:bg-zinc-800 shadow-sm outline-none"
-                                                : "border-transparent opacity-60 hover:opacity-100"
+                                                ? "bg-black text-white dark:bg-white dark:text-black"
+                                                : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
                                         )}
                                     >
                                         <div
-                                            className="w-12 h-12 rounded-lg bg-zinc-200 dark:bg-zinc-700 shadow-inner overflow-hidden"
+                                            className="w-full aspect-square border border-current opacity-20"
                                             style={{
                                                 backgroundImage: `url(${imageUrl})`,
                                                 backgroundSize: 'cover',
@@ -185,38 +205,37 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
                                                 filter: f === 'vintage' ? 'sepia(50%) contrast(110%)' : f === 'bw' ? 'grayscale(100%)' : f === 'warm' ? 'saturate(130%) hue-rotate(-10deg)' : f === 'cool' ? 'saturate(110%) hue-rotate(10deg)' : 'none'
                                             }}
                                         />
-                                        <span className="text-[9px] font-black uppercase tracking-tighter">
-                                            {f === 'none' ? 'Original' : f === 'bw' ? 'P&B' : f}
+                                        <span className="text-[7px] font-black uppercase tracking-tighter">
+                                            {f === 'none' ? 'RAW' : f.toUpperCase()}
                                         </span>
                                     </button>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="space-y-3 pb-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Borda & Estilo</Label>
-                            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 custom-scrollbar snap-x">
+                        <div className="space-y-3">
+                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Substrate_Geometry</Label>
+                            <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800">
                                 {(['none', 'polaroid', 'border', 'shadow'] as const).map((frm) => (
                                     <button
                                         key={frm}
                                         onClick={() => setFrame(frm)}
                                         className={cn(
-                                            "flex flex-col items-center gap-2 p-2 rounded-xl transition-all min-w-[70px] snap-start shrink-0 border-2",
+                                            "flex flex-col items-center gap-3 p-3 border-r last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all",
                                             frame === frm
-                                                ? "border-black dark:border-white bg-white dark:bg-zinc-800 shadow-sm outline-none"
-                                                : "border-transparent opacity-60 hover:opacity-100"
+                                                ? "bg-black text-white dark:bg-white dark:text-black"
+                                                : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
                                         )}
                                     >
                                         <div className={cn(
-                                            "w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 border flex items-center justify-center p-1",
-                                            frm === 'polaroid' && "bg-white p-1 border-zinc-200 pb-2 flex-col",
-                                            frm === 'border' && "border-4 border-zinc-300 dark:border-zinc-700",
-                                            frm === 'shadow' && "shadow-xl border-zinc-100 dark:border-zinc-800",
+                                            "w-6 h-6 border flex items-center justify-center border-current opacity-30",
+                                            frm === 'polaroid' && "border-b-4",
+                                            frm === 'border' && "border-2",
                                         )}>
-                                            <div className="w-full h-full bg-zinc-300 dark:bg-zinc-600 rounded-sm" />
+                                            <div className="w-full h-full bg-current opacity-10" />
                                         </div>
-                                        <span className="text-[9px] font-black uppercase tracking-tighter">
-                                            {frm === 'none' ? 'Nenhuma' : frm}
+                                        <span className="text-[7px] font-black uppercase tracking-tighter">
+                                            {frm.toUpperCase()}
                                         </span>
                                     </button>
                                 ))}
@@ -225,9 +244,9 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
 
                         <Button
                             onClick={handleAdd}
-                            className="w-full bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black"
+                            className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
                         >
-                            Adicionar Foto
+                            Manifest_Visual_Node
                         </Button>
                     </div>
                 )}

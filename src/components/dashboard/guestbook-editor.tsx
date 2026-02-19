@@ -26,63 +26,66 @@ export function GuestbookEditor({ highlight }: { highlight?: boolean }) {
 
     return (
         <div className={cn(
-            "space-y-6 transition-all duration-500 rounded-3xl",
-            highlight ? "ring-2 ring-purple-500/30 bg-purple-50/50 dark:bg-purple-900/10 p-6 -m-6" : ""
+            "space-y-6 transition-all duration-500",
+            highlight ? "border-2 border-black dark:border-white p-6 -m-6 bg-zinc-50 dark:bg-zinc-900/50" : ""
         )}>
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
-                    <MessageSquare className="w-4 h-4 text-purple-600" />
+                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                    <MessageSquare className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Mural de Recados</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Guestbook_Registry_Protocol</h3>
             </div>
 
-            <div className="space-y-3">
-                <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Título do Mural</label>
-                    <Input
-                        placeholder="Ex: Deixe um recado!"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="bg-white dark:bg-zinc-900 border-none rounded-xl text-xs h-10 shadow-inner"
-                    />
-                </div>
+            <div className="space-y-6 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
+                <div className="p-5 space-y-4">
+                    <div className="space-y-3">
+                        <label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Registry_Manifest_Alias</label>
+                        <Input
+                            placeholder="INPUT_MURAL_TITLE..."
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none h-11 text-[10px] font-mono tracking-tight focus-visible:ring-0 uppercase"
+                        />
+                    </div>
 
-                <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Cor de Destaque</label>
-                    <div className="flex gap-2">
-                        <div className="flex-1 relative">
-                            <Input
-                                type="text"
+                    <div className="space-y-3">
+                        <label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Aesthetic_Node_Accent</label>
+                        <div className="flex gap-2 p-1 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                            <div className="flex-1 relative">
+                                <Input
+                                    type="text"
+                                    value={color}
+                                    onChange={(e) => setColor(e.target.value)}
+                                    className="bg-zinc-100/50 dark:bg-zinc-800/50 border-none pl-10 h-9 rounded-none text-[9px] font-mono uppercase"
+                                />
+                                <div
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 border border-white/20"
+                                    style={{ backgroundColor: color }}
+                                />
+                            </div>
+                            <input
+                                type="color"
                                 value={color}
                                 onChange={(e) => setColor(e.target.value)}
-                                className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 pl-10"
-                            />
-                            <div
-                                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border border-white/20 shadow-sm"
-                                style={{ backgroundColor: color }}
+                                className="w-9 h-9 cursor-pointer bg-transparent border-none p-0"
                             />
                         </div>
-                        <input
-                            type="color"
-                            value={color}
-                            onChange={(e) => setColor(e.target.value)}
-                            className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-none p-0"
-                        />
                     </div>
                 </div>
 
-                <Button
-                    onClick={handleAdd}
-                    isLoading={isPending}
-                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Ativar Mural
-                </Button>
+                <div className="p-5 border-t border-zinc-100 dark:border-zinc-900">
+                    <Button
+                        onClick={handleAdd}
+                        disabled={isPending}
+                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
+                    >
+                        Deploy_Guestbook_Node
+                    </Button>
+                </div>
             </div>
 
-            <p className="text-[10px] text-zinc-500 italic leading-relaxed">
-                Permite que visitantes deixem mensagens interativas no seu espaço.
+            <p className="text-[7px] text-zinc-400 font-black uppercase tracking-widest text-center opacity-30">
+                Manifest_Interactive_Registry // Visitor_Node_Active
             </p>
         </div>
     )

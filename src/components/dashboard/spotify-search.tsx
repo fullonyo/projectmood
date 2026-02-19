@@ -47,15 +47,18 @@ export function SpotifySearch() {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
-                    <Music className="w-4 h-4 text-[#1DB954]" />
+                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                    <Music className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Spotify Music</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Audio_Node_Source</h3>
             </div>
-            <div className="space-y-3 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
-                <div className="relative">
+            <div className="space-y-4 p-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                <div className="relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 border-r border-zinc-100 dark:border-zinc-900 pr-3 mr-3">
+                        <Search className="w-3.5 h-3.5 text-zinc-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" />
+                    </div>
                     <Input
-                        placeholder="Busque uma música ou artista..."
+                        placeholder="SEARCH_PROTOCOL // Query audio database..."
                         value={query}
                         onChange={(e) => {
                             setQuery(e.target.value)
@@ -63,50 +66,47 @@ export function SpotifySearch() {
                         }}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         className={cn(
-                            "bg-white dark:bg-zinc-900 border-none rounded-xl pr-10 text-xs h-10 shadow-inner",
-                            error && "ring-1 ring-red-500"
+                            "bg-transparent border-none rounded-none pl-14 pr-5 text-[10px] font-mono h-12 uppercase tracking-tight focus-visible:ring-0",
+                            error && "border-b border-red-500"
                         )}
                     />
-                    <Music className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                 </div>
 
                 <Button
                     onClick={handleSearch}
                     isLoading={isLoading}
-                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
+                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                 >
-                    <Search className="w-4 h-4 mr-2" />
-                    Buscar Música
+                    Manifest_Search
                 </Button>
             </div>
 
             {error && (
-                <p className="text-[10px] text-red-500 font-bold animate-in fade-in slide-in-from-top-1">
-                    {error}
+                <p className="text-[8px] text-red-500 font-black uppercase tracking-widest animate-in fade-in slide-in-from-top-1 px-1">
+                    SEARCH_ERROR // {error}
                 </p>
             )}
 
             {results.length > 0 && (
-                <div className="mt-4 space-y-2 border border-zinc-100 dark:border-zinc-800 rounded-[2.5rem] p-4 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl shadow-2xl max-h-72 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 px-2 mb-3">Resultados da Busca</p>
+                <div className="mt-4 space-y-0 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950 max-h-72 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-bottom-4 duration-500 divide-y divide-zinc-100 dark:divide-zinc-900">
+                    <div className="p-4 bg-zinc-50 dark:bg-zinc-900/30 sticky top-0 z-20 border-b border-zinc-100 dark:border-zinc-900">
+                        <p className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-400">Audio_Registry_Results</p>
+                    </div>
                     {results.map((track) => (
                         <button
                             key={track.id}
                             onClick={() => handleSelect(track)}
                             disabled={isPending}
-                            className="w-full flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-[1.5rem] transition-all text-left group relative overflow-hidden"
+                            className="w-full flex items-center gap-4 p-4 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-left group relative"
                         >
-                            <img src={track.albumArt} alt={track.name} className="w-12 h-12 rounded-2xl shrink-0 shadow-md transition-transform group-hover:scale-110 z-10" />
-                            <div className="overflow-hidden z-10">
-                                <p className="text-[11px] font-black uppercase truncate leading-tight group-hover:text-[#1DB954] transition-colors">{track.name}</p>
-                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-tight truncate opacity-60 group-hover:opacity-100 transition-opacity">{track.artist}</p>
+                            <img src={track.albumArt} alt={track.name} className="w-10 h-10 border border-zinc-200 dark:border-zinc-800 grayscale group-hover:grayscale-0 transition-all duration-500" />
+                            <div className="overflow-hidden flex-1">
+                                <p className="text-[9px] font-black uppercase truncate leading-none mb-1 text-black dark:text-white group-hover:text-current">{track.name}</p>
+                                <p className="text-[7px] text-zinc-400 font-bold uppercase tracking-widest truncate group-hover:text-current opacity-60">Source // {track.artist}</p>
                             </div>
-                            <div className="ml-auto flex items-center justify-center w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 z-10">
-                                <Plus className="w-4 h-4 text-[#1DB954]" />
+                            <div className="flex items-center justify-center w-6 h-6 border border-current opacity-0 group-hover:opacity-100 transition-all">
+                                <Plus className="w-3 h-3" />
                             </div>
-
-                            {/* Premium Hover Glow */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                     ))}
                 </div>

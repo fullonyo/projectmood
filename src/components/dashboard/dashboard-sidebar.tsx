@@ -147,24 +147,26 @@ export function DashboardSidebar({
     ]
 
     return (
-        <aside className="w-80 h-full bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shadow-2xl z-50">
-            {/* Sidebar Header */}
-            <div className="p-6 border-b border-zinc-100 dark:border-zinc-900">
+        <aside className="w-80 h-full bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col z-50 overflow-hidden">
+            {/* Sidebar Header - Studio Identity */}
+            <div className="p-8 border-b border-zinc-100 dark:border-zinc-900">
                 <div className="flex items-center justify-between mb-2">
-                    <h1 className="text-2xl font-black tracking-tighter uppercase italic">Mood Studio</h1>
+                    <div className="flex flex-col">
+                        <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-30 leading-none mb-1">Curation Engine</span>
+                        <h1 className="text-2xl font-black tracking-tighter uppercase italic">Mood Studio</h1>
+                    </div>
                     {selectedBlock && (
                         <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => setSelectedId(null)}
-                            className="h-7 px-2 text-[10px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            className="h-7 px-3 text-[8px] font-black uppercase tracking-widest border-black dark:border-white rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                         >
                             <Plus className="w-3 h-3 mr-1 rotate-45" />
-                            Novo
+                            Discard
                         </Button>
                     )}
                 </div>
-                <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-zinc-400">Curadoria de Estética</p>
             </div>
             {/* Top Categories Navigation */}
             <nav className="grid grid-cols-4 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
@@ -179,8 +181,8 @@ export function DashboardSidebar({
                                 : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                         )}
                     >
-                        <tab.icon className={cn("w-5 h-5 mb-1", activeTab === tab.id && "animate-in fade-in scale-110")} />
-                        <span className="text-[10px] font-bold uppercase tracking-tighter">{tab.label}</span>
+                        <tab.icon className={cn("w-4 h-4 mb-1.5 opacity-40 transition-all", activeTab === tab.id && "opacity-100 scale-110")} />
+                        <span className="text-[7px] font-black uppercase tracking-[0.2em]">{tab.label}</span>
 
                         {activeTab === tab.id && (
                             <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black dark:bg-white" />
@@ -192,14 +194,17 @@ export function DashboardSidebar({
             {/* Scrollable Editor Area */}
             <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-8 animate-in fade-in slide-in-from-left-2 duration-300"
+                className="flex-1 overflow-y-auto overflow-x-hidden p-6 custom-scrollbar space-y-8 animate-in fade-in slide-in-from-left-2 duration-300"
             >
 
                 {activeTab === 'style' && (
-                    <div className="space-y-8">
+                    <div className="space-y-10">
                         <header>
-                            <h3 className="text-xl font-black tracking-tighter uppercase">Canvas Style</h3>
-                            <p className="text-[11px] text-zinc-500 italic">Defina a atmosfera do seu espaço digital.</p>
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
+                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">Canvas Protocol</h3>
+                            </div>
+                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Environment & Tone Definition</p>
                         </header>
                         <ThemeEditor
                             currentTheme={profile.theme}
@@ -226,14 +231,13 @@ export function DashboardSidebar({
                         </header>
                         <EffectsEditor profile={profile} />
 
-                        <div className="pt-10 space-y-4">
-                            <div className="h-[1px] bg-red-100 dark:bg-red-900/20" />
-                            <header>
-                                <h3 className="text-sm font-bold text-red-500 uppercase flex items-center gap-2">
-                                    <Bomb className="w-4 h-4" />
-                                    Danger Zone
+                        <div className="pt-12 space-y-6">
+                            <header className="border-t border-zinc-100 dark:border-zinc-900 pt-8">
+                                <h3 className="text-[10px] font-black text-red-500 uppercase tracking-[0.4em] flex items-center gap-2">
+                                    <Bomb className="w-3 h-3" />
+                                    System Termination
                                 </h3>
-                                <p className="text-[10px] text-zinc-500 mt-1">Ações que não podem ser desfeitas.</p>
+                                <p className="text-[9px] text-zinc-400 uppercase tracking-widest mt-1">Irreversible Data Erasure Protocol</p>
                             </header>
 
                             <Button
@@ -251,8 +255,11 @@ export function DashboardSidebar({
                 {activeTab === 'writing' && (
                     <div className="space-y-10">
                         <header>
-                            <h3 className="text-xl font-black tracking-tighter uppercase italic">Writing Desk</h3>
-                            <p className="text-[11px] text-zinc-500">Dê voz às suas ideias no mural.</p>
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
+                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">Textual Input</h3>
+                            </div>
+                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Thought & Manifest Capture</p>
                         </header>
                         <div ref={textEditorRef}>
                             <TextEditor
@@ -285,8 +292,11 @@ export function DashboardSidebar({
                 {activeTab === 'media' && (
                     <div className="space-y-10">
                         <header>
-                            <h3 className="text-xl font-black tracking-tighter uppercase italic">Media Hub</h3>
-                            <p className="text-[11px] text-zinc-500">Músicas, vídeos e interatividade.</p>
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
+                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">Atmosphere Nodes</h3>
+                            </div>
+                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Audio / Visual Integration</p>
                         </header>
 
                         <div ref={youtubeEditorRef}>
@@ -331,8 +341,11 @@ export function DashboardSidebar({
                 {activeTab === 'art' && (
                     <div className="space-y-10">
                         <header>
-                            <h3 className="text-xl font-black tracking-tighter uppercase italic">Atelier</h3>
-                            <p className="text-[11px] text-zinc-500">Ferramentas de arte e scrapbook.</p>
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
+                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">Creative Assets</h3>
+                            </div>
+                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Spatial Branding & Decoration</p>
                         </header>
                         <div ref={artToolsRef}>
                             <ArtTools highlight={['tape', 'weather', 'media'].includes(selectedBlock?.type)} />

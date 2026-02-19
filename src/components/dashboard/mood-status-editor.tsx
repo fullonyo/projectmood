@@ -43,59 +43,64 @@ export function MoodStatusEditor({ onAdd }: MoodStatusEditorProps) {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-zinc-200 dark:border-zinc-800">
-                <Smile className="w-4 h-4 text-zinc-500" />
-                <h3 className="font-bold text-sm uppercase tracking-wider">Mood Status</h3>
+        <div className="space-y-6">
+            <div className="flex items-center gap-3">
+                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+                    <Smile className="w-3.5 h-3.5 text-black dark:text-white" />
+                </div>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Identity_State_Pulse</h3>
             </div>
 
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Escolha o Ícone</Label>
-                    <div className="flex flex-wrap gap-2 p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+            <div className="space-y-6 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
+                <div className="p-5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
+                    <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-4 block text-center">Mood_Registry_Protocol</Label>
+                    <div className="grid grid-cols-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                         {ICONS.map(({ name, icon: Icon }) => (
                             <button
                                 key={name}
                                 onClick={() => setSelectedIcon(name)}
                                 className={cn(
-                                    "w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:scale-110 relative",
-                                    selectedIcon === name ? "bg-white dark:bg-zinc-800 shadow-md ring-1 ring-zinc-200 dark:ring-zinc-700" : "opacity-40 hover:opacity-100 bg-white/50 dark:bg-black/20"
+                                    "aspect-square flex items-center justify-center border-r border-b last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all",
+                                    selectedIcon === name
+                                        ? "bg-black text-white dark:bg-white dark:text-black"
+                                        : "opacity-40 hover:opacity-100"
                                 )}
                             >
-                                <Icon className={cn("w-5 h-5", selectedIcon === name ? "text-zinc-900 dark:text-white" : "text-zinc-500")} />
-                                {selectedIcon === name && (
-                                    <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-0.5 shadow-sm">
-                                        <Check className="w-2 h-2 text-white" />
-                                    </div>
-                                )}
+                                <Icon className="w-4 h-4" />
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                        Seu mood agora
-                    </Label>
-                    <Input
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        placeholder="Ex: Inspirado e criativo!"
-                        maxLength={50}
-                        className="bg-white dark:bg-zinc-950 border-none rounded-xl h-11 shadow-inner text-xs"
-                    />
-                    <div className="flex justify-end">
-                        <span className="text-[9px] font-bold text-zinc-400 uppercase">{text.length}/50</span>
+                <div className="p-5 space-y-4">
+                    <div className="space-y-3">
+                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                            Current_Status_Buffer
+                        </Label>
+                        <Input
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                            placeholder="Input state manifestation..."
+                            maxLength={50}
+                            className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none h-12 text-[10px] uppercase font-mono tracking-tight focus-visible:ring-0"
+                        />
+                        <div className="flex justify-between items-center px-1">
+                            <div className="flex gap-1 items-center opacity-20">
+                                <div className="w-1 h-3 bg-zinc-400" />
+                                <div className="w-1 h-3 bg-zinc-400" />
+                            </div>
+                            <span className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">{text.length} // 50</span>
+                        </div>
                     </div>
-                </div>
 
-                <Button
-                    onClick={handleAdd}
-                    disabled={!text.trim()}
-                    className="w-full bg-black dark:bg-white text-white dark:text-black rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg"
-                >
-                    Adicionar Status
-                </Button>
+                    <Button
+                        onClick={handleAdd}
+                        disabled={!text.trim()}
+                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
+                    >
+                        Deploy_State_Signal
+                    </Button>
+                </div>
             </div>
         </div>
     )
