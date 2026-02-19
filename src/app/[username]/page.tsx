@@ -12,6 +12,8 @@ import { StaticTextures } from "@/components/effects/static-textures";
 import { CustomCursor } from "@/components/effects/custom-cursor";
 import { MouseTrails } from "@/components/effects/mouse-trails";
 import { FontLoader } from "@/components/dashboard/font-loader";
+import { ViralBadge } from "@/components/dashboard/viral-badge";
+import { ProfileSignature } from "@/components/dashboard/profile-signature";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -87,18 +89,12 @@ export default async function PublicMoodPage({
                 }}
             />
 
-            {/* Floating Header */}
-            <header className="fixed top-8 left-8 z-50 mix-blend-difference">
-                <div className="flex items-center gap-4 group">
-                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-current bg-white/10">
-                        <img src={(profile as any).avatarUrl || `https://avatar.vercel.sh/${user.username}`} alt={user.username} className="w-full h-full object-cover" />
-                    </div>
-                    <div>
-                        <h1 className="text-xl font-black tracking-tighter">@{user.username}</h1>
-                        <p className="text-[10px] uppercase tracking-widest opacity-60">MoodSpace</p>
-                    </div>
-                </div>
-            </header>
+            {/* Studio Profile Signature */}
+            <ProfileSignature
+                username={user.username}
+                name={user.name || undefined}
+                avatarUrl={(profile as any).avatarUrl}
+            />
 
             {/* The Canvas Reality */}
             <main className="relative w-full h-full">
@@ -123,15 +119,8 @@ export default async function PublicMoodPage({
             {/* Analytics Display */}
             <AnalyticsDisplay profileId={user.profile.id} />
 
-            {/* Now Playing Spotify - Removed (Merged into Music Block) */}
-            {/* <NowPlayingSpotify userId={user.id} /> */}
-
-            {/* Branding Footer */}
-            <footer className="fixed bottom-8 right-8 z-50">
-                <div className="text-[9px] font-black tracking-[0.5em] uppercase opacity-20 hover:opacity-100 transition-opacity">
-                    MoodSpace Studio
-                </div>
-            </footer>
+            {/* Viral CTA / Branding */}
+            <ViralBadge />
         </div>
     );
 }
