@@ -14,13 +14,15 @@ import { useCanvasManager } from "@/hooks/use-canvas-manager"
 import { calculateResize, getResizeCursor, ResizeHandle, ResizeCorner, calculateRotation } from '@/lib/canvas-transforms'
 
 
+import { MoodBlock, Profile, ThemeConfig } from "@/types/database"
+
 interface MoodCanvasProps {
-    blocks: any[]
-    profile: any
+    blocks: MoodBlock[]
+    profile: Profile
     backgroundEffect: string
     selectedId: string | null
     setSelectedId: (id: string | null) => void
-    onUpdateBlock: (id: string, updates: any) => void
+    onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void
     isSaving: boolean
 }
 
@@ -68,7 +70,7 @@ export function MoodCanvas({
             style={{ backgroundColor: bgColor, color: primaryColor }}
         >
             <div className="absolute inset-0 z-0">
-                <BackgroundEffect type={backgroundEffect} primaryColor={profile.primaryColor} />
+                <BackgroundEffect type={backgroundEffect} primaryColor={profile.primaryColor || undefined} />
             </div>
             <div className="absolute inset-0 z-[1]">
                 <StaticTextures type={profile.staticTexture || 'none'} />
@@ -145,13 +147,13 @@ export function MoodCanvas({
 
 
 function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile, themeConfig, onDeleteRequest }: {
-    block: any,
+    block: MoodBlock,
     canvasRef: React.RefObject<HTMLDivElement | null>,
     isSelected: boolean,
     onSelect: (toggle?: boolean) => void,
-    onUpdate: (content: any) => void,
-    profile: any,
-    themeConfig: any,
+    onUpdate: (content: Partial<MoodBlock>) => void,
+    profile: Profile,
+    themeConfig: ThemeConfig,
     onDeleteRequest: (id: string) => void
 }) {
     const [isDragging, setIsDragging] = useState(false)

@@ -2,6 +2,8 @@
 
 import { PhotoBlockContent } from "@/lib/validations"
 
+import Image from "next/image"
+
 interface PhotoBlockPublicProps {
     content: PhotoBlockContent
 }
@@ -50,12 +52,16 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
     return (
         <div className="w-full h-full flex flex-col items-center justify-center p-2">
             <div className={`relative w-full h-full flex-1 min-h-0 rounded-none overflow-hidden ${getFrameClass()}`}>
-                <img
-                    src={imageUrl}
-                    alt={alt}
-                    className="w-full h-full object-cover"
-                    style={{ filter: getFilterClass() }}
-                />
+                <div className="relative w-full h-full z-0">
+                    <Image
+                        src={imageUrl}
+                        alt={alt || "Mood photo"}
+                        fill
+                        className="object-cover"
+                        style={{ filter: getFilterClass() }}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                </div>
                 {caption && (frame === 'polaroid' || frame === 'polaroid-dark') && (
                     <div className="absolute bottom-3 left-3 right-3 text-center pointer-events-none">
                         <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium truncate">{caption}</p>

@@ -27,8 +27,10 @@ import { MediaBlockPublic } from "./media-block-public"
 import { VideoBlockPublic } from "./video-block-public"
 import { MusicBlockPublic } from "./music-block-public"
 
+import { MoodBlock } from "@/types/database"
+
 interface BlockRendererProps {
-    block: any
+    block: MoodBlock
     isPublic?: boolean
 }
 

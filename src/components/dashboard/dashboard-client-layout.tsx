@@ -10,11 +10,12 @@ import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
 import { BackgroundEffect } from "../effects/background-effect";
 import { FontLoader } from "./font-loader";
+import { MoodBlock, Profile } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
 
 interface DashboardClientLayoutProps {
-    profile: any;
-    moodBlocks: any[];
+    profile: Profile;
+    moodBlocks: MoodBlock[];
     username: string;
 }
 

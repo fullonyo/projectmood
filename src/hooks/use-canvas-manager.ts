@@ -2,23 +2,16 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { updateMoodBlockLayout } from '@/actions/profile';
 import { toast } from 'sonner';
 
-interface Block {
-    id: string;
-    x: number;
-    y: number;
-    width?: number;
-    height?: number;
-    zIndex?: number;
-    rotation?: number;
-    content?: any;
-    [key: string]: any;
-}
+import { MoodBlock } from '@/types/database';
 
-export function useCanvasManager(initialBlocks: Block[]) {
+// Helper type for local state (handling Prisma nulls vs optional)
+type CanvasBlock = MoodBlock;
+
+export function useCanvasManager(initialBlocks: MoodBlock[]) {
     const [isSaving, setIsSaving] = useState(false);
 
     // 1. SOVEREIGN STATE: Local state is the absolute master.
-    const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
+    const [blocks, setBlocks] = useState<MoodBlock[]>(initialBlocks);
 
     // 2. EPOCH SYSTEM: Prevent race conditions with server updates
     const epochRef = useRef<Record<string, number>>({});
@@ -26,7 +19,7 @@ export function useCanvasManager(initialBlocks: Block[]) {
     // 3. PERSISTENCE QUEUE: Debounce saving
     const saveTimers = useRef<Record<string, NodeJS.Timeout>>({});
     // 4. PENDING UPDATES: Accumulate updates between debounce cycles
-    const pendingUpdates = useRef<Record<string, Partial<Block>>>({});
+    const pendingUpdates = useRef<Record<string, Partial<MoodBlock>>>({});
 
     // Smart Sync from Server Props
     useEffect(() => {
@@ -54,7 +47,7 @@ export function useCanvasManager(initialBlocks: Block[]) {
         });
     }, [initialBlocks]);
 
-    const updateBlock = useCallback((id: string, updates: Partial<Block>) => {
+    const updateBlock = useCallback((id: string, updates: Partial<MoodBlock>) => {
         // Increment Epoch (Lock)
         epochRef.current[id] = (epochRef.current[id] || 0) + 1;
 
@@ -85,7 +78,14 @@ export function useCanvasManager(initialBlocks: Block[]) {
             delete pendingUpdates.current[id];
 
             try {
-                const result = await updateMoodBlockLayout(id, mergedUpdates);
+                // Sanitize Payload: Convert nulls to undefined to match Server Action signature
+                const payload = {
+                    ...mergedUpdates,
+                    width: mergedUpdates.width ?? undefined,
+                    height: mergedUpdates.height ?? undefined,
+                };
+
+                const result = await updateMoodBlockLayout(id, payload);
 
                 if (result?.error) throw new Error(result.error);
 
