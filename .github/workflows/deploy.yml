@@ -17,6 +17,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.AWS_SSH_KEY }}
+          command_timeout: 45m
           script: |
             # Garantir que a pasta do projeto existe
             if [ ! -d "~/moodproject" ]; then
