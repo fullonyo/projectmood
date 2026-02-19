@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Share2, Check, Link as LinkIcon } from "lucide-react"
+import { Check, Link as LinkIcon, Fingerprint } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface SignatureShareProps {
@@ -23,33 +23,56 @@ export function SignatureShare({ username }: SignatureShareProps) {
     }
 
     return (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] pointer-events-auto">
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] mix-blend-difference pointer-events-auto group">
             <button
                 onClick={handleCopy}
-                className={cn(
-                    "flex items-center gap-3 px-6 py-2.5 rounded-full transition-all duration-500",
-                    "bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-lg group",
-                    "hover:bg-white/10 dark:hover:bg-black/20 hover:scale-105 hover:border-white/20",
-                    status === 'copied' && "bg-green-500/20 border-green-500/50"
-                )}
+                className="flex items-center gap-4 group/btn outline-none"
             >
-                <div className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500",
-                    status === 'copied' ? "bg-green-500 text-white" : "bg-white/10 text-current group-hover:rotate-12"
-                )}>
-                    {status === 'copied' ? <Check className="w-3 h-3" /> : <LinkIcon className="w-3 h-3" />}
+                {/* Visual Connector Line */}
+                <div className="h-[1px] w-6 bg-current opacity-20 group-hover:w-10 transition-all duration-700" />
+
+                <div className="flex flex-col items-center">
+                    <div className="flex items-center gap-2 mb-1">
+                        <Fingerprint className={cn(
+                            "w-3 h-3 transition-all duration-500",
+                            status === 'copied' ? "text-green-500 scale-125" : "opacity-40 group-hover:rotate-12"
+                        )} />
+                        <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-40">
+                            Creator Signature URL
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <span className={cn(
+                            "text-[10px] font-mono tracking-[0.2em] uppercase transition-all duration-500",
+                            status === 'copied' ? "text-green-500 font-black italic" : "opacity-60 group-hover:opacity-100"
+                        )}>
+                            {status === 'copied' ? "Signature Secured" : `moodspace.me/${username}`}
+                        </span>
+
+                        <div className={cn(
+                            "w-4 h-4 rounded-full border border-current flex items-center justify-center transition-all duration-500",
+                            status === 'copied' ? "bg-current" : "opacity-20 group-hover:opacity-100"
+                        )}>
+                            {status === 'copied' ? <Check className="w-2 h-2 mix-blend-difference invert" /> : <LinkIcon className="w-2 h-2" />}
+                        </div>
+                    </div>
+
+                    {/* Technical Barcode Decoration */}
+                    <div className="mt-2 flex gap-0.5 opacity-10 group-hover:opacity-30 transition-opacity">
+                        {[...Array(12)].map((_, i) => (
+                            <div
+                                key={i}
+                                className={cn(
+                                    "w-[1px] bg-current",
+                                    i % 3 === 0 ? "h-2" : "h-1"
+                                )}
+                            />
+                        ))}
+                    </div>
                 </div>
 
-                <div className="flex flex-col items-start min-w-[100px]">
-                    <span className="text-[7px] font-black uppercase tracking-[0.3em] opacity-40 leading-none mb-1">
-                        Secure Studio URL
-                    </span>
-                    <span className="text-[10px] font-black tracking-widest uppercase leading-none">
-                        {status === 'copied' ? "Signature Secured" : "Copy Signature"}
-                    </span>
-                </div>
-
-                <Share2 className="w-3 h-3 opacity-20 group-hover:opacity-100 transition-opacity" />
+                <div className="h-[1px] w-6 bg-current opacity-20 group-hover:w-10 transition-all duration-700" />
             </button>
         </div>
     )
