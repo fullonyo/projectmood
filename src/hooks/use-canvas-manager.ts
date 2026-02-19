@@ -84,7 +84,6 @@ export function useCanvasManager(initialBlocks: Block[]) {
             const mergedUpdates = { ...pendingUpdates.current[id] };
             delete pendingUpdates.current[id];
 
-
             try {
                 const result = await updateMoodBlockLayout(id, mergedUpdates);
 

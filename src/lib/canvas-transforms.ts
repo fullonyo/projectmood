@@ -217,3 +217,38 @@ export function getResizeCursor(handle: ResizeHandle): string {
     };
     return cursors[handle];
 }
+
+/**
+ * Calcula o ângulo de rotação baseado na posição do mouse.
+ * 
+ * @param centerX - X do centro do bloco (px)
+ * @param centerY - Y do centro do bloco (px)
+ * @param mouseX - X do mouse (px)
+ * @param mouseY - Y do mouse (px)
+ * @param snapToGrid - Se true, trava em incrementos de 15 graus (Shift)
+ */
+export function calculateRotation(
+    centerX: number,
+    centerY: number,
+    mouseX: number,
+    mouseY: number,
+    snapToGrid = false
+): number {
+    // Vetor do centro até o mouse
+    const dx = mouseX - centerX;
+    const dy = mouseY - centerY;
+
+    // Arco tangente para obter o ângulo em radianos.
+    // +90 graus porque o 0 no CSS rotate é "top" (12h), mas o 0 trigonométrico é "right" (3h)
+    let angle = (Math.atan2(dy, dx) * 180 / Math.PI) + 90;
+
+    // Normaliza para 0-360
+    angle = (angle + 360) % 360;
+
+    if (snapToGrid) {
+        const snapIncrement = 15;
+        angle = Math.round(angle / snapIncrement) * snapIncrement;
+    }
+
+    return Math.round(angle);
+}

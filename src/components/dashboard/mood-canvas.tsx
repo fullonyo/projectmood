@@ -11,7 +11,7 @@ import { BackgroundEffect } from "../effects/background-effect"
 import { StaticTextures } from "../effects/static-textures"
 import { BoardStage } from "./board-stage"
 import { useCanvasManager } from "@/hooks/use-canvas-manager"
-import { calculateResize, getResizeCursor, type ResizeHandle } from "@/lib/canvas-transforms"
+import { calculateResize, getResizeCursor, ResizeHandle, ResizeCorner, calculateRotation } from '@/lib/canvas-transforms'
 
 
 interface MoodCanvasProps {
@@ -156,6 +156,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
 }) {
     const [isDragging, setIsDragging] = useState(false)
     const [isResizing, setIsResizing] = useState(false)
+    const [isRotating, setIsRotating] = useState(false)
     const [localRotation, setLocalRotation] = useState(block.rotation || 0)
     const [shiftHeld, setShiftHeld] = useState(false)
     const [size, setSize] = useState({
@@ -286,17 +287,47 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             updates.y = finalPos.y
         }
 
-
         onUpdate(updates)
     }
 
-    const handleDelete = () => onDeleteRequest(block.id)
+    const handleRotate = (event: any, info: any) => {
+        if (!canvasRef.current) return
+        setIsRotating(true)
 
-    const rotate = () => {
-        const newRotation = (localRotation + 15) % 360
+        const canvasRect = canvasRef.current.getBoundingClientRect()
+        const currentPos = positionRef.current
+        const currentSize = sizeRef.current
+
+        // Fallback para DOM se size for auto (igual ao resize)
+        const currentWidth = typeof currentSize.width === 'number' ? currentSize.width : (canvasRef.current.querySelector(`[data-block-id="${block.id}"]`) as HTMLElement)?.offsetWidth || 100
+        const currentHeight = typeof currentSize.height === 'number' ? currentSize.height : (canvasRef.current.querySelector(`[data-block-id="${block.id}"]`) as HTMLElement)?.offsetHeight || 100
+
+        // Centro do bloco em pixels relativos ao viewport
+        const blockCenterX = canvasRect.left + (currentPos.x / 100) * canvasRect.width + (currentWidth / 2)
+        const blockCenterY = canvasRect.top + (currentPos.y / 100) * canvasRect.height + (currentHeight / 2)
+
+        const newRotation = calculateRotation(
+            blockCenterX,
+            blockCenterY,
+            info.point.x,
+            info.point.y,
+            shiftHeld
+        )
+
         setLocalRotation(newRotation)
-        onUpdate({ rotation: newRotation })
     }
+
+    const handleRotateEnd = () => {
+        setIsRotating(false)
+        onUpdate({ rotation: localRotation })
+    }
+
+    const resetRotation = () => {
+        setLocalRotation(0)
+        onUpdate({ rotation: 0 })
+    }
+
+    const handleDelete = () => onDeleteRequest(block.id)
 
     const [isInteracting, setIsInteracting] = useState(false)
     const isInteractiveBlock = ['video', 'music', 'guestbook', 'media'].includes(block.type)
@@ -354,7 +385,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
 
     return (
         <motion.div
-            drag={!isResizing && !isInteracting}
+            drag={!isResizing && !isRotating && !isInteracting}
             dragMomentum={false}
             dragConstraints={canvasRef}
             dragElastic={0}
@@ -391,6 +422,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 !isInteracting && "select-none touch-none",
                 isSelected ? "cursor-default" : "cursor-grab active:cursor-grabbing"
             )}
+            data-block-id={block.id}
         >
             {/* Selection Border Outline */}
             {isSelected && (
@@ -417,9 +449,14 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                         <Move className="w-3.5 h-3.5 text-zinc-500" />
                     </div>
                     <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
-                    <button onClick={rotate} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-none transition-colors" title="Girar">
-                        <RotateCw className="w-3.5 h-3.5 text-zinc-500" />
-                    </button>
+                    {localRotation !== 0 && (
+                        <>
+                            <button onClick={resetRotation} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-none transition-colors text-xs font-mono text-blue-500" title="Resetar Rotação">
+                                {localRotation}°
+                            </button>
+                            <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
+                        </>
+                    )}
                     {isInteractiveBlock && (
                         <>
                             <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
@@ -451,6 +488,22 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             {isSelected && (
                 <>
                     {allHandles.map(renderHandle)}
+
+                    {/* Rotation Handle (Lollipop) */}
+                    <div
+                        className="absolute left-1/2 -top-8 -translate-x-1/2 w-0.5 h-8 bg-blue-400 z-[1002] pointer-events-auto cursor-grab active:cursor-grabbing origin-bottom"
+                    >
+                        <motion.div
+                            drag
+                            dragMomentum={false}
+                            dragElastic={0}
+                            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                            onPan={handleRotate}
+                            onPanEnd={handleRotateEnd}
+                            className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-blue-500 rounded-full shadow-sm hover:scale-110 transition-transform"
+                        />
+                    </div>
+
                     <div className="absolute inset-0 border border-blue-500/20 pointer-events-none" />
                 </>
             )}
