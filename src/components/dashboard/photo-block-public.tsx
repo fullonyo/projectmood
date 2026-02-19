@@ -1,7 +1,6 @@
 "use client"
 
 import { PhotoBlockContent } from "@/lib/validations"
-import { cn } from "@/lib/utils"
 
 interface PhotoBlockPublicProps {
     content: PhotoBlockContent
@@ -49,12 +48,8 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
     }
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center overflow-hidden">
-            <div className={cn(
-                "relative rounded-none overflow-hidden",
-                frame === 'none' ? "w-full h-full" : "w-auto h-auto max-w-full max-h-full",
-                getFrameClass()
-            )}>
+        <div className="w-full h-full flex flex-col items-center justify-center p-4">
+            <div className={`relative rounded-none overflow-hidden ${getFrameClass()}`}>
                 <img
                     src={imageUrl}
                     alt={alt}
@@ -63,7 +58,7 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
                 />
                 {caption && (frame === 'polaroid' || frame === 'polaroid-dark') && (
                     <div className="absolute bottom-3 left-3 right-3 text-center">
-                        <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium line-clamp-2">{caption}</p>
+                        <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium">{caption}</p>
                     </div>
                 )}
             </div>

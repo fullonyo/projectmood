@@ -157,30 +157,12 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     const [isResizing, setIsResizing] = useState(false)
     const [localRotation, setLocalRotation] = useState(block.rotation || 0)
     const [size, setSize] = useState({
-        width: block.width || 0,
-        height: block.height || 0
+        width: block.width || 'auto',
+        height: block.height || 'auto'
     })
 
-    const [coords, setCoords] = useState({
-        x: block.x || 0,
-        y: block.y || 0
-    })
-
-    // Sync with external state (blocks from useCanvasManager)
-    useEffect(() => {
-        if (!isDragging && !isResizing) {
-            setSize({
-                width: block.width || 0,
-                height: block.height || 0
-            })
-            setCoords({
-                x: block.x || 0,
-                y: block.y || 0
-            })
-        }
-    }, [block.width, block.height, block.x, block.y, isDragging, isResizing])
-
-    // 🏎️ GPU-ACCELERATED VALUES
+    // 🏎️ GPU-ACCELERATED VALUES: MotionValues bypass the React Render cycle
+    // for silky smooth 60fps movement.
     const mvX = useMotionValue(0)
     const mvY = useMotionValue(0)
 
@@ -194,100 +176,55 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
         if (!canvasRef.current) return
 
         const canvasRect = canvasRef.current.getBoundingClientRect()
+
+        // Calculate final percentages
         const deltaXPercent = (info.offset.x / canvasRect.width) * 100
         const deltaYPercent = (info.offset.y / canvasRect.height) * 100
 
-        const newX = parseFloat(Math.max(0, Math.min(100, coords.x + deltaXPercent)).toFixed(4))
-        const newY = parseFloat(Math.max(0, Math.min(100, coords.y + deltaYPercent)).toFixed(4))
+        const newX = parseFloat(Math.max(0, Math.min(100, block.x + deltaXPercent)).toFixed(4))
+        const newY = parseFloat(Math.max(0, Math.min(100, block.y + deltaYPercent)).toFixed(4))
 
-        setCoords({ x: newX, y: newY })
+        // Update the Sovereign Manager (Debounced saving happens in the hook)
         onUpdate({ x: newX, y: newY })
 
+        // Reset motion values so the 'left/top' props take over again
         mvX.set(0)
         mvY.set(0)
     }
 
-    const resizeStartRef = useRef<{
-        widthPercent: number,
-        heightPercent: number,
-        xPercent: number,
-        yPercent: number,
-        canvasWidth: number,
-        canvasHeight: number
-    } | null>(null)
-
-    const handleResizeStart = (event: any, corner: string) => {
-        if (!canvasRef.current) return
-        const canvasRect = canvasRef.current.getBoundingClientRect()
-
-        // Capture stabilized initial state in %
-        resizeStartRef.current = {
-            widthPercent: size.width || (event.target.parentElement.offsetWidth / canvasRect.width) * 100,
-            heightPercent: size.height || (event.target.parentElement.offsetHeight / canvasRect.height) * 100,
-            xPercent: coords.x,
-            yPercent: coords.y,
-            canvasWidth: canvasRect.width,
-            canvasHeight: canvasRect.height
-        }
-    }
-
     const handleResize = (event: any, info: any, corner: 'br' | 'bl' | 'tr' | 'tl') => {
         setIsResizing(true)
-        const start = resizeStartRef.current
-        if (!start) return
+        const currentWidth = typeof size.width === 'number' ? size.width : event.target.parentElement.offsetWidth
+        const currentHeight = typeof size.height === 'number' ? size.height : event.target.parentElement.offsetHeight
 
-        // Calculate deltas in %
-        const dxPercent = (info.offset.x / start.canvasWidth) * 100
-        const dyPercent = (info.offset.y / start.canvasHeight) * 100
-
-        let newW = start.widthPercent
-        let newH = start.heightPercent
-        let newX = start.xPercent
-        let newY = start.yPercent
+        let newWidth = currentWidth
+        let newHeight = currentHeight
 
         if (corner === 'br') {
-            newW = start.widthPercent + dxPercent
-            newH = start.heightPercent + dyPercent
+            newWidth = currentWidth + info.delta.x
+            newHeight = currentHeight + info.delta.y
         } else if (corner === 'bl') {
-            newW = start.widthPercent - dxPercent
-            newX = start.xPercent + dxPercent
-            newH = start.heightPercent + dyPercent
+            newWidth = currentWidth - info.delta.x
+            newHeight = currentHeight + info.delta.y
         } else if (corner === 'tr') {
-            newW = start.widthPercent + dxPercent
-            newH = start.heightPercent - dyPercent
-            newY = start.yPercent + dyPercent
+            newWidth = currentWidth + info.delta.x
+            newHeight = currentHeight - info.delta.y
         } else if (corner === 'tl') {
-            newW = start.widthPercent - dxPercent
-            newX = start.xPercent + dxPercent
-            newH = start.heightPercent - dyPercent
-            newY = start.yPercent + dyPercent
+            newWidth = currentWidth - info.delta.x
+            newHeight = currentHeight - info.delta.y
         }
 
-        // Constraints in %
-        const minW = (40 / start.canvasWidth) * 100
-        const minH = (20 / start.canvasHeight) * 100
-
-        if (newW < minW) {
-            if (corner === 'tl' || corner === 'bl') newX = start.xPercent + (start.widthPercent - minW)
-            newW = minW
-        }
-        if (newH < minH) {
-            if (corner === 'tl' || corner === 'tr') newY = start.yPercent + (start.heightPercent - minH)
-            newH = minH
-        }
-
-        setSize({ width: newW, height: newH })
-        setCoords({ x: newX, y: newY })
+        setSize({
+            width: Math.max(60, newWidth),
+            height: Math.max(30, newHeight)
+        })
     }
 
     const handleResizeEnd = () => {
         setIsResizing(false)
-        resizeStartRef.current = null
         onUpdate({
-            width: size.width,
-            height: size.height,
-            x: coords.x,
-            y: coords.y
+            width: typeof size.width === 'number' ? Math.round(size.width) : undefined,
+            height: typeof size.height === 'number' ? Math.round(size.height) : undefined
         })
     }
 
@@ -318,10 +255,10 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             style={{
                 x: mvX,
                 y: mvY,
-                left: `${coords.x}%`,
-                top: `${coords.y}%`,
-                width: size.width ? `${size.width}%` : 'auto',
-                height: size.height ? `${size.height}%` : 'auto',
+                left: `${block.x}%`,
+                top: `${block.y}%`,
+                width: size.width,
+                height: size.height,
                 rotate: localRotation,
                 zIndex: isDragging || isSelected ? 999 : (block.zIndex || 1),
                 boxShadow: isSelected ? `0 0 0 2px ${themeConfig.bg}, 0 0 0 4px ${profile.primaryColor || '#3b82f6'}` : 'none',
@@ -412,10 +349,9 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                         onPointerDown={(e) => {
                             e.stopPropagation()
                             setIsResizing(true)
-                            handleResizeStart(e, 'br')
                         }}
                         onPointerUp={() => setIsResizing(false)}
-                        className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-white border border-black dark:border-white rounded-none cursor-nwse-resize z-[1002] pointer-events-auto hover:scale-125 transition-transform"
+                        className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-nwse-resize z-[1002] pointer-events-auto shadow-sm"
                     >
                         <motion.div
                             onPan={(e, i) => handleResize(e, i, 'br')}
@@ -428,10 +364,9 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                         onPointerDown={(e) => {
                             e.stopPropagation()
                             setIsResizing(true)
-                            handleResizeStart(e, 'bl')
                         }}
                         onPointerUp={() => setIsResizing(false)}
-                        className="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-white border border-black dark:border-white rounded-none cursor-nesw-resize z-[1002] pointer-events-auto hover:scale-125 transition-transform"
+                        className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-nesw-resize z-[1002] pointer-events-auto shadow-sm"
                     >
                         <motion.div
                             onPan={(e, i) => handleResize(e, i, 'bl')}
@@ -444,10 +379,9 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                         onPointerDown={(e) => {
                             e.stopPropagation()
                             setIsResizing(true)
-                            handleResizeStart(e, 'tr')
                         }}
                         onPointerUp={() => setIsResizing(false)}
-                        className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white border border-black dark:border-white rounded-none cursor-nesw-resize z-[1002] pointer-events-auto hover:scale-125 transition-transform"
+                        className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-nesw-resize z-[1002] pointer-events-auto shadow-sm"
                     >
                         <motion.div
                             onPan={(e, i) => handleResize(e, i, 'tr')}
@@ -460,10 +394,9 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                         onPointerDown={(e) => {
                             e.stopPropagation()
                             setIsResizing(true)
-                            handleResizeStart(e, 'tl')
                         }}
                         onPointerUp={() => setIsResizing(false)}
-                        className="absolute -top-1 -left-1 w-2.5 h-2.5 bg-white border border-black dark:border-white rounded-none cursor-nwse-resize z-[1002] pointer-events-auto hover:scale-125 transition-transform"
+                        className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-nwse-resize z-[1002] pointer-events-auto shadow-sm"
                     >
                         <motion.div
                             onPan={(e, i) => handleResize(e, i, 'tl')}

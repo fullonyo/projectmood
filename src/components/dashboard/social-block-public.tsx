@@ -45,7 +45,7 @@ export function SocialBlockPublic({ content, isPublic = false }: SocialBlockPubl
             rel="noopener noreferrer"
             onClick={(e) => !isPublic && e.preventDefault()}
             className={cn(
-                "flex items-center gap-3 px-4 py-2.5 transition-all duration-300 shadow-none border border-black/10 dark:border-white/10 w-full h-full group bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
+                "flex items-center gap-3 px-4 py-2.5 transition-all duration-300 shadow-none border border-black/10 dark:border-white/10 min-w-[160px] group bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
                 !isPublic && "pointer-events-none",
                 content.style === 'tag' && "bg-[#fefefe] dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-[2px] border border-zinc-200 dark:border-zinc-700 border-l-[6px] border-l-black dark:border-l-white font-serif italic hover:translate-x-1",
                 content.style === 'glass' && "bg-white/10 dark:bg-white/5 rounded-none border border-white/20 text-current hover:bg-white/20 hover:scale-[1.05]",
