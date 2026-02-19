@@ -67,8 +67,8 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
                 content: validation.data.content,
                 x: x,
                 y: y,
-                width: width ? Math.round(width) : null,
-                height: height ? Math.round(height) : null,
+                width: width || null,
+                height: height || null,
             },
         });
 

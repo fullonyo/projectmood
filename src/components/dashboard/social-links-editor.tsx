@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 const PLATFORMS = [
     { id: 'instagram', icon: Instagram, label: 'Instagram', color: '#E4405F' },
@@ -108,11 +109,16 @@ export function SocialLinksEditor({
             }
 
             if (block?.id) {
-                await updateMoodBlockLayout(block.id, { content })
+                const res = await updateMoodBlockLayout(block.id, { content })
+                if (res.error) toast.error(res.error)
             } else {
-                await addMoodBlock('social', content, { x: 300, y: 300 })
-                setUrl("")
-                setLabel("")
+                const res = await addMoodBlock('social', content, { x: 50, y: 50 })
+                if (res.error) {
+                    toast.error(res.error)
+                } else {
+                    setUrl("")
+                    setLabel("")
+                }
             }
         })
     }

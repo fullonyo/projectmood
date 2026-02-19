@@ -56,8 +56,8 @@ model MoodBlock {
   // Canvas positioning
   x         Float    @default(0)
   y         Float    @default(0)
-  width     Int?
-  height    Int?
+  width     Float?
+  height    Float?
   zIndex    Int      @default(1)
   rotation  Float    @default(0)
   
