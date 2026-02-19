@@ -1,6 +1,7 @@
+
 # --- Stage 1: Install dependencies ---
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+FROM node:20-slim AS deps
+RUN apt-get update -y && apt-get install -y openssl ca-certificates
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
@@ -8,12 +9,13 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 # --- Stage 2: Build the application ---
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma Client
+# Note: Ensure schema.prisma has binaryTargets = ["native", "debian-openssl-3.0.x"]
 RUN npx prisma generate
 
 # Disable Next.js telemetry
@@ -22,10 +24,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # --- Stage 3: Runner ---
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
-RUN apk add --no-cache openssl libc6-compat
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
