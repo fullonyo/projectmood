@@ -48,8 +48,8 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
     }
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-4">
-            <div className={`relative rounded-none overflow-hidden ${getFrameClass()}`}>
+        <div className="w-full h-full flex flex-col items-center justify-center p-2">
+            <div className={`relative w-full h-full flex-1 min-h-0 rounded-none overflow-hidden ${getFrameClass()}`}>
                 <img
                     src={imageUrl}
                     alt={alt}
@@ -57,8 +57,8 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
                     style={{ filter: getFilterClass() }}
                 />
                 {caption && (frame === 'polaroid' || frame === 'polaroid-dark') && (
-                    <div className="absolute bottom-3 left-3 right-3 text-center">
-                        <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium">{caption}</p>
+                    <div className="absolute bottom-3 left-3 right-3 text-center pointer-events-none">
+                        <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium truncate">{caption}</p>
                     </div>
                 )}
             </div>

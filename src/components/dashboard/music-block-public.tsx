@@ -12,7 +12,7 @@ interface MusicBlockPublicProps {
 
 export function MusicBlockPublic({ content, isPublic = false }: MusicBlockPublicProps) {
     return (
-        <div className="w-full max-w-[320px] p-2 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm rounded-none border border-black/10 dark:border-white/10 hover:scale-[1.02] transition-transform relative overflow-hidden shadow-none">
+        <div className="w-full h-full p-2 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm rounded-none border border-black/10 dark:border-white/10 hover:scale-[1.02] transition-transform relative overflow-hidden shadow-none flex items-center justify-center">
             <iframe
                 src={`https://open.spotify.com/embed/track/${content.trackId}?utm_source=generator`}
                 width="100%"
