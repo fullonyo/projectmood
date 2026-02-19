@@ -12,20 +12,31 @@ import {
 } from "../icons"
 
 // Modularized Public Blocks
+import dynamic from "next/dynamic"
+
+// Modularized Public Blocks - Static (Critical for LCP/CLS)
+import { TextBlockPublic } from "./text-block-public"
+import { PhotoBlockPublic } from "./photo-block-public"
+import { QuoteBlockPublic } from "./quote-block-public"
 import { TickerBlockPublic } from "./ticker-block-public"
 import { SubtitleBlockPublic } from "./subtitle-block-public"
 import { FloatingBlockPublic } from "./floating-block-public"
-import { QuoteBlockPublic } from "./quote-block-public"
-import { PhotoBlockPublic } from "./photo-block-public"
-import { MoodStatusBlockPublic } from "./mood-status-block-public"
 import { CountdownBlockPublic } from "./countdown-block-public"
-import { GuestbookBlock } from "./guestbook-block"
-import { TextBlockPublic } from "./text-block-public"
-import { SocialBlockPublic } from "./social-block-public"
-import { WeatherBlockPublic } from "./weather-block-public"
-import { MediaBlockPublic } from "./media-block-public"
-import { VideoBlockPublic } from "./video-block-public"
-import { MusicBlockPublic } from "./music-block-public"
+import { MoodStatusBlockPublic } from "./mood-status-block-public"
+
+// Dynamic Imports (Heavy/Interactive Blocks)
+const VideoBlockPublic = dynamic(() => import("./video-block-public").then(mod => mod.VideoBlockPublic), {
+    loading: () => <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
+})
+const MusicBlockPublic = dynamic(() => import("./music-block-public").then(mod => mod.MusicBlockPublic), {
+    loading: () => <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
+})
+const GuestbookBlock = dynamic(() => import("./guestbook-block").then(mod => mod.GuestbookBlock), {
+    loading: () => <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
+})
+const WeatherBlockPublic = dynamic(() => import("./weather-block-public").then(mod => mod.WeatherBlockPublic))
+const MediaBlockPublic = dynamic(() => import("./media-block-public").then(mod => mod.MediaBlockPublic))
+const SocialBlockPublic = dynamic(() => import("./social-block-public").then(mod => mod.SocialBlockPublic))
 
 import { MoodBlock } from "@/types/database"
 

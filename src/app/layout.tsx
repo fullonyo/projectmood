@@ -3,6 +3,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
+import ReactDOM from "react-dom";
+
+ReactDOM.preconnect("https://fonts.googleapis.com");
+ReactDOM.preconnect("https://fonts.gstatic.com", { crossOrigin: "anonymous" });
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
