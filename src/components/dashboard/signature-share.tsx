@@ -51,8 +51,8 @@ export function SignatureShare({ username }: SignatureShareProps) {
                         </span>
 
                         <div className={cn(
-                            "w-4 h-4 rounded-full border border-current flex items-center justify-center transition-all duration-500",
-                            status === 'copied' ? "bg-current" : "opacity-20 group-hover:opacity-100"
+                            "w-4 h-4 rounded-none border border-current flex items-center justify-center transition-all duration-500",
+                            status === 'copied' ? "bg-current shadow-none" : "opacity-20 group-hover:opacity-100"
                         )}>
                             {status === 'copied' ? <Check className="w-2 h-2 mix-blend-difference invert" /> : <LinkIcon className="w-2 h-2" />}
                         </div>

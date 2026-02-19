@@ -36,24 +36,23 @@ export function GuestbookBlock({ block, isPublic = false }: { block: any, isPubl
     }
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border-2 border-zinc-200 dark:border-zinc-800 overflow-hidden font-sans relative">
+        <div className="flex flex-col h-full bg-white dark:bg-zinc-950 rounded-none border border-black dark:border-white overflow-hidden font-mono relative shadow-none">
             {!isPublic && (
                 <div className="absolute inset-0 z-50 bg-transparent cursor-default" />
             )}
-            {/* Window Header */}
+            {/* Registry Header */}
             <div
-                className="px-4 py-2 flex items-center justify-between border-b-2 border-zinc-200 dark:border-zinc-800"
-                style={{ backgroundColor: color + '10' }}
+                className="px-4 py-3 flex items-center justify-between border-b border-black dark:border-white bg-zinc-50 dark:bg-zinc-900"
             >
                 <div className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" style={{ color }} />
-                    <span className="text-[10px] font-black uppercase tracking-widest italic" style={{ color }}>
+                    <MessageSquare className="w-3 h-3 text-black dark:text-white" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black dark:text-white italic">
                         {title}
                     </span>
                 </div>
-                <div className="flex gap-1">
-                    <div className="w-2 h-2 rounded-full bg-zinc-200 dark:bg-zinc-700" />
-                    <div className="w-2 h-2 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+                <div className="flex gap-1.5 opacity-20">
+                    <div className="w-1 h-1 bg-black dark:bg-white animate-pulse" />
+                    <div className="w-1 h-1 bg-black dark:bg-white animate-pulse delay-75" />
                 </div>
             </div>
 
@@ -69,19 +68,19 @@ export function GuestbookBlock({ block, isPublic = false }: { block: any, isPubl
                 ) : (
                     messages.map((msg) => (
                         <div key={msg.id} className="group animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-1.5">
                                 <div className={cn(
-                                    "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter flex items-center gap-1",
-                                    msg.isAdmin ? "bg-black text-white dark:bg-white dark:text-black" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
+                                    "px-2 py-0.5 rounded-none text-[8px] font-black uppercase tracking-widest flex items-center gap-1 border border-zinc-100 dark:border-zinc-800",
+                                    msg.isAdmin ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400"
                                 )}>
-                                    {msg.isAdmin ? <ShieldCheck className="w-3 h-3" /> : <User className="w-3 h-3" />}
+                                    {msg.isAdmin ? <ShieldCheck className="w-2.5 h-2.5" /> : <User className="w-2.5 h-2.5" />}
                                     {msg.author}
                                 </div>
-                                <span className="text-[8px] text-zinc-400 font-medium uppercase italic">
+                                <span className="text-[7px] text-zinc-300 dark:text-zinc-600 font-black uppercase tracking-widest">
                                     {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: ptBR })}
                                 </span>
                             </div>
-                            <div className="bg-white dark:bg-zinc-800/50 p-3 rounded-2xl rounded-tl-none border border-zinc-100 dark:border-zinc-800 shadow-sm text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium">
+                            <div className="bg-white dark:bg-zinc-950 p-4 rounded-none border border-zinc-100 dark:border-zinc-800 shadow-none text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-mono">
                                 {msg.content}
                             </div>
                         </div>
@@ -89,22 +88,22 @@ export function GuestbookBlock({ block, isPublic = false }: { block: any, isPubl
                 )}
             </div>
 
-            {/* Input Area (Only for public view or if allowed) */}
+            {/* Input Area */}
             {isPublic && (
-                <form onSubmit={handleSend} className="p-3 bg-zinc-50 dark:bg-zinc-950 border-t-2 border-zinc-200 dark:border-zinc-800 flex gap-2">
+                <form onSubmit={handleSend} className="p-3 bg-zinc-50 dark:bg-zinc-900 border-t border-black dark:border-white flex gap-2">
                     <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Deixe um recado..."
-                        className="flex-1 bg-white dark:bg-zinc-900 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 ring-zinc-200 dark:ring-zinc-800 transition-all outline-none"
+                        placeholder="INPUT_REGISTRY_DATA..."
+                        className="flex-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-none px-4 py-2 text-[11px] font-mono focus:ring-1 ring-black dark:ring-white transition-all outline-none uppercase"
                     />
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || isSending}
-                        className="w-10 h-10 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all shadow-lg"
+                        className="w-10 h-10 rounded-none bg-black dark:bg-white text-white dark:text-black flex items-center justify-center hover:scale-[1.05] active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all shadow-none border border-black dark:border-white"
                     >
-                        <Send className="w-4 h-4" />
+                        <Send className="w-3.5 h-3.5" />
                     </button>
                 </form>
             )}

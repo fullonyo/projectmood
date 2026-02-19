@@ -18,11 +18,11 @@ export function TextBlockPublic({ content }: TextBlockPublicProps) {
     return (
         <div
             className={cn(
-                "p-6 shadow-2xl transition-all duration-300 min-w-[220px] max-w-[450px]",
+                "p-6 shadow-none border border-black/10 dark:border-white/10 transition-all duration-300 min-w-[220px] max-w-[450px] bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
                 style === 'postit' && "bg-[#ffff88] text-zinc-900 rotate-[-1deg] shadow-yellow-900/20 rounded-sm border-b-[20px] border-b-black/5 font-handwriting",
                 style === 'ripped' && "bg-white text-zinc-900 shadow-zinc-300/80",
                 style === 'typewriter' && "bg-transparent border-2 border-dashed border-current rounded-none px-4 py-8",
-                style === 'simple' && "bg-white/10 dark:bg-zinc-900/10 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl"
+                style === 'simple' && "bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none shadow-none"
             )}
             style={{
                 backgroundColor: style === 'postit' ? undefined : bgColor,

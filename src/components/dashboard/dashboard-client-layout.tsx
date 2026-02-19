@@ -66,7 +66,7 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                         transition={{ type: 'spring', damping: 25, stiffness: 120 }}
                         className="absolute top-0 left-0 bottom-0 z-20 pointer-events-none"
                     >
-                        <div className="pointer-events-auto h-full shadow-2xl relative">
+                        <div className="pointer-events-auto h-full shadow-none relative">
                             <DashboardSidebar
                                 profile={localProfile}
                                 selectedBlock={selectedBlock}
@@ -78,7 +78,7 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                             {/* Inner Collapse Button */}
                             <button
                                 onClick={() => setIsSidebarOpen(false)}
-                                className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-r-xl flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors pointer-events-auto shadow-md group"
+                                className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors pointer-events-auto shadow-none group"
                             >
                                 <ChevronLeft className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
                             </button>
@@ -93,7 +93,7 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     onClick={() => setIsSidebarOpen(true)}
-                    className="absolute top-1/2 left-4 -translate-y-1/2 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center shadow-2xl z-30 hover:scale-110 transition-transform"
+                    className="absolute top-1/2 left-4 -translate-y-1/2 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-none border border-black dark:border-white flex items-center justify-center shadow-none z-30 hover:scale-110 transition-transform"
                 >
                     <Menu className="w-5 h-5" />
                 </motion.button>
@@ -109,13 +109,13 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                         transition={{ type: 'spring', damping: 25, stiffness: 120 }}
                         className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
                     >
-                        <div className="pointer-events-auto h-full shadow-2xl relative">
+                        <div className="pointer-events-auto h-full shadow-none relative">
                             <ActionsSidebar username={username} profile={localProfile} />
 
                             {/* Inner Collapse Button */}
                             <button
                                 onClick={() => setIsRightSidebarOpen(false)}
-                                className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-l-xl flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors pointer-events-auto shadow-md group"
+                                className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors pointer-events-auto shadow-none group"
                             >
                                 <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
                             </button>
@@ -130,7 +130,7 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                     initial={{ x: 20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     onClick={() => setIsRightSidebarOpen(true)}
-                    className="absolute top-1/2 right-4 -translate-y-1/2 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center shadow-2xl z-30 hover:scale-110 transition-transform"
+                    className="absolute top-1/2 right-4 -translate-y-1/2 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-none border border-black dark:border-white flex items-center justify-center shadow-none z-30 hover:scale-110 transition-transform"
                 >
                     <Menu className="w-5 h-5" />
                 </motion.button>

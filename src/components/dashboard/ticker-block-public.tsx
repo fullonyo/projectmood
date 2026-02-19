@@ -11,9 +11,10 @@ export function TickerBlockPublic({ content }: TickerBlockProps) {
     return (
         <div
             className={cn(
-                "py-3 overflow-hidden whitespace-nowrap shadow-2xl min-w-[300px] transition-all duration-500",
-                content.style === 'neon' && "border-y border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)]",
-                content.style === 'glass' && "backdrop-blur-md border-y border-white/10"
+                "p-6 rounded-none shadow-none border border-black/10 dark:border-white/10 relative overflow-hidden bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
+                "whitespace-nowrap border-y border-black/10 dark:border-white/10 shadow-none min-w-[300px] transition-all duration-500 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
+                "px-10 py-6 shadow-none border border-black/10 dark:border-white/10 relative overflow-hidden transition-all duration-500 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
+                content.style === 'modern' && "bg-white dark:bg-zinc-950 rounded-none border border-black dark:border-white"
             )}
             style={{ backgroundColor: content.bgColor }}
         >

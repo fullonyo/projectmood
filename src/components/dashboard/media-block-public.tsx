@@ -18,10 +18,10 @@ export function MediaBlockPublic({ content, isPublic = false }: MediaBlockPublic
 
     return (
         <div className={cn(
-            "p-5 py-9 min-w-[160px] max-w-[220px] shadow-2xl relative transition-all group hover:-translate-y-1",
+            "p-5 py-9 min-w-[160px] max-w-[220px] shadow-none border border-black/10 dark:border-white/10 rounded-none relative transition-all group hover:-translate-y-1 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
             isBook
-                ? "bg-[#fdfcf0] text-zinc-800 rounded-r-xl border-l-[8px] border-zinc-400/50 shadow-yellow-900/10"
-                : "bg-zinc-950 text-zinc-100 rounded-2xl border-2 border-zinc-800 shadow-purple-900/5"
+                ? "text-zinc-800 border-l-[8px] border-zinc-400/50 bg-[#fdfcf0]"
+                : "bg-zinc-950 text-zinc-100 border border-zinc-800"
         )}>
             <div className="absolute top-3 left-4 flex items-center gap-1.5">
                 {isBook ? <Book className="w-3 h-3 opacity-30" /> : <Film className="w-3 h-3 opacity-30" />}

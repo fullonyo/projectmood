@@ -89,7 +89,7 @@ export function BlockManager({ blocks }: BlockManagerProps) {
                     <div
                         key={block.id}
                         className={cn(
-                            "group flex items-center gap-3 p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 transition-all",
+                            "group flex items-center gap-3 p-3 bg-white dark:bg-zinc-950 border border-black/10 dark:border-white/10 rounded-none hover:border-black dark:hover:border-white transition-all shadow-none",
                             isPending && "opacity-50"
                         )}
                     >
@@ -97,7 +97,7 @@ export function BlockManager({ blocks }: BlockManagerProps) {
                             <GripVertical className="w-4 h-4" />
                         </div>
 
-                        <div className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-800 flex items-center justify-center text-zinc-500 border border-zinc-100 dark:border-zinc-700">
+                        <div className="w-8 h-8 rounded-none bg-black/5 dark:bg-white/5 flex items-center justify-center text-zinc-500 border border-black/10 dark:border-white/10">
                             {getIcon(block.type)}
                         </div>
 
@@ -110,7 +110,7 @@ export function BlockManager({ blocks }: BlockManagerProps) {
                         <button
                             onClick={() => handleDelete(block.id)}
                             disabled={isPending}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100"
+                            className="w-8 h-8 flex items-center justify-center rounded-none text-zinc-400 hover:text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors opacity-0 group-hover:opacity-100"
                         >
                             <Trash2 className="w-4 h-4" />
                         </button>

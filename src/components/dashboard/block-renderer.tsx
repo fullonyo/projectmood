@@ -41,15 +41,15 @@ export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
 
         case 'gif':
             return (
-                <div className="p-1 bg-white/20 dark:bg-black/20 backdrop-blur-md rounded-2xl shadow-xl border border-white/10">
-                    <img src={content.url} alt="gif" className="rounded-xl w-48 h-auto" />
+                <div className="p-1 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm rounded-none border border-black/10 dark:border-white/10 shadow-none">
+                    <img src={content.url} alt="gif" className="rounded-none w-48 h-auto" />
                 </div>
             )
 
         case 'tape':
             return (
                 <div
-                    className="w-32 h-8 shadow-sm backdrop-blur-[2px]"
+                    className="w-32 h-8 shadow-none border border-black/5 backdrop-blur-[2px]"
                     style={{
                         backgroundColor: content.color,
                         backgroundImage: content.pattern === 'dots' ? 'radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)' : 'none',
@@ -70,7 +70,7 @@ export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
                 <img
                     src={content.image}
                     alt="doodle"
-                    className="w-48 h-auto dark:invert contrast-125 brightness-110 pointer-events-none drop-shadow-xl"
+                    className="w-48 h-auto dark:invert contrast-125 brightness-110 pointer-events-none drop-shadow-none"
                 />
             )
 

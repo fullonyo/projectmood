@@ -75,11 +75,11 @@ export function MoodCanvas({
 
             {/* Saving Indicator */}
             <div className={cn(
-                "absolute top-20 right-8 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 transition-all duration-300 pointer-events-none",
+                "absolute top-20 right-8 z-50 flex items-center gap-2 px-3 py-1.5 rounded-none bg-white dark:bg-zinc-950/80 backdrop-blur-md border border-black dark:border-white transition-all duration-300 pointer-events-none shadow-none",
                 isSaving ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
             )}>
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Sincronizando...</span>
+                <div className="w-1.5 h-1.5 rounded-none bg-green-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">SYNC_ACTIVE</span>
             </div>
 
             {/* Canvas Grid Layer */}
@@ -117,8 +117,8 @@ export function MoodCanvas({
                 ))}
             </BoardStage>
 
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-[10px] font-bold tracking-widest uppercase text-zinc-400">
-                Zona de Criatividade Livre
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-none bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm border border-black/10 dark:border-white/10 text-[9px] font-black tracking-[0.5em] uppercase text-zinc-400">
+                CREATIVITY_DOMAIN_S01
             </div>
 
             <ConfirmModal
@@ -265,9 +265,8 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 touchAction: 'none'
             }}
             whileDrag={{
-                scale: 1.05,
+                opacity: 0.8,
                 zIndex: 1000,
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
             }}
             onClick={(e) => {
                 if (isInteracting) return
@@ -291,28 +290,28 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             {isSelected && (
                 <div
                     className={cn(
-                        "absolute -inset-[3px] border-2 rounded-lg pointer-events-none z-[1001] transition-all",
-                        isInteracting ? "border-blue-500 opacity-100 shadow-[0_0_15px_rgba(59,130,246,0.5)]" : "border-dashed border-zinc-400 opacity-50"
+                        "absolute -inset-[3px] border-2 rounded-none pointer-events-none z-[1001] transition-all",
+                        isInteracting ? "border-white opacity-100 shadow-none" : "border-dashed border-zinc-400 opacity-50 font-mono"
                     )}
                     style={!isInteracting ? { borderColor: profile.primaryColor || '#3b82f6' } : {}}
                 />
             )}
             {/* Action Toolbar */}
             {isSelected && (
-                <div className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200 dark:border-zinc-800 z-[1001] animate-in fade-in zoom-in duration-200 pointer-events-auto">
+                <div className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-none bg-white dark:bg-zinc-950 shadow-none border border-black dark:border-white z-[1001] animate-in fade-in zoom-in duration-200 pointer-events-auto">
                     <button
                         onClick={() => onSelect(false)}
-                        className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors group/edit"
+                        className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-none transition-colors group/edit"
                         title="Editar"
                     >
-                        <Pencil className="w-3.5 h-3.5 text-zinc-500 group-hover/edit:text-blue-500" />
+                        <Pencil className="w-3.5 h-3.5 text-zinc-500 group-hover/edit:text-white" />
                     </button>
                     <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
-                    <div className="p-1.5 cursor-move rounded-lg transition-colors" title="Mover">
+                    <div className="p-1.5 cursor-move rounded-none transition-colors border border-transparent" title="Mover">
                         <Move className="w-3.5 h-3.5 text-zinc-500" />
                     </div>
                     <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
-                    <button onClick={rotate} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors" title="Girar">
+                    <button onClick={rotate} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-none transition-colors" title="Girar">
                         <RotateCw className="w-3.5 h-3.5 text-zinc-500" />
                     </button>
                     {isInteractiveBlock && (
@@ -324,10 +323,10 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                                     setIsInteracting(!isInteracting)
                                 }}
                                 className={cn(
-                                    "p-1.5 rounded-lg transition-all border",
+                                    "p-1.5 rounded-none transition-all border",
                                     isInteracting
-                                        ? "bg-blue-500 text-white border-blue-600 shadow-inner"
-                                        : "hover:bg-zinc-100 border-transparent text-zinc-500"
+                                        ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
+                                        : "hover:bg-black/5 border-transparent text-zinc-500"
                                 )}
                                 title={isInteracting ? "Modo Interação Ativo" : "Ativar Modo Interação"}
                             >
@@ -336,7 +335,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                         </>
                     )}
                     <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
-                    <button onClick={handleDelete} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors group/del" title="Excluir">
+                    <button onClick={handleDelete} className="p-1.5 hover:bg-red-500/10 rounded-none transition-colors group/del" title="Excluir">
                         <Trash2 className="w-3.5 h-3.5 text-zinc-500 group-hover/del:text-red-500" />
                     </button>
                 </div>

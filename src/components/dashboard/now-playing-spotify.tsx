@@ -11,7 +11,7 @@ export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
     const [track, setTrack] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [isPlaying, setIsPlaying] = useState(false)
-    const [isMuted, setIsMuted] = useState(false) // Start UNMUTED (User request)
+    const [isMuted, setIsMuted] = useState(false)
     const audioRef = useRef<HTMLAudioElement | null>(null)
 
     useEffect(() => {
@@ -40,11 +40,9 @@ export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
         fetchNowPlaying()
     }, [userId])
 
-    // Autoplay Logic - Aggressive
     useEffect(() => {
         if (track?.previewUrl && audioRef.current) {
             audioRef.current.volume = 0.5
-            // audioRef.current.muted = true // User requested unmuted
 
             const attemptPlay = async () => {
                 try {
@@ -64,11 +62,9 @@ export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
     const togglePlay = () => {
         if (!audioRef.current) return
         if (isPlaying && !isMuted) {
-            // Se está tocando com som, pausa
             audioRef.current.pause()
             setIsPlaying(false)
         } else {
-            // Se está pausado OU mutado, toca com som
             audioRef.current.muted = false
             setIsMuted(false)
             audioRef.current.play()
@@ -96,21 +92,20 @@ export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
             )}
 
             {/* Main Widget */}
-            <div className={`bg-black/80 backdrop-blur-md text-white rounded-full pr-4 pl-1 py-1 shadow-2xl flex items-center gap-3 border border-white/10 overflow-hidden max-w-[300px] transition-all group ${isMuted && isPlaying ? 'ring-2 ring-yellow-400/50' : ''}`}>
+            <div className={`bg-black dark:bg-zinc-950 text-white rounded-none pr-4 pl-1 py-1 shadow-none border border-zinc-200 dark:border-zinc-800 flex items-center gap-3 overflow-hidden max-w-[300px] transition-all group ${isMuted && isPlaying ? 'ring-1 ring-white/20' : ''}`}>
 
                 {/* Album Art with Controls */}
-                <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 cursor-pointer" onClick={togglePlay}>
+                <div className="relative w-10 h-10 rounded-none overflow-hidden flex-shrink-0 cursor-pointer border-r border-zinc-200 dark:border-zinc-800" onClick={togglePlay}>
                     {track.albumArt ? (
                         <div className={`w-full h-full relative ${isPlaying ? 'animate-spin-slow' : ''}`}>
                             <img src={track.albumArt} alt={track.name} className="w-full h-full object-cover opacity-80" />
                         </div>
                     ) : (
-                        <div className="w-full h-full bg-green-500 flex items-center justify-center">
+                        <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
                             <Music2 className="w-4 h-4" />
                         </div>
                     )}
 
-                    {/* Overlay Icon */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity">
                         {isMuted && isPlaying ? (
                             <VolumeX className="w-4 h-4 text-yellow-400 animate-pulse" />
@@ -124,26 +119,26 @@ export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
 
                 <div className="flex-1 min-w-0 flex flex-col justify-center cursor-pointer" onClick={togglePlay}>
                     <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase font-bold text-green-400 tracking-wider">
-                            {isMuted ? "TAP TO UNMUTE" : "Now Playing"}
+                        <span className="text-[7px] uppercase font-black text-zinc-400 tracking-[0.4em]">
+                            {isMuted ? "TAP_TO_UNMUTE" : "AUDIO_STREAM"}
                         </span>
                         {isPlaying && !isMuted && (
                             <div className="flex gap-[2px] items-end h-[8px]">
                                 {[1, 2, 3].map(i => (
-                                    <div key={i} className="w-[2px] bg-green-400 animate-music-bar" style={{ animationDelay: `${i * 0.1}s` }} />
+                                    <div key={i} className="w-[1px] bg-white animate-music-bar" style={{ animationDelay: `${i * 0.1}s` }} />
                                 ))}
                             </div>
                         )}
                     </div>
 
                     <div className="flex items-baseline gap-1 overflow-hidden">
-                        <span className="text-xs font-bold whitespace-nowrap">{track.name}</span>
-                        <span className="text-[10px] opacity-70 whitespace-nowrap">- {track.artist}</span>
+                        <span className="text-[11px] font-black uppercase tracking-tighter whitespace-nowrap">{track.name}</span>
+                        <span className="text-[9px] opacity-40 uppercase italic whitespace-nowrap">// {track.artist}</span>
                     </div>
                 </div>
 
                 {track.previewUrl && !isMuted && (
-                    <button onClick={(e) => { e.stopPropagation(); toggleMute(); }} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
+                    <button onClick={(e) => { e.stopPropagation(); toggleMute(); }} className="p-1.5 hover:bg-white/10 rounded-none transition-colors border border-transparent hover:border-zinc-800">
                         <Volume2 className="w-3 h-3 opacity-70" />
                     </button>
                 )}

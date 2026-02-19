@@ -131,7 +131,7 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
 
             <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                    <div className="p-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
                         <Type className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
                     </div>
                     <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Base System</h3>

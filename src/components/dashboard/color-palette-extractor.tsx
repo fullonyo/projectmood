@@ -86,7 +86,7 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                     <Sparkles className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
                 </div>
                 <div>
@@ -99,7 +99,7 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                 <div
                     {...getRootProps()}
                     className={cn(
-                        "border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer group",
+                        "border border-dashed border-zinc-200 dark:border-zinc-800 rounded-none p-6 text-center transition-all cursor-pointer group bg-zinc-50/50 dark:bg-zinc-900/30",
                         isDragActive
                             ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
                             : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
@@ -114,12 +114,12 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                 </div>
             ) : (
                 <div className="space-y-4 animate-in fade-in zoom-in duration-300">
-                    <div className="relative aspect-video rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 group">
+                    <div className="relative aspect-video rounded-none overflow-hidden border border-zinc-200 dark:border-zinc-800 group">
                         <img src={previewUrl} className="w-full h-full object-cover" alt="Source" />
                         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button
                                 onClick={reset}
-                                className="p-2 bg-white/20 backdrop-blur-md rounded-full hover:bg-white/40 transition-colors"
+                                className="p-2 bg-white/20 backdrop-blur-md rounded-none hover:bg-white/40 transition-colors"
                             >
                                 <X className="w-4 h-4 text-white" />
                             </button>
@@ -139,11 +139,11 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                                 {extractedColors.map((color, idx) => (
                                     <div key={idx} className="group relative">
                                         <div
-                                            className="w-10 h-10 rounded-full border-2 border-white dark:border-zinc-900 shadow-sm transition-transform hover:scale-110"
+                                            className="w-10 h-10 rounded-none border border-white dark:border-zinc-900 shadow-none transition-transform hover:scale-110"
                                             style={{ backgroundColor: color }}
                                         />
                                         <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="text-[8px] font-mono uppercase bg-zinc-900 text-white px-1 rounded">
+                                            <span className="text-[8px] font-mono uppercase bg-zinc-900 text-white px-1 rounded-none">
                                                 {color}
                                             </span>
                                         </div>
@@ -152,7 +152,7 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                             </div>
                             <Button
                                 onClick={() => onApplyPalette(extractedColors)}
-                                className="w-full bg-black text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-black h-11 rounded-xl text-xs font-black uppercase tracking-widest"
+                                className="w-full bg-black text-white hover:bg-zinc-900 dark:bg-white dark:text-black h-12 rounded-none text-[10px] font-black uppercase tracking-widest border border-black dark:border-white transition-all"
                             >
                                 Aplicar no Mural
                             </Button>

@@ -63,7 +63,7 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
     const avatarSrc = profile.avatarUrl || `https://avatar.vercel.sh/${username}`
 
     return (
-        <aside className="w-80 h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-2xl z-50">
+        <aside className="w-80 h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-none z-50 overflow-hidden">
             {/* Hidden File Input */}
             <input
                 type="file"
@@ -90,7 +90,7 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
 
             {/* Profile Context Card */}
             <div className="px-6 py-10">
-                <div className="p-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 relative group transition-all duration-500 shadow-sm">
+                <div className="p-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 relative group transition-all duration-500">
                     {/* Technical corner accents */}
                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-zinc-300 dark:border-zinc-700" />
                     <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-zinc-300 dark:border-zinc-700" />
@@ -100,7 +100,7 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                             <button
                                 onClick={handleAvatarClick}
                                 disabled={isUploading}
-                                className="relative w-14 h-14 overflow-hidden border border-zinc-200 dark:border-zinc-800 transition-all duration-500 group/avatar disabled:opacity-50"
+                                className="relative w-14 h-14 overflow-hidden border border-zinc-200 dark:border-zinc-800 transition-all duration-500 group/avatar disabled:opacity-50 grayscale hover:grayscale-0"
                             >
                                 <img
                                     src={avatarSrc}
@@ -119,7 +119,7 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                             </button>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400 leading-none mb-1.5">Identity Protocol</span>
+                            <span className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-400 leading-none mb-1.5">Identity Protocol</span>
                             <h4 className="text-base font-black tracking-tighter dark:text-white uppercase italic">{firstName}</h4>
                             <span className="text-[7px] font-mono text-zinc-300 dark:text-zinc-600 mt-1">S_ID // {username.toUpperCase()}</span>
                         </div>
@@ -179,24 +179,24 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
 
                 {/* Futuras Funcionalidades - Polished Placeholder */}
                 <div className="space-y-4">
-                    <header className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-xs font-black tracking-[0.2em] uppercase text-zinc-500/50">Configurações</h3>
-                            <p className="text-[10px] text-zinc-400/50 italic">Novos controles em breve.</p>
+                    <header className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-zinc-200 dark:bg-zinc-800" />
+                            <h3 className="text-[9px] font-black tracking-[0.3em] uppercase text-zinc-400">System_Configuration</h3>
                         </div>
                     </header>
                     <div className="grid gap-2 opacity-30 grayscale cursor-not-allowed">
-                        <Button variant="outline" className="justify-start gap-4 h-12 rounded-xl text-[10px] font-bold uppercase tracking-widest border-dashed">
-                            <div className="p-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+                        <Button variant="outline" className="justify-start gap-4 h-12 rounded-none text-[9px] font-black uppercase tracking-widest border border-dashed border-zinc-200 dark:border-zinc-800 bg-transparent">
+                            <div className="p-1.5 border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950">
                                 <User className="w-3.5 h-3.5" />
                             </div>
-                            Perfil & Identidade
+                            Identity_Registry_Config
                         </Button>
-                        <Button variant="outline" className="justify-start gap-4 h-12 rounded-xl text-[10px] font-bold uppercase tracking-widest border-dashed">
-                            <div className="p-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+                        <Button variant="outline" className="justify-start gap-4 h-12 rounded-none text-[9px] font-black uppercase tracking-widest border border-dashed border-zinc-200 dark:border-zinc-800 bg-transparent">
+                            <div className="p-1.5 border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950">
                                 <Settings className="w-3.5 h-3.5" />
                             </div>
-                            Sistema & UX
+                            System_UX_Protocol
                         </Button>
                     </div>
                 </div>

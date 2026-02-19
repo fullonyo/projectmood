@@ -16,7 +16,7 @@ export function ProfileSignature({ username, name, avatarUrl, isVerified = true 
             <div className="flex items-start gap-5">
                 {/* Studio Avatar - High Fashion Style */}
                 <div className="relative pointer-events-auto">
-                    <div className="w-16 h-16 bg-current/10 backdrop-blur-md overflow-hidden border border-current transition-all duration-500 group-hover:rounded-2xl group-hover:scale-105">
+                    <div className="w-16 h-16 bg-white dark:bg-zinc-950 overflow-hidden border border-black dark:border-white transition-all duration-500 group-hover:scale-105 rounded-none">
                         <img
                             src={avatarUrl || `https://avatar.vercel.sh/${username}`}
                             alt={username}
@@ -24,8 +24,8 @@ export function ProfileSignature({ username, name, avatarUrl, isVerified = true 
                         />
                     </div>
                     {/* Active Indicator */}
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-current flex items-center justify-center rounded-full border-2 border-transparent shadow-lg">
-                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white dark:bg-zinc-950 flex items-center justify-center rounded-none border border-black dark:border-white shadow-none">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-none animate-pulse" />
                     </div>
                 </div>
 

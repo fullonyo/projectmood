@@ -85,7 +85,7 @@ export const PhotoBlockContentSchema = z.object({
     imageUrl: z.string().min(1, "Imagem é obrigatória"),
     alt: z.string().max(200).optional(),
     filter: z.enum(['none', 'vintage', 'bw', 'warm', 'cool']).default('none'),
-    frame: z.enum(['none', 'polaroid', 'border', 'shadow']).default('none'),
+    frame: z.enum(['none', 'polaroid', 'polaroid-dark', 'frame', 'minimal', 'round']).default('none'),
     caption: z.string().max(100).optional()
 })
 

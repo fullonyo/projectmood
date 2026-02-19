@@ -14,16 +14,16 @@ export function VideoBlockPublic({ content, isPublic = false }: VideoBlockPublic
     const autoplayParams = isPublic ? '&autoplay=1&mute=0' : '';
 
     return (
-        <div className="w-full max-w-[420px] aspect-video bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden border border-white/10 group hover:scale-[1.01] transition-transform relative">
+        <div className="w-full max-w-[320px] p-2 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm rounded-none border border-black/10 dark:border-white/10 hover:scale-[1.02] transition-transform relative overflow-hidden">
             <iframe
                 src={`https://www.youtube.com/embed/${content.videoId}?loop=1&playlist=${content.videoId}&controls=1&rel=0${autoplayParams}`}
                 width="100%" height="100%" frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                className="opacity-90"
+                className="rounded-none font-mono"
             />
             {/* Premium Overlay for non-hover state */}
-            <div className="absolute inset-0 pointer-events-none border-[8px] border-black/5 rounded-2xl" />
+            <div className="absolute inset-0 pointer-events-none border border-black/5 rounded-none" />
 
             {/* Interaction Shield for Editor Mode */}
             {!isPublic && (

@@ -45,17 +45,17 @@ export function SocialBlockPublic({ content, isPublic = false }: SocialBlockPubl
             rel="noopener noreferrer"
             onClick={(e) => !isPublic && e.preventDefault()}
             className={cn(
-                "flex items-center gap-3 px-4 py-2.5 transition-all duration-300 shadow-xl min-w-[160px] group",
+                "flex items-center gap-3 px-4 py-2.5 transition-all duration-300 shadow-none border border-black/10 dark:border-white/10 min-w-[160px] group bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
                 !isPublic && "pointer-events-none",
                 content.style === 'tag' && "bg-[#fefefe] dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-[2px] border border-zinc-200 dark:border-zinc-700 border-l-[6px] border-l-black dark:border-l-white font-serif italic hover:translate-x-1",
-                content.style === 'glass' && "bg-white/10 dark:bg-black/10 backdrop-blur-xl rounded-2xl border border-white/10 text-current hover:bg-white/20 hover:scale-[1.05]",
-                content.style === 'minimal' && "bg-transparent text-current font-black tracking-tighter text-xl hover:opacity-70",
-                content.style === 'neon' && "bg-black text-green-400 rounded-full border-2 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:shadow-[0_0_25px_rgba(34,197,94,0.5)] hover:bg-zinc-900"
+                content.style === 'glass' && "bg-white/10 dark:bg-white/5 rounded-none border border-white/20 text-current hover:bg-white/20 hover:scale-[1.05]",
+                content.style === 'minimal' && "bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none",
+                content.style === 'neon' && "bg-black text-green-400 rounded-none border border-green-500/50 hover:bg-zinc-900"
             )}
         >
             <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110",
-                content.style === 'minimal' ? "bg-black text-white dark:bg-white dark:text-black shadow-lg" : "bg-zinc-100 dark:bg-zinc-700/50"
+                "w-8 h-8 rounded-none flex items-center justify-center shrink-0 transition-transform group-hover:scale-110",
+                content.style === 'minimal' ? "bg-black text-white dark:bg-white dark:text-black shadow-none border border-black dark:border-white" : "bg-black/5 dark:bg-white/5"
             )}>
                 <Icon className="w-4 h-4" />
             </div>

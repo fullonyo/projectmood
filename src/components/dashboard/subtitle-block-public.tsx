@@ -23,8 +23,8 @@ export function SubtitleBlockPublic({ content }: SubtitleBlockProps) {
                     }
                 }}
                 className={cn(
-                    "px-10 py-6 shadow-2xl relative overflow-hidden transition-all duration-500",
-                    content.style === 'vhs' && "bg-[#050505] border-l-[8px] border-l-red-600 rounded-sm shadow-[8px_8px_0_rgba(0,0,0,0.5)]",
+                    "px-10 py-6 shadow-none relative overflow-hidden transition-all duration-500 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm border border-black/10 dark:border-white/10",
+                    content.style === 'vhs' && "bg-[#050505] border-l-[8px] border-l-red-600",
                     content.style === 'minimal' && "bg-transparent border-none rounded-none text-xl font-normal tracking-tight",
                     content.style === 'modern' && "bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800"
                 )}

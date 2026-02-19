@@ -33,11 +33,15 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
     const getFrameClass = () => {
         switch (frame) {
             case 'polaroid':
-                return 'bg-white p-3 pb-12 shadow-xl'
-            case 'border':
-                return 'border-4 border-white shadow-lg'
-            case 'shadow':
-                return 'shadow-2xl'
+                return 'bg-white p-3 pb-12 border border-zinc-200 shadow-none'
+            case 'polaroid-dark':
+                return 'bg-zinc-900 p-3 pb-12 border border-zinc-800 shadow-none'
+            case 'frame':
+                return 'border-4 border-white shadow-none'
+            case 'minimal':
+                return 'shadow-none border border-zinc-100 dark:border-zinc-900'
+            case 'round':
+                return 'border border-black dark:border-white shadow-none'
             default:
                 return ''
         }
@@ -45,20 +49,20 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
 
     return (
         <div className="w-full h-full flex flex-col items-center justify-center p-4">
-            <div className={`relative rounded-2xl overflow-hidden ${getFrameClass()}`}>
+            <div className={`relative rounded-none overflow-hidden ${getFrameClass()}`}>
                 <img
                     src={imageUrl}
                     alt={alt}
                     className="w-full h-full object-cover"
                     style={{ filter: getFilterClass() }}
                 />
-                {caption && frame === 'polaroid' && (
+                {caption && (frame === 'polaroid' || frame === 'polaroid-dark') && (
                     <div className="absolute bottom-3 left-3 right-3 text-center">
-                        <p className="text-sm text-zinc-700 font-medium">{caption}</p>
+                        <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium">{caption}</p>
                     </div>
                 )}
             </div>
-            {caption && frame !== 'polaroid' && (
+            {caption && !(frame === 'polaroid' || frame === 'polaroid-dark') && (
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-3 text-center italic">
                     {caption}
                 </p>
