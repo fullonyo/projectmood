@@ -50,23 +50,24 @@ export function MoodCanvas({
     }, [blocks])
 
     const bringToFront = async (blockId: string) => {
+        onInteractionStart() // Renova blindagem
         const newZ = maxZ + 1
         setMaxZ(newZ)
+
+        // Optimistic update local
+        onUpdateBlock(blockId, { zIndex: newZ })
+
         setIsSaving(true)
         await updateMoodBlockLayout(blockId, { zIndex: newZ })
         setIsSaving(false)
     }
 
     const handleCanvasClick = (e: React.MouseEvent) => {
-        // Se o clique foi diretamente no fundo (container ou grid)
-        const target = e.target as HTMLElement
-        const isBackground = target === canvasRef.current ||
-            target.id === 'canvas-grid-layer' ||
-            target.classList.contains('canvas-items-wrapper')
-
-        if (isBackground) {
-            setSelectedId(null)
-        }
+        // Event Bubbling Strategy:
+        // Se o evento de clique chegou até aqui (container pai), significa que não foi interrompido (stopPropagation)
+        // por nenhum elemento filho interativo (blocos, botões, etc).
+        // Portanto, assumimos seguramente que foi um clique no "vazio" ou em elementos decorativos de fundo.
+        setSelectedId(null)
     }
 
     return (
@@ -110,9 +111,18 @@ export function MoodCanvas({
                         isSelected={selectedId === block.id}
                         profile={profile}
                         themeConfig={config}
-                        onSelect={() => {
-                            setSelectedId(block.id)
-                            bringToFront(block.id)
+                        onSelect={(toggle = false) => {
+                            onInteractionStart() // Renova blindagem ao clicar/selecionar
+                            if (toggle && selectedId === block.id) {
+                                // Se for toggle e já estiver selecionado, deselecionar
+                                setSelectedId(null)
+                            } else {
+                                // Caso contrário (ou se for force select), selecionar e trazer para frente
+                                setSelectedId(block.id)
+                                if (selectedId !== block.id) {
+                                    bringToFront(block.id)
+                                }
+                            }
                         }}
                         onUpdate={(content) => onUpdateBlock(block.id, content)}
                         onDeleteRequest={(id) => setBlockToDelete(id)}
@@ -153,7 +163,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
     block: any,
     canvasRef: React.RefObject<HTMLDivElement | null>,
     isSelected: boolean,
-    onSelect: () => void,
+    onSelect: (toggle?: boolean) => void,
     onUpdate: (content: any) => void,
     onSavingStart: () => void,
     onSavingEnd: () => void,
@@ -172,7 +182,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
 
     const handleDragStart = () => {
         setIsDragging(true)
-        onSelect()
+        onSelect(false) // Force select on drag start (never toggle off)
         onInteractionStart()
     }
 
@@ -302,11 +312,11 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
             }}
             onClick={(e) => {
                 e.stopPropagation()
-                onSelect()
+                onSelect(true) // Toggle selection on click
             }}
             onDoubleClick={(e) => {
                 e.stopPropagation()
-                onSelect()
+                onSelect(false) // Force select on double click (editing)
             }}
             initial={false}
             className={cn(
@@ -334,7 +344,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
             {isSelected && (
                 <div className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200 dark:border-zinc-800 z-[1001] animate-in fade-in zoom-in duration-200 pointer-events-auto">
                     <button
-                        onClick={onSelect}
+                        onClick={() => onSelect(false)}
                         className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors group/edit"
                         title="Editar"
                     >
@@ -426,7 +436,8 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
 
             <div className={cn(
                 "w-full h-full transition-transform duration-200 overflow-hidden",
-                isDragging && "scale-[1.02] rotate-1"
+                isDragging && "scale-[1.02] rotate-1",
+                (isDragging || isResizing) && "pointer-events-none"
             )}>
                 <BlockRenderer block={block} isPublic={false} />
             </div>
