@@ -10,6 +10,7 @@ import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
 import { BackgroundEffect } from "../effects/background-effect";
 import { FontLoader } from "./font-loader";
+import { useCanvasManager } from "@/hooks/use-canvas-manager";
 
 interface DashboardClientLayoutProps {
     profile: any;
@@ -21,78 +22,20 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [localBlocks, setLocalBlocks] = useState(moodBlocks);
     const [localProfile, setLocalProfile] = useState(profile);
 
-    // Sync with server data (Smart Merge Strategy)
-    useEffect(() => {
-        setLocalBlocks(prevLocalBlocks => {
-            const now = Date.now();
-            const localMap = new Map(prevLocalBlocks.map(b => [b.id, b]));
-
-            // Se o servidor trouxe novos blocos, vamos mesclar
-            const mergedBlocks = moodBlocks.map(serverBlock => {
-                const localBlock = localMap.get(serverBlock.id);
-
-                // Se não temos localmente (novo do servidor), aceitamos
-                if (!localBlock) return serverBlock;
-
-                // Verificamos se houve edição local recente (Soberania Local - 5s)
-                const lastEdit = (localBlock as any)._localUpdatedAt || 0;
-                const isRecentlyEdited = (now - lastEdit) < 5000;
-
-                if (isRecentlyEdited) {
-                    // Mantemos a versão local para evitar "pulo" visual
-                    return localBlock;
-                }
-
-                // Se não foi editado recentemente, aceitamos a verdade do servidor (Sync)
-                // Mas preservamos o _localUpdatedAt para não perder referência num ciclo rápido
-                return {
-                    ...serverBlock,
-                    _localUpdatedAt: lastEdit
-                };
-            });
-
-            // Precisamos garantir que blocos criados otimistamente (ainda não no servidor) não sumam?
-            // A lógica anterior substituía tudo: setLocalBlocks(moodBlocks).
-            // Isso significava que criações otimistas dependiam de revalidate rápido ou eram adicionadas ao array moodBlocks antes.
-            // Vamos manter o comportamento de "fonte da verdade é o servidor" para adição/remoção,
-            // focando o Smart Merge apenas na ATUALIZAÇÃO de propriedades.
-
-            return mergedBlocks;
-        });
-    }, [moodBlocks]);
+    // 🧠 CENTRAL CORTEX: Sovereign management of blocks and persistence
+    const { blocks, updateBlock, isSaving } = useCanvasManager(moodBlocks);
 
     useEffect(() => {
         setLocalProfile(profile);
     }, [profile]);
 
-    const handleUpdateLocalBlock = (id: string, updates: any) => {
-        setLocalBlocks(prev => prev.map(block => {
-            if (block.id !== id) return block;
-
-            // Injeta timestamp de modificação local para o Smart Merge
-            const updatedBlock = {
-                ...block,
-                ...updates,
-                _localUpdatedAt: Date.now()
-            };
-
-            // Se updates contém 'content', fazemos merge profundo do content
-            if (updates.content) {
-                updatedBlock.content = { ...((block.content as any) || {}), ...updates.content };
-            }
-
-            return updatedBlock;
-        }));
-    };
-
     const handleUpdateLocalProfile = (data: any) => {
         setLocalProfile((prev: any) => ({ ...prev, ...data }));
     };
 
-    const selectedBlock = localBlocks.find(b => b.id === selectedId);
+    const selectedBlock = blocks.find(b => b.id === selectedId);
 
     return (
         <main className="flex-1 relative overflow-hidden flex flex-col focus:outline-none">
@@ -103,12 +46,13 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
             {/* Fullscreen Canvas as Base Layer (layer 0) */}
             <div className="absolute inset-0 z-0">
                 <MoodCanvas
-                    blocks={localBlocks}
+                    blocks={blocks}
                     profile={localProfile}
                     backgroundEffect={localProfile.backgroundEffect || 'none'}
                     selectedId={selectedId}
                     setSelectedId={setSelectedId}
-                    onUpdateBlock={handleUpdateLocalBlock}
+                    onUpdateBlock={updateBlock}
+                    isSaving={isSaving}
                 />
             </div>
 
@@ -127,7 +71,7 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                                 profile={localProfile}
                                 selectedBlock={selectedBlock}
                                 setSelectedId={setSelectedId}
-                                onUpdateBlock={handleUpdateLocalBlock}
+                                onUpdateBlock={updateBlock}
                                 onUpdateProfile={handleUpdateLocalProfile}
                             />
 

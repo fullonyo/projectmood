@@ -1,6 +1,6 @@
-import { motion } from "framer-motion"
+import { motion, useMotionValue } from "framer-motion"
 import { toast } from "sonner"
-import { updateMoodBlockLayout, deleteMoodBlock } from "@/actions/profile"
+import { deleteMoodBlock } from "@/actions/profile"
 import { Trash2, RotateCw, Pencil, Move } from "lucide-react"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
 import { useState, useRef, useEffect } from "react"
@@ -10,6 +10,7 @@ import { BlockRenderer } from "./block-renderer"
 import { BackgroundEffect } from "../effects/background-effect"
 import { StaticTextures } from "../effects/static-textures"
 import { BoardStage } from "./board-stage"
+import { useCanvasManager } from "@/hooks/use-canvas-manager"
 
 
 interface MoodCanvasProps {
@@ -18,7 +19,8 @@ interface MoodCanvasProps {
     backgroundEffect: string
     selectedId: string | null
     setSelectedId: (id: string | null) => void
-    onUpdateBlock: (id: string, content: any) => void
+    onUpdateBlock: (id: string, updates: any) => void
+    isSaving: boolean
 }
 
 export function MoodCanvas({
@@ -27,12 +29,13 @@ export function MoodCanvas({
     backgroundEffect,
     selectedId,
     setSelectedId,
-    onUpdateBlock
+    onUpdateBlock,
+    isSaving
 }: MoodCanvasProps) {
     const canvasRef = useRef<HTMLDivElement>(null)
     const [maxZ, setMaxZ] = useState(10)
-    const [isSaving, setIsSaving] = useState(false)
     const [blockToDelete, setBlockToDelete] = useState<string | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
 
     const theme = profile.theme || 'light'
     const config = themeConfigs[theme] || themeConfigs.light
@@ -50,20 +53,10 @@ export function MoodCanvas({
     const bringToFront = async (blockId: string) => {
         const newZ = maxZ + 1
         setMaxZ(newZ)
-
-        // Optimistic update local
         onUpdateBlock(blockId, { zIndex: newZ })
-
-        setIsSaving(true)
-        await updateMoodBlockLayout(blockId, { zIndex: newZ })
-        setIsSaving(false)
     }
 
     const handleCanvasClick = (e: React.MouseEvent) => {
-        // Event Bubbling Strategy:
-        // Se o evento de clique chegou até aqui (container pai), significa que não foi interrompido (stopPropagation)
-        // por nenhum elemento filho interativo (blocos, botões, etc).
-        // Portanto, assumimos seguramente que foi um clique no "vazio" ou em elementos decorativos de fundo.
         setSelectedId(null)
     }
 
@@ -110,20 +103,16 @@ export function MoodCanvas({
                         themeConfig={config}
                         onSelect={(toggle = false) => {
                             if (toggle && selectedId === block.id) {
-                                // Se for toggle e já estiver selecionado, deselecionar
                                 setSelectedId(null)
                             } else {
-                                // Caso contrário (ou se for force select), selecionar e trazer para frente
                                 setSelectedId(block.id)
                                 if (selectedId !== block.id) {
                                     bringToFront(block.id)
                                 }
                             }
                         }}
-                        onUpdate={(content) => onUpdateBlock(block.id, content)}
+                        onUpdate={(updates) => onUpdateBlock(block.id, updates)}
                         onDeleteRequest={(id) => setBlockToDelete(id)}
-                        onSavingStart={() => setIsSaving(true)}
-                        onSavingEnd={() => setIsSaving(false)}
                     />
                 ))}
             </BoardStage>
@@ -137,9 +126,9 @@ export function MoodCanvas({
                 onClose={() => setBlockToDelete(null)}
                 onConfirm={async () => {
                     if (blockToDelete) {
-                        setIsSaving(true)
+                        setIsDeleting(true)
                         await deleteMoodBlock(blockToDelete)
-                        setIsSaving(false)
+                        setIsDeleting(false)
                         setBlockToDelete(null)
                     }
                 }}
@@ -147,21 +136,19 @@ export function MoodCanvas({
                 message="Essa ação não pode ser desfeita. O item será removido permanentemente do seu mural."
                 confirmText="Excluir"
                 type="danger"
-                isLoading={isSaving}
+                isLoading={isDeleting}
             />
         </div>
     )
 }
 
 
-function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSavingStart, onSavingEnd, profile, themeConfig, onDeleteRequest }: {
+function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile, themeConfig, onDeleteRequest }: {
     block: any,
     canvasRef: React.RefObject<HTMLDivElement | null>,
     isSelected: boolean,
     onSelect: (toggle?: boolean) => void,
     onUpdate: (content: any) => void,
-    onSavingStart: () => void,
-    onSavingEnd: () => void,
     profile: any,
     themeConfig: any,
     onDeleteRequest: (id: string) => void
@@ -174,42 +161,35 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
         height: block.height || 'auto'
     })
 
+    // 🏎️ GPU-ACCELERATED VALUES: MotionValues bypass the React Render cycle
+    // for silky smooth 60fps movement.
+    const mvX = useMotionValue(0)
+    const mvY = useMotionValue(0)
+
     const handleDragStart = () => {
         setIsDragging(true)
-        onSelect(false) // Force select on drag start (never toggle off)
+        onSelect(false)
     }
 
-    const handleDragEnd = async (event: any, info: any) => {
+    const handleDragEnd = (event: any, info: any) => {
         setIsDragging(false)
         if (!canvasRef.current) return
 
         const canvasRect = canvasRef.current.getBoundingClientRect()
 
-        // Calculate the new percentage position
+        // Calculate final percentages
         const deltaXPercent = (info.offset.x / canvasRect.width) * 100
         const deltaYPercent = (info.offset.y / canvasRect.height) * 100
 
-        // Use toFixed(4) and parseFloat to round to 4 decimal places for high precision
         const newX = parseFloat(Math.max(0, Math.min(100, block.x + deltaXPercent)).toFixed(4))
         const newY = parseFloat(Math.max(0, Math.min(100, block.y + deltaYPercent)).toFixed(4))
 
-        // Optimistic update
+        // Update the Sovereign Manager (Debounced saving happens in the hook)
         onUpdate({ x: newX, y: newY })
 
-        onSavingStart()
-        const result = await updateMoodBlockLayout(block.id, {
-            x: newX,
-            y: newY
-        })
-
-        if (result?.error) {
-            toast.error("Erro ao salvar posição", {
-                description: "Verifique sua conexão e tente novamente."
-            })
-            // Rollback forces update to original position
-            onUpdate({ x: block.x, y: block.y })
-        }
-        onSavingEnd()
+        // Reset motion values so the 'left/top' props take over again
+        mvX.set(0)
+        mvY.set(0)
     }
 
     const handleResize = (event: any, info: any, corner: 'br' | 'bl' | 'tr' | 'tl') => {
@@ -240,52 +220,21 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
         })
     }
 
-    const handleResizeEnd = async () => {
+    const handleResizeEnd = () => {
         setIsResizing(false)
-
-        const updates = {
+        onUpdate({
             width: typeof size.width === 'number' ? Math.round(size.width) : undefined,
             height: typeof size.height === 'number' ? Math.round(size.height) : undefined
-        }
-
-        // Optimistic update
-        onUpdate(updates)
-
-        onSavingStart()
-        const result = await updateMoodBlockLayout(block.id, updates)
-
-        if (result?.error) {
-            toast.error("Erro ao salvar tamanho")
-            // Rollback visual state if possible, or just warn.
-        }
-        onSavingEnd()
+        })
     }
 
-    const handleDelete = async () => {
-        onDeleteRequest(block.id)
-    }
+    const handleDelete = () => onDeleteRequest(block.id)
 
-    const rotate = async () => {
+    const rotate = () => {
         const newRotation = (localRotation + 15) % 360
         setLocalRotation(newRotation)
-
-        // Optimistic update
         onUpdate({ rotation: newRotation })
-
-        onSavingStart()
-        const result = await updateMoodBlockLayout(block.id, { rotation: newRotation })
-
-        if (result?.error) {
-            toast.error("Erro ao salvar rotação")
-            // Revert rotation locally
-            setLocalRotation(localRotation) // restoration to old state
-            onUpdate({ rotation: localRotation })
-        }
-        onSavingEnd()
     }
-
-    const displayX = block.x
-    const displayY = block.y
 
     return (
         <motion.div
@@ -295,7 +244,18 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
             dragElastic={0}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            animate={{ x: 0, y: 0 }}
+            style={{
+                x: mvX,
+                y: mvY,
+                left: `${block.x}%`,
+                top: `${block.y}%`,
+                width: size.width,
+                height: size.height,
+                rotate: localRotation,
+                zIndex: isDragging || isSelected ? 999 : (block.zIndex || 1),
+                boxShadow: isSelected ? `0 0 0 2px ${themeConfig.bg}, 0 0 0 4px ${profile.primaryColor || '#3b82f6'}` : 'none',
+                touchAction: 'none'
+            }}
             whileDrag={{
                 scale: 1.05,
                 zIndex: 1000,
@@ -303,26 +263,16 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, onSaving
             }}
             onClick={(e) => {
                 e.stopPropagation()
-                onSelect(true) // Toggle selection on click
+                onSelect(true)
             }}
             onDoubleClick={(e) => {
                 e.stopPropagation()
-                onSelect(false) // Force select on double click (editing)
+                onSelect(false)
             }}
-            initial={false}
             className={cn(
                 "absolute select-none group touch-none",
                 isSelected ? "cursor-default" : "cursor-grab active:cursor-grabbing"
             )}
-            style={{
-                left: `${displayX}%`,
-                top: `${displayY}%`,
-                width: size.width,
-                height: size.height,
-                rotate: localRotation,
-                zIndex: isDragging || isSelected ? 999 : (block.zIndex || 1),
-                boxShadow: isSelected ? `0 0 0 2px ${themeConfig.bg}, 0 0 0 4px ${profile.primaryColor || '#3b82f6'}` : 'none'
-            }}
         >
             {/* Selection Border Outline (Standardized) */}
             {isSelected && (

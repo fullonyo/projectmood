@@ -38,7 +38,7 @@ export async function updateProfile(data: {
         if (username) {
             revalidatePath(`/${username}`);
             // @ts-ignore
-            revalidateTag(`profile:${username}`);
+            revalidateTag(`profile:${username}`, 'max');
         }
         return { success: true };
     } catch (error) {
@@ -77,7 +77,7 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
         if (username) {
             revalidatePath(`/${username}`);
             // @ts-ignore
-            revalidateTag(`profile:${username}`);
+            revalidateTag(`profile:${username}`, 'max');
         }
         return { success: true, block };
     } catch (error) {
@@ -112,7 +112,7 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
         if (username) {
             revalidatePath(`/${username}`);
             // @ts-ignore
-            revalidateTag(`profile:${username}`);
+            revalidateTag(`profile:${username}`, 'max');
         }
 
         return { success: true };
@@ -135,7 +135,7 @@ export async function deleteMoodBlock(blockId: string) {
         if (username) {
             revalidatePath(`/${username}`);
             // @ts-ignore
-            revalidateTag(`profile:${username}`);
+            revalidateTag(`profile:${username}`, 'max');
         }
         return { success: true };
     } catch (error) {
@@ -158,7 +158,7 @@ export async function clearMoodBlocks() {
         if (username) {
             revalidatePath(`/${username}`);
             // @ts-ignore
-            revalidateTag(`profile:${username}`);
+            revalidateTag(`profile:${username}`, 'max');
         }
 
         return { success: true };
@@ -188,7 +188,7 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
         if (username) {
             revalidatePath(`/${username}`);
             // @ts-ignore
-            revalidateTag(`profile:${username}`);
+            revalidateTag(`profile:${username}`, 'max');
         }
         return { success: true };
     } catch (error) {
