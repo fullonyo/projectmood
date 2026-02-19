@@ -315,7 +315,9 @@ export function DashboardSidebar({
                                 const { addMoodBlock } = await import('@/actions/profile')
                                 await addMoodBlock('photo', content, {
                                     x: Math.random() * 40 + 30,
-                                    y: Math.random() * 40 + 30
+                                    y: Math.random() * 40 + 30,
+                                    width: 300,
+                                    height: 300
                                 })
                             }} />
                         </div>

@@ -50,13 +50,14 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
     }
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-2">
-            <div className={`relative w-full h-full flex-1 min-h-0 rounded-none overflow-hidden ${getFrameClass()}`}>
-                <div className="relative w-full h-full z-0">
+        <div className="w-full h-full flex flex-col p-2">
+            <div className={`relative w-full h-full flex-1 rounded-none overflow-hidden flex flex-col ${getFrameClass()}`}>
+                <div className="relative flex-1 w-full min-h-0 z-0">
                     <Image
                         src={imageUrl}
                         alt={alt || "Mood photo"}
                         fill
+                        unoptimized
                         className="object-cover"
                         style={{ filter: getFilterClass() }}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -64,12 +65,12 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
                 </div>
                 {caption && (frame === 'polaroid' || frame === 'polaroid-dark') && (
                     <div className="absolute bottom-3 left-3 right-3 text-center pointer-events-none">
-                        <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium truncate">{caption}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 truncate">{caption}</p>
                     </div>
                 )}
             </div>
             {caption && !(frame === 'polaroid' || frame === 'polaroid-dark') && (
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-3 text-center italic">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mt-2 text-center truncate">
                     {caption}
                 </p>
             )}

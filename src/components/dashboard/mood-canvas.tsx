@@ -161,9 +161,14 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     const [isRotating, setIsRotating] = useState(false)
     const [localRotation, setLocalRotation] = useState(block.rotation || 0)
     const [shiftHeld, setShiftHeld] = useState(false)
+    const getFallbackSize = (type: string) => {
+        if (['photo', 'video', 'music', 'guestbook'].includes(type)) return 300
+        return 'auto'
+    }
+
     const [size, setSize] = useState({
-        width: block.width || 'auto' as number | 'auto',
-        height: block.height || 'auto' as number | 'auto'
+        width: block.width || getFallbackSize(block.type) as number | 'auto',
+        height: block.height || getFallbackSize(block.type) as number | 'auto'
     })
     const [localPosition, setLocalPosition] = useState({ x: block.x, y: block.y })
 
@@ -184,8 +189,8 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     useEffect(() => {
         if (!isResizingRef.current) {
             const newSize = {
-                width: block.width || 'auto' as number | 'auto',
-                height: block.height || 'auto' as number | 'auto'
+                width: block.width || getFallbackSize(block.type) as number | 'auto',
+                height: block.height || getFallbackSize(block.type) as number | 'auto'
             }
             setSize(newSize)
             sizeRef.current = newSize

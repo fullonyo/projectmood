@@ -22,7 +22,7 @@ RUN npx prisma generate
 # Disable Next.js telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npm run build
+RUN NODE_OPTIONS="--max-old-space-size=2048" npm run build
 
 # --- Stage 3: Runner ---
 FROM node:20-slim AS runner
