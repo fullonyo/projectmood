@@ -6,6 +6,8 @@ import Link from "next/link"
 import { registerUser } from "@/actions/register"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { BackgroundEffect } from "@/components/effects/background-effect"
+import { UserPlus, ShieldPlus } from "lucide-react"
 
 export default function RegisterForm() {
     const [error, setError] = useState<string | undefined>("")
@@ -25,12 +27,12 @@ export default function RegisterForm() {
         const res = await registerUser(data as any)
 
         if (res.error) {
-            setError(res.error)
+            setError(`Identity Rejected: ${res.error}`)
             setLoading(false)
         }
 
         if (res.success) {
-            setSuccess(res.success)
+            setSuccess("Identity Established. Initializing Studio...")
             setTimeout(() => {
                 router.push("/auth/login")
             }, 2000)
@@ -38,94 +40,106 @@ export default function RegisterForm() {
     }
 
     return (
-        <div className="h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden">
-            {/* Header */}
-            <nav className="flex items-center justify-between px-6 py-4 md:px-12 border-b border-zinc-100 flex-shrink-0">
-                <div className="text-2xl font-black tracking-tighter uppercase italic">MoodSpace</div>
+        <div className="h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden relative">
+            <div className="fixed inset-0 z-0 opacity-5 pointer-events-none">
+                <BackgroundEffect type="aurora" primaryColor="#000" />
+            </div>
+
+            {/* Technical Header */}
+            <nav className="relative z-50 flex items-center justify-between px-6 py-6 md:px-12 border-b border-zinc-100 flex-shrink-0">
+                <div className="flex flex-col">
+                    <span className="text-[7px] font-black uppercase tracking-[0.5em] opacity-30 leading-none mb-1">Entity Registration</span>
+                    <div className="text-2xl font-black tracking-tighter uppercase italic">MoodSpace</div>
+                </div>
                 <Link href="/">
-                    <Button variant="ghost" className="text-sm">← Voltar</Button>
+                    <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest gap-2">
+                        <ShieldPlus className="w-3 h-3" />
+                        Cancel Protocol
+                    </Button>
                 </Link>
             </nav>
 
-            {/* Main Content */}
-            <main className="flex-1 flex items-center justify-center px-6 py-6 overflow-y-auto">
-                <div className="w-full max-w-md space-y-6">
-                    {/* Título */}
-                    <div className="text-center space-y-2">
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tight">Crie sua conta.</h1>
-                        <p className="text-zinc-500 text-lg">Comece a construir seu espaço único.</p>
+            <main className="relative z-10 flex-1 flex items-center justify-center px-6 py-6 overflow-y-auto">
+                <div className="w-full max-w-sm space-y-12">
+                    <div className="text-center space-y-4">
+                        <div className="inline-flex items-center gap-3 px-4 py-1.5 border border-black/5 bg-zinc-50 rounded-full mb-2">
+                            <UserPlus className="w-3 h-3 opacity-40" />
+                            <span className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40">Request Studio Allocation</span>
+                        </div>
+                        <h1 className="text-6xl font-black tracking-tighter uppercase leading-none text-balance">Join <br /><span className="italic text-zinc-300">Studio</span></h1>
                     </div>
 
-                    {/* Card do Formulário */}
-                    <div className="p-8 rounded-[40px] bg-zinc-50 border border-zinc-100 -rotate-1 shadow-sm">
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-zinc-700">Nome de usuário</label>
+                    <div className="p-10 border border-zinc-200 bg-white relative shadow-2xl">
+                        {/* Technical accents */}
+                        <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-black" />
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-black" />
+
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="space-y-1">
+                                <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 ml-1">Unique Identifier (Username)</label>
                                 <Input
                                     name="username"
-                                    placeholder="seu_username"
-                                    className="h-12 rounded-2xl bg-white border-zinc-200 shadow-inner focus:ring-2 focus:ring-black transition-all"
+                                    placeholder="entity_name"
+                                    className="h-11 rounded-none border-zinc-200 bg-zinc-50/50 shadow-none focus:ring-0 focus:border-black font-mono text-[10px]"
                                     required
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-zinc-700">Email</label>
+                            <div className="space-y-1">
+                                <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 ml-1">Communication Node (Email)</label>
                                 <Input
                                     name="email"
                                     type="email"
-                                    placeholder="seu@email.com"
-                                    className="h-12 rounded-2xl bg-white border-zinc-200 shadow-inner focus:ring-2 focus:ring-black transition-all"
+                                    placeholder="entity@access.com"
+                                    className="h-11 rounded-none border-zinc-200 bg-zinc-50/50 shadow-none focus:ring-0 focus:border-black font-mono text-[10px]"
                                     required
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-zinc-700">Senha</label>
+                            <div className="space-y-1">
+                                <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 ml-1">Private Key (Password)</label>
                                 <Input
                                     name="password"
                                     type="password"
                                     placeholder="••••••••"
-                                    className="h-12 rounded-2xl bg-white border-zinc-200 shadow-inner focus:ring-2 focus:ring-black transition-all"
+                                    className="h-11 rounded-none border-zinc-200 bg-zinc-50/50 shadow-none focus:ring-0 focus:border-black font-mono text-[10px]"
                                     required
                                 />
                             </div>
 
                             {error && (
-                                <div className="p-4 text-sm text-red-600 bg-red-50 rounded-2xl border border-red-100">
-                                    {error}
+                                <div className="p-4 text-[9px] font-bold uppercase tracking-widest text-red-500 bg-red-50 border border-red-100 italic transition-all animate-in fade-in slide-in-from-top-2">
+                                    // {error}
                                 </div>
                             )}
 
                             {success && (
-                                <div className="p-4 text-sm text-green-600 bg-green-50 rounded-2xl border border-green-100">
-                                    {success}
+                                <div className="p-4 text-[9px] font-bold uppercase tracking-widest text-green-600 bg-green-50 border border-green-100 italic transition-all animate-in fade-in slide-in-from-top-2">
+                                    // {success}
                                 </div>
                             )}
 
                             <Button
                                 type="submit"
-                                className="w-full h-12 bg-black text-white rounded-xl font-black uppercase tracking-widest text-xs hover:scale-[1.02] transition-all shadow-md"
+                                className="w-full h-14 bg-black text-white rounded-none font-black uppercase tracking-[0.3em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all"
                                 disabled={loading}
                             >
-                                {loading ? "Criando..." : "Criar Conta"}
+                                {loading ? "Establishing..." : "Register Identity"}
                             </Button>
                         </form>
                     </div>
 
-                    {/* Link para Login */}
-                    <p className="text-center text-sm text-zinc-500 pb-4">
-                        Já tem conta?{" "}
-                        <Link href="/auth/login" className="font-black text-black hover:underline">
-                            Entrar
+                    <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 pb-8">
+                        Already Registered?{" "}
+                        <Link href="/auth/login" className="text-black hover:underline underline-offset-4">
+                            Resume Session
                         </Link>
                     </p>
                 </div>
             </main>
 
-            {/* Footer */}
-            <footer className="py-4 text-center text-zinc-400 border-t border-zinc-100 text-sm flex-shrink-0">
-                © 2026 MoodSpace. O seu espaço, o seu estilo.
+            <footer className="py-6 text-center text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-300 border-t border-zinc-100 flex-shrink-0">
+                Entity_Allocation_System // MoodSpace_Core
             </footer>
         </div>
     )

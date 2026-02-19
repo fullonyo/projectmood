@@ -24,27 +24,27 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
         return (
             <button
-        className= {
-            cn(
-          "inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 disabled:pointer-events-none disabled:opacity-50",
-                variants[variant],
-                sizes[size],
-                className
-            )
-        }
-        ref = { ref }
-        disabled = { isLoading }
-        {...props}
-      >
-{
-    isLoading?(
-          <div className = "mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-        ): null
-}
-{ children }
-</button>
-    )
-  }
+                className={
+                    cn(
+                        "inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 disabled:pointer-events-none disabled:opacity-50",
+                        variants[variant],
+                        sizes[size],
+                        className
+                    )
+                }
+                ref={ref}
+                disabled={isLoading}
+                {...props}
+            >
+                {
+                    isLoading ? (
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : null
+                }
+                {children}
+            </button>
+        )
+    }
 )
 Button.displayName = "Button"
 

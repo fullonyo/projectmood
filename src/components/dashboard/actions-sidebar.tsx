@@ -197,15 +197,15 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                 </div>
             </div>
 
-            {/* Bottom Section - Logout */}
+            {/* Bottom Section - Session Closure */}
             <div className="p-4 bg-zinc-50 dark:bg-zinc-800/10 border-t border-zinc-100 dark:border-zinc-800 shrink-0">
                 <Button
                     variant="ghost"
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="w-full justify-center gap-3 h-12 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all group"
+                    className="w-full justify-center gap-3 h-12 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all group"
                 >
                     <LogOut className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                    Encerrar Sessão
+                    Terminate Session
                 </Button>
             </div>
         </aside>
