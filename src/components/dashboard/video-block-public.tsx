@@ -24,6 +24,11 @@ export function VideoBlockPublic({ content, isPublic = false }: VideoBlockPublic
             />
             {/* Premium Overlay for non-hover state */}
             <div className="absolute inset-0 pointer-events-none border-[8px] border-black/5 rounded-2xl" />
+
+            {/* Interaction Shield for Editor Mode */}
+            {!isPublic && (
+                <div className="absolute inset-0 bg-transparent cursor-pointer z-10" />
+            )}
         </div>
     )
 }

@@ -78,7 +78,7 @@ export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
             return <SocialBlockPublic content={content} />
 
         case 'music':
-            return <MusicBlockPublic content={content} />
+            return <MusicBlockPublic content={content} isPublic={isPublic} />
 
         case 'video':
             return <VideoBlockPublic content={content} isPublic={isPublic} />

@@ -1,7 +1,7 @@
 import { motion, useMotionValue } from "framer-motion"
 import { toast } from "sonner"
 import { deleteMoodBlock } from "@/actions/profile"
-import { Trash2, RotateCw, Pencil, Move } from "lucide-react"
+import { Trash2, RotateCw, Pencil, Move, MousePointer2 } from "lucide-react"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
 import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
@@ -236,9 +236,17 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
         onUpdate({ rotation: newRotation })
     }
 
+    const [isInteracting, setIsInteracting] = useState(false)
+    const isInteractiveBlock = ['video', 'music', 'guestbook', 'media'].includes(block.type)
+
+    // Reset interaction when deselected
+    useEffect(() => {
+        if (!isSelected) setIsInteracting(false)
+    }, [isSelected])
+
     return (
         <motion.div
-            drag={!isResizing}
+            drag={!isResizing && !isInteracting}
             dragMomentum={false}
             dragConstraints={canvasRef}
             dragElastic={0}
@@ -262,23 +270,31 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
             }}
             onClick={(e) => {
+                if (isInteracting) return
                 e.stopPropagation()
-                onSelect(true)
+                // Evita o "toggle" que desmarca o bloco ao clicar nele. 
+                // Seleção mantida; deseleção apenas no canvas.
+                onSelect(false)
             }}
             onDoubleClick={(e) => {
+                if (isInteracting) return
                 e.stopPropagation()
                 onSelect(false)
             }}
             className={cn(
-                "absolute select-none group touch-none",
+                "absolute group",
+                !isInteracting && "select-none touch-none",
                 isSelected ? "cursor-default" : "cursor-grab active:cursor-grabbing"
             )}
         >
             {/* Selection Border Outline (Standardized) */}
             {isSelected && (
                 <div
-                    className="absolute -inset-[3px] border-2 border-dashed rounded-lg pointer-events-none z-[1001]"
-                    style={{ borderColor: profile.primaryColor || '#3b82f6', opacity: 0.5 }}
+                    className={cn(
+                        "absolute -inset-[3px] border-2 rounded-lg pointer-events-none z-[1001] transition-all",
+                        isInteracting ? "border-blue-500 opacity-100 shadow-[0_0_15px_rgba(59,130,246,0.5)]" : "border-dashed border-zinc-400 opacity-50"
+                    )}
+                    style={!isInteracting ? { borderColor: profile.primaryColor || '#3b82f6' } : {}}
                 />
             )}
             {/* Action Toolbar */}
@@ -299,6 +315,26 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                     <button onClick={rotate} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors" title="Girar">
                         <RotateCw className="w-3.5 h-3.5 text-zinc-500" />
                     </button>
+                    {isInteractiveBlock && (
+                        <>
+                            <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    setIsInteracting(!isInteracting)
+                                }}
+                                className={cn(
+                                    "p-1.5 rounded-lg transition-all border",
+                                    isInteracting
+                                        ? "bg-blue-500 text-white border-blue-600 shadow-inner"
+                                        : "hover:bg-zinc-100 border-transparent text-zinc-500"
+                                )}
+                                title={isInteracting ? "Modo Interação Ativo" : "Ativar Modo Interação"}
+                            >
+                                <MousePointer2 className={cn("w-3.5 h-3.5", isInteracting && "animate-pulse")} />
+                            </button>
+                        </>
+                    )}
                     <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
                     <button onClick={handleDelete} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors group/del" title="Excluir">
                         <Trash2 className="w-3.5 h-3.5 text-zinc-500 group-hover/del:text-red-500" />
@@ -380,7 +416,10 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 isDragging && "scale-[1.02] rotate-1",
                 (isDragging || isResizing) && "pointer-events-none"
             )}>
-                <BlockRenderer block={block} isPublic={false} />
+                <BlockRenderer
+                    block={block}
+                    isPublic={isInteracting}
+                />
             </div>
         </motion.div>
     )
