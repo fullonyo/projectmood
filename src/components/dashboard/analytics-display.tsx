@@ -4,40 +4,11 @@ import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 interface AnalyticsDisplayProps {
-    profileId: string
+    views: number
+    loading: boolean
 }
 
-export function AnalyticsDisplay({ profileId }: AnalyticsDisplayProps) {
-    const [views, setViews] = useState<number>(0)
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        const storageKey = `mood_v_${profileId}`
-        const lastView = localStorage.getItem(storageKey)
-        const now = Date.now()
-
-        // Only track view if 24h has passed since last view from this user
-        const shouldTrack = !lastView || (now - parseInt(lastView) > 24 * 60 * 60 * 1000)
-
-        if (shouldTrack) {
-            fetch(`/api/analytics/view`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ profileId })
-            }).catch(console.error)
-            localStorage.setItem(storageKey, now.toString())
-        }
-
-        // Fetch current view count
-        fetch(`/api/analytics/views?profileId=${profileId}`)
-            .then(res => res.json())
-            .then(data => {
-                setViews(data.views || 0)
-                setLoading(false)
-            })
-            .catch(() => setLoading(false))
-    }, [profileId])
-
+export function AnalyticsDisplay({ views, loading }: AnalyticsDisplayProps) {
     const getVibeStatus = (count: number) => {
         if (count > 1000) return { label: "Viral Atmosphere", color: "text-purple-500" }
         if (count > 100) return { label: "High Vibration", color: "text-blue-500" }

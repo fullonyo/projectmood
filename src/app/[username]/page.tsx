@@ -2,18 +2,8 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Metadata } from "next";
-import { AnalyticsDisplay } from "@/components/dashboard/analytics-display";
-// import { NowPlayingSpotify } from "@/components/dashboard/now-playing-spotify";
 import { themeConfigs } from "@/lib/themes";
-import { BlockRenderer } from "@/components/dashboard/block-renderer";
-import { BoardStage } from "@/components/dashboard/board-stage";
-import { BackgroundEffect } from "@/components/effects/background-effect";
-import { StaticTextures } from "@/components/effects/static-textures";
-import { CustomCursor } from "@/components/effects/custom-cursor";
-import { MouseTrails } from "@/components/effects/mouse-trails";
-import { FontLoader } from "@/components/dashboard/font-loader";
-import { ViralBadge } from "@/components/dashboard/viral-badge";
-import { ProfileSignature } from "@/components/dashboard/profile-signature";
+import { PublicMoodPageClient } from "./page-client";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -69,58 +59,13 @@ export default async function PublicMoodPage({
                 color: finalPrimary
             }}
         >
-            <FontLoader fontFamily={(profile as any).customFont} />
-            <CustomCursor type={profile.customCursor || 'auto'} />
-            <MouseTrails type={profile.mouseTrails || 'none'} />
-            <div className="fixed inset-0 z-0">
-                <BackgroundEffect type={profile.backgroundEffect || 'none'} primaryColor={profile.primaryColor || undefined} />
-            </div>
-            <div className="fixed inset-0 z-[1]">
-                <StaticTextures type={(profile as any).staticTexture || 'none'} />
-            </div>
-
-            {/* Dynamic Background Effect / Grid */}
-            <div
-                className={cn("fixed inset-0 z-[2] pointer-events-none transition-opacity duration-1000", config.gridOpacity)}
-                style={{
-                    backgroundImage: config.grid,
-                    backgroundSize: config.bgSize,
-                    filter: theme === 'vintage' ? 'contrast(110%) brightness(105%) sepia(20%)' : 'none'
-                }}
+            <PublicMoodPageClient
+                user={user}
+                profile={profile}
+                moodBlocks={moodBlocks}
+                config={config}
+                theme={theme}
             />
-
-            {/* Studio Profile Signature */}
-            <ProfileSignature
-                username={user.username}
-                name={user.name || undefined}
-                avatarUrl={(profile as any).avatarUrl}
-            />
-
-            {/* The Canvas Reality */}
-            <main className="relative w-full h-full">
-                <BoardStage>
-                    {moodBlocks.map((block: any) => (
-                        <div
-                            key={block.id}
-                            className="absolute select-none pointer-events-auto"
-                            style={{
-                                left: `${block.x}%`,
-                                top: `${block.y}%`,
-                                transform: `rotate(${block.rotation || 0}deg)`,
-                                zIndex: block.zIndex || 1
-                            }}
-                        >
-                            <BlockRenderer block={block} isPublic={true} />
-                        </div>
-                    ))}
-                </BoardStage>
-            </main>
-
-            {/* Analytics Display */}
-            <AnalyticsDisplay profileId={user.profile.id} />
-
-            {/* Viral CTA / Branding */}
-            <ViralBadge />
         </div>
     );
 }
