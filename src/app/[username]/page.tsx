@@ -6,6 +6,7 @@ import { AnalyticsDisplay } from "@/components/dashboard/analytics-display";
 // import { NowPlayingSpotify } from "@/components/dashboard/now-playing-spotify";
 import { themeConfigs } from "@/lib/themes";
 import { BlockRenderer } from "@/components/dashboard/block-renderer";
+import { BoardStage } from "@/components/dashboard/board-stage";
 import { BackgroundEffect } from "@/components/effects/background-effect";
 import { StaticTextures } from "@/components/effects/static-textures";
 import { CustomCursor } from "@/components/effects/custom-cursor";
@@ -100,8 +101,8 @@ export default async function PublicMoodPage({
             </header>
 
             {/* The Canvas Reality */}
-            <main className="relative w-full h-full pt-16">
-                <div className="relative w-full h-full p-10">
+            <main className="relative w-full h-full">
+                <BoardStage>
                     {moodBlocks.map((block: any) => (
                         <div
                             key={block.id}
@@ -116,7 +117,7 @@ export default async function PublicMoodPage({
                             <BlockRenderer block={block} isPublic={true} />
                         </div>
                     ))}
-                </div>
+                </BoardStage>
             </main>
 
             {/* Analytics Display */}

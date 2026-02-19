@@ -8,6 +8,7 @@ import { themeConfigs } from "@/lib/themes"
 import { BlockRenderer } from "./block-renderer"
 import { BackgroundEffect } from "../effects/background-effect"
 import { StaticTextures } from "../effects/static-textures"
+import { BoardStage } from "./board-stage"
 
 
 interface MoodCanvasProps {
@@ -97,10 +98,7 @@ export function MoodCanvas({
                 }}
             />
 
-            <div
-                ref={canvasRef}
-                className="relative w-full h-full p-10 canvas-items-wrapper"
-            >
+            <BoardStage ref={canvasRef}>
                 {blocks.map((block) => (
                     <CanvasItem
                         key={block.id}
@@ -119,7 +117,7 @@ export function MoodCanvas({
                         onSavingEnd={() => setIsSaving(false)}
                     />
                 ))}
-            </div>
+            </BoardStage>
 
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-[10px] font-bold tracking-widest uppercase text-zinc-400">
                 Zona de Criatividade Livre
