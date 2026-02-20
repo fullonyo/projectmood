@@ -46,7 +46,7 @@ export const en: Dictionary = {
                 text: { title: "Paper Note", desc: "Write loose thoughts" },
                 photo: { title: "Photograph", desc: "Stick images & photos" },
                 youtube: { title: "Video Tape", desc: "YouTube embed" },
-                spotify: { title: "Sound", desc: "Ambient soundtrack" },
+                spotify: { title: "Vinyl Record", desc: "Spotify Music" },
                 doodle: { title: "Draft", desc: "Freehand drawing" },
                 phrase: { title: "Marquee", desc: "Animated text" },
                 quote: { title: "Quote", desc: "Highlight statements" },

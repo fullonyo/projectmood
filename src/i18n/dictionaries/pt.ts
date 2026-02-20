@@ -46,7 +46,7 @@ export const pt = {
                 text: { title: "Nota de Papel", desc: "Escreva pensamentos livres" },
                 photo: { title: "Fotografia", desc: "Cole imagens e fotos" },
                 youtube: { title: "Fita de Vídeo", desc: "Embed YouTube" },
-                spotify: { title: "Som", desc: "Trilha sonora ambiente" },
+                spotify: { title: "Disco de Vinil", desc: "Música do Spotify" },
                 doodle: { title: "Rascunho", desc: "Desenho à mão livre" },
                 phrase: { title: "Letreiro", desc: "Animação de texto" },
                 quote: { title: "Citação", desc: "Destaque frases marcantes" },
