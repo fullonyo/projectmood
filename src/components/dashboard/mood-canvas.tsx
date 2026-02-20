@@ -158,6 +158,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     themeConfig: ThemeConfig,
     onDeleteRequest: (id: string) => void
 }) {
+    const { t } = useTranslation()
     const [isDragging, setIsDragging] = useState(false)
     const [isResizing, setIsResizing] = useState(false)
     const [isRotating, setIsRotating] = useState(false)
@@ -349,7 +350,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     const renderHandle = (handle: ResizeHandle) => {
         const isCorner = ['br', 'bl', 'tr', 'tl'].includes(handle)
         const handleSize = isCorner ? 'w-2.5 h-2.5' : (
-            handle === 'top' || handle === 'bottom' ? 'w-6 h-2' : 'w-2 h-6'
+            handle === 'top' || handle === 'bottom' ? 'w-6 h-1' : 'w-1 h-6'
         )
 
         const positionClasses: Record<ResizeHandle, string> = {
@@ -357,10 +358,10 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             bl: '-bottom-1.5 -left-1.5',
             tr: '-top-1.5 -right-1.5',
             tl: '-top-1.5 -left-1.5',
-            top: '-top-1 left-1/2 -translate-x-1/2',
-            bottom: '-bottom-1 left-1/2 -translate-x-1/2',
-            left: 'top-1/2 -left-1 -translate-y-1/2',
-            right: 'top-1/2 -right-1 -translate-y-1/2',
+            top: '-top-0.5 left-1/2 -translate-x-1/2',
+            bottom: '-bottom-0.5 left-1/2 -translate-x-1/2',
+            left: 'top-1/2 -left-0.5 -translate-y-1/2',
+            right: 'top-1/2 -right-0.5 -translate-y-1/2',
         }
 
         return (
@@ -372,11 +373,10 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 }}
                 onPointerUp={() => setIsResizing(false)}
                 className={cn(
-                    "absolute z-[1002] pointer-events-auto",
+                    "absolute z-[1002] pointer-events-auto bg-black dark:bg-white border hover:scale-[1.2] active:scale-95 transition-transform",
                     positionClasses[handle],
                     handleSize,
-                    "bg-white border-2 rounded-sm shadow-sm",
-                    isCorner ? "border-blue-500" : "border-blue-400"
+                    isCorner ? "border-transparent" : "border-white dark:border-black"
                 )}
                 style={{ cursor: getResizeCursor(handle) }}
             >
@@ -437,58 +437,56 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             {isSelected && (
                 <div
                     className={cn(
-                        "absolute -inset-[3px] border-2 rounded-none pointer-events-none z-[1001] transition-all",
-                        isInteracting ? "border-white opacity-100 shadow-none" : "border-dashed border-zinc-400 opacity-50 font-mono"
+                        "absolute -inset-[3px] pointer-events-none z-[1001] transition-all",
+                        isInteracting ? "border-[3px] border-white shadow-none mix-blend-difference" : "border border-dashed border-black/50 dark:border-white/50 bg-black/5"
                     )}
-                    style={!isInteracting ? { borderColor: profile.primaryColor || '#3b82f6' } : {}}
                 />
             )}
             {/* Action Toolbar */}
             {isSelected && (
-                <div className="absolute -top-14 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-none bg-white dark:bg-zinc-950 shadow-none border border-black dark:border-white z-[1001] animate-in fade-in zoom-in duration-200 pointer-events-auto">
+                <div className="absolute -top-[52px] left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-zinc-950 border border-black dark:border-white z-[1001] animate-in fade-in zoom-in duration-200 pointer-events-auto">
                     <button
                         onClick={() => onSelect(false)}
-                        className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-none transition-colors group/edit"
-                        title="Editar"
+                        className="p-1.5 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors group/edit"
+                        title={t('common.edit')}
                     >
-                        <Pencil className="w-3.5 h-3.5 text-zinc-500 group-hover/edit:text-white" />
+                        <Pencil className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover/edit:text-current" />
                     </button>
-                    <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
-                    <div className="p-1.5 cursor-move rounded-none transition-colors border border-transparent" title="Mover">
-                        <Move className="w-3.5 h-3.5 text-zinc-500" />
+                    <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
+                    <div className="p-1.5 cursor-move transition-colors border border-transparent hover:bg-black/5 dark:hover:bg-white/5 group/move" title={t('common.move')}>
+                        <Move className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                     </div>
-                    <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
+                    <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
                     {localRotation !== 0 && (
                         <>
-                            <button onClick={resetRotation} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-none transition-colors text-xs font-mono text-blue-500" title="Resetar Rotação">
+                            <button onClick={resetRotation} className="px-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors text-[9px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400" title={t('common.reset_rotation')}>
                                 {localRotation}°
                             </button>
-                            <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
+                            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
                         </>
                     )}
                     {isInteractiveBlock && (
                         <>
-                            <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     setIsInteracting(!isInteracting)
                                 }}
                                 className={cn(
-                                    "p-1.5 rounded-none transition-all border",
+                                    "p-1.5 transition-all outline outline-1 -outline-offset-1 border border-transparent",
                                     isInteracting
-                                        ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
-                                        : "hover:bg-black/5 border-transparent text-zinc-500"
+                                        ? "bg-black text-white dark:bg-white dark:text-black outline-current animate-pulse"
+                                        : "hover:bg-black/5 text-zinc-600 dark:text-zinc-400 outline-transparent"
                                 )}
-                                title={isInteracting ? "Modo Interação Ativo" : "Ativar Modo Interação"}
+                                title={isInteracting ? t('common.disable_interaction') : t('common.enable_interaction')}
                             >
-                                <MousePointer2 className={cn("w-3.5 h-3.5", isInteracting && "animate-pulse")} />
+                                <MousePointer2 className="w-4 h-4" />
                             </button>
+                            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
                         </>
                     )}
-                    <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
-                    <button onClick={handleDelete} className="p-1.5 hover:bg-red-500/10 rounded-none transition-colors group/del" title="Excluir">
-                        <Trash2 className="w-3.5 h-3.5 text-zinc-500 group-hover/del:text-red-500" />
+                    <button onClick={handleDelete} className="p-1.5 hover:bg-red-500/10 hover:text-red-500 transition-colors group/del text-zinc-600 dark:text-zinc-400" title={t('common.delete')}>
+                        <Trash2 className="w-4 h-4 group-hover/del:text-red-500" />
                     </button>
                 </div>
             )}
@@ -498,9 +496,9 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 <>
                     {allHandles.map(renderHandle)}
 
-                    {/* Rotation Handle (Lollipop) */}
+                    {/* Rotation Handle (Lollipop Reto e Arestas Vivas) */}
                     <div
-                        className="absolute left-1/2 -top-8 -translate-x-1/2 w-0.5 h-8 bg-blue-400 z-[1002] pointer-events-auto cursor-grab active:cursor-grabbing origin-bottom"
+                        className="absolute left-1/2 -top-8 -translate-x-1/2 w-[2px] h-8 bg-black dark:bg-white z-[1002] pointer-events-auto cursor-grab active:cursor-grabbing origin-bottom"
                     >
                         <motion.div
                             drag
@@ -509,11 +507,9 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                             dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                             onPan={handleRotate}
                             onPanEnd={handleRotateEnd}
-                            className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-blue-500 rounded-full shadow-sm hover:scale-110 transition-transform"
+                            className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white dark:bg-zinc-950 border-2 border-black dark:border-white hover:scale-125 transition-transform"
                         />
                     </div>
-
-                    <div className="absolute inset-0 border border-blue-500/20 pointer-events-none" />
                 </>
             )}
 
