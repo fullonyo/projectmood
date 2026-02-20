@@ -83,7 +83,7 @@ export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
                 <img
                     src={content.image}
                     alt="doodle"
-                    className="w-full h-full object-contain dark:invert contrast-125 brightness-110 pointer-events-none drop-shadow-none"
+                    className="w-full h-full object-contain pointer-events-none drop-shadow-none"
                 />
             )
 

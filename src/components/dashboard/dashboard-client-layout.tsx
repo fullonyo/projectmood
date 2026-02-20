@@ -12,6 +12,8 @@ import { BackgroundEffect } from "../effects/background-effect";
 import { FontLoader } from "./font-loader";
 import { MoodBlock, Profile } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
+import { CanvasInteractionProvider, useCanvasInteraction } from "./canvas-interaction-context";
+import { FullscreenDoodleOverlay } from "./fullscreen-doodle-overlay";
 
 interface DashboardClientLayoutProps {
     profile: Profile;
@@ -20,10 +22,19 @@ interface DashboardClientLayoutProps {
 }
 
 export function DashboardClientLayout({ profile, moodBlocks, username }: DashboardClientLayoutProps) {
+    return (
+        <CanvasInteractionProvider>
+            <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} />
+        </CanvasInteractionProvider>
+    )
+}
+
+function DashboardClientLayoutInner({ profile, moodBlocks, username }: DashboardClientLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [localProfile, setLocalProfile] = useState(profile);
+    const { isDrawingMode } = useCanvasInteraction();
 
     // 🧠 CENTRAL CORTEX: Sovereign management of blocks and persistence
     const { blocks, updateBlock, isSaving } = useCanvasManager(moodBlocks);
@@ -56,6 +67,11 @@ export function DashboardClientLayout({ profile, moodBlocks, username }: Dashboa
                     isSaving={isSaving}
                 />
             </div>
+
+            {/* Drawing Layer (z-index between Canvas and Sidebars) */}
+            <AnimatePresence>
+                {isDrawingMode && <FullscreenDoodleOverlay />}
+            </AnimatePresence>
 
             {/* Floating Sidebar Container (layer 20) */}
             <AnimatePresence>
