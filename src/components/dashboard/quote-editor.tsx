@@ -9,15 +9,16 @@ import { Quote as QuoteIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
-import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+import { addMoodBlock } from "@/actions/profile"
 
 interface QuoteEditorProps {
     block?: any
     onUpdate?: (id: string, content: any) => void
     onAdd?: (content: any) => Promise<void>
+    onClose?: () => void
 }
 
-export function QuoteEditor({ block, onUpdate, onAdd }: QuoteEditorProps) {
+export function QuoteEditor({ block, onUpdate, onAdd, onClose }: QuoteEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [text, setText] = useState(defaultContent.text || "")
@@ -45,7 +46,7 @@ export function QuoteEditor({ block, onUpdate, onAdd }: QuoteEditorProps) {
     }, [text, author, style, color, bgColor, showQuotes, block?.id])
 
     const handleAdd = async () => {
-        if (!text.trim()) return
+        if (!text.trim() && !block?.id) return
 
         setIsPending(true)
         const content = {
@@ -58,7 +59,7 @@ export function QuoteEditor({ block, onUpdate, onAdd }: QuoteEditorProps) {
         }
 
         if (block?.id) {
-            await updateMoodBlockLayout(block.id, { content })
+            if (onClose) onClose()
         } else if (onAdd) {
             await onAdd(content)
             setText("")
@@ -185,10 +186,10 @@ export function QuoteEditor({ block, onUpdate, onAdd }: QuoteEditorProps) {
 
                     <Button
                         onClick={handleAdd}
-                        disabled={isPending || !text.trim()}
-                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
+                        disabled={isPending || (!text.trim() && !block?.id)}
+                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all shadow-none mt-6"
                     >
-                        {t('editors.quote.deploy')}
+                        {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.quote.deploy'))}
                     </Button>
                 </div>
             </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect } from "react"
-import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+import { addMoodBlock } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -43,10 +43,14 @@ const STYLES = [
 export function SocialLinksEditor({
     block,
     onUpdate,
+    onAdd,
+    onClose,
     highlight
 }: {
     block?: any,
     onUpdate?: (id: string, content: any) => void,
+    onAdd?: (content: any) => Promise<void>,
+    onClose?: () => void,
     highlight?: boolean
 }) {
     const { t } = useTranslation()
@@ -82,25 +86,10 @@ export function SocialLinksEditor({
         onUpdate(block.id, { content })
     }, [selectedPlatform, url, label, style])
 
-    // 3. Debounced Silent Save
-    useEffect(() => {
-        if (!block?.id || !url) return
 
-        const timer = setTimeout(async () => {
-            const content = {
-                platform: selectedPlatform.id,
-                url,
-                label: label || selectedPlatform.label,
-                style
-            }
-            await updateMoodBlockLayout(block.id, { content })
-        }, 800)
-
-        return () => clearTimeout(timer)
-    }, [selectedPlatform, url, label, style, block?.id])
 
     const handleAction = () => {
-        if (!url) return
+        if (!url && !block?.id) return
 
         startTransition(async () => {
             const content = {
@@ -111,8 +100,11 @@ export function SocialLinksEditor({
             }
 
             if (block?.id) {
-                const res = await updateMoodBlockLayout(block.id, { content })
-                if (res.error) toast.error(res.error)
+                if (onClose) onClose()
+            } else if (onAdd) {
+                await onAdd(content)
+                setUrl("")
+                setLabel("")
             } else {
                 const res = await addMoodBlock('social', content, { x: 50, y: 50 })
                 if (res.error) {
@@ -204,10 +196,10 @@ export function SocialLinksEditor({
 
                     <Button
                         onClick={handleAction}
-                        disabled={isPending || !url}
-                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
+                        disabled={isPending || (!url && !block?.id)}
+                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-12 font-black uppercase tracking-widest text-xs shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] hover:shadow-none hover:translate-y-1 hover:translate-x-1 transition-all"
                     >
-                        {t('editors.social_links.deploy')}
+                        {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.social_links.add_link'))}
                     </Button>
                 </div>
             </div>

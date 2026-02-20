@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect } from "react"
-import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+import { addMoodBlock } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,11 +25,13 @@ export function TextEditor({
     block,
     onUpdate,
     onAdd,
+    onClose,
     highlight
 }: {
     block?: any,
     onUpdate?: (id: string, content: any) => void,
     onAdd?: (content: any) => Promise<void>,
+    onClose?: () => void,
     highlight?: boolean
 }) {
     const { t } = useTranslation()
@@ -56,26 +58,9 @@ export function TextEditor({
         onUpdate(block.id, { content })
     }, [text, selectedStyle, bgColor, fontSize, align])
 
-    // 3. Debounced Silent Save
-    useEffect(() => {
-        if (!block?.id || !text.trim()) return
-
-        const timer = setTimeout(async () => {
-            const content = {
-                text: text.trim(),
-                style: selectedStyle,
-                bgColor: selectedStyle === 'postit' ? '#ffff88' : bgColor,
-                fontSize,
-                align
-            }
-            await updateMoodBlockLayout(block.id, { content })
-        }, 800)
-
-        return () => clearTimeout(timer)
-    }, [text, selectedStyle, bgColor, fontSize, align, block?.id])
 
     const handleAddText = () => {
-        if (!text.trim()) return
+        if (!text.trim() && !block?.id) return
 
         startTransition(async () => {
             const content = {
@@ -87,7 +72,7 @@ export function TextEditor({
             }
 
             if (block?.id) {
-                await updateMoodBlockLayout(block.id, { content })
+                if (onClose) onClose()
             } else if (onAdd) {
                 await onAdd(content)
                 setText("")
@@ -198,10 +183,10 @@ export function TextEditor({
 
                     <Button
                         onClick={handleAddText}
-                        disabled={isPending || !text.trim()}
-                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
+                        disabled={isPending || (!text.trim() && !block?.id)}
+                        className="w-full h-12 bg-black dark:bg-white text-white dark:text-black rounded-none hover:bg-zinc-800 dark:hover:bg-zinc-200 uppercase tracking-widest text-xs font-black shadow-[-4px_4px_0_0_rgba(0,0,0,0.1)] hover:shadow-none hover:translate-y-1 hover:-translate-x-1 transition-all"
                     >
-                        {t('editors.text.deploy')}
+                        {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.text.deploy'))}
                     </Button>
                 </div>
             </div>

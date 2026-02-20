@@ -19,15 +19,16 @@ const ICONS = [
     { name: 'PartyPopper', icon: PartyPopper },
 ]
 
-import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+import { addMoodBlock } from "@/actions/profile"
 
 interface CountdownEditorProps {
     block?: any
     onUpdate?: (id: string, content: any) => void
     onAdd?: (content: any) => Promise<void>
+    onClose?: () => void
 }
 
-export function CountdownEditor({ block, onUpdate, onAdd }: CountdownEditorProps) {
+export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [title, setTitle] = useState(defaultContent.title || "")
@@ -51,7 +52,7 @@ export function CountdownEditor({ block, onUpdate, onAdd }: CountdownEditorProps
     }, [title, targetDate, selectedIcon, style, block?.id])
 
     const handleAdd = async () => {
-        if (!title.trim() || !targetDate) return
+        if ((!title.trim() || !targetDate) && !block?.id) return
 
         setIsPending(true)
         const content = {
@@ -62,7 +63,7 @@ export function CountdownEditor({ block, onUpdate, onAdd }: CountdownEditorProps
         }
 
         if (block?.id) {
-            await updateMoodBlockLayout(block.id, { content })
+            if (onClose) onClose()
         } else if (onAdd) {
             await onAdd(content)
             setTitle("")
@@ -156,10 +157,10 @@ export function CountdownEditor({ block, onUpdate, onAdd }: CountdownEditorProps
 
                     <Button
                         onClick={handleAdd}
-                        disabled={isPending || !title.trim() || !targetDate}
+                        disabled={isPending || ((!title.trim() || !targetDate) && !block?.id)}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                     >
-                        {t('editors.countdown.deploy')}
+                        {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.countdown.deploy'))}
                     </Button>
                 </div>
             </div>

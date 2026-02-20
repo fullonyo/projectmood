@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect } from "react"
-import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+import { addMoodBlock } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
 import { Type, Play, Quote, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -47,11 +47,13 @@ export function PhraseEditor({
     block,
     onUpdate,
     onAdd,
+    onClose,
     highlight
 }: {
     block?: any,
     onUpdate?: (id: string, content: any) => void,
     onAdd?: (type: string, content: any) => Promise<void>,
+    onClose?: () => void,
     highlight?: boolean
 }) {
     const { t } = useTranslation()
@@ -89,28 +91,10 @@ export function PhraseEditor({
         onUpdate(block.id, { content })
     }, [text, textColor, bgColor, speed, direction, cursorType, activeStyle])
 
-    // 3. Debounced Silent Save
-    useEffect(() => {
-        if (!block?.id || !text) return
 
-        const timer = setTimeout(async () => {
-            const content = {
-                text: text,
-                textColor,
-                bgColor,
-                speed: selectedType === 'ticker' ? speed : (selectedType === 'floating' ? speed : (speed / 5)),
-                style: activeStyle,
-                direction: selectedType === 'ticker' ? direction : undefined,
-                cursorType: selectedType === 'subtitle' ? cursorType : undefined
-            }
-            await updateMoodBlockLayout(block.id, { content })
-        }, 800) // 800ms debounce
-
-        return () => clearTimeout(timer)
-    }, [text, textColor, bgColor, speed, direction, cursorType, activeStyle, block?.id])
 
     const handleAction = () => {
-        if (!text) return
+        if (!text && !block?.id) return
 
         startTransition(async () => {
             const content = {
@@ -124,7 +108,7 @@ export function PhraseEditor({
             }
 
             if (block?.id) {
-                await updateMoodBlockLayout(block.id, { content })
+                if (onClose) onClose()
             } else if (onAdd) {
                 await onAdd(selectedType, content)
                 setText("")
@@ -303,10 +287,10 @@ export function PhraseEditor({
 
                     <Button
                         onClick={handleAction}
-                        disabled={isPending || !text}
+                        disabled={isPending || (!text && !block?.id)}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
                     >
-                        {t('editors.phrase.deploy')}
+                        {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.phrase.deploy'))}
                     </Button>
                 </div>
             </div>

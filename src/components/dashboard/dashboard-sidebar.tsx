@@ -178,6 +178,10 @@ export function DashboardSidebar({
                                             const result = await addMoodBlock('text', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
+                                        onClose={() => {
+                                            setSelectedId(null)
+                                            setDraftBlockType(null)
+                                        }}
                                     />
                                 )}
                                 {['ticker', 'subtitle', 'floating', 'phrase'].includes(selectedBlock?.type || draftBlockType || '') && (
@@ -189,6 +193,10 @@ export function DashboardSidebar({
                                             const result = await addMoodBlock(type, content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
+                                        onClose={() => {
+                                            setSelectedId(null)
+                                            setDraftBlockType(null)
+                                        }}
                                     />
                                 )}
                                 {((selectedBlock?.type || draftBlockType) === 'social') && (
@@ -197,6 +205,10 @@ export function DashboardSidebar({
                                         onUpdate={selectedBlock ? onUpdateBlock : async (_, content) => {
                                             const result = await addMoodBlock('social', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
+                                        }}
+                                        onClose={() => {
+                                            setSelectedId(null)
+                                            setDraftBlockType(null)
                                         }}
                                     />
                                 )}
@@ -209,6 +221,10 @@ export function DashboardSidebar({
                                             const result = await addMoodBlock('quote', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
+                                        onClose={() => {
+                                            setSelectedId(null)
+                                            setDraftBlockType(null)
+                                        }}
                                     />
                                 )}
                                 {((selectedBlock?.type || draftBlockType) === 'video') && <YoutubeEditor key={selectedBlock?.id || 'draft-video'} />}
@@ -217,7 +233,7 @@ export function DashboardSidebar({
                                     <PhotoEditor key={selectedBlock?.id || 'draft-photo'} block={selectedBlock} onUpdate={onUpdateBlock} onAdd={selectedBlock ? undefined : async (content) => {
                                         const result = await addMoodBlock('photo', content, { x: 40, y: 40, width: 300, height: 300 })
                                         if (result?.success) setDraftBlockType(null)
-                                    }} />
+                                    }} onClose={() => { setSelectedId(null); setDraftBlockType(null) }} />
                                 )}
                                 {((selectedBlock?.type || draftBlockType) === 'gif') && <GifPicker key={selectedBlock?.id || 'draft-gif'} />}
                                 {((selectedBlock?.type || draftBlockType) === 'guestbook') && <GuestbookEditor key={selectedBlock?.id || 'draft-guestbook'} />}
@@ -227,7 +243,7 @@ export function DashboardSidebar({
                                     <MoodStatusEditor key={selectedBlock?.id || 'draft-mood'} block={selectedBlock} onUpdate={onUpdateBlock} onAdd={selectedBlock ? undefined : async (content) => {
                                         const result = await addMoodBlock('moodStatus', content, { x: 40, y: 40 })
                                         if (result?.success) setDraftBlockType(null)
-                                    }} />
+                                    }} onClose={() => { setSelectedId(null); setDraftBlockType(null) }} />
                                 )}
                                 {((selectedBlock?.type || draftBlockType) === 'countdown') && (
                                     <CountdownEditor
@@ -237,6 +253,10 @@ export function DashboardSidebar({
                                         onAdd={selectedBlock ? undefined : async (content) => {
                                             const result = await addMoodBlock('countdown', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
+                                        }}
+                                        onClose={() => {
+                                            setSelectedId(null)
+                                            setDraftBlockType(null)
                                         }}
                                     />
                                 )}

@@ -11,15 +11,16 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { toast } from "sonner"
 
-import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+import { addMoodBlock } from "@/actions/profile"
 
 interface PhotoEditorProps {
     block?: any
     onUpdate?: (id: string, content: any) => void
     onAdd?: (content: any) => Promise<void>
+    onClose?: () => void
 }
 
-export function PhotoEditor({ block, onUpdate, onAdd }: PhotoEditorProps) {
+export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [imageUrl, setImageUrl] = useState<string>(defaultContent.imageUrl || "")
@@ -88,7 +89,7 @@ export function PhotoEditor({ block, onUpdate, onAdd }: PhotoEditorProps) {
     })
 
     const handleAdd = async () => {
-        if (!imageUrl) return
+        if (!imageUrl && !block?.id) return
 
         setIsPending(true)
         const content = {
@@ -100,7 +101,7 @@ export function PhotoEditor({ block, onUpdate, onAdd }: PhotoEditorProps) {
         }
 
         if (block?.id) {
-            await updateMoodBlockLayout(block.id, { content })
+            if (onClose) onClose()
         } else if (onAdd) {
             await onAdd(content)
             setImageUrl("")
@@ -274,10 +275,10 @@ export function PhotoEditor({ block, onUpdate, onAdd }: PhotoEditorProps) {
 
                         <Button
                             onClick={handleAdd}
-                            disabled={isPending || isUploading}
+                            disabled={isPending || isUploading || (!imageUrl && !block?.id)}
                             className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
                         >
-                            {t('editors.photo.deploy')}
+                            {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.photo.deploy'))}
                         </Button>
                     </div>
                 )}

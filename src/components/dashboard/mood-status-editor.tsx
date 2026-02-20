@@ -21,15 +21,16 @@ const ICONS = [
     { name: 'Ghost', icon: Ghost },
 ]
 
-import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+import { addMoodBlock } from "@/actions/profile"
 
 interface MoodStatusEditorProps {
     block?: any
     onUpdate?: (id: string, content: any) => void
     onAdd?: (content: any) => Promise<void>
+    onClose?: () => void
 }
 
-export function MoodStatusEditor({ block, onUpdate, onAdd }: MoodStatusEditorProps) {
+export function MoodStatusEditor({ block, onUpdate, onAdd, onClose }: MoodStatusEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [selectedIcon, setSelectedIcon] = useState(defaultContent.emoji || "Smile")
@@ -50,7 +51,7 @@ export function MoodStatusEditor({ block, onUpdate, onAdd }: MoodStatusEditorPro
     }, [selectedIcon, text, block?.id])
 
     const handleAdd = async () => {
-        if (!text.trim()) return
+        if (!text.trim() && !block?.id) return
 
         setIsPending(true)
         const content = {
@@ -60,7 +61,7 @@ export function MoodStatusEditor({ block, onUpdate, onAdd }: MoodStatusEditorPro
         }
 
         if (block?.id) {
-            await updateMoodBlockLayout(block.id, { content })
+            if (onClose) onClose()
         } else if (onAdd) {
             await onAdd(content)
             setText("")
@@ -122,10 +123,10 @@ export function MoodStatusEditor({ block, onUpdate, onAdd }: MoodStatusEditorPro
 
                     <Button
                         onClick={handleAdd}
-                        disabled={isPending || !text.trim()}
+                        disabled={isPending || (!text.trim() && !block?.id)}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                     >
-                        {t('editors.mood_status.deploy')}
+                        {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.mood_status.deploy'))}
                     </Button>
                 </div>
             </div>
