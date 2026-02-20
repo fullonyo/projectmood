@@ -43,6 +43,27 @@ export const pt = {
             creative_assets_title: "Expressão cinética",
             creative_assets_desc: "Adesivos, rabiscos e bagunça"
         },
+        library: {
+            title: "Catálogo",
+            subtitle: "Injete elementos no espaço",
+            items: {
+                text: { title: "Nota de Papel", desc: "Escreva pensamentos livres" },
+                photo: { title: "Fotografia", desc: "Cole imagens e fotos" },
+                youtube: { title: "Fita de Vídeo", desc: "Embed YouTube" },
+                spotify: { title: "Som", desc: "Trilha sonora ambiente" },
+                doodle: { title: "Rascunho", desc: "Desenho à mão livre" },
+                phrase: { title: "Letreiro", desc: "Animação de texto" },
+                quote: { title: "Citação", desc: "Destaque frases marcantes" },
+                countdown: { title: "Contagem", desc: "Marque uma data" },
+                guestbook: { title: "Recados", desc: "Deixe os outros assinarem" },
+                moodStatus: { title: "Estado Atual", desc: "Como você está agora?" },
+                social: { title: "Link Salto", desc: "Leve para outro lugar" },
+                gif: { title: "Animação", desc: "Reações em GIF (Giphy)" },
+                weather: { title: "Clima", desc: "Como está o dia lá fora?" },
+                media: { title: "Mídia Análoga", desc: "Livros e fitas" }
+            },
+            inspector_back: "Voltar para Elementos"
+        },
         bottom_tip: "Clique nos blocos do mural para girar ou deletar",
     },
     modals: {

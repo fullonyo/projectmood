@@ -43,6 +43,27 @@ export const en: Dictionary = {
             creative_assets_title: "Kinetic expression",
             creative_assets_desc: "Stickers, doodles and mess"
         },
+        library: {
+            title: "Catalog",
+            subtitle: "Drop elements in space",
+            items: {
+                text: { title: "Paper Note", desc: "Write loose thoughts" },
+                photo: { title: "Photograph", desc: "Stick images & photos" },
+                youtube: { title: "Video Tape", desc: "YouTube embed" },
+                spotify: { title: "Sound", desc: "Ambient soundtrack" },
+                doodle: { title: "Draft", desc: "Freehand drawing" },
+                phrase: { title: "Marquee", desc: "Animated text" },
+                quote: { title: "Quote", desc: "Highlight statements" },
+                countdown: { title: "Timer", desc: "Mark a date" },
+                guestbook: { title: "Guestbook", desc: "Let others sign" },
+                moodStatus: { title: "Current State", desc: "How are you right now?" },
+                social: { title: "Portal Link", desc: "Take anywhere else" },
+                gif: { title: "Animation", desc: "GIF reactions (Giphy)" },
+                weather: { title: "Weather", desc: "How is the day outside?" },
+                media: { title: "Analog Media", desc: "Books and tapes" }
+            },
+            inspector_back: "Back to Elements"
+        },
         bottom_tip: "Click on the blocks on the wall to rotate or delete them",
     },
     modals: {

@@ -5,25 +5,13 @@ import { cn } from "@/lib/utils"
 // ... keep other imports ...
 import {
     Layout,
-    Type,
-    Palette,
     Plus,
-    Share2,
     ChevronLeft,
-    ChevronRight,
-    Trash2,
-    Music,
-    Image as ImageIcon,
-    Cloud,
-    StickyNote,
-    ExternalLink,
-    Zap,
-    PlusSquare,
+    Box,
     Sparkles,
-    Bomb
+    Loader2
 } from "lucide-react"
 
-import { ThemeEditor } from "./theme-editor"
 import { TextEditor } from "./text-editor"
 import { PhraseEditor } from "./phrase-editor"
 import { ArtTools } from "./art-tools"
@@ -37,14 +25,14 @@ import { QuoteEditor } from "./quote-editor"
 import { PhotoEditor } from "./photo-editor"
 import { MoodStatusEditor } from "./mood-status-editor"
 import { CountdownEditor } from "./countdown-editor"
-import { ColorPaletteExtractor } from "./color-palette-extractor"
-import { EffectsEditor } from "./effects-editor"
-import { clearMoodBlocks } from "@/actions/profile"
+import { BlockLibrary } from "./block-library"
+import { RoomSettings } from "./room-settings"
+import { clearMoodBlocks, addMoodBlock } from "@/actions/profile"
 import { Button } from "../ui/button"
 import { ConfirmModal } from "../ui/confirm-modal"
 import { useTranslation } from "@/i18n/context"
 
-type TabType = 'style' | 'writing' | 'media' | 'art'
+type TopLevelTab = 'elements' | 'room'
 
 export function DashboardSidebar({
     profile,
@@ -60,92 +48,51 @@ export function DashboardSidebar({
     onUpdateProfile: (data: any) => void
 }) {
     const { t } = useTranslation()
-    const [activeTab, setActiveTab] = useState<TabType>('writing')
+    const [activeTab, setActiveTab] = useState<TopLevelTab>('elements')
     const [showClearConfirm, setShowClearConfirm] = useState(false)
     const [isClearing, setIsClearing] = useState(false)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-    // Refs for each editor section
-    const textEditorRef = useRef<HTMLDivElement>(null)
-    const phraseEditorRef = useRef<HTMLDivElement>(null)
-    const socialEditorRef = useRef<HTMLDivElement>(null)
-    const artToolsRef = useRef<HTMLDivElement>(null)
-    const themeEditorRef = useRef<HTMLDivElement>(null)
-    const gifPickerRef = useRef<HTMLDivElement>(null)
-    const youtubeEditorRef = useRef<HTMLDivElement>(null)
-    const guestbookEditorRef = useRef<HTMLDivElement>(null)
-    const quoteEditorRef = useRef<HTMLDivElement>(null)
-    const photoEditorRef = useRef<HTMLDivElement>(null)
-    const moodStatusEditorRef = useRef<HTMLDivElement>(null)
-    const countdownEditorRef = useRef<HTMLDivElement>(null)
+    const handleAddBlock = async (type: string) => {
+        let defaultContent = {}
+        // Criar conteúdo inicial dependendo do tipo para instanciar rápido
+        if (type === 'text') defaultContent = { text: "" }
+        if (type === 'phrase') defaultContent = { text: "", style: 'vhs' }
+        if (type === 'moodStatus') defaultContent = { status: '' }
+        if (type === 'countdown') defaultContent = { title: '', date: '' }
+
+        const result = await addMoodBlock(type, defaultContent, {
+            x: Math.random() * 40 + 30, // Centro aproximado
+            y: Math.random() * 40 + 30
+        })
+
+        if (result?.success && result?.block?.id) {
+            setSelectedId(result.block.id)
+        }
+    }
 
     useEffect(() => {
-        if (!selectedBlock) return
+        // Se houver um bloco selecionado, forçamos a aba para "Elementos"
+        // para exibir o inspector correspondente
+        if (selectedBlock && activeTab !== 'elements') {
+            setActiveTab('elements')
 
-        let newTab: TabType = activeTab
-        let targetRef: React.RefObject<HTMLDivElement | null> | null = null
-
-        if (selectedBlock.type === 'social') {
-            newTab = 'art'
-            targetRef = socialEditorRef
-        } else if (['text'].includes(selectedBlock.type)) {
-            newTab = 'writing'
-            targetRef = textEditorRef
-        } else if (['ticker', 'subtitle', 'floating'].includes(selectedBlock.type)) {
-            newTab = 'writing'
-            targetRef = phraseEditorRef
-        } else if (selectedBlock.type === 'quote') {
-            newTab = 'writing'
-            targetRef = quoteEditorRef
-        } else if (selectedBlock.type === 'gif') {
-            newTab = 'media'
-            targetRef = gifPickerRef
-        } else if (selectedBlock.type === 'video') {
-            newTab = 'media'
-            targetRef = youtubeEditorRef
-        } else if (selectedBlock.type === 'guestbook') {
-            newTab = 'media'
-            targetRef = guestbookEditorRef
-        } else if (selectedBlock.type === 'photo') {
-            newTab = 'media'
-            targetRef = photoEditorRef
-        } else if (['doodle', 'tape', 'weather', 'media'].includes(selectedBlock.type)) {
-            newTab = 'art'
-            targetRef = artToolsRef
-        } else if (selectedBlock.type === 'moodStatus') {
-            newTab = 'art'
-            targetRef = moodStatusEditorRef
-        } else if (selectedBlock.type === 'countdown') {
-            newTab = 'art'
-            targetRef = countdownEditorRef
-        }
-
-        if (newTab !== activeTab) {
-            setActiveTab(newTab)
-        }
-
-        // Scroll to editor inside the sidebar container without affecting the main page scroll
-        if (targetRef && scrollContainerRef.current && targetRef.current) {
-            const container = scrollContainerRef.current
-            const target = targetRef.current
-
-            // Calculate position relative to container
-            const targetTop = target.offsetTop
-
+            // Um leve delay pro DOM da Sidebar desenhar o componente inspector 
+            // antes de focar
             setTimeout(() => {
-                container.scrollTo({
-                    top: targetTop - 20, // 20px margin
-                    behavior: 'smooth'
-                })
-            }, 100)
+                if (scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    })
+                }
+            }, 50)
         }
     }, [selectedBlock])
 
     const tabs = [
-        { id: 'style', label: t('sidebar.tabs.style'), icon: Palette, description: t('sidebar.tabs.style_desc') },
-        { id: 'writing', label: t('sidebar.tabs.writing'), icon: Type, description: t('sidebar.tabs.writing_desc') },
-        { id: 'media', label: t('sidebar.tabs.media'), icon: Zap, description: t('sidebar.tabs.media_desc') },
-        { id: 'art', label: t('sidebar.tabs.art'), icon: Sparkles, description: t('sidebar.tabs.art_desc') },
+        { id: 'elements', label: t('sidebar.tabs.elements'), icon: Box, description: t('sidebar.tabs.elements_desc') },
+        { id: 'room', label: t('sidebar.tabs.room'), icon: Sparkles, description: t('sidebar.tabs.room_desc') },
     ]
 
     return (
@@ -171,11 +118,14 @@ export function DashboardSidebar({
                 </div>
             </div>
             {/* Top Categories Navigation */}
-            <nav className="grid grid-cols-4 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
+            <nav className="grid grid-cols-2 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id as TabType)}
+                        onClick={() => {
+                            setActiveTab(tab.id as TopLevelTab)
+                            setSelectedId(null) // Reset selection when changing tabs
+                        }}
                         className={cn(
                             "flex flex-col items-center justify-center py-4 transition-all relative group",
                             activeTab === tab.id
@@ -199,196 +149,76 @@ export function DashboardSidebar({
                 className="flex-1 overflow-y-auto overflow-x-hidden p-6 custom-scrollbar space-y-8 animate-in fade-in slide-in-from-left-2 duration-300"
             >
 
-                {activeTab === 'style' && (
-                    <div className="space-y-10">
-                        <header>
-                            <div className="flex items-center gap-2 mb-1">
-                                <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('sidebar.style.atmosphere_title')}</h3>
-                            </div>
-                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('sidebar.style.atmosphere_desc')}</p>
-                        </header>
-                        <ThemeEditor
-                            currentTheme={profile.theme}
-                            currentPrimaryColor={profile.primaryColor || '#000'}
-                            currentFontStyle={profile.fontStyle || 'sans'}
-                            currentCustomFont={profile.customFont}
-                            onUpdate={onUpdateProfile}
-                        />
-
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-
-                        <ColorPaletteExtractor onApplyPalette={async (colors) => {
-                            // Apply first color as primary
-                            if (colors[0]) {
-                                await onUpdateProfile({ primaryColor: colors[0] })
-                            }
-                        }} />
-
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-
-                        <header>
-                            <h3 className="text-[10px] font-black tracking-tighter uppercase">{t('sidebar.style.magic_fx_title')}</h3>
-                            <p className="text-[11px] text-zinc-500 italic mt-1">{t('sidebar.style.magic_fx_desc')}</p>
-                        </header>
-                        <EffectsEditor profile={profile} />
-
-                        <div className="pt-12 space-y-6">
-                            <header className="border-t border-zinc-100 dark:border-zinc-900 pt-8">
-                                <h3 className="text-[10px] font-black text-red-500 uppercase tracking-[0.4em] flex items-center gap-2">
-                                    <Bomb className="w-3 h-3" />
-                                    {t('sidebar.style.danger_title')}
-                                </h3>
-                                <p className="text-[9px] text-zinc-400 uppercase tracking-widest mt-1">{t('sidebar.style.danger_desc')}</p>
-                            </header>
-
-                            <Button
-                                variant="outline"
-                                className="w-full border-red-200 dark:border-red-900/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-2 h-12 rounded-xl text-xs font-bold"
-                                onClick={() => setShowClearConfirm(true)}
-                            >
-                                <Trash2 className="w-4 h-4" />
-                                {t('sidebar.style.clear_wall_btn')}
-                            </Button>
-                        </div>
-                    </div>
+                {activeTab === 'room' && (
+                    <RoomSettings
+                        profile={profile}
+                        onUpdateProfile={onUpdateProfile}
+                        onClearWall={() => setShowClearConfirm(true)}
+                    />
                 )}
 
-                {activeTab === 'writing' && (
-                    <div className="space-y-10">
-                        <header>
-                            <div className="flex items-center gap-2 mb-1">
-                                <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('sidebar.writing.text_title')}</h3>
+                {activeTab === 'elements' && (
+                    <>
+                        {!selectedBlock ? (
+                            <BlockLibrary onAddBlock={handleAddBlock} />
+                        ) : (
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setSelectedId(null)}
+                                    className="w-full justify-start h-10 px-0 hover:bg-transparent hover:opacity-70 transition-opacity text-zinc-500 rounded-none mb-6 relative group"
+                                >
+                                    <div className="w-6 h-6 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center mr-3 group-hover:-translate-x-1 transition-transform bg-white dark:bg-zinc-950">
+                                        <ChevronLeft className="w-3 h-3 text-black dark:text-white" />
+                                    </div>
+                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black dark:text-white">{t('sidebar.library.inspector_back')}</span>
+                                </Button>
+
+                                {/* Inspector Condicional */}
+                                {selectedBlock.type === 'text' && (
+                                    <TextEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                                )}
+                                {['ticker', 'subtitle', 'floating'].includes(selectedBlock.type) && (
+                                    <PhraseEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                                )}
+                                {selectedBlock.type === 'quote' && (
+                                    <QuoteEditor
+                                        onAdd={() => { }} // It's already added, we'd need to adapt QuoteEditor for update in the future, simulating for now
+                                    />
+                                )}
+                                {selectedBlock.type === 'video' && (
+                                    <YoutubeEditor />
+                                )}
+                                {selectedBlock.type === 'music' && (
+                                    <SpotifySearch />
+                                )}
+                                {selectedBlock.type === 'photo' && (
+                                    <PhotoEditor onAdd={() => { }} />
+                                )}
+                                {selectedBlock.type === 'gif' && (
+                                    <GifPicker />
+                                )}
+                                {selectedBlock.type === 'guestbook' && (
+                                    <GuestbookEditor />
+                                )}
+                                {['tape', 'weather', 'media'].includes(selectedBlock.type) && (
+                                    <ArtTools />
+                                )}
+                                {selectedBlock.type === 'doodle' && (
+                                    <DoodlePad />
+                                )}
+                                {selectedBlock.type === 'social' && (
+                                    <SocialLinksEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                                )}
+                                {selectedBlock.type === 'moodStatus' && (
+                                    <MoodStatusEditor onAdd={() => { }} />
+                                )}
+                                {selectedBlock.type === 'countdown' && (
+                                    <CountdownEditor onAdd={() => { }} />
+                                )}
                             </div>
-                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('sidebar.writing.text_desc')}</p>
-                        </header>
-                        <div ref={textEditorRef}>
-                            <TextEditor
-                                block={selectedBlock}
-                                onUpdate={onUpdateBlock}
-                                highlight={selectedBlock?.type === 'text'}
-                            />
-                        </div>
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <div ref={phraseEditorRef}>
-                            <PhraseEditor
-                                block={selectedBlock}
-                                onUpdate={onUpdateBlock}
-                                highlight={['ticker', 'subtitle', 'floating'].includes(selectedBlock?.type)}
-                            />
-                        </div>
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <div ref={quoteEditorRef}>
-                            <QuoteEditor onAdd={async (content) => {
-                                const { addMoodBlock } = await import('@/actions/profile')
-                                await addMoodBlock('quote', content, {
-                                    x: Math.random() * 40 + 30,
-                                    y: Math.random() * 40 + 30
-                                })
-                            }} />
-                        </div>
-                    </div>
-                )}
-
-                {activeTab === 'media' && (
-                    <div className="space-y-10">
-                        <header>
-                            <div className="flex items-center gap-2 mb-1">
-                                <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('sidebar.media.atmosphere_nodes_title')}</h3>
-                            </div>
-                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('sidebar.media.atmosphere_nodes_desc')}</p>
-                        </header>
-
-                        <div ref={youtubeEditorRef}>
-                            <YoutubeEditor
-                                highlight={selectedBlock?.type === 'video'}
-                            />
-                        </div>
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-
-                        <SpotifySearch />
-
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-
-                        <div ref={photoEditorRef}>
-                            <PhotoEditor onAdd={async (content) => {
-                                const { addMoodBlock } = await import('@/actions/profile')
-                                await addMoodBlock('photo', content, {
-                                    x: Math.random() * 40 + 30,
-                                    y: Math.random() * 40 + 30,
-                                    width: 300,
-                                    height: 300
-                                })
-                            }} />
-                        </div>
-
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-
-                        <div ref={gifPickerRef}>
-                            <GifPicker
-                                highlight={selectedBlock?.type === 'gif'}
-                            />
-                        </div>
-
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-
-                        <div ref={guestbookEditorRef}>
-                            <GuestbookEditor
-                                highlight={selectedBlock?.type === 'guestbook'}
-                            />
-                        </div>
-                    </div>
-                )}
-
-                {activeTab === 'art' && (
-                    <div className="space-y-10">
-                        <header>
-                            <div className="flex items-center gap-2 mb-1">
-                                <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('sidebar.art.creative_assets_title')}</h3>
-                            </div>
-                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('sidebar.art.creative_assets_desc')}</p>
-                        </header>
-                        <div ref={artToolsRef}>
-                            <ArtTools highlight={['tape', 'weather', 'media'].includes(selectedBlock?.type)} />
-                        </div>
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <DoodlePad />
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <div ref={socialEditorRef}>
-                            <SocialLinksEditor
-                                block={selectedBlock}
-                                onUpdate={onUpdateBlock}
-                                highlight={selectedBlock?.type === 'social'}
-                            />
-                        </div>
-
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-
-                        <div ref={moodStatusEditorRef}>
-                            <MoodStatusEditor onAdd={async (content) => {
-                                const { addMoodBlock } = await import('@/actions/profile')
-                                await addMoodBlock('moodStatus', content, {
-                                    x: Math.random() * 40 + 30,
-                                    y: Math.random() * 40 + 30
-                                })
-                            }} />
-                        </div>
-
-                        <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-
-                        <div ref={countdownEditorRef}>
-                            <CountdownEditor onAdd={async (content) => {
-                                const { addMoodBlock } = await import('@/actions/profile')
-                                await addMoodBlock('countdown', content, {
-                                    x: Math.random() * 40 + 30,
-                                    y: Math.random() * 40 + 30
-                                })
-                            }} />
-                        </div>
-                    </div>
+                        )}
+                    </>
                 )}
 
             </div>
