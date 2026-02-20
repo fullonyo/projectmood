@@ -20,16 +20,18 @@ import {
     MessageSquare
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 interface BlockManagerProps {
     blocks: any[]
 }
 
 export function BlockManager({ blocks }: BlockManagerProps) {
+    const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
 
     const handleDelete = (id: string) => {
-        if (!confirm("Tem certeza que deseja remover este bloco?")) return
+        if (!confirm(t('editors.block_manager.delete_confirm'))) return
         startTransition(async () => {
             await deleteMoodBlock(id)
         })
@@ -59,29 +61,29 @@ export function BlockManager({ blocks }: BlockManagerProps) {
         const content = block.content as any
 
         switch (type) {
-            case 'text': return content.text || "Notas"
-            case 'music': return "Música do Spotify"
-            case 'photo': return "Imagem / Foto"
-            case 'video': return "Vídeo do YouTube"
-            case 'quote': return content.text || "Citação"
-            case 'moodStatus': return `Mood: ${content.status}`
-            case 'countdown': return content.title || "Contagem Regressiva"
-            case 'social': return `${content.platform} link`
-            case 'weather': return `Vibe: ${content.vibe}`
-            case 'media': return `${content.category === 'book' ? 'Livro' : 'Filme'}: ${content.title}`
-            case 'gif': return "GIF Animado"
-            case 'doodle': return "Desenho à mão"
-            case 'guestbook': return "Livro de Recados"
-            default: return "Bloco de Conteúdo"
+            case 'text': return content.text || t('editors.block_manager.labels.text')
+            case 'music': return t('editors.block_manager.labels.music')
+            case 'photo': return t('editors.block_manager.labels.photo')
+            case 'video': return t('editors.block_manager.labels.video')
+            case 'quote': return content.text || t('editors.block_manager.labels.quote')
+            case 'moodStatus': return `${t('editors.block_manager.labels.moodStatus')} ${content.status}`
+            case 'countdown': return content.title || t('editors.block_manager.labels.countdown')
+            case 'social': return `${content.platform} ${t('editors.block_manager.labels.social')}`
+            case 'weather': return `${t('editors.block_manager.labels.weather')} ${content.vibe}`
+            case 'media': return `${content.category === 'book' ? t('editors.block_manager.labels.book') : t('editors.block_manager.labels.movie')}: ${content.title}`
+            case 'gif': return t('editors.block_manager.labels.gif')
+            case 'doodle': return t('editors.block_manager.labels.doodle')
+            case 'guestbook': return t('editors.block_manager.labels.guestbook')
+            default: return t('editors.block_manager.labels.default')
         }
     }
 
     return (
         <div className="space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Seu Feed</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">{t('editors.block_manager.feed_title')}</h2>
 
             {blocks.length === 0 && (
-                <p className="text-xs text-zinc-500 italic">Nenhum bloco ainda...</p>
+                <p className="text-xs text-zinc-500 italic">{t('editors.block_manager.empty')}</p>
             )}
 
             <div className="space-y-2">

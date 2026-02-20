@@ -3,8 +3,10 @@
 import Link from "next/link"
 import { ShieldAlert } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 export function ViralBadge() {
+    const { t } = useTranslation()
     return (
         <Link
             href="/auth/register"
@@ -15,7 +17,7 @@ export function ViralBadge() {
         >
             <div className="flex items-center gap-3 mb-1">
                 <span className="text-[7px] font-black uppercase tracking-[0.5em] opacity-30 group-hover:opacity-100 transition-opacity">
-                    Authorized Access
+                    {t('public_page.badge.auth_access')}
                 </span>
                 <div className="h-[1px] w-4 bg-current opacity-20" />
             </div>
@@ -23,10 +25,10 @@ export function ViralBadge() {
             <div className="flex items-center gap-3">
                 <div className="flex flex-col items-end group-hover:-translate-x-1 transition-transform duration-500">
                     <span className="text-[10px] font-black tracking-widest uppercase leading-none mb-0.5">
-                        Claim Studio
+                        {t('public_page.badge.claim')}
                     </span>
                     <div className="flex items-center gap-1.5 opacity-40">
-                        <span className="text-[6px] font-bold uppercase tracking-tighter italic">Registration open</span>
+                        <span className="text-[6px] font-bold uppercase tracking-tighter italic">{t('public_page.badge.open')}</span>
                         <div className="w-1 h-1 bg-current animate-pulse" />
                     </div>
                 </div>
@@ -39,7 +41,7 @@ export function ViralBadge() {
             {/* Studio Technical Footer */}
             <div className="mt-2 flex flex-col items-end opacity-20 group-hover:opacity-100 transition-opacity">
                 <div className="h-[1px] w-12 bg-current mb-1" />
-                <span className="text-[5px] font-mono uppercase tracking-[0.2em]">01-MS-ACCESS-GRANTED</span>
+                <span className="text-[5px] font-mono uppercase tracking-[0.2em]">{t('public_page.badge.footer')}</span>
             </div>
         </Link>
     )

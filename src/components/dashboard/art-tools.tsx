@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
+import { useTranslation } from "@/i18n/context"
 
 const TAPES = [
     { name: 'Classic White', color: 'rgba(255, 255, 255, 0.4)', pattern: 'none' },
@@ -30,6 +31,7 @@ const TAPES = [
 ]
 
 export function ArtTools({ highlight }: { highlight?: boolean }) {
+    const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
 
     // Form states for Weather
@@ -86,7 +88,7 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                     <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                         <StickyNote className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Material_Substrates</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.art.tape_title')}</h3>
                 </div>
 
                 <div className="grid grid-cols-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
@@ -117,12 +119,12 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                     <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                         <Cloud className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Atmospheric_Registry</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.art.weather_title')}</h3>
                 </div>
 
                 <div className="border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
                     <div className="p-5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
-                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">Vibe_State_Frequency</p>
+                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">{t('editors.art.weather_state')}</p>
                         <div className="grid grid-cols-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                             {[
                                 { icon: Sun, id: 'sun', vibe: 'Ensolarado e calmo' },
@@ -150,18 +152,18 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
 
                     <div className="p-5 space-y-4">
                         <div className="space-y-3">
-                            <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">Geographic_Node</p>
+                            <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.art.weather_location')}</p>
                             <Input
-                                placeholder="IDENTIFY_LOCATION..."
+                                placeholder={t('editors.art.weather_location_placeholder')}
                                 value={weatherLoc}
                                 onChange={(e) => setWeatherLoc(e.target.value)}
                                 className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] font-mono h-11 uppercase tracking-tight focus-visible:ring-0"
                             />
                         </div>
                         <div className="space-y-3">
-                            <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">Temporal_Feel</p>
+                            <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.art.weather_temp')}</p>
                             <Input
-                                placeholder="DEFINE_VIBE_PROTOCOL..."
+                                placeholder={t('editors.art.weather_temp_placeholder')}
                                 value={weatherVibe}
                                 onChange={(e) => setWeatherVibe(e.target.value)}
                                 className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] font-mono h-11 uppercase tracking-tight focus-visible:ring-0"
@@ -191,7 +193,7 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                             disabled={isPending || !weatherVibe || !weatherLoc}
                             className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                         >
-                            Manifest_Climate_Node
+                            {t('editors.art.weather_deploy')}
                         </Button>
                     </div>
                 </div>
@@ -203,7 +205,7 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                     <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                         {mediaCategory === 'book' ? <Book className="w-3.5 h-3.5 text-black dark:text-white" /> : <Film className="w-3.5 h-3.5 text-black dark:text-white" />}
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Curation_Manifesto</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.art.media_title')}</h3>
                 </div>
 
                 <div className="border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
@@ -214,30 +216,30 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                                 "py-4 text-[8px] font-black uppercase tracking-widest border-r border-zinc-100 dark:border-zinc-900 transition-all",
                                 mediaCategory === 'book' ? "bg-black text-white dark:bg-white dark:text-black" : "bg-zinc-50/50 dark:bg-zinc-900/30 text-zinc-400 hover:text-black dark:hover:text-white"
                             )}
-                        >Manifest_Book</button>
+                        >{t('editors.art.media_book')}</button>
                         <button
                             onClick={() => setMediaCategory('movie')}
                             className={cn(
                                 "py-4 text-[8px] font-black uppercase tracking-widest transition-all",
                                 mediaCategory === 'movie' ? "bg-black text-white dark:bg-white dark:text-black" : "bg-zinc-50/50 dark:bg-zinc-900/30 text-zinc-400 hover:text-black dark:hover:text-white"
                             )}
-                        >Manifest_Cinema</button>
+                        >{t('editors.art.media_movie')}</button>
                     </div>
 
                     <div className="p-5 space-y-4">
                         <div className="space-y-3">
-                            <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">Work_Title</p>
+                            <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.art.media_work_title')}</p>
                             <Input
-                                placeholder="IDENTIFY_TITLE..."
+                                placeholder={t('editors.art.media_work_title_placeholder')}
                                 value={mediaTitle}
                                 onChange={(e) => setMediaTitle(e.target.value)}
                                 className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] font-mono h-11 uppercase focus-visible:ring-0"
                             />
                         </div>
                         <div className="space-y-3">
-                            <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">Critique_Matrix // 3_Words</p>
+                            <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.art.media_critique')}</p>
                             <Input
-                                placeholder="X_Y_Z..."
+                                placeholder={t('editors.art.media_critique_placeholder')}
                                 value={mediaReview}
                                 onChange={(e) => setMediaReview(e.target.value)}
                                 className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] uppercase font-mono h-11 focus-visible:ring-0"
@@ -249,7 +251,7 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                             disabled={isPending || !mediaTitle || !mediaReview}
                             className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                         >
-                            Publish_Review_Node
+                            {t('editors.art.media_deploy')}
                         </Button>
                     </div>
                 </div>

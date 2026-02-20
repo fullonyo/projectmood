@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 interface AnalyticsDisplayProps {
     views: number
@@ -9,10 +10,12 @@ interface AnalyticsDisplayProps {
 }
 
 export function AnalyticsDisplay({ views, loading }: AnalyticsDisplayProps) {
+    const { t } = useTranslation()
+
     const getVibeStatus = (count: number) => {
-        if (count > 1000) return { label: "Atmosphere_Viral", color: "text-white" }
-        if (count > 100) return { label: "Atmosphere_High", color: "text-white" }
-        return { label: "Atmosphere_Stable", color: "text-zinc-500" }
+        if (count > 1000) return { label: t('public_page.analytics.viral'), color: "text-white" }
+        if (count > 100) return { label: t('public_page.analytics.high'), color: "text-white" }
+        return { label: t('public_page.analytics.stable'), color: "text-zinc-500" }
     }
 
     const vibe = getVibeStatus(views)
@@ -31,7 +34,7 @@ export function AnalyticsDisplay({ views, loading }: AnalyticsDisplayProps) {
                         {loading ? "..." : views.toLocaleString()}
                     </span>
                     <span className="text-[8px] font-black uppercase tracking-widest opacity-20">
-                        Souls Visited
+                        {t('public_page.analytics.views')}
                     </span>
                 </div>
             </div>

@@ -3,12 +3,14 @@
 import { useState } from "react"
 import { Check, Link as LinkIcon, Fingerprint } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 interface SignatureShareProps {
     username: string
 }
 
 export function SignatureShare({ username }: SignatureShareProps) {
+    const { t } = useTranslation()
     const [status, setStatus] = useState<'idle' | 'copied'>('idle')
 
     const handleCopy = async () => {
@@ -38,7 +40,7 @@ export function SignatureShare({ username }: SignatureShareProps) {
                             status === 'copied' ? "text-green-500 scale-125" : "opacity-40 group-hover:rotate-12"
                         )} />
                         <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-40">
-                            Creator Signature URL
+                            {t('public_page.share.title')}
                         </span>
                     </div>
 
@@ -47,7 +49,7 @@ export function SignatureShare({ username }: SignatureShareProps) {
                             "text-[10px] font-mono tracking-[0.2em] uppercase transition-all duration-500",
                             status === 'copied' ? "text-green-500 font-black italic" : "opacity-60 group-hover:opacity-100"
                         )}>
-                            {status === 'copied' ? "Signature Secured" : `moodspace.me/${username}`}
+                            {status === 'copied' ? t('public_page.share.copied') : `moodspace.me/${username}`}
                         </span>
 
                         <div className={cn(

@@ -5,12 +5,14 @@ import { useDropzone } from "react-dropzone"
 import { Button } from "@/components/ui/button"
 import { Palette, Upload, X, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 interface ColorPaletteExtractorProps {
     onApplyPalette: (palette: string[]) => void
 }
 
 export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorProps) {
+    const { t } = useTranslation()
     const [extractedColors, setExtractedColors] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -90,8 +92,8 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                     <Sparkles className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
                 </div>
                 <div>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Auto Palette</h3>
-                    <p className="text-[9px] text-zinc-400 uppercase tracking-tighter">Extraia cores de uma imagem</p>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">{t('editors.palette.title')}</h3>
+                    <p className="text-[9px] text-zinc-400 uppercase tracking-tighter">{t('editors.palette.desc')}</p>
                 </div>
             </div>
 
@@ -108,9 +110,9 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                     <input {...getInputProps()} />
                     <Upload className="w-8 h-8 mx-auto mb-2 text-zinc-400 group-hover:scale-110 transition-transform" />
                     <p className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400">
-                        {isDragActive ? 'Solte para analisar' : 'Arraste uma imagem'}
+                        {isDragActive ? t('editors.palette.drop') : t('editors.palette.drag')}
                     </p>
-                    <p className="text-[10px] text-zinc-400 mt-1">Extração inteligente de vibes</p>
+                    <p className="text-[10px] text-zinc-400 mt-1">{t('editors.palette.hint')}</p>
                 </div>
             ) : (
                 <div className="space-y-4 animate-in fade-in zoom-in duration-300">
@@ -127,7 +129,7 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                         {loading && (
                             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-white animate-pulse">
-                                    Analisando...
+                                    {t('editors.palette.analyzing')}
                                 </p>
                             </div>
                         )}
@@ -154,7 +156,7 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                                 onClick={() => onApplyPalette(extractedColors)}
                                 className="w-full bg-black text-white hover:bg-zinc-900 dark:bg-white dark:text-black h-12 rounded-none text-[10px] font-black uppercase tracking-widest border border-black dark:border-white transition-all"
                             >
-                                Aplicar no Mural
+                                {t('editors.palette.apply')}
                             </Button>
                         </div>
                     )}

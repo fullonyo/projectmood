@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils"
 import { useEffect, useState, useRef } from "react"
 import { updateProfile } from "@/actions/profile"
 import imageCompression from 'browser-image-compression'
+import { useTranslation } from "@/i18n/context"
+import { LanguageSwitcher } from "./language-switcher"
 
 interface ActionsSidebarProps {
     username: string
@@ -16,16 +18,9 @@ interface ActionsSidebarProps {
 }
 
 export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
-    const [greeting, setGreeting] = useState("Bons ventos")
+    const { t } = useTranslation()
     const [isUploading, setIsUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
-
-    useEffect(() => {
-        const hour = new Date().getHours()
-        if (hour >= 5 && hour < 12) setGreeting("Bom dia")
-        else if (hour >= 12 && hour < 18) setGreeting("Boa tarde")
-        else setGreeting("Boa noite")
-    }, [])
 
     const handleAvatarClick = () => {
         fileInputRef.current?.click()
@@ -63,7 +58,9 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
     const avatarSrc = profile.avatarUrl || `https://avatar.vercel.sh/${username}`
 
     return (
-        <aside className="w-80 h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-none z-50 overflow-hidden">
+        <aside className="relative w-80 h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-none z-50 overflow-hidden">
+            <LanguageSwitcher className="absolute top-8 right-6" />
+
             {/* Hidden File Input */}
             <input
                 type="file"
@@ -73,17 +70,16 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                 onChange={handleAvatarUpload}
             />
 
-            {/* Sidebar Header - Studio Identity */}
             <div className="p-8 border-b border-zinc-100 dark:border-zinc-900">
                 <div className="flex items-center justify-between mb-2">
                     <Link href="/" className="flex flex-col hover:opacity-70 transition-opacity">
-                        <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-30 leading-none mb-1">System Node</span>
+                        <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-30 leading-none mb-1">{t('leftSidebar.system_node')}</span>
                         <div className="text-2xl font-black tracking-tighter uppercase italic flex items-center gap-2">
                             MoodSpace
                         </div>
                     </Link>
-                    <div className="flex items-center gap-2 px-3 py-1 border border-black dark:border-white">
-                        <span className="text-[8px] font-black uppercase tracking-widest">Active Studio</span>
+                    <div className="flex items-center gap-2 px-3 py-1 border border-black dark:border-white mr-10 relative z-10">
+                        <span className="text-[8px] font-black uppercase tracking-widest">{t('leftSidebar.active_studio')}</span>
                     </div>
                 </div>
             </div>
@@ -119,22 +115,22 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                             </button>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-400 leading-none mb-1.5">Identity Protocol</span>
+                            <span className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-400 leading-none mb-1.5">{t('leftSidebar.identity_protocol')}</span>
                             <h4 className="text-base font-black tracking-tighter dark:text-white uppercase italic">{firstName}</h4>
-                            <span className="text-[7px] font-mono text-zinc-300 dark:text-zinc-600 mt-1">S_ID // {username.toUpperCase()}</span>
+                            <span className="text-[7px] font-mono text-zinc-300 dark:text-zinc-600 mt-1">Tag // {username.toUpperCase()}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-5 border-t border-zinc-100 dark:border-zinc-900">
                         <div className="flex flex-col">
-                            <p className="text-[7px] uppercase font-black text-zinc-400 tracking-[0.3em] mb-1">Access Level</p>
-                            <p className="text-[9px] font-black uppercase text-black dark:text-white">Studio_Free</p>
+                            <p className="text-[7px] uppercase font-black text-zinc-400 tracking-[0.3em] mb-1">{t('leftSidebar.access_level')}</p>
+                            <p className="text-[9px] font-black uppercase text-black dark:text-white">{t('leftSidebar.studio_free')}</p>
                         </div>
                         <div className="flex flex-col items-end">
-                            <p className="text-[7px] uppercase font-black text-zinc-400 tracking-[0.3em] mb-1">System Status</p>
+                            <p className="text-[7px] uppercase font-black text-zinc-400 tracking-[0.3em] mb-1">{t('leftSidebar.system_status')}</p>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-1 h-1 bg-black dark:bg-white animate-pulse" />
-                                <p className="text-[9px] font-black uppercase text-black dark:text-white">Authorized</p>
+                                <p className="text-[9px] font-black uppercase text-black dark:text-white">{t('leftSidebar.authorized')}</p>
                             </div>
                         </div>
                     </div>
@@ -149,9 +145,9 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                     <header className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                            <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">Deployment Area</h3>
+                            <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('leftSidebar.deployment_area')}</h3>
                         </div>
-                        <p className="text-[9px] text-zinc-400 uppercase tracking-widest">External Visibility Protocols</p>
+                        <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('leftSidebar.external_visibility')}</p>
                     </header>
 
                     <div className="grid gap-4">
@@ -161,7 +157,7 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                             >
                                 <div className="flex items-center gap-3">
                                     <ExternalLink className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                    Launch Public Space
+                                    {t('leftSidebar.launch_public_space')}
                                 </div>
                                 <div className="flex gap-1.5 opacity-30">
                                     <div className="w-1 h-1 bg-white dark:bg-black animate-pulse" />
@@ -182,7 +178,7 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                     <header className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-zinc-200 dark:bg-zinc-800" />
-                            <h3 className="text-[9px] font-black tracking-[0.3em] uppercase text-zinc-400">System_Configuration</h3>
+                            <h3 className="text-[9px] font-black tracking-[0.3em] uppercase text-zinc-400">{t('leftSidebar.system_configuration')}</h3>
                         </div>
                     </header>
                     <div className="grid gap-2 opacity-30 grayscale cursor-not-allowed">
@@ -190,13 +186,13 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                             <div className="p-1.5 border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950">
                                 <User className="w-3.5 h-3.5" />
                             </div>
-                            Identity_Registry_Config
+                            {t('leftSidebar.identity_registry')}
                         </Button>
                         <Button variant="outline" className="justify-start gap-4 h-12 rounded-none text-[9px] font-black uppercase tracking-widest border border-dashed border-zinc-200 dark:border-zinc-800 bg-transparent">
                             <div className="p-1.5 border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950">
                                 <Settings className="w-3.5 h-3.5" />
                             </div>
-                            System_UX_Protocol
+                            {t('leftSidebar.system_ux')}
                         </Button>
                     </div>
                 </div>
@@ -211,9 +207,9 @@ export function ActionsSidebar({ username, profile }: ActionsSidebarProps) {
                 >
                     <div className="flex items-center gap-3">
                         <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        Terminate_Session
+                        {t('leftSidebar.terminate_session')}
                     </div>
-                    <span className="text-[8px] opacity-20 font-mono">0x00_EXIT</span>
+                    <span className="text-[8px] opacity-20 font-mono">{t('leftSidebar.exit_hex')}</span>
                 </Button>
             </div>
         </aside>

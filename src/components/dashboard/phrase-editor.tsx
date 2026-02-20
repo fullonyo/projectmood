@@ -5,6 +5,7 @@ import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
 import { Button } from "@/components/ui/button"
 import { Type, Play, Quote, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 const PHRASE_STYLES = [
     {
@@ -51,6 +52,7 @@ export function PhraseEditor({
     onUpdate?: (id: string, content: any) => void,
     highlight?: boolean
 }) {
+    const { t } = useTranslation()
     const [selectedType, setSelectedType] = useState(PHRASE_STYLES[0].id)
     const [text, setText] = useState("")
     const [textColor, setTextColor] = useState('#ffffff')
@@ -152,13 +154,13 @@ export function PhraseEditor({
                 <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                     <Type className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Kinetic_Manifesto</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.phrase.title')}</h3>
             </div>
 
             <div className="border border-zinc-200 dark:border-zinc-800 space-y-6 p-0 bg-white dark:bg-zinc-950">
                 {/* Type Selection */}
                 <div className="p-5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
-                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">Protocol_Type</p>
+                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">{t('editors.phrase.protocol_type')}</p>
                     <div className="grid grid-cols-3 border border-zinc-200 dark:border-zinc-800">
                         {PHRASE_STYLES.map((t) => (
                             <button
@@ -184,7 +186,7 @@ export function PhraseEditor({
 
                 <div className="p-0">
                     <textarea
-                        placeholder={currentConfig?.example}
+                        placeholder={t('editors.phrase.placeholder')}
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         className="w-full min-h-[90px] p-5 text-sm font-mono bg-transparent border-none focus:ring-0 outline-none resize-none placeholder:opacity-30"
@@ -193,7 +195,7 @@ export function PhraseEditor({
 
                 <div className="space-y-6 p-5 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
                     <div className="space-y-3">
-                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">Aura_Style</p>
+                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.phrase.aura_style')}</p>
                         <div className="grid grid-cols-3 border border-zinc-200 dark:border-zinc-800">
                             {currentConfig?.styles.map(s => (
                                 <button
@@ -216,22 +218,22 @@ export function PhraseEditor({
                         <div className="grid grid-cols-1 gap-5">
                             {selectedType === 'ticker' && (
                                 <div className="space-y-3">
-                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">Vector_Flow</p>
+                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.phrase.flow')}</p>
                                     <div className="flex border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                                         <button
                                             onClick={() => setDirection('left')}
                                             className={cn("flex-1 h-10 text-[8px] font-black uppercase tracking-widest transition-all border-r border-zinc-100 dark:border-zinc-900", direction === 'left' ? "bg-black text-white dark:bg-white dark:text-black" : "text-zinc-400")}
-                                        >L_Flow</button>
+                                        >{t('editors.phrase.left')}</button>
                                         <button
                                             onClick={() => setDirection('right')}
                                             className={cn("flex-1 h-10 text-[8px] font-black uppercase tracking-widest transition-all", direction === 'right' ? "bg-black text-white dark:bg-white dark:text-black" : "text-zinc-400")}
-                                        >R_Flow</button>
+                                        >{t('editors.phrase.right')}</button>
                                     </div>
                                 </div>
                             )}
                             {selectedType === 'subtitle' && (
                                 <div className="space-y-3">
-                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">Cursor_Protocol</p>
+                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.phrase.cursor')}</p>
                                     <div className="flex border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                                         {['block', 'bar', 'underline'].map(c => (
                                             <button
@@ -248,7 +250,7 @@ export function PhraseEditor({
 
                     <div className="grid grid-cols-2 gap-5">
                         <div className="space-y-3">
-                            <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">Text_Luma</p>
+                            <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.phrase.text_color')}</p>
                             <div className="flex flex-wrap gap-2 p-4 bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-900">
                                 {COLORS.map(c => (
                                     <button
@@ -264,7 +266,7 @@ export function PhraseEditor({
                             </div>
                         </div>
                         <div className="space-y-3">
-                            <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">Node_Luma</p>
+                            <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.phrase.bg_color')}</p>
                             <div className="flex flex-wrap gap-2 p-4 bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-900">
                                 {COLORS.map(c => (
                                     <button
@@ -293,7 +295,7 @@ export function PhraseEditor({
 
                     <div className="space-y-3">
                         <div className="flex justify-between px-1">
-                            <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">Temporal_Shift</p>
+                            <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.phrase.speed')}</p>
                             <span className="text-[8px] font-mono text-zinc-500">{speed}s</span>
                         </div>
                         <input
@@ -312,7 +314,7 @@ export function PhraseEditor({
                         disabled={isPending || !text}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
                     >
-                        Deploy_Cinetic
+                        {t('editors.phrase.deploy')}
                     </Button>
                 </div>
             </div>

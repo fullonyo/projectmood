@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { Cloud, Sun, CloudRain, Snowflake, Wind } from "lucide-react"
+import { useTranslation } from "@/i18n/context"
 
 const ICONS: Record<string, any> = {
     sun: Sun,
@@ -20,6 +21,7 @@ interface WeatherBlockPublicProps {
 }
 
 export function WeatherBlockPublic({ content }: WeatherBlockPublicProps) {
+    const { t } = useTranslation()
     const Icon = ICONS[content.icon || 'cloud'] || Cloud
 
     return (
@@ -28,7 +30,7 @@ export function WeatherBlockPublic({ content }: WeatherBlockPublicProps) {
                 <div className="w-12 h-12 rounded-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 flex items-center justify-center mb-1">
                     <Icon className="w-6 h-6 text-current opacity-80" />
                 </div>
-                <p className="text-[10px] uppercase tracking-[0.4em] font-black opacity-30">Identity_Weather_Registry</p>
+                <p className="text-[10px] uppercase tracking-[0.4em] font-black opacity-30">{t('canvas.weather_registry')}</p>
             </div>
 
             <div className="space-y-1">

@@ -10,6 +10,7 @@ import { BlockRenderer } from "./block-renderer"
 import { BackgroundEffect } from "../effects/background-effect"
 import { StaticTextures } from "../effects/static-textures"
 import { BoardStage } from "./board-stage"
+import { useTranslation } from "@/i18n/context"
 import { useCanvasManager } from "@/hooks/use-canvas-manager"
 import { calculateResize, getResizeCursor, ResizeHandle, ResizeCorner, calculateRotation } from '@/lib/canvas-transforms'
 
@@ -35,6 +36,7 @@ export function MoodCanvas({
     onUpdateBlock,
     isSaving
 }: MoodCanvasProps) {
+    const { t } = useTranslation()
     const canvasRef = useRef<HTMLDivElement>(null)
     const [maxZ, setMaxZ] = useState(10)
     const [blockToDelete, setBlockToDelete] = useState<string | null>(null)
@@ -82,7 +84,7 @@ export function MoodCanvas({
                 isSaving ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
             )}>
                 <div className="w-1.5 h-1.5 rounded-none bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">SYNC_ACTIVE</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">{t('canvas.sync_active')}</span>
             </div>
 
             {/* Canvas Grid Layer */}
@@ -121,7 +123,7 @@ export function MoodCanvas({
             </BoardStage>
 
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-none bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm border border-black/10 dark:border-white/10 text-[9px] font-black tracking-[0.5em] uppercase text-zinc-400">
-                CREATIVITY_DOMAIN_S01
+                {t('canvas.creativity_domain')}
             </div>
 
             <ConfirmModal
@@ -135,9 +137,9 @@ export function MoodCanvas({
                         setBlockToDelete(null)
                     }
                 }}
-                title="Deletar Item?"
-                message="Essa ação não pode ser desfeita. O item será removido permanentemente do seu mural."
-                confirmText="Excluir"
+                title={t('canvas.delete_modal_title')}
+                message={t('canvas.delete_modal_message')}
+                confirmText={t('canvas.delete_modal_confirm')}
                 type="danger"
                 isLoading={isDeleting}
             />

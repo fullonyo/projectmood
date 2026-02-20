@@ -8,12 +8,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Image as ImageIcon, Upload, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
+import { toast } from "sonner"
 
 interface PhotoEditorProps {
     onAdd: (content: any) => void
 }
 
 export function PhotoEditor({ onAdd }: PhotoEditorProps) {
+    const { t } = useTranslation()
     const [imageUrl, setImageUrl] = useState<string>("")
     const [alt, setAlt] = useState("")
     const [caption, setCaption] = useState("")
@@ -44,16 +47,16 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
                 setIsUploading(false)
             }
             reader.onerror = () => {
-                alert("Erro ao carregar imagem")
+                toast.error(t('editors.photo.error_load'))
                 setIsUploading(false)
             }
             reader.readAsDataURL(compressedFile)
         } catch (error) {
             console.error("Erro na compressão:", error)
-            alert("Erro ao processar imagem")
+            toast.error(t('editors.photo.error_process'))
             setIsUploading(false)
         }
-    }, [])
+    }, [t])
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -107,7 +110,7 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
                 <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                     <ImageIcon className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Image_Injection_Protocol</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.photo.title')}</h3>
             </div>
 
             <div className="space-y-4">
@@ -124,13 +127,13 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
                         <input {...getInputProps()} />
                         <Upload className="w-8 h-8 mx-auto mb-4 text-zinc-400 opacity-40" />
                         <p className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-500">
-                            {isDragActive ? 'Drop_Link_Detected' : 'Inject_Visual_Buffer'}
+                            {isDragActive ? t('editors.photo.drop_link') : t('editors.photo.inject_visual')}
                         </p>
-                        <p className="text-[7px] text-zinc-400 font-mono mt-2">S_FORMAT // PNG, JPG, WEBP</p>
+                        <p className="text-[7px] text-zinc-400 font-mono mt-2">{t('editors.photo.format_hint')}</p>
                         {isUploading && (
                             <div className="mt-4 flex items-center justify-center gap-2">
                                 <div className="w-1 h-3 bg-black dark:bg-white animate-pulse" />
-                                <p className="text-[7px] text-black dark:text-white font-black uppercase tracking-widest">Processing_Buffer...</p>
+                                <p className="text-[7px] text-black dark:text-white font-black uppercase tracking-widest">{t('editors.photo.processing')}</p>
                             </div>
                         )}
                     </div>
@@ -154,28 +157,28 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
                             </button>
 
                             <div className="absolute bottom-4 left-4 px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10">
-                                <span className="text-[7px] font-black uppercase tracking-widest text-white/70">Buffer_Live_Preview</span>
+                                <span className="text-[7px] font-black uppercase tracking-widest text-white/70">{t('editors.photo.live_preview')}</span>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 gap-5">
                             <div className="space-y-3">
-                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Caption_Metadata</Label>
+                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.photo.caption')}</Label>
                                 <Input
                                     value={caption}
                                     onChange={(e) => setCaption(e.target.value)}
-                                    placeholder="Input textual context..."
+                                    placeholder={t('editors.photo.caption_placeholder')}
                                     className="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-none text-[10px] uppercase font-mono h-11 focus-visible:ring-0"
                                     maxLength={100}
                                 />
                             </div>
 
                             <div className="space-y-3">
-                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Alt_Text_Protocol</Label>
+                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.photo.alt_text')}</Label>
                                 <Input
                                     value={alt}
                                     onChange={(e) => setAlt(e.target.value)}
-                                    placeholder="Define accessibility string..."
+                                    placeholder={t('editors.photo.alt_placeholder')}
                                     className="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-none text-[10px] uppercase font-mono h-11 focus-visible:ring-0"
                                     maxLength={200}
                                 />
@@ -183,7 +186,7 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
                         </div>
 
                         <div className="space-y-3">
-                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Filter_Vibe_Protocol</Label>
+                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.photo.filter')}</Label>
                             <div className="grid grid-cols-5 border border-zinc-200 dark:border-zinc-800">
                                 {(['none', 'vintage', 'bw', 'warm', 'cool'] as const).map((f) => (
                                     <button
@@ -214,7 +217,7 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
                         </div>
 
                         <div className="space-y-3">
-                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Substrate_Geometry</Label>
+                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.photo.geometry')}</Label>
                             <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800">
                                 {(['none', 'polaroid', 'border', 'shadow'] as const).map((frm) => (
                                     <button
@@ -246,7 +249,7 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
                             onClick={handleAdd}
                             className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
                         >
-                            Manifest_Visual_Node
+                            {t('editors.photo.deploy')}
                         </Button>
                     </div>
                 )}

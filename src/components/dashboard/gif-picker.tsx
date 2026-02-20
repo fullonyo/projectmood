@@ -6,8 +6,10 @@ import { addMoodBlock } from "@/actions/profile"
 import { Input } from "@/components/ui/input"
 import { Search, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 export function GifPicker({ highlight }: { highlight?: boolean }) {
+    const { t } = useTranslation()
     const [query, setQuery] = useState("")
     const [gifs, setGifs] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -51,8 +53,8 @@ export function GifPicker({ highlight }: { highlight?: boolean }) {
                     <Search className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
                 <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Reaction_Manifest_Protocol</h3>
-                    <p className="text-[7px] text-zinc-400 uppercase tracking-[0.2em] opacity-50">Powered_by_Giphy // Engine_Active</p>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.gif.title')}</h3>
+                    <p className="text-[7px] text-zinc-400 uppercase tracking-[0.2em] opacity-50">{t('editors.gif.powered_by')}</p>
                 </div>
             </div>
 
@@ -63,7 +65,7 @@ export function GifPicker({ highlight }: { highlight?: boolean }) {
                 <Input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="SEARCH_VIBE_BUFFER..."
+                    placeholder={t('editors.gif.search_placeholder')}
                     className="pl-14 rounded-none bg-transparent border-none h-11 text-[10px] font-mono uppercase tracking-tight focus-visible:ring-0"
                 />
                 {query && (
@@ -83,7 +85,7 @@ export function GifPicker({ highlight }: { highlight?: boolean }) {
                         <div className="w-12 h-0.5 bg-zinc-100 dark:bg-zinc-900 relative overflow-hidden">
                             <div className="absolute inset-0 bg-black dark:bg-white animate-slide-infinite" />
                         </div>
-                        <p className="text-[8px] uppercase font-black tracking-[0.3em] text-zinc-400">Scaning_Vibe_Stream...</p>
+                        <p className="text-[8px] uppercase font-black tracking-[0.3em] text-zinc-400">{t('editors.gif.searching')}</p>
                     </div>
                 ) : gifs.length > 0 ? (
                     <div className="columns-2 gap-3 space-y-3">
@@ -102,15 +104,13 @@ export function GifPicker({ highlight }: { highlight?: boolean }) {
                                 />
                                 <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="absolute bottom-0 left-0 right-0 p-2 bg-black text-white text-[7px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transform translate-y-full group-hover:translate-y-0 transition-all">
-                                    Inject_GIF
+                                    {t('editors.gif.deploy')}
                                 </div>
                             </button>
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-48 text-zinc-500 gap-2">
-                        <span className="text-xs italic opacity-40">Nenhum gif encontrado</span>
-                    </div>
+                    <span className="text-xs italic opacity-40">{t('editors.gif.not_found')}</span>
                 )}
             </div>
         </div>

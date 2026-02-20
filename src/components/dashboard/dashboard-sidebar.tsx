@@ -42,6 +42,7 @@ import { EffectsEditor } from "./effects-editor"
 import { clearMoodBlocks } from "@/actions/profile"
 import { Button } from "../ui/button"
 import { ConfirmModal } from "../ui/confirm-modal"
+import { useTranslation } from "@/i18n/context"
 
 type TabType = 'style' | 'writing' | 'media' | 'art'
 
@@ -58,6 +59,7 @@ export function DashboardSidebar({
     onUpdateBlock: (id: string, content: any) => void,
     onUpdateProfile: (data: any) => void
 }) {
+    const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState<TabType>('writing')
     const [showClearConfirm, setShowClearConfirm] = useState(false)
     const [isClearing, setIsClearing] = useState(false)
@@ -140,10 +142,10 @@ export function DashboardSidebar({
     }, [selectedBlock])
 
     const tabs = [
-        { id: 'style', label: 'Estilo', icon: Palette, description: 'Luz e Cor' },
-        { id: 'writing', label: 'Escrita', icon: Type, description: 'Textos' },
-        { id: 'media', label: 'Mídia', icon: Zap, description: 'Conteúdo' },
-        { id: 'art', label: 'Criativo', icon: Sparkles, description: 'Assets' },
+        { id: 'style', label: t('sidebar.tabs.style'), icon: Palette, description: t('sidebar.tabs.style_desc') },
+        { id: 'writing', label: t('sidebar.tabs.writing'), icon: Type, description: t('sidebar.tabs.writing_desc') },
+        { id: 'media', label: t('sidebar.tabs.media'), icon: Zap, description: t('sidebar.tabs.media_desc') },
+        { id: 'art', label: t('sidebar.tabs.art'), icon: Sparkles, description: t('sidebar.tabs.art_desc') },
     ]
 
     return (
@@ -152,8 +154,8 @@ export function DashboardSidebar({
             <div className="p-8 border-b border-zinc-100 dark:border-zinc-900">
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex flex-col">
-                        <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-30 leading-none mb-1">Curation Engine</span>
-                        <h1 className="text-2xl font-black tracking-tighter uppercase italic">Mood Studio</h1>
+                        <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-30 leading-none mb-1">{t('sidebar.header_subtitle')}</span>
+                        <h1 className="text-2xl font-black tracking-tighter uppercase italic">{t('sidebar.header_title')}</h1>
                     </div>
                     {selectedBlock && (
                         <Button
@@ -163,7 +165,7 @@ export function DashboardSidebar({
                             className="h-7 px-3 text-[8px] font-black uppercase tracking-widest border-black dark:border-white rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                         >
                             <Plus className="w-3 h-3 mr-1 rotate-45" />
-                            Discard
+                            {t('sidebar.discard_changes')}
                         </Button>
                     )}
                 </div>
@@ -202,9 +204,9 @@ export function DashboardSidebar({
                         <header>
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">Canvas Protocol</h3>
+                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('sidebar.style.atmosphere_title')}</h3>
                             </div>
-                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Environment & Tone Definition</p>
+                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('sidebar.style.atmosphere_desc')}</p>
                         </header>
                         <ThemeEditor
                             currentTheme={profile.theme}
@@ -226,8 +228,8 @@ export function DashboardSidebar({
                         <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
 
                         <header>
-                            <h3 className="text-xl font-black tracking-tighter uppercase">Magic FX</h3>
-                            <p className="text-[11px] text-zinc-500 italic">Interatividade e Imersão.</p>
+                            <h3 className="text-[10px] font-black tracking-tighter uppercase">{t('sidebar.style.magic_fx_title')}</h3>
+                            <p className="text-[11px] text-zinc-500 italic mt-1">{t('sidebar.style.magic_fx_desc')}</p>
                         </header>
                         <EffectsEditor profile={profile} />
 
@@ -235,9 +237,9 @@ export function DashboardSidebar({
                             <header className="border-t border-zinc-100 dark:border-zinc-900 pt-8">
                                 <h3 className="text-[10px] font-black text-red-500 uppercase tracking-[0.4em] flex items-center gap-2">
                                     <Bomb className="w-3 h-3" />
-                                    System Termination
+                                    {t('sidebar.style.danger_title')}
                                 </h3>
-                                <p className="text-[9px] text-zinc-400 uppercase tracking-widest mt-1">Irreversible Data Erasure Protocol</p>
+                                <p className="text-[9px] text-zinc-400 uppercase tracking-widest mt-1">{t('sidebar.style.danger_desc')}</p>
                             </header>
 
                             <Button
@@ -246,7 +248,7 @@ export function DashboardSidebar({
                                 onClick={() => setShowClearConfirm(true)}
                             >
                                 <Trash2 className="w-4 h-4" />
-                                Limpar Todo o Mural
+                                {t('sidebar.style.clear_wall_btn')}
                             </Button>
                         </div>
                     </div>
@@ -257,9 +259,9 @@ export function DashboardSidebar({
                         <header>
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">Textual Input</h3>
+                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('sidebar.writing.text_title')}</h3>
                             </div>
-                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Thought & Manifest Capture</p>
+                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('sidebar.writing.text_desc')}</p>
                         </header>
                         <div ref={textEditorRef}>
                             <TextEditor
@@ -294,9 +296,9 @@ export function DashboardSidebar({
                         <header>
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">Atmosphere Nodes</h3>
+                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('sidebar.media.atmosphere_nodes_title')}</h3>
                             </div>
-                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Audio / Visual Integration</p>
+                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('sidebar.media.atmosphere_nodes_desc')}</p>
                         </header>
 
                         <div ref={youtubeEditorRef}>
@@ -345,9 +347,9 @@ export function DashboardSidebar({
                         <header>
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">Creative Assets</h3>
+                                <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('sidebar.art.creative_assets_title')}</h3>
                             </div>
-                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Spatial Branding & Decoration</p>
+                            <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('sidebar.art.creative_assets_desc')}</p>
                         </header>
                         <div ref={artToolsRef}>
                             <ArtTools highlight={['tape', 'weather', 'media'].includes(selectedBlock?.type)} />
@@ -401,16 +403,16 @@ export function DashboardSidebar({
                     setShowClearConfirm(false)
                 }}
                 isLoading={isClearing}
-                title="Limpar Mural?"
-                message="Isso vai deletar todos os seus blocos permanentemente. Tem certeza absoluta?"
-                confirmText="Sim, deletar tudo"
+                title={t('modals.clear_wall.title')}
+                message={t('modals.clear_wall.message')}
+                confirmText={t('modals.clear_wall.confirm_btn')}
                 type="danger"
             />
 
             {/* Bottom Tip Overlay (Conditional) */}
             <div className="p-4 bg-zinc-50 dark:bg-zinc-800/20 border-t border-zinc-100 dark:border-zinc-800 shrink-0">
                 <p className="text-[9px] text-zinc-400 text-center uppercase tracking-widest leading-relaxed">
-                    Clique nos blocos do mural para <br /> girar ou deletar
+                    {t('sidebar.bottom_tip')}
                 </p>
             </div>
         </aside>

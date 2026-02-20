@@ -8,8 +8,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { BackgroundEffect } from "@/components/effects/background-effect"
 import { Fingerprint, ShieldEllipsis } from "lucide-react"
+import { useTranslation } from "@/i18n/context"
+import { LanguageSwitcher } from "@/components/dashboard/language-switcher"
 
 export default function LoginForm() {
+    const { t } = useTranslation()
     const [error, setError] = useState<string | undefined>("")
     const [loading, setLoading] = useState(false)
     const router = useRouter()
@@ -31,13 +34,13 @@ export default function LoginForm() {
             })
 
             if (res?.error) {
-                setError("Protocol Access Denied: Invalid Credentials")
+                setError(t('auth.login.protocol_denied'))
                 setLoading(false)
             } else {
                 router.push("/dashboard")
             }
         } catch (err) {
-            setError("System Error: Protocol Connection Failed")
+            setError(t('auth.login.protocol_error'))
             setLoading(false)
         }
     }
@@ -51,15 +54,18 @@ export default function LoginForm() {
             {/* Technical Header */}
             <nav className="relative z-50 flex items-center justify-between px-6 py-6 md:px-12 border-b border-zinc-100 flex-shrink-0">
                 <div className="flex flex-col">
-                    <span className="text-[7px] font-black uppercase tracking-[0.5em] opacity-30 leading-none mb-1">Authorization Protocol</span>
+                    <span className="text-[7px] font-black uppercase tracking-[0.5em] opacity-30 leading-none mb-1">{t('auth.login.auth_protocol')}</span>
                     <div className="text-2xl font-black tracking-tighter uppercase italic">MoodSpace</div>
                 </div>
-                <Link href="/">
-                    <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest gap-2">
-                        <ShieldEllipsis className="w-3 h-3" />
-                        Abort Session
-                    </Button>
-                </Link>
+                <div className="flex items-center gap-6">
+                    <LanguageSwitcher />
+                    <Link href="/">
+                        <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest gap-2">
+                            <ShieldEllipsis className="w-3 h-3" />
+                            {t('auth.login.abort')}
+                        </Button>
+                    </Link>
+                </div>
             </nav>
 
             {/* Login Protocol Form */}
@@ -68,9 +74,9 @@ export default function LoginForm() {
                     <div className="text-center space-y-4">
                         <div className="inline-flex items-center gap-3 px-4 py-1.5 border border-black/5 bg-zinc-50 rounded-full mb-2">
                             <Fingerprint className="w-3 h-3 opacity-40" />
-                            <span className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40">Identify Your Presence</span>
+                            <span className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40">{t('auth.login.identify_presence')}</span>
                         </div>
-                        <h1 className="text-6xl font-black tracking-tighter uppercase leading-none">Studio <br /><span className="italic text-zinc-300">Login</span></h1>
+                        <h1 className="text-5xl font-black tracking-tighter uppercase leading-none">{t('auth.login.title')} <br /><span className="italic text-zinc-300">{t('auth.login.title_italic')}</span></h1>
                     </div>
 
                     <div className="p-10 border border-zinc-200 bg-white relative">
@@ -82,22 +88,22 @@ export default function LoginForm() {
 
                         <form onSubmit={handleSubmit} className="space-y-8">
                             <div className="space-y-2">
-                                <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 ml-1">Identity URL (Email)</label>
+                                <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 ml-1">{t('auth.login.identity_url')}</label>
                                 <Input
                                     name="email"
                                     type="email"
-                                    placeholder="your@access.com"
+                                    placeholder={t('auth.login.placeholder_email')}
                                     className="h-12 rounded-none border-zinc-200 bg-zinc-50/50 shadow-none focus:ring-0 focus:border-black transition-all font-mono text-[10px]"
                                     required
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 ml-1">Access Key (Password)</label>
+                                <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 ml-1">{t('auth.login.access_key')}</label>
                                 <Input
                                     name="password"
                                     type="password"
-                                    placeholder="••••••••"
+                                    placeholder={t('auth.login.placeholder_password')}
                                     className="h-12 rounded-none border-zinc-200 bg-zinc-50/50 shadow-none focus:ring-0 focus:border-black transition-all font-mono text-[10px]"
                                     required
                                 />
@@ -114,22 +120,22 @@ export default function LoginForm() {
                                 className="w-full h-14 bg-black text-white rounded-none font-black uppercase tracking-[0.3em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all shadow-none"
                                 disabled={loading}
                             >
-                                {loading ? "Authorizing..." : "Initiate Access"}
+                                {loading ? t('auth.login.authorizing') : t('auth.login.initiate_access')}
                             </Button>
                         </form>
                     </div>
 
                     <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                        Unauthorized?{" "}
+                        {t('auth.login.unauthorized')}{" "}
                         <Link href="/auth/register" className="text-black hover:underline underline-offset-4">
-                            Establish Identity
+                            {t('auth.login.establish_identity')}
                         </Link>
                     </p>
                 </div>
             </main>
 
             <footer className="py-6 text-center text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-300 border-t border-zinc-100 flex-shrink-0">
-                Studio_Connection_Secure // TLS_v1.3
+                {t('auth.login.footer')}
             </footer>
         </div>
     )

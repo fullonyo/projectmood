@@ -17,6 +17,7 @@ import {
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useTranslation } from "@/i18n/context"
 
 const PLATFORMS = [
     { id: 'instagram', icon: Instagram, label: 'Instagram', color: '#E4405F' },
@@ -48,6 +49,7 @@ export function SocialLinksEditor({
     onUpdate?: (id: string, content: any) => void,
     highlight?: boolean
 }) {
+    const { t } = useTranslation()
     const [selectedPlatform, setSelectedPlatform] = useState(PLATFORMS[0])
     const [url, setUrl] = useState("")
     const [label, setLabel] = useState("")
@@ -131,12 +133,12 @@ export function SocialLinksEditor({
                 <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                     <Share2 className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Social_Connect_Protocol</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.social_links.title')}</h3>
             </div>
 
             <div className="space-y-6 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
                 <div className="p-5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
-                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">Entity_Identity_Nodes</p>
+                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">{t('editors.social_links.node_identity')}</p>
                     <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800">
                         {PLATFORMS.map((p) => (
                             <button
@@ -160,18 +162,18 @@ export function SocialLinksEditor({
 
                 <div className="p-5 space-y-4">
                     <div className="space-y-3">
-                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">Link_Protocol</p>
+                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.social_links.link_protocol')}</p>
                         <Input
-                            placeholder="HTTPS://SOURCE_URL..."
+                            placeholder="https://..."
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
                             className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] font-mono h-11 uppercase tracking-tight focus-visible:ring-0"
                         />
                     </div>
                     <div className="space-y-3">
-                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">Visual_Alias</p>
+                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.social_links.alias')}</p>
                         <Input
-                            placeholder="IDENTITY_LABEL..."
+                            placeholder="Ex: Meu Perfil"
                             value={label}
                             onChange={(e) => setLabel(e.target.value)}
                             className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] uppercase font-mono h-11 focus-visible:ring-0"
@@ -181,7 +183,7 @@ export function SocialLinksEditor({
 
                 <div className="p-5 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30 space-y-6">
                     <div className="space-y-3">
-                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">Style_Manifesto</p>
+                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.social_links.style')}</p>
                         <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                             {STYLES.map((s) => (
                                 <button
@@ -205,7 +207,7 @@ export function SocialLinksEditor({
                         disabled={isPending || !url}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
                     >
-                        Deploy_Link_Node
+                        {t('editors.social_links.deploy')}
                     </Button>
                 </div>
             </div>

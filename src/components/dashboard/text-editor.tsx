@@ -8,12 +8,13 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Type, Palette, AlignLeft, AlignCenter, AlignRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 const TEXT_STYLES = [
-    { id: 'simple', label: 'Simples', bg: 'bg-white dark:bg-zinc-900', border: 'border-zinc-100 dark:border-zinc-800' },
-    { id: 'postit', label: 'Post-it', bg: 'bg-[#ffff88]', border: 'border-yellow-200 shadow-yellow-200/50 text-zinc-900' },
-    { id: 'ripped', label: 'Rasgado', bg: 'bg-zinc-50 dark:bg-zinc-100 text-zinc-900', border: 'border-none' },
-    { id: 'typewriter', label: 'Máquina', bg: 'bg-transparent', border: 'border-zinc-200 dark:border-zinc-700 font-mono underline' },
+    { id: 'simple', bg: 'bg-white dark:bg-zinc-900', border: 'border-zinc-100 dark:border-zinc-800' },
+    { id: 'postit', bg: 'bg-[#ffff88]', border: 'border-yellow-200 shadow-yellow-200/50 text-zinc-900' },
+    { id: 'ripped', bg: 'bg-zinc-50 dark:bg-zinc-100 text-zinc-900', border: 'border-none' },
+    { id: 'typewriter', bg: 'bg-transparent', border: 'border-zinc-200 dark:border-zinc-700 font-mono underline' },
 ]
 
 const COLORS = [
@@ -29,6 +30,7 @@ export function TextEditor({
     onUpdate?: (id: string, content: any) => void,
     highlight?: boolean
 }) {
+    const { t } = useTranslation()
     const [text, setText] = useState("")
     const [selectedStyle, setSelectedStyle] = useState('simple')
     const [bgColor, setBgColor] = useState('#ffffff')
@@ -111,12 +113,12 @@ export function TextEditor({
                 <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                     <Type className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Textual_Protocol</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.text.title')}</h3>
             </div>
 
             <div className="border border-zinc-200 dark:border-zinc-800 space-y-4 p-0 bg-white dark:bg-zinc-950">
                 <Textarea
-                    placeholder="Input technical manifestation here..."
+                    placeholder={t('editors.text.placeholder')}
                     value={text}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
                     className="min-h-[140px] bg-transparent border-none rounded-none text-base font-mono resize-none placeholder:opacity-30 p-5 focus-visible:ring-0"
@@ -124,7 +126,7 @@ export function TextEditor({
 
                 <div className="space-y-6 p-5 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
                     <div className="space-y-3">
-                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Media_Substrate</Label>
+                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.text.substrate')}</Label>
                         <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar snap-x">
                             {TEXT_STYLES.map((s) => (
                                 <button
@@ -143,7 +145,10 @@ export function TextEditor({
                                             <div className="h-0.5 w-full bg-current opacity-20" />
                                         </div>
                                     </div>
-                                    <span className="text-[7px] font-black uppercase tracking-[0.2em]">{s.label}</span>
+                                    <span className="text-[7px] font-black uppercase tracking-[0.2em]">
+                                        {/* @ts-ignore */}
+                                        {t(`editors.text.styles.${s.id}`)}
+                                    </span>
                                 </button>
                             ))}
                         </div>
@@ -151,7 +156,7 @@ export function TextEditor({
 
                     <div className="space-y-6">
                         <div className="flex flex-col gap-3">
-                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Node_Color_Registry</Label>
+                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.text.node_color')}</Label>
                             <div className="flex flex-wrap gap-2 p-4 bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-900">
                                 {COLORS.map((c) => (
                                     <button
@@ -169,7 +174,7 @@ export function TextEditor({
 
                         <div className="grid grid-cols-2 gap-5">
                             <div className="space-y-3">
-                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Font_Scale</Label>
+                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.text.font_scale')}</Label>
                                 <div className="flex border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                                     {['sm', 'xl', '3xl'].map((s) => (
                                         <button
@@ -187,7 +192,7 @@ export function TextEditor({
                             </div>
 
                             <div className="space-y-3">
-                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Alignment_Node</Label>
+                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.text.alignment')}</Label>
                                 <div className="flex border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                                     <button onClick={() => setAlign("left")} className={cn("flex-1 h-10 flex items-center justify-center transition-all border-r border-zinc-100 dark:border-zinc-900", align === "left" ? "bg-black text-white dark:bg-white dark:text-black" : "bg-transparent text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900")}><AlignLeft className="w-3.5 h-3.5" /></button>
                                     <button onClick={() => setAlign("center")} className={cn("flex-1 h-10 flex items-center justify-center transition-all border-r border-zinc-100 dark:border-zinc-900", align === "center" ? "bg-black text-white dark:bg-white dark:text-black" : "bg-transparent text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900")}><AlignCenter className="w-3.5 h-3.5" /></button>
@@ -202,7 +207,7 @@ export function TextEditor({
                         disabled={isPending || !text.trim()}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
                     >
-                        Deploy_Manifest
+                        {t('editors.text.deploy')}
                     </Button>
                 </div>
             </div>

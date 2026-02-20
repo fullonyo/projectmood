@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { I18nProvider } from "@/i18n/context";
 
 import ReactDOM from "react-dom";
 
@@ -33,8 +34,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <Toaster position="bottom-center" richColors theme="system" />
+        <I18nProvider>
+          {children}
+          <Toaster position="bottom-center" richColors theme="system" />
+        </I18nProvider>
       </body>
     </html>
   );

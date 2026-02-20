@@ -8,6 +8,7 @@ import { X, Check, Eraser, Loader2, Paintbrush } from "lucide-react"
 import { addMoodBlock } from "@/actions/profile"
 import imageCompression from "browser-image-compression"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 const PRESET_COLORS = [
     '#000000', '#666666', '#FF0000', '#FF7F00', '#FFD700',
@@ -20,6 +21,7 @@ export function FullscreenDoodleOverlay() {
     const [isDrawing, setIsDrawing] = useState(false)
     const [isPending, startTransition] = useTransition()
     const [hasDrawn, setHasDrawn] = useState(false)
+    const { t } = useTranslation()
 
     useEffect(() => {
         const handleResize = () => {
@@ -265,7 +267,7 @@ export function FullscreenDoodleOverlay() {
                             onClick={clearCanvas}
                             disabled={isPending || !hasDrawn}
                             className="hover:bg-red-50 hover:text-red-500 rounded-xl h-10 w-10 text-zinc-500 transition-colors"
-                            title="Limpar Tela"
+                            title={t('doodle.clear_screen')}
                         >
                             <Eraser className="w-5 h-5" />
                         </Button>
@@ -295,21 +297,21 @@ export function FullscreenDoodleOverlay() {
                             "bg-black dark:bg-white text-white dark:text-black rounded-full h-12 px-8 font-black uppercase tracking-widest text-[11px] hover:scale-105 active:scale-95 transition-all shadow-xl",
                             (!hasDrawn || isPending) && "opacity-50 grayscale"
                         )}
-                        title="Salvar Desenho"
+                        title={t('doodle.confirm_save')}
                     >
                         {isPending ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         ) : (
                             <Check className="w-5 h-5 mr-2" />
                         )}
-                        {isPending ? "Manifesting..." : "Finalizar & Salvar Traçado"}
+                        {isPending ? t('doodle.manifesting') : t('doodle.confirm_save')}
                     </Button>
                 </motion.div>
             </div>
 
             {/* Guide Text */}
             <p className="absolute top-10 left-1/2 -translate-x-1/2 text-center text-[10px] font-black uppercase tracking-[0.4em] text-black/50 dark:text-white/50 bg-white/50 dark:bg-black/50 px-4 py-2 backdrop-blur-sm pointer-events-none">
-                Desenhe Diretamente na Tela
+                {t('doodle.kinetic_active')}
             </p>
         </motion.div>
     )

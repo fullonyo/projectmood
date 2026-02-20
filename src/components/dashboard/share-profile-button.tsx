@@ -4,12 +4,14 @@ import { useState } from "react"
 import { QRCodeSVG } from "qrcode.react"
 import { Button } from "@/components/ui/button"
 import { ExternalLink, Copy, Download, QrCode } from "lucide-react"
+import { useTranslation } from "@/i18n/context"
 
 interface ShareProfileButtonProps {
     username: string
 }
 
 export function ShareProfileButton({ username }: ShareProfileButtonProps) {
+    const { t } = useTranslation()
     const [showQR, setShowQR] = useState(false)
     const [copied, setCopied] = useState(false)
 
@@ -63,12 +65,12 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
                     {copied ? (
                         <>
                             <Copy className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white" />
-                            // Copied
+                            {t('editors.share.copied')}
                         </>
                     ) : (
                         <>
                             <Copy className="w-3.5 h-3.5" />
-                            Share Link
+                            {t('editors.share.link')}
                         </>
                     )}
                 </Button>
@@ -80,7 +82,7 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
                     className="h-10 rounded-none border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-[0.2em] px-4 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                 >
                     <QrCode className="w-3.5 h-3.5" />
-                    QR CODE
+                    {t('editors.share.qr_code')}
                 </Button>
             </div>
 
@@ -110,7 +112,7 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
                                 className="w-full h-12 bg-black dark:bg-white text-white dark:text-black rounded-none text-[10px] font-black uppercase tracking-[0.3em] hover:scale-[1.02] active:scale-95 transition-all"
                             >
                                 <Download className="w-3.5 h-3.5 mr-2" />
-                                Save Protocol QR
+                                {t('editors.share.save_qr')}
                             </Button>
                         </div>
                     </div>

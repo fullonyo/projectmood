@@ -11,6 +11,7 @@ const textures = [
     { id: 'fine-sand', name: 'Areia Fina', icon: Feather },
 ]
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 interface ThemeEditorProps {
     currentTheme: string
@@ -32,6 +33,7 @@ const GOOGLE_FONTS = [
 ]
 
 export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyle, currentCustomFont, onUpdate }: ThemeEditorProps) {
+    const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
 
     const handleUpdate = (data: any) => {
@@ -49,17 +51,17 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                     <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                         <Palette className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Vibe Protocols</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.theme.title')}</h3>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-4 pt-2 -mx-1 px-1 custom-scrollbar snap-x">
                     {[
-                        { id: 'light', label: 'Classic', colors: 'bg-white border-zinc-200' },
-                        { id: 'dark', label: 'Midnight', colors: 'bg-zinc-900 border-zinc-800' },
-                        { id: 'vintage', label: 'Vintage', colors: 'bg-[#f4ead5] border-[#d3c4a1]', data: { theme: 'vintage', backgroundColor: '#f4ead5', primaryColor: '#5d4037' } },
-                        { id: 'notebook', label: 'Notebook', colors: 'bg-[#fafafa] border-blue-100', data: { theme: 'notebook', backgroundColor: '#fafafa', primaryColor: '#1e3a8a' } },
-                        { id: 'blueprint', label: 'Blueprint', colors: 'bg-[#1a3a5f] border-[#2d5a8e]', data: { theme: 'blueprint', backgroundColor: '#1a3a5f', primaryColor: '#ffffff' } },
-                        { id: 'canvas', label: 'Canvas', colors: 'bg-[#e7e5e4] border-[#d6d3d1]', data: { theme: 'canvas', backgroundColor: '#e7e5e4', primaryColor: '#44403c' } },
-                        { id: 'cyberpunk', label: 'Cyberpunk', colors: 'bg-black border-pink-500/30', data: { theme: 'cyberpunk', backgroundColor: '#000000', primaryColor: '#ff00ff' } },
+                        { id: 'light', label: t('editors.theme.light'), colors: 'bg-white border-zinc-200' },
+                        { id: 'dark', label: t('editors.theme.dark'), colors: 'bg-zinc-900 border-zinc-800' },
+                        { id: 'vintage', label: t('editors.theme.vintage'), colors: 'bg-[#f4ead5] border-[#d3c4a1]', data: { theme: 'vintage', backgroundColor: '#f4ead5', primaryColor: '#5d4037' } },
+                        { id: 'notebook', label: t('editors.theme.notebook'), colors: 'bg-[#fafafa] border-blue-100', data: { theme: 'notebook', backgroundColor: '#fafafa', primaryColor: '#1e3a8a' } },
+                        { id: 'blueprint', label: t('editors.theme.blueprint'), colors: 'bg-[#1a3a5f] border-[#2d5a8e]', data: { theme: 'blueprint', backgroundColor: '#1a3a5f', primaryColor: '#ffffff' } },
+                        { id: 'canvas', label: t('editors.theme.canvas'), colors: 'bg-[#e7e5e4] border-[#d6d3d1]', data: { theme: 'canvas', backgroundColor: '#e7e5e4', primaryColor: '#44403c' } },
+                        { id: 'cyberpunk', label: t('editors.theme.cyberpunk'), colors: 'bg-black border-pink-500/30', data: { theme: 'cyberpunk', backgroundColor: '#000000', primaryColor: '#ff00ff' } },
                     ].map((vibe) => (
                         <button
                             key={vibe.id}
@@ -84,9 +86,9 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                     <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                         <MousePointer2 className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Node_Luminance</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.theme.node_luminance')}</h3>
                 </div>
-                <p className="text-[8px] text-zinc-400 uppercase tracking-widest leading-tight">Define visual intensity for core nodes.</p>
+                <p className="text-[8px] text-zinc-400 uppercase tracking-widest leading-tight">{t('editors.theme.luminance_desc')}</p>
                 <div className="flex flex-wrap gap-2">
                     {['#000000', '#FFFFFF', '#666666', '#FF0000', '#22C55E', '#3B82F6'].map(color => (
                         <button
@@ -110,7 +112,7 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                     <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                         <Type className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Atomic_Typography</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.theme.atomic_typography')}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                     {GOOGLE_FONTS.map(font => (
@@ -134,7 +136,7 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                     <div className="p-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
                         <Type className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
                     </div>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Base System</h3>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">{t('editors.theme.base_system')}</h3>
                 </div>
                 <div className="grid grid-cols-3 border border-zinc-200 dark:border-zinc-800">
                     {[

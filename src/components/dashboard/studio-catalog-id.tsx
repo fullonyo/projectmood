@@ -2,6 +2,7 @@
 
 import { useMemo } from "react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 interface StudioCatalogIDProps {
     profileId: string
@@ -10,6 +11,8 @@ interface StudioCatalogIDProps {
 }
 
 export function StudioCatalogID({ profileId, createdAt, views = 0 }: StudioCatalogIDProps) {
+    const { t } = useTranslation()
+
     const catalogNumber = useMemo(() => {
         const date = createdAt ? new Date(createdAt) : new Date()
         const year = date.getFullYear().toString().slice(-2)
@@ -30,7 +33,7 @@ export function StudioCatalogID({ profileId, createdAt, views = 0 }: StudioCatal
         <div className="fixed top-10 right-10 z-[60] mix-blend-difference pointer-events-none group">
             <div className="flex flex-col items-end">
                 <span className="text-[7px] font-black uppercase tracking-[0.5em] opacity-30 group-hover:opacity-100 transition-opacity">
-                    Authorized Studio Edition
+                    {t('public_page.catalog.title')}
                 </span>
                 <div className="flex items-center gap-3">
                     <div className="h-[1px] w-8 bg-current opacity-20" />

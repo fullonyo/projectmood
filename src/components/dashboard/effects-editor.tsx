@@ -31,8 +31,10 @@ import {
 interface EffectsEditorProps {
     profile: any
 }
+import { useTranslation } from "@/i18n/context"
 
 export function EffectsEditor({ profile }: EffectsEditorProps) {
+    const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
     const [showSuccess, setShowSuccess] = useState(false)
 
@@ -86,7 +88,7 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                     <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                         <MousePointer2 className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Cursor_Node</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.effects.cursor_title')}</h3>
                 </div>
                 <div className="grid grid-cols-3 border border-zinc-200 dark:border-zinc-800">
                     {cursors.map((c) => (
@@ -113,7 +115,7 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                     <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                         <Sparkles className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Interaction_Trails</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.effects.trails_title')}</h3>
                 </div>
                 <div className="grid grid-cols-2 border border-zinc-200 dark:border-zinc-800">
                     {trails.map((t) => (
@@ -140,7 +142,7 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                     <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                         <Wallpaper className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Atmosphere_Registry</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.effects.atmosphere_title')}</h3>
                 </div>
                 <div className="grid grid-cols-1 border border-zinc-200 dark:border-zinc-800">
                     {backgrounds.map((b) => {
@@ -167,7 +169,7 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                                 {isSelected && (
                                     <div className="flex items-center gap-1.5 z-10">
                                         <div className="w-1.5 h-1.5 bg-current animate-pulse" />
-                                        <span className="text-[7px] font-mono opacity-50 uppercase tracking-tighter">Active Protocol</span>
+                                        <span className="text-[7px] font-mono opacity-50 uppercase tracking-tighter">{t('editors.effects.active')}</span>
                                     </div>
                                 )}
                             </button>
@@ -180,14 +182,14 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                 {isPending && (
                     <div className="flex items-center justify-center gap-2 text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 animate-pulse">
                         <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                        Synchronizing_Protocol
+                        {t('editors.effects.syncing')}
                     </div>
                 )}
 
                 {showSuccess && !isPending && (
                     <div className="flex items-center justify-center gap-2 text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500">
                         <Check className="w-2.5 h-2.5" />
-                        Protocol_Deployed
+                        {t('editors.effects.deployed')}
                     </div>
                 )}
             </div>

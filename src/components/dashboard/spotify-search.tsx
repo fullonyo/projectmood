@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, Music, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 export function SpotifySearch() {
+    const { t } = useTranslation()
     const [query, setQuery] = useState("")
     const [results, setResults] = useState<any[]>([])
     const [error, setError] = useState<string | null>(null)
@@ -50,7 +52,7 @@ export function SpotifySearch() {
                 <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                     <Music className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Audio_Node_Source</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.spotify.title')}</h3>
             </div>
             <div className="space-y-4 p-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                 <div className="relative group">
@@ -58,7 +60,7 @@ export function SpotifySearch() {
                         <Search className="w-3.5 h-3.5 text-zinc-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" />
                     </div>
                     <Input
-                        placeholder="SEARCH_PROTOCOL // Query audio database..."
+                        placeholder={t('editors.spotify.search_placeholder')}
                         value={query}
                         onChange={(e) => {
                             setQuery(e.target.value)
@@ -77,20 +79,20 @@ export function SpotifySearch() {
                     isLoading={isLoading}
                     className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                 >
-                    Manifest_Search
+                    {t('editors.spotify.search_btn')}
                 </Button>
             </div>
 
             {error && (
                 <p className="text-[8px] text-red-500 font-black uppercase tracking-widest animate-in fade-in slide-in-from-top-1 px-1">
-                    SEARCH_ERROR // {error}
+                    {t('editors.spotify.error')} // {error}
                 </p>
             )}
 
             {results.length > 0 && (
                 <div className="mt-4 space-y-0 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950 max-h-72 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-bottom-4 duration-500 divide-y divide-zinc-100 dark:divide-zinc-900">
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-900/30 sticky top-0 z-20 border-b border-zinc-100 dark:border-zinc-900">
-                        <p className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-400">Audio_Registry_Results</p>
+                        <p className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.spotify.results')}</p>
                     </div>
                     {results.map((track) => (
                         <button
@@ -102,7 +104,7 @@ export function SpotifySearch() {
                             <img src={track.albumArt} alt={track.name} className="w-10 h-10 border border-zinc-200 dark:border-zinc-800 grayscale group-hover:grayscale-0 transition-all duration-500" />
                             <div className="overflow-hidden flex-1">
                                 <p className="text-[9px] font-black uppercase truncate leading-none mb-1 text-black dark:text-white group-hover:text-current">{track.name}</p>
-                                <p className="text-[7px] text-zinc-400 font-bold uppercase tracking-widest truncate group-hover:text-current opacity-60">Source // {track.artist}</p>
+                                <p className="text-[7px] text-zinc-400 font-bold uppercase tracking-widest truncate group-hover:text-current opacity-60">{t('editors.spotify.source')} // {track.artist}</p>
                             </div>
                             <div className="flex items-center justify-center w-6 h-6 border border-current opacity-0 group-hover:opacity-100 transition-all">
                                 <Plus className="w-3 h-3" />

@@ -7,12 +7,14 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Quote as QuoteIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 interface QuoteEditorProps {
     onAdd: (content: any) => void
 }
 
 export function QuoteEditor({ onAdd }: QuoteEditorProps) {
+    const { t } = useTranslation()
     const [text, setText] = useState("")
     const [author, setAuthor] = useState("")
     const [style, setStyle] = useState<'minimal' | 'bold' | 'serif' | 'modern'>('minimal')
@@ -47,17 +49,17 @@ export function QuoteEditor({ onAdd }: QuoteEditorProps) {
                 <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                     <QuoteIcon className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Quote_Manifest_Protocol</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.quote.title')}</h3>
             </div>
 
             <div className="space-y-6 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
                 <div className="p-5 space-y-4">
                     <div className="space-y-3">
-                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Identify_Manifest_Buffer</Label>
+                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.quote.label_text')}</Label>
                         <Textarea
                             value={text}
                             onChange={(e) => setText(e.target.value)}
-                            placeholder="INPUT_TEXTUAL_DOMAIN..."
+                            placeholder={t('editors.quote.placeholder')}
                             className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none min-h-[120px] text-[10px] uppercase font-mono tracking-tight focus-visible:ring-0 resize-none p-4"
                             maxLength={500}
                         />
@@ -67,11 +69,11 @@ export function QuoteEditor({ onAdd }: QuoteEditorProps) {
                     </div>
 
                     <div className="space-y-3">
-                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Attribution_Source_Node</Label>
+                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.quote.label_author')}</Label>
                         <Input
                             value={author}
                             onChange={(e) => setAuthor(e.target.value)}
-                            placeholder="INPUT_SOURCE_IDENTITY..."
+                            placeholder={t('editors.quote.author')}
                             maxLength={100}
                             className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none h-11 text-[10px] font-mono tracking-tight focus-visible:ring-0 uppercase"
                         />
@@ -79,7 +81,7 @@ export function QuoteEditor({ onAdd }: QuoteEditorProps) {
                 </div>
 
                 <div className="p-5 border-y border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
-                    <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-4 block text-center">Styling_Identity_Matrix</Label>
+                    <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-4 block text-center">{t('editors.quote.style_title')}</Label>
                     <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                         {[
                             { id: 'minimal', label: 'Neutral' },
@@ -106,7 +108,7 @@ export function QuoteEditor({ onAdd }: QuoteEditorProps) {
                 <div className="p-5 space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-3">
-                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Chrome_Content</Label>
+                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.quote.color_text')}</Label>
                             <div className="flex gap-2 p-1 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                                 <input
                                     type="color"
@@ -123,7 +125,7 @@ export function QuoteEditor({ onAdd }: QuoteEditorProps) {
                         </div>
 
                         <div className="space-y-3">
-                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Chrome_Substrate</Label>
+                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.quote.color_bg')}</Label>
                             <div className="flex gap-2 p-1 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                                 <input
                                     type="color"
@@ -149,7 +151,7 @@ export function QuoteEditor({ onAdd }: QuoteEditorProps) {
                             className="w-3.5 h-3.5 border border-zinc-300 rounded-none accent-black dark:accent-white"
                         />
                         <Label htmlFor="showQuotes" className="text-[8px] font-black uppercase tracking-[0.2em] cursor-pointer text-zinc-500">
-                            Manifest_Decorative_Quotes
+                            {t('editors.quote.show_quotes')}
                         </Label>
                     </div>
 
@@ -158,7 +160,7 @@ export function QuoteEditor({ onAdd }: QuoteEditorProps) {
                         disabled={!text.trim()}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                     >
-                        Deploy_Quote_Manifest
+                        {t('editors.quote.deploy')}
                     </Button>
                 </div>
             </div>
