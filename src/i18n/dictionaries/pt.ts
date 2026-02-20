@@ -13,14 +13,10 @@ export const pt = {
         header_title: "Diorama",
         discard_changes: "Esquecer",
         tabs: {
-            style: "Estilo",
-            style_desc: "Luz e Cor",
-            writing: "Escrita",
-            writing_desc: "Textos",
-            media: "Mídia",
-            media_desc: "Conteúdo",
-            art: "Criativo",
-            art_desc: "Assets",
+            elements: "Elementos",
+            elements_desc: "Adicionar notas, fotos e memórias físicas.",
+            room: "Quarto",
+            room_desc: "Luzes, cores e efeitos.",
         },
         style: {
             atmosphere_title: "Atmosfera base",

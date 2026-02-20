@@ -13,14 +13,10 @@ export const en: Dictionary = {
         header_title: "Diorama",
         discard_changes: "Forget",
         tabs: {
-            style: "Style",
-            style_desc: "Light and Color",
-            writing: "Writing",
-            writing_desc: "Texts",
-            media: "Media",
-            media_desc: "Content",
-            art: "Creative",
-            art_desc: "Assets",
+            elements: "Elements",
+            elements_desc: "Add notes, photos and physical memories.",
+            room: "Room",
+            room_desc: "Lights, colors and effects.",
         },
         style: {
             atmosphere_title: "Base atmosphere",

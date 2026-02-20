@@ -49,25 +49,36 @@ export function DashboardSidebar({
 }) {
     const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState<TopLevelTab>('elements')
+    const [draftBlockType, setDraftBlockType] = useState<string | null>(null)
     const [showClearConfirm, setShowClearConfirm] = useState(false)
     const [isClearing, setIsClearing] = useState(false)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     const handleAddBlock = async (type: string) => {
-        let defaultContent = {}
-        // Criar conteúdo inicial dependendo do tipo para instanciar rápido
-        if (type === 'text') defaultContent = { text: "" }
-        if (type === 'phrase') defaultContent = { text: "", style: 'vhs' }
-        if (type === 'moodStatus') defaultContent = { status: '' }
-        if (type === 'countdown') defaultContent = { title: '', date: '' }
+        // Se for texto ou media que possuem "onUpdate", a gente pode
+        // instanciar neles mesmos pois eles salvam no banco a cada tecla.
+        // Mas para editores como Quote, Photo, Countdown que usam
+        // o botão "Salvar/Colar", setamos apenas o DRAFT para renderizar
+        // o formulário deles na aba inspector.
+        const requiresDraft = ['quote', 'photo', 'guestbook', 'moodStatus', 'countdown', 'video', 'music', 'gif', 'doodle', 'weather', 'media', 'social']
 
-        const result = await addMoodBlock(type, defaultContent, {
-            x: Math.random() * 40 + 30, // Centro aproximado
-            y: Math.random() * 40 + 30
-        })
+        if (requiresDraft.includes(type)) {
+            setDraftBlockType(type)
+            setSelectedId(null) // des-selecionar quaquer bloco real
+        } else {
+            let defaultContent = {}
+            if (type === 'text') defaultContent = { text: "" }
+            if (type === 'phrase') defaultContent = { text: "", style: 'vhs' }
 
-        if (result?.success && result?.block?.id) {
-            setSelectedId(result.block.id)
+            const result = await addMoodBlock(type, defaultContent, {
+                x: Math.random() * 40 + 30,
+                y: Math.random() * 40 + 30
+            })
+
+            if (result?.success && result?.block?.id) {
+                setSelectedId(result.block.id)
+                setDraftBlockType(null)
+            }
         }
     }
 
@@ -125,6 +136,7 @@ export function DashboardSidebar({
                         onClick={() => {
                             setActiveTab(tab.id as TopLevelTab)
                             setSelectedId(null) // Reset selection when changing tabs
+                            setDraftBlockType(null)
                         }}
                         className={cn(
                             "flex flex-col items-center justify-center py-4 transition-all relative group",
@@ -159,13 +171,16 @@ export function DashboardSidebar({
 
                 {activeTab === 'elements' && (
                     <>
-                        {!selectedBlock ? (
+                        {!selectedBlock && !draftBlockType ? (
                             <BlockLibrary onAddBlock={handleAddBlock} />
                         ) : (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
                                 <Button
                                     variant="ghost"
-                                    onClick={() => setSelectedId(null)}
+                                    onClick={() => {
+                                        setSelectedId(null)
+                                        setDraftBlockType(null)
+                                    }}
                                     className="w-full justify-start h-10 px-0 hover:bg-transparent hover:opacity-70 transition-opacity text-zinc-500 rounded-none mb-6 relative group"
                                 >
                                     <div className="w-6 h-6 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center mr-3 group-hover:-translate-x-1 transition-transform bg-white dark:bg-zinc-950">
@@ -174,47 +189,62 @@ export function DashboardSidebar({
                                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black dark:text-white">{t('sidebar.library.inspector_back')}</span>
                                 </Button>
 
-                                {/* Inspector Condicional */}
-                                {selectedBlock.type === 'text' && (
-                                    <TextEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                                {/* Inspector Condicional (Bloco Real Selecionado) */}
+                                {selectedBlock && (
+                                    <>
+                                        {selectedBlock.type === 'text' && (
+                                            <TextEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                                        )}
+                                        {['ticker', 'subtitle', 'floating'].includes(selectedBlock.type) && (
+                                            <PhraseEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                                        )}
+                                        {selectedBlock.type === 'social' && (
+                                            <SocialLinksEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                                        )}
+                                    </>
                                 )}
-                                {['ticker', 'subtitle', 'floating'].includes(selectedBlock.type) && (
-                                    <PhraseEditor block={selectedBlock} onUpdate={onUpdateBlock} />
-                                )}
-                                {selectedBlock.type === 'quote' && (
+
+                                {/* Inspector Condicional (Modo Draft / Criação) */}
+                                {(draftBlockType || '') === 'quote' && (
                                     <QuoteEditor
-                                        onAdd={() => { }} // It's already added, we'd need to adapt QuoteEditor for update in the future, simulating for now
+                                        onAdd={async (content) => {
+                                            const result = await addMoodBlock('quote', content, { x: 40, y: 40 })
+                                            if (result?.success) setDraftBlockType(null)
+                                        }}
                                     />
                                 )}
-                                {selectedBlock.type === 'video' && (
-                                    <YoutubeEditor />
+                                {(draftBlockType || '') === 'video' && <YoutubeEditor />}
+                                {(draftBlockType || '') === 'music' && <SpotifySearch />}
+                                {(draftBlockType || '') === 'photo' && (
+                                    <PhotoEditor onAdd={async (content) => {
+                                        const result = await addMoodBlock('photo', content, { x: 40, y: 40, width: 300, height: 300 })
+                                        if (result?.success) setDraftBlockType(null)
+                                    }} />
                                 )}
-                                {selectedBlock.type === 'music' && (
-                                    <SpotifySearch />
+                                {(draftBlockType || '') === 'gif' && <GifPicker />}
+                                {(draftBlockType || '') === 'guestbook' && <GuestbookEditor />}
+                                {['tape', 'weather', 'media'].includes(draftBlockType || '') && <ArtTools />}
+                                {(draftBlockType || '') === 'doodle' && <DoodlePad />}
+                                {(draftBlockType || '') === 'moodStatus' && (
+                                    <MoodStatusEditor onAdd={async (content) => {
+                                        const result = await addMoodBlock('moodStatus', content, { x: 40, y: 40 })
+                                        if (result?.success) setDraftBlockType(null)
+                                    }} />
                                 )}
-                                {selectedBlock.type === 'photo' && (
-                                    <PhotoEditor onAdd={() => { }} />
+                                {(draftBlockType || '') === 'countdown' && (
+                                    <CountdownEditor onAdd={async (content) => {
+                                        const result = await addMoodBlock('countdown', content, { x: 40, y: 40 })
+                                        if (result?.success) setDraftBlockType(null)
+                                    }} />
                                 )}
-                                {selectedBlock.type === 'gif' && (
-                                    <GifPicker />
-                                )}
-                                {selectedBlock.type === 'guestbook' && (
-                                    <GuestbookEditor />
-                                )}
-                                {['tape', 'weather', 'media'].includes(selectedBlock.type) && (
-                                    <ArtTools />
-                                )}
-                                {selectedBlock.type === 'doodle' && (
-                                    <DoodlePad />
-                                )}
-                                {selectedBlock.type === 'social' && (
-                                    <SocialLinksEditor block={selectedBlock} onUpdate={onUpdateBlock} />
-                                )}
-                                {selectedBlock.type === 'moodStatus' && (
-                                    <MoodStatusEditor onAdd={() => { }} />
-                                )}
-                                {selectedBlock.type === 'countdown' && (
-                                    <CountdownEditor onAdd={() => { }} />
+                                {(draftBlockType || '') === 'social' && (
+                                    <SocialLinksEditor
+                                        block={{ content: {} } as any} // Block falso
+                                        onUpdate={async (_, content) => {
+                                            const result = await addMoodBlock('social', content, { x: 40, y: 40 })
+                                            if (result?.success) setDraftBlockType(null)
+                                        }}
+                                    />
                                 )}
                             </div>
                         )}
