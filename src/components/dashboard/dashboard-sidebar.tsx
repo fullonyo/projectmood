@@ -202,35 +202,41 @@ export function DashboardSidebar({
                                 )}
                                 {((selectedBlock?.type || draftBlockType) === 'quote') && (
                                     <QuoteEditor
-                                        onAdd={selectedBlock ? () => { } : async (content) => {
+                                        key={selectedBlock?.id || 'draft-quote'}
+                                        block={selectedBlock}
+                                        onAdd={selectedBlock ? undefined : async (content) => {
                                             const result = await addMoodBlock('quote', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
                                     />
                                 )}
-                                {((selectedBlock?.type || draftBlockType) === 'video') && <YoutubeEditor />}
-                                {((selectedBlock?.type || draftBlockType) === 'music') && <SpotifySearch />}
+                                {((selectedBlock?.type || draftBlockType) === 'video') && <YoutubeEditor key={selectedBlock?.id || 'draft-video'} />}
+                                {((selectedBlock?.type || draftBlockType) === 'music') && <SpotifySearch key={selectedBlock?.id || 'draft-music'} />}
                                 {((selectedBlock?.type || draftBlockType) === 'photo') && (
-                                    <PhotoEditor onAdd={selectedBlock ? () => { } : async (content) => {
+                                    <PhotoEditor key={selectedBlock?.id || 'draft-photo'} onAdd={selectedBlock ? undefined : async (content) => {
                                         const result = await addMoodBlock('photo', content, { x: 40, y: 40, width: 300, height: 300 })
                                         if (result?.success) setDraftBlockType(null)
                                     }} />
                                 )}
-                                {((selectedBlock?.type || draftBlockType) === 'gif') && <GifPicker />}
-                                {((selectedBlock?.type || draftBlockType) === 'guestbook') && <GuestbookEditor />}
-                                {['tape', 'weather', 'media'].includes(selectedBlock?.type || draftBlockType || '') && <ArtTools />}
-                                {((selectedBlock?.type || draftBlockType) === 'doodle') && <DoodlePad />}
+                                {((selectedBlock?.type || draftBlockType) === 'gif') && <GifPicker key={selectedBlock?.id || 'draft-gif'} />}
+                                {((selectedBlock?.type || draftBlockType) === 'guestbook') && <GuestbookEditor key={selectedBlock?.id || 'draft-guestbook'} />}
+                                {['tape', 'weather', 'media'].includes(selectedBlock?.type || draftBlockType || '') && <ArtTools key={selectedBlock?.id || 'draft-art'} />}
+                                {((selectedBlock?.type || draftBlockType) === 'doodle') && <DoodlePad key={selectedBlock?.id || 'draft-doodle'} />}
                                 {((selectedBlock?.type || draftBlockType) === 'moodStatus') && (
-                                    <MoodStatusEditor onAdd={selectedBlock ? () => { } : async (content) => {
+                                    <MoodStatusEditor key={selectedBlock?.id || 'draft-mood'} onAdd={selectedBlock ? undefined : async (content) => {
                                         const result = await addMoodBlock('moodStatus', content, { x: 40, y: 40 })
                                         if (result?.success) setDraftBlockType(null)
                                     }} />
                                 )}
                                 {((selectedBlock?.type || draftBlockType) === 'countdown') && (
-                                    <CountdownEditor onAdd={selectedBlock ? () => { } : async (content) => {
-                                        const result = await addMoodBlock('countdown', content, { x: 40, y: 40 })
-                                        if (result?.success) setDraftBlockType(null)
-                                    }} />
+                                    <CountdownEditor
+                                        key={selectedBlock?.id || 'draft-countdown'}
+                                        block={selectedBlock}
+                                        onAdd={selectedBlock ? undefined : async (content) => {
+                                            const result = await addMoodBlock('countdown', content, { x: 40, y: 40 })
+                                            if (result?.success) setDraftBlockType(null)
+                                        }}
+                                    />
                                 )}
                             </div>
                         )}

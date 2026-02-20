@@ -9,38 +9,49 @@ import { Quote as QuoteIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
+import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+
 interface QuoteEditorProps {
-    onAdd: (content: any) => void
+    block?: any
+    onAdd?: (content: any) => Promise<void>
 }
 
-export function QuoteEditor({ onAdd }: QuoteEditorProps) {
+export function QuoteEditor({ block, onAdd }: QuoteEditorProps) {
     const { t } = useTranslation()
-    const [text, setText] = useState("")
-    const [author, setAuthor] = useState("")
-    const [style, setStyle] = useState<'minimal' | 'bold' | 'serif' | 'modern'>('minimal')
-    const [color, setColor] = useState("#000000")
-    const [bgColor, setBgColor] = useState("#ffffff")
-    const [showQuotes, setShowQuotes] = useState(true)
+    const defaultContent = block?.content || {}
+    const [text, setText] = useState(defaultContent.text || "")
+    const [author, setAuthor] = useState(defaultContent.author || "")
+    const [style, setStyle] = useState<'minimal' | 'bold' | 'serif' | 'modern'>(defaultContent.style || 'minimal')
+    const [color, setColor] = useState(defaultContent.color || "#000000")
+    const [bgColor, setBgColor] = useState(defaultContent.bgColor || "#ffffff")
+    const [showQuotes, setShowQuotes] = useState(defaultContent.showQuotes !== undefined ? defaultContent.showQuotes : true)
+    const [isPending, setIsPending] = useState(false)
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         if (!text.trim()) return
 
-        onAdd({
+        setIsPending(true)
+        const content = {
             text: text.trim(),
             author: author.trim() || undefined,
             style,
             color,
             bgColor,
             showQuotes
-        })
+        }
 
-        // Reset form
-        setText("")
-        setAuthor("")
-        setStyle('minimal')
-        setColor("#000000")
-        setBgColor("#ffffff")
-        setShowQuotes(true)
+        if (block?.id) {
+            await updateMoodBlockLayout(block.id, { content })
+        } else if (onAdd) {
+            await onAdd(content)
+            setText("")
+            setAuthor("")
+            setStyle('minimal')
+            setColor("#000000")
+            setBgColor("#ffffff")
+            setShowQuotes(true)
+        }
+        setIsPending(false)
     }
 
     return (
@@ -157,7 +168,7 @@ export function QuoteEditor({ onAdd }: QuoteEditorProps) {
 
                     <Button
                         onClick={handleAdd}
-                        disabled={!text.trim()}
+                        disabled={isPending || !text.trim()}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                     >
                         {t('editors.quote.deploy')}

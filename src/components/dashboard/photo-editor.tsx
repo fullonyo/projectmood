@@ -11,18 +11,23 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { toast } from "sonner"
 
+import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+
 interface PhotoEditorProps {
-    onAdd: (content: any) => void
+    block?: any
+    onAdd?: (content: any) => Promise<void>
 }
 
-export function PhotoEditor({ onAdd }: PhotoEditorProps) {
+export function PhotoEditor({ block, onAdd }: PhotoEditorProps) {
     const { t } = useTranslation()
-    const [imageUrl, setImageUrl] = useState<string>("")
-    const [alt, setAlt] = useState("")
-    const [caption, setCaption] = useState("")
-    const [filter, setFilter] = useState<'none' | 'vintage' | 'bw' | 'warm' | 'cool'>('none')
-    const [frame, setFrame] = useState<'none' | 'polaroid' | 'border' | 'shadow'>('none')
+    const defaultContent = block?.content || {}
+    const [imageUrl, setImageUrl] = useState<string>(defaultContent.imageUrl || "")
+    const [alt, setAlt] = useState(defaultContent.alt || "")
+    const [caption, setCaption] = useState(defaultContent.caption || "")
+    const [filter, setFilter] = useState<'none' | 'vintage' | 'bw' | 'warm' | 'cool'>(defaultContent.filter || 'none')
+    const [frame, setFrame] = useState<'none' | 'polaroid' | 'border' | 'shadow'>(defaultContent.frame || 'none')
     const [isUploading, setIsUploading] = useState(false)
+    const [isPending, setIsPending] = useState(false)
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         const file = acceptedFiles[0]
@@ -66,23 +71,29 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
         maxFiles: 1
     })
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         if (!imageUrl) return
 
-        onAdd({
+        setIsPending(true)
+        const content = {
             imageUrl,
             alt: alt || undefined,
             filter,
             frame,
             caption: caption || undefined
-        })
+        }
 
-        // Reset form
-        setImageUrl("")
-        setAlt("")
-        setCaption("")
-        setFilter('none')
-        setFrame('none')
+        if (block?.id) {
+            await updateMoodBlockLayout(block.id, { content })
+        } else if (onAdd) {
+            await onAdd(content)
+            setImageUrl("")
+            setAlt("")
+            setCaption("")
+            setFilter('none')
+            setFrame('none')
+        }
+        setIsPending(false)
     }
 
     const handleRemoveImage = () => {
@@ -247,6 +258,7 @@ export function PhotoEditor({ onAdd }: PhotoEditorProps) {
 
                         <Button
                             onClick={handleAdd}
+                            disabled={isPending || isUploading}
                             className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
                         >
                             {t('editors.photo.deploy')}

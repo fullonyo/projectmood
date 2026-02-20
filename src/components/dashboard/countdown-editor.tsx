@@ -19,32 +19,43 @@ const ICONS = [
     { name: 'PartyPopper', icon: PartyPopper },
 ]
 
+import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+
 interface CountdownEditorProps {
-    onAdd: (content: any) => void
+    block?: any
+    onAdd?: (content: any) => Promise<void>
 }
 
-export function CountdownEditor({ onAdd }: CountdownEditorProps) {
+export function CountdownEditor({ block, onAdd }: CountdownEditorProps) {
     const { t } = useTranslation()
-    const [title, setTitle] = useState("")
-    const [targetDate, setTargetDate] = useState("")
-    const [selectedIcon, setSelectedIcon] = useState("PartyPopper")
-    const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>('minimal')
+    const defaultContent = block?.content || {}
+    const [title, setTitle] = useState(defaultContent.title || "")
+    const [targetDate, setTargetDate] = useState(defaultContent.targetDate || "")
+    const [selectedIcon, setSelectedIcon] = useState(defaultContent.emoji || "PartyPopper")
+    const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>(defaultContent.style || 'minimal')
+    const [isPending, setIsPending] = useState(false)
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         if (!title.trim() || !targetDate) return
 
-        onAdd({
+        setIsPending(true)
+        const content = {
             title: title.trim(),
             targetDate,
             emoji: selectedIcon, // Mantendo o nome da prop por compatibilidade
             style
-        })
+        }
 
-        // Reset
-        setTitle("")
-        setTargetDate("")
-        setSelectedIcon("PartyPopper")
-        setStyle('minimal')
+        if (block?.id) {
+            await updateMoodBlockLayout(block.id, { content })
+        } else if (onAdd) {
+            await onAdd(content)
+            setTitle("")
+            setTargetDate("")
+            setSelectedIcon("PartyPopper")
+            setStyle('minimal')
+        }
+        setIsPending(false)
     }
 
     return (
@@ -130,7 +141,7 @@ export function CountdownEditor({ onAdd }: CountdownEditorProps) {
 
                     <Button
                         onClick={handleAdd}
-                        disabled={!title.trim() || !targetDate}
+                        disabled={isPending || !title.trim() || !targetDate}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                     >
                         {t('editors.countdown.deploy')}

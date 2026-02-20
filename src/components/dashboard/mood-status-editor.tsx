@@ -21,27 +21,38 @@ const ICONS = [
     { name: 'Ghost', icon: Ghost },
 ]
 
+import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
+
 interface MoodStatusEditorProps {
-    onAdd: (content: any) => void
+    block?: any
+    onAdd?: (content: any) => Promise<void>
 }
 
-export function MoodStatusEditor({ onAdd }: MoodStatusEditorProps) {
+export function MoodStatusEditor({ block, onAdd }: MoodStatusEditorProps) {
     const { t } = useTranslation()
-    const [selectedIcon, setSelectedIcon] = useState("Smile")
-    const [text, setText] = useState("")
+    const defaultContent = block?.content || {}
+    const [selectedIcon, setSelectedIcon] = useState(defaultContent.emoji || "Smile")
+    const [text, setText] = useState(defaultContent.text || "")
+    const [isPending, setIsPending] = useState(false)
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         if (!text.trim()) return
 
-        onAdd({
+        setIsPending(true)
+        const content = {
             emoji: selectedIcon, // Mantendo o nome da prop como 'emoji' para compatibilidade, mas enviando o nome do ícone
             text: text.trim(),
             timestamp: new Date().toISOString()
-        })
+        }
 
-        // Reset form
-        setText("")
-        setSelectedIcon("Smile")
+        if (block?.id) {
+            await updateMoodBlockLayout(block.id, { content })
+        } else if (onAdd) {
+            await onAdd(content)
+            setText("")
+            setSelectedIcon("Smile")
+        }
+        setIsPending(false)
     }
 
     return (
@@ -97,7 +108,7 @@ export function MoodStatusEditor({ onAdd }: MoodStatusEditorProps) {
 
                     <Button
                         onClick={handleAdd}
-                        disabled={!text.trim()}
+                        disabled={isPending || !text.trim()}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                     >
                         {t('editors.mood_status.deploy')}
