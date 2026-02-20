@@ -42,7 +42,7 @@ export function PhotoEditor({ block, onUpdate, onAdd }: PhotoEditorProps) {
             caption: caption || undefined
         }
 
-        onUpdate(block.id, content)
+        onUpdate(block.id, { content })
     }, [imageUrl, alt, caption, filter, frame, block?.id])
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {

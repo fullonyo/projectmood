@@ -79,7 +79,7 @@ export function SocialLinksEditor({
             style
         }
 
-        onUpdate(block.id, content)
+        onUpdate(block.id, { content })
     }, [selectedPlatform, url, label, style])
 
     // 3. Debounced Silent Save

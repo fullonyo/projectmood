@@ -46,7 +46,7 @@ export function MoodStatusEditor({ block, onUpdate, onAdd }: MoodStatusEditorPro
             timestamp: block.content?.timestamp || new Date().toISOString()
         }
 
-        onUpdate(block.id, content)
+        onUpdate(block.id, { content })
     }, [selectedIcon, text, block?.id])
 
     const handleAdd = async () => {

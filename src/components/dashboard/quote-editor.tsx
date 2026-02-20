@@ -41,7 +41,7 @@ export function QuoteEditor({ block, onUpdate, onAdd }: QuoteEditorProps) {
             showQuotes
         }
 
-        onUpdate(block.id, content)
+        onUpdate(block.id, { content })
     }, [text, author, style, color, bgColor, showQuotes, block?.id])
 
     const handleAdd = async () => {

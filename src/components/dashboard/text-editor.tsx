@@ -53,7 +53,7 @@ export function TextEditor({
             align
         }
 
-        onUpdate(block.id, content)
+        onUpdate(block.id, { content })
     }, [text, selectedStyle, bgColor, fontSize, align])
 
     // 3. Debounced Silent Save

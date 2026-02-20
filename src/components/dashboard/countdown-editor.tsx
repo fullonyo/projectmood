@@ -47,7 +47,7 @@ export function CountdownEditor({ block, onUpdate, onAdd }: CountdownEditorProps
             style
         }
 
-        onUpdate(block.id, content)
+        onUpdate(block.id, { content })
     }, [title, targetDate, selectedIcon, style, block?.id])
 
     const handleAdd = async () => {

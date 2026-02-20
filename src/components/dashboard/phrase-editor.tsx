@@ -86,7 +86,7 @@ export function PhraseEditor({
             cursorType: selectedType === 'subtitle' ? cursorType : undefined
         }
 
-        onUpdate(block.id, content)
+        onUpdate(block.id, { content })
     }, [text, textColor, bgColor, speed, direction, cursorType, activeStyle])
 
     // 3. Debounced Silent Save
