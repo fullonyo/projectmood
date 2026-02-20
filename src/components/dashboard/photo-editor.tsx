@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import imageCompression from 'browser-image-compression'
 import { Button } from "@/components/ui/button"
@@ -15,10 +15,11 @@ import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
 
 interface PhotoEditorProps {
     block?: any
+    onUpdate?: (id: string, content: any) => void
     onAdd?: (content: any) => Promise<void>
 }
 
-export function PhotoEditor({ block, onAdd }: PhotoEditorProps) {
+export function PhotoEditor({ block, onUpdate, onAdd }: PhotoEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [imageUrl, setImageUrl] = useState<string>(defaultContent.imageUrl || "")
@@ -28,6 +29,21 @@ export function PhotoEditor({ block, onAdd }: PhotoEditorProps) {
     const [frame, setFrame] = useState<'none' | 'polaroid' | 'border' | 'shadow'>(defaultContent.frame || 'none')
     const [isUploading, setIsUploading] = useState(false)
     const [isPending, setIsPending] = useState(false)
+
+    // 2. Real-time Preview
+    useEffect(() => {
+        if (!block?.id || !onUpdate) return
+
+        const content = {
+            imageUrl,
+            alt: alt || undefined,
+            filter,
+            frame,
+            caption: caption || undefined
+        }
+
+        onUpdate(block.id, content)
+    }, [imageUrl, alt, caption, filter, frame, block?.id])
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         const file = acceptedFiles[0]

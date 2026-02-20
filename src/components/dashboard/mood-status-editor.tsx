@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,15 +25,29 @@ import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
 
 interface MoodStatusEditorProps {
     block?: any
+    onUpdate?: (id: string, content: any) => void
     onAdd?: (content: any) => Promise<void>
 }
 
-export function MoodStatusEditor({ block, onAdd }: MoodStatusEditorProps) {
+export function MoodStatusEditor({ block, onUpdate, onAdd }: MoodStatusEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [selectedIcon, setSelectedIcon] = useState(defaultContent.emoji || "Smile")
     const [text, setText] = useState(defaultContent.text || "")
     const [isPending, setIsPending] = useState(false)
+
+    // 2. Real-time Preview
+    useEffect(() => {
+        if (!block?.id || !onUpdate) return
+
+        const content = {
+            emoji: selectedIcon,
+            text: text.trim(),
+            timestamp: block.content?.timestamp || new Date().toISOString()
+        }
+
+        onUpdate(block.id, content)
+    }, [selectedIcon, text, block?.id])
 
     const handleAdd = async () => {
         if (!text.trim()) return

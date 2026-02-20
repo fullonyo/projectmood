@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,10 +23,11 @@ import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
 
 interface CountdownEditorProps {
     block?: any
+    onUpdate?: (id: string, content: any) => void
     onAdd?: (content: any) => Promise<void>
 }
 
-export function CountdownEditor({ block, onAdd }: CountdownEditorProps) {
+export function CountdownEditor({ block, onUpdate, onAdd }: CountdownEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [title, setTitle] = useState(defaultContent.title || "")
@@ -34,6 +35,20 @@ export function CountdownEditor({ block, onAdd }: CountdownEditorProps) {
     const [selectedIcon, setSelectedIcon] = useState(defaultContent.emoji || "PartyPopper")
     const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>(defaultContent.style || 'minimal')
     const [isPending, setIsPending] = useState(false)
+
+    // 2. Real-time Preview
+    useEffect(() => {
+        if (!block?.id || !onUpdate) return
+
+        const content = {
+            title: title.trim(),
+            targetDate,
+            emoji: selectedIcon,
+            style
+        }
+
+        onUpdate(block.id, content)
+    }, [title, targetDate, selectedIcon, style, block?.id])
 
     const handleAdd = async () => {
         if (!title.trim() || !targetDate) return

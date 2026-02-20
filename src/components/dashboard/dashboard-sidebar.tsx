@@ -204,6 +204,7 @@ export function DashboardSidebar({
                                     <QuoteEditor
                                         key={selectedBlock?.id || 'draft-quote'}
                                         block={selectedBlock}
+                                        onUpdate={onUpdateBlock}
                                         onAdd={selectedBlock ? undefined : async (content) => {
                                             const result = await addMoodBlock('quote', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
@@ -213,7 +214,7 @@ export function DashboardSidebar({
                                 {((selectedBlock?.type || draftBlockType) === 'video') && <YoutubeEditor key={selectedBlock?.id || 'draft-video'} />}
                                 {((selectedBlock?.type || draftBlockType) === 'music') && <SpotifySearch key={selectedBlock?.id || 'draft-music'} />}
                                 {((selectedBlock?.type || draftBlockType) === 'photo') && (
-                                    <PhotoEditor key={selectedBlock?.id || 'draft-photo'} onAdd={selectedBlock ? undefined : async (content) => {
+                                    <PhotoEditor key={selectedBlock?.id || 'draft-photo'} block={selectedBlock} onUpdate={onUpdateBlock} onAdd={selectedBlock ? undefined : async (content) => {
                                         const result = await addMoodBlock('photo', content, { x: 40, y: 40, width: 300, height: 300 })
                                         if (result?.success) setDraftBlockType(null)
                                     }} />
@@ -223,7 +224,7 @@ export function DashboardSidebar({
                                 {['tape', 'weather', 'media'].includes(selectedBlock?.type || draftBlockType || '') && <ArtTools key={selectedBlock?.id || 'draft-art'} />}
                                 {((selectedBlock?.type || draftBlockType) === 'doodle') && <DoodlePad key={selectedBlock?.id || 'draft-doodle'} />}
                                 {((selectedBlock?.type || draftBlockType) === 'moodStatus') && (
-                                    <MoodStatusEditor key={selectedBlock?.id || 'draft-mood'} onAdd={selectedBlock ? undefined : async (content) => {
+                                    <MoodStatusEditor key={selectedBlock?.id || 'draft-mood'} block={selectedBlock} onUpdate={onUpdateBlock} onAdd={selectedBlock ? undefined : async (content) => {
                                         const result = await addMoodBlock('moodStatus', content, { x: 40, y: 40 })
                                         if (result?.success) setDraftBlockType(null)
                                     }} />
@@ -232,6 +233,7 @@ export function DashboardSidebar({
                                     <CountdownEditor
                                         key={selectedBlock?.id || 'draft-countdown'}
                                         block={selectedBlock}
+                                        onUpdate={onUpdateBlock}
                                         onAdd={selectedBlock ? undefined : async (content) => {
                                             const result = await addMoodBlock('countdown', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)

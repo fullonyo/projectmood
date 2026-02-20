@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,10 +13,11 @@ import { addMoodBlock, updateMoodBlockLayout } from "@/actions/profile"
 
 interface QuoteEditorProps {
     block?: any
+    onUpdate?: (id: string, content: any) => void
     onAdd?: (content: any) => Promise<void>
 }
 
-export function QuoteEditor({ block, onAdd }: QuoteEditorProps) {
+export function QuoteEditor({ block, onUpdate, onAdd }: QuoteEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [text, setText] = useState(defaultContent.text || "")
@@ -26,6 +27,22 @@ export function QuoteEditor({ block, onAdd }: QuoteEditorProps) {
     const [bgColor, setBgColor] = useState(defaultContent.bgColor || "#ffffff")
     const [showQuotes, setShowQuotes] = useState(defaultContent.showQuotes !== undefined ? defaultContent.showQuotes : true)
     const [isPending, setIsPending] = useState(false)
+
+    // 2. Real-time Preview
+    useEffect(() => {
+        if (!block?.id || !onUpdate) return
+
+        const content = {
+            text: text.trim(),
+            author: author.trim() || undefined,
+            style,
+            color,
+            bgColor,
+            showQuotes
+        }
+
+        onUpdate(block.id, content)
+    }, [text, author, style, color, bgColor, showQuotes, block?.id])
 
     const handleAdd = async () => {
         if (!text.trim()) return
