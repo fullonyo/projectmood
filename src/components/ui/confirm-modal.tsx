@@ -29,7 +29,6 @@ export function ConfirmModal({
     type = "info",
     isLoading = false
 }: ConfirmModalProps) {
-    // Fechar com ESC
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose()
@@ -48,43 +47,62 @@ export function ConfirmModal({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+                        className="absolute inset-0 bg-black/70 backdrop-blur-[3px]"
                     />
 
-                    {/* Modal Content */}
+                    {/* Modal — Caixa Bruta */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                        className="relative w-full max-w-[320px] bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden p-8"
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 12 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="relative w-full max-w-[340px] bg-white dark:bg-zinc-950 border-2 border-black dark:border-white overflow-hidden"
                     >
-                        <div className="flex flex-col items-center text-center space-y-4">
-                            {/* Icon */}
+                        {/* Faixa superior de contexto (Danger / Info) */}
+                        <div className={cn(
+                            "h-1 w-full",
+                            type === 'danger' ? "bg-red-500" : "bg-black dark:bg-white"
+                        )} />
+
+                        {/* Botão Fechar */}
+                        <button
+                            onClick={onClose}
+                            className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center border border-transparent hover:border-black dark:hover:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-zinc-400"
+                        >
+                            <X className="w-3.5 h-3.5" />
+                        </button>
+
+                        <div className="flex flex-col items-center text-center px-8 py-8 space-y-5">
+                            {/* Ícone — Quadrado brutalist */}
                             <div className={cn(
-                                "w-16 h-16 rounded-full flex items-center justify-center",
-                                type === 'danger' ? "bg-red-50 dark:bg-red-900/20 text-red-500" : "bg-blue-50 dark:bg-blue-900/20 text-blue-500"
+                                "w-14 h-14 flex items-center justify-center border-2",
+                                type === 'danger'
+                                    ? "border-red-500 text-red-500 bg-red-500/5"
+                                    : "border-black dark:border-white text-black dark:text-white bg-black/5 dark:bg-white/5"
                             )}>
-                                {type === 'danger' ? <AlertTriangle className="w-8 h-8" /> : <Info className="w-8 h-8" />}
+                                {type === 'danger' ? <AlertTriangle className="w-7 h-7" /> : <Info className="w-7 h-7" />}
                             </div>
 
-                            {/* Text */}
-                            <div className="space-y-1">
-                                <h3 className="text-xl font-black tracking-tighter uppercase italic text-zinc-900 dark:text-zinc-100">
+                            {/* Texto */}
+                            <div className="space-y-2">
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-900 dark:text-zinc-100">
                                     {title}
                                 </h3>
-                                <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                                <p className="text-[10px] uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
                                     {message}
                                 </p>
                             </div>
 
-                            {/* Actions */}
-                            <div className="flex flex-col w-full gap-2 pt-4">
+                            {/* Ações */}
+                            <div className="flex flex-col w-full gap-2 pt-2">
                                 <Button
                                     onClick={onConfirm}
                                     isLoading={isLoading}
                                     className={cn(
-                                        "w-full rounded-2xl font-black uppercase tracking-widest text-xs h-12",
-                                        type === 'danger' ? "bg-red-600 hover:bg-red-700 text-white" : "bg-zinc-900 dark:bg-white dark:text-zinc-900 text-white"
+                                        "w-full h-12 font-black uppercase tracking-[0.3em] text-[10px] border-2 hover:scale-[1.02] active:scale-95 transition-all",
+                                        type === 'danger'
+                                            ? "bg-red-500 hover:bg-red-600 text-white border-red-500"
+                                            : "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
                                     )}
                                 >
                                     {confirmText}
@@ -92,7 +110,7 @@ export function ConfirmModal({
                                 <button
                                     onClick={onClose}
                                     disabled={isLoading}
-                                    className="w-full h-10 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                                    className="w-full h-10 text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 border border-transparent hover:border-black/10 dark:hover:border-white/10 transition-all"
                                 >
                                     {cancelText}
                                 </button>

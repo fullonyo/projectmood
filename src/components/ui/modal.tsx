@@ -14,7 +14,6 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
-    // Fechar com ESC
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose()
@@ -27,40 +26,41 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-                    {/* Backdrop */}
+                    {/* Backdrop — Noise grain + blur sutil */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className="absolute inset-0 bg-black/70 backdrop-blur-[3px]"
                     />
 
-                    {/* Modal Content */}
+                    {/* Modal Content — Brutalist Box */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 12 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
                         className={cn(
-                            "relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden",
+                            "relative w-full max-w-md bg-white dark:bg-zinc-950 border-2 border-black dark:border-white overflow-hidden",
                             className
                         )}
                     >
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-6 pb-2">
-                            <h3 className="text-lg font-black tracking-tighter uppercase italic text-zinc-800 dark:text-zinc-100">
+                        {/* Header — Barra industrial */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-black/10 dark:border-white/10">
+                            <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-900 dark:text-zinc-100">
                                 {title}
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+                                className="w-8 h-8 flex items-center justify-center border border-transparent hover:border-black dark:hover:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                             >
-                                <X className="w-5 h-5 text-zinc-400" />
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 
                         {/* Body */}
-                        <div className="p-6 pt-2">
+                        <div className="p-6">
                             {children}
                         </div>
                     </motion.div>
