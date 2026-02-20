@@ -46,42 +46,31 @@ const COLORS = [
 export function PhraseEditor({
     block,
     onUpdate,
+    onAdd,
     highlight
 }: {
     block?: any,
     onUpdate?: (id: string, content: any) => void,
+    onAdd?: (type: string, content: any) => Promise<void>,
     highlight?: boolean
 }) {
     const { t } = useTranslation()
-    const [selectedType, setSelectedType] = useState(PHRASE_STYLES[0].id)
-    const [text, setText] = useState("")
-    const [textColor, setTextColor] = useState('#ffffff')
-    const [bgColor, setBgColor] = useState('#000000')
-    const [speed, setSpeed] = useState(20)
-    const [direction, setDirection] = useState<'left' | 'right'>('left')
-    const [cursorType, setCursorType] = useState('block')
-    const [activeStyle, setActiveStyle] = useState('classic')
+    const defaultContent = block?.content || {}
+    const defaultType = block && ['ticker', 'subtitle', 'floating'].includes(block.type) ? block.type : 'ticker'
+    const [selectedType, setSelectedType] = useState(defaultType)
+    const [text, setText] = useState(defaultContent.text || "")
+    const [textColor, setTextColor] = useState(defaultContent.textColor || '#ffffff')
+    const [bgColor, setBgColor] = useState(defaultContent.bgColor || '#000000')
+
+    let defaultSpeed = 20
+    if (defaultType === 'subtitle') defaultSpeed = 10
+    if (defaultType === 'floating') defaultSpeed = 3
+    const [speed, setSpeed] = useState(defaultContent.speed || defaultSpeed)
+
+    const [direction, setDirection] = useState<'left' | 'right'>(defaultContent.direction || 'left')
+    const [cursorType, setCursorType] = useState(defaultContent.cursorType || 'block')
+    const [activeStyle, setActiveStyle] = useState(defaultContent.style || 'classic')
     const [isPending, startTransition] = useTransition()
-
-    // 1. Load data if block is selected
-    useEffect(() => {
-        if (block && (block.type === 'ticker' || block.type === 'subtitle' || block.type === 'floating')) {
-            setSelectedType(block.type)
-            const content = block.content as any
-            setText(content.text || "")
-            setTextColor(content.textColor || "#ffffff")
-            setBgColor(content.bgColor || "#000000")
-
-            let defaultSpeed = 20
-            if (block.type === 'subtitle') defaultSpeed = 10
-            if (block.type === 'floating') defaultSpeed = 3
-
-            setSpeed(content.speed || defaultSpeed)
-            setActiveStyle(content.style || 'classic')
-            setDirection(content.direction || 'left')
-            setCursorType(content.cursorType || 'block')
-        }
-    }, [block?.id]) // Only reload if ID changes to prevent loops
 
     // 2. Real-time Preview logic
     useEffect(() => {
@@ -136,6 +125,9 @@ export function PhraseEditor({
 
             if (block?.id) {
                 await updateMoodBlockLayout(block.id, { content })
+            } else if (onAdd) {
+                await onAdd(selectedType, content)
+                setText("")
             } else {
                 await addMoodBlock(selectedType, content, { x: 30, y: 70 })
                 setText("")

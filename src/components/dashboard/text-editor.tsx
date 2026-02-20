@@ -24,31 +24,22 @@ const COLORS = [
 export function TextEditor({
     block,
     onUpdate,
+    onAdd,
     highlight
 }: {
     block?: any,
     onUpdate?: (id: string, content: any) => void,
+    onAdd?: (content: any) => Promise<void>,
     highlight?: boolean
 }) {
     const { t } = useTranslation()
-    const [text, setText] = useState("")
-    const [selectedStyle, setSelectedStyle] = useState('simple')
-    const [bgColor, setBgColor] = useState('#ffffff')
-    const [fontSize, setFontSize] = useState("xl")
-    const [align, setAlign] = useState("center")
+    const defaultContent = block?.content || {}
+    const [text, setText] = useState(defaultContent.text || "")
+    const [selectedStyle, setSelectedStyle] = useState(defaultContent.style || 'simple')
+    const [bgColor, setBgColor] = useState(defaultContent.bgColor || '#ffffff')
+    const [fontSize, setFontSize] = useState(defaultContent.fontSize || "xl")
+    const [align, setAlign] = useState(defaultContent.align || "center")
     const [isPending, startTransition] = useTransition()
-
-    // 1. Sync with selected block
-    useEffect(() => {
-        if (block && block.type === 'text') {
-            const content = block.content as any
-            setText(content.text || "")
-            setSelectedStyle(content.style || 'simple')
-            setBgColor(content.bgColor || "#ffffff")
-            setFontSize(content.fontSize || "xl")
-            setAlign(content.align || "center")
-        }
-    }, [block?.id])
 
     // 2. Real-time Preview
     useEffect(() => {
@@ -97,6 +88,9 @@ export function TextEditor({
 
             if (block?.id) {
                 await updateMoodBlockLayout(block.id, { content })
+            } else if (onAdd) {
+                await onAdd(content)
+                setText("")
             } else {
                 await addMoodBlock('text', content, { x: 50, y: 50 })
                 setText("")

@@ -55,31 +55,10 @@ export function DashboardSidebar({
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     const handleAddBlock = async (type: string) => {
-        // Se for texto ou media que possuem "onUpdate", a gente pode
-        // instanciar neles mesmos pois eles salvam no banco a cada tecla.
-        // Mas para editores como Quote, Photo, Countdown que usam
-        // o botão "Salvar/Colar", setamos apenas o DRAFT para renderizar
-        // o formulário deles na aba inspector.
-        const requiresDraft = ['quote', 'photo', 'guestbook', 'moodStatus', 'countdown', 'video', 'music', 'gif', 'doodle', 'weather', 'media', 'social']
-
-        if (requiresDraft.includes(type)) {
-            setDraftBlockType(type)
-            setSelectedId(null) // des-selecionar quaquer bloco real
-        } else {
-            let defaultContent = {}
-            if (type === 'text') defaultContent = { text: "" }
-            if (type === 'phrase') defaultContent = { text: "", style: 'vhs' }
-
-            const result = await addMoodBlock(type, defaultContent, {
-                x: Math.random() * 40 + 30,
-                y: Math.random() * 40 + 30
-            })
-
-            if (result?.success && result?.block?.id) {
-                setSelectedId(result.block.id)
-                setDraftBlockType(null)
-            }
-        }
+        // Colocar SEMPRE em estado de draft para abrir o inspector,
+        // garantindo que não suje o mural até o usuário clicar em "adicionar".
+        setDraftBlockType(type)
+        setSelectedId(null) // des-selecionar quaquer bloco real
     }
 
     useEffect(() => {
@@ -191,10 +170,26 @@ export function DashboardSidebar({
 
                                 {/* Inspector Universal (Serve ambos: Novo Draft ou Bloco Selecionado) */}
                                 {((selectedBlock?.type || draftBlockType) === 'text') && (
-                                    <TextEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                                    <TextEditor
+                                        key={selectedBlock?.id || 'draft-text'}
+                                        block={selectedBlock}
+                                        onUpdate={onUpdateBlock}
+                                        onAdd={async (content: any) => {
+                                            const result = await addMoodBlock('text', content, { x: 40, y: 40 })
+                                            if (result?.success) setDraftBlockType(null)
+                                        }}
+                                    />
                                 )}
-                                {['ticker', 'subtitle', 'floating'].includes(selectedBlock?.type || draftBlockType || '') && (
-                                    <PhraseEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+                                {['ticker', 'subtitle', 'floating', 'phrase'].includes(selectedBlock?.type || draftBlockType || '') && (
+                                    <PhraseEditor
+                                        key={selectedBlock?.id || `draft-phrase`}
+                                        block={selectedBlock}
+                                        onUpdate={onUpdateBlock}
+                                        onAdd={async (type: string, content: any) => {
+                                            const result = await addMoodBlock(type, content, { x: 40, y: 40 })
+                                            if (result?.success) setDraftBlockType(null)
+                                        }}
+                                    />
                                 )}
                                 {((selectedBlock?.type || draftBlockType) === 'social') && (
                                     <SocialLinksEditor
