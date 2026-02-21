@@ -16,10 +16,11 @@ export function TickerBlockPublic({ content }: TickerBlockProps) {
             className={cn(
                 "rounded-none shadow-none border border-black/10 dark:border-white/10 relative overflow-hidden bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
                 "whitespace-nowrap border-y shadow-none transition-all duration-500",
-                content.style === 'modern' && "bg-white dark:bg-zinc-950 rounded-none border border-black dark:border-white"
+                content.style === 'modern' && "bg-white dark:bg-zinc-950 rounded-none border border-black dark:border-white",
+                content.style === 'naked' && "bg-transparent border-none shadow-none backdrop-blur-none"
             )}
             style={{
-                backgroundColor: content.bgColor,
+                backgroundColor: content.style === 'naked' ? 'transparent' : content.bgColor,
                 minWidth: Math.round(300 * scale),
                 padding: `${Math.round(24 * scale)}px ${Math.round(40 * scale)}px`,
             }}

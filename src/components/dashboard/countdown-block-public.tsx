@@ -94,7 +94,7 @@ export function CountdownBlockPublic({ content }: CountdownBlockPublicProps) {
                             { value: timeLeft.seconds, label: 'Seg' }
                         ].map((item, idx) => (
                             <div key={idx} className="flex flex-col" style={{ gap: Math.round(4 * scale) }}>
-                                <div className={cn(
+                                <div suppressHydrationWarning className={cn(
                                     "font-black tabular-nums tracking-tighter",
                                     style === 'neon' && "text-pink-400",
                                 )} style={{ fontSize: Math.round(30 * scale) }}>

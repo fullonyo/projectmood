@@ -26,9 +26,9 @@ model Profile {
   id              String  @id @default(cuid())
   userId          String  @unique
   user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  theme           String  @default("light")
-  backgroundColor String? @default("#ffffff")
-  primaryColor    String? @default("#000000")
+  theme           String  @default("dark")
+  backgroundColor String? @default("#050505")
+  primaryColor    String? @default("#ffffff")
   fontStyle       String? @default("sans")
   backgroundImage String?
   

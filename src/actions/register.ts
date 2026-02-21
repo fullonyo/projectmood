@@ -40,7 +40,7 @@ export async function registerUser(values: z.infer<typeof RegisterSchema>) {
                 name,
                 profile: {
                     create: {
-                        theme: "light",
+                        theme: "dark",
                     },
                 },
             },

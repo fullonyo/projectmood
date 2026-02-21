@@ -14,7 +14,7 @@ const PHRASE_STYLES = [
         icon: Play,
         description: 'Loop infinito horizontal',
         example: 'Novidades chegando por aqui...',
-        styles: ['classic', 'neon', 'glass']
+        styles: ['classic', 'neon', 'glass', 'naked']
     },
     {
         id: 'subtitle',
@@ -22,7 +22,7 @@ const PHRASE_STYLES = [
         icon: Quote,
         description: 'Efeito Typewriter suave',
         example: 'O mundo gira em volta de quem sonha.',
-        styles: ['vhs', 'minimal', 'modern']
+        styles: ['vhs', 'minimal', 'modern', 'naked']
     },
     {
         id: 'floating',
@@ -30,7 +30,7 @@ const PHRASE_STYLES = [
         icon: Plus,
         description: 'Alguma ideia solta no mural...',
         example: 'Alguma ideia solta no mural...',
-        styles: ['clean', 'focus', 'ghost']
+        styles: ['clean', 'focus', 'ghost', 'naked']
     }
 ]
 
@@ -137,7 +137,7 @@ export function PhraseEditor({
                 {/* Type Selection */}
                 <div className="p-5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
                     <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">{t('editors.phrase.protocol_type')}</p>
-                    <div className="grid grid-cols-3 border border-zinc-200 dark:border-zinc-800">
+                    <div className="grid grid-cols-2 border border-zinc-200 dark:border-zinc-800 gap-[1px] bg-zinc-200 dark:bg-zinc-800">
                         {PHRASE_STYLES.map((t) => (
                             <button
                                 key={t.id}
@@ -147,7 +147,8 @@ export function PhraseEditor({
                                     setSpeed(t.id === 'ticker' ? 20 : (t.id === 'floating' ? 3 : 10))
                                 }}
                                 className={cn(
-                                    "flex flex-col items-center gap-3 p-4 border-r last:border-r-0 border-zinc-200 dark:border-zinc-800 transition-all",
+                                    "flex flex-col items-center gap-3 p-4 transition-all col-span-1",
+                                    t.id === 'floating' ? "col-span-2" : "",
                                     selectedType === t.id
                                         ? "bg-black text-white dark:bg-white dark:text-black"
                                         : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
@@ -172,13 +173,13 @@ export function PhraseEditor({
                 <div className="space-y-6 p-5 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
                     <div className="space-y-3">
                         <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.phrase.aura_style')}</p>
-                        <div className="grid grid-cols-3 border border-zinc-200 dark:border-zinc-800">
+                        <div className="grid grid-cols-2 gap-[1px] border border-zinc-200 dark:border-zinc-800 bg-zinc-200 dark:bg-zinc-800">
                             {currentConfig?.styles.map(s => (
                                 <button
                                     key={s}
                                     onClick={() => setActiveStyle(s)}
                                     className={cn(
-                                        "h-10 text-[8px] font-black uppercase tracking-widest transition-all border-r last:border-r-0 border-zinc-100 dark:border-zinc-900",
+                                        "h-10 text-[8px] font-black uppercase tracking-widest transition-all",
                                         activeStyle === s
                                             ? "bg-black text-white dark:bg-white dark:text-black"
                                             : "bg-white dark:bg-zinc-950 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900"

@@ -29,10 +29,11 @@ export function SubtitleBlockPublic({ content }: SubtitleBlockProps) {
                     "w-full h-full flex flex-col justify-center shadow-none relative overflow-hidden transition-colors duration-500 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm border border-black/10 dark:border-white/10",
                     content.style === 'vhs' && "bg-[#050505]",
                     content.style === 'minimal' && "bg-transparent border-none rounded-none font-normal tracking-tight",
-                    content.style === 'modern' && "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+                    content.style === 'modern' && "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800",
+                    content.style === 'naked' && "bg-transparent border-none shadow-none backdrop-blur-none"
                 )}
                 style={{
-                    backgroundColor: content.style !== 'minimal' ? content.bgColor : 'transparent',
+                    backgroundColor: (content.style === 'minimal' || content.style === 'naked') ? 'transparent' : content.bgColor,
                     padding: `${Math.round(24 * scale)}px ${Math.round(40 * scale)}px`,
                     borderLeftWidth: content.style === 'vhs' ? Math.round(8 * scale) : undefined,
                     borderLeftColor: content.style === 'vhs' ? '#dc2626' : undefined,

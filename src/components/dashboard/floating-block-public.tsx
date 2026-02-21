@@ -24,11 +24,12 @@ export function FloatingBlockPublic({ content }: FloatingBlockProps) {
             }}
             className={cn(
                 "bg-white/5 backdrop-blur-sm border border-white/10 rounded-full shadow-2xl",
-                content.style === 'ghost' && "bg-transparent border-none shadow-none"
+                content.style === 'ghost' && "bg-transparent border-none shadow-none",
+                content.style === 'naked' && "bg-transparent border-none shadow-none backdrop-blur-none"
             )}
             style={{
                 color: content.textColor,
-                backgroundColor: content.bgColor,
+                backgroundColor: (content.style === 'ghost' || content.style === 'naked') ? 'transparent' : content.bgColor,
                 padding: `${Math.round(16 * scale)}px ${Math.round(24 * scale)}px`
             }}
         >
