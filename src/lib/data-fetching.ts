@@ -19,7 +19,10 @@ export const getProfileWithTags = async (username: string) => {
                             }
                         }
                     },
-                    moodBlocks: { orderBy: { order: "asc" } },
+                    moodBlocks: {
+                        where: { deletedAt: null },
+                        orderBy: { order: "asc" }
+                    },
                 },
             });
         },

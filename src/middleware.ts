@@ -6,8 +6,21 @@ export default auth((req) => {
     const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard")
     const isRootPage = req.nextUrl.pathname === "/"
 
+    const isAdminPage = req.nextUrl.pathname.startsWith("/admin")
+
     if (isDashboardPage && !isLoggedIn) {
         return Response.redirect(new URL("/auth/login", req.nextUrl))
+    }
+
+    // Role-based protection for the Admin Panel
+    if (isAdminPage) {
+        if (!isLoggedIn) {
+            return Response.redirect(new URL("/auth/login", req.nextUrl))
+        }
+        const userRole = (req.auth?.user as any)?.role
+        if (userRole !== "ADMIN") {
+            return Response.redirect(new URL("/dashboard", req.nextUrl))
+        }
     }
 
     if (isRootPage && isLoggedIn) {

@@ -45,6 +45,23 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
 
+    // Validar Feature Flags do sistema (Kill-Switch)
+    try {
+        const flagKey = `block_${type}`;
+        const flag = await prisma.featureFlag.findUnique({ where: { key: flagKey } });
+
+        if (flag && !flag.isEnabled) {
+            return { error: `O bloco "${flag.name || type}" está temporariamente desativado pelo administrador.` };
+        }
+
+        if (flag && flag.isPremium && (session.user as any)?.role !== 'ADMIN') {
+            // Futura checagem VIP (por hora, bloqueia não-admins se for premium)
+            return { error: `O bloco "${flag.name || type}" é exclusivo para usuários VIP.` };
+        }
+    } catch (e) {
+        console.warn("[addMoodBlock] Feature flag check failed, proceeding anyway", e);
+    }
+
     // Validação de entrada
     const validation = CreateMoodBlockSchema.safeParse({ type, content, options });
     if (!validation.success) {
@@ -54,7 +71,7 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
     const { x = 50, y = 50, width, height } = validation.data.options || {};
 
     try {
-        const block = await (prisma.moodBlock as any).create({
+        const block = await prisma.moodBlock.create({
             data: {
                 userId: session.user.id,
                 type: validation.data.type,
@@ -111,8 +128,9 @@ export async function deleteMoodBlock(blockId: string) {
     if (!session?.user?.id) return { error: "Não autorizado" };
 
     try {
-        await prisma.moodBlock.delete({
+        await prisma.moodBlock.update({
             where: { id: blockId, userId: session.user.id },
+            data: { deletedAt: new Date() }
         });
         revalidatePath("/dashboard");
         return { success: true };
@@ -127,8 +145,9 @@ export async function clearMoodBlocks() {
     if (!session?.user?.id) return { error: "Não autorizado" };
 
     try {
-        await prisma.moodBlock.deleteMany({
-            where: { userId: session.user.id }
+        await prisma.moodBlock.updateMany({
+            where: { userId: session.user.id, deletedAt: null },
+            data: { deletedAt: new Date() }
         });
 
         revalidatePath("/dashboard");
@@ -150,7 +169,7 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
         await prisma.$transaction(
             blocks.map((block) =>
                 prisma.moodBlock.update({
-                    where: { id: block.id, userId },
+                    where: { id: block.id, userId, deletedAt: null },
                     data: { order: block.order }
                 })
             )

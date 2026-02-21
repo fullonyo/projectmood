@@ -24,12 +24,12 @@ export async function publishProfile() {
     try {
         // 1. Ler todos os blocos (draft state)
         const blocks = await prisma.moodBlock.findMany({
-            where: { userId },
+            where: { userId, deletedAt: null },
             orderBy: { order: 'asc' },
         })
 
         // 2. Serializar snapshot (strip de campos internos do Prisma)
-        const snapshot = blocks.map(b => ({
+        const snapshot = blocks.map((b: any) => ({
             id: b.id,
             type: b.type,
             content: b.content,

@@ -9,9 +9,12 @@ interface ProfileSignatureProps {
     name?: string
     avatarUrl?: string
     isVerified?: boolean
+    verificationType?: string | null
 }
 
-export function ProfileSignature({ username, name, avatarUrl, isVerified = true }: ProfileSignatureProps) {
+import { VerificationBadge } from "@/components/ui/verification-badge"
+
+export function ProfileSignature({ username, name, avatarUrl, isVerified = false, verificationType }: ProfileSignatureProps) {
     const { t } = useTranslation()
 
     return (
@@ -36,7 +39,7 @@ export function ProfileSignature({ username, name, avatarUrl, isVerified = true 
                 <div className="flex flex-col pt-1">
                     <div className="flex items-center gap-2 mb-1">
                         <span className="text-[8px] font-black uppercase tracking-[0.5em] opacity-40">{t('public_page.signature.role')}</span>
-                        {isVerified && <ShieldCheck className="w-2.5 h-2.5 opacity-40" />}
+                        {isVerified && <VerificationBadge isVerified={isVerified} type={verificationType} className="opacity-60" />}
                     </div>
 
                     <h1 className="text-2xl font-black tracking-tighter leading-none mb-1 group-hover:translate-x-1 transition-transform duration-500">

@@ -8,16 +8,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  CURATOR
+  MODERATOR
+  ADMIN
+}
+
 model User {
   id        String      @id @default(cuid())
   name      String?
   email     String      @unique
   username  String      @unique
   password  String
+  role      Role        @default(USER)
+  isBanned  Boolean     @default(false)
+  banReason String?
+  
+  // Verification System
+  isVerified      Boolean  @default(false)
+  verificationType String?  // e.g., "verified", "premium", "notable"
+  
   createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  updatedAt DateTime    @default(now()) @updatedAt
+  deletedAt DateTime?
+  
   profile   Profile?
   moodBlocks MoodBlock[]
+  auditLogs  AuditLog[]  @relation("AdminActions")
 
   @@index([username])
 }
@@ -40,7 +58,9 @@ model Profile {
   staticTexture    String?  @default("none")
   avatarUrl        String?  @db.Text
 
+  createdAt       DateTime @default(now())
   updatedAt       DateTime @default(now()) @updatedAt
+  deletedAt       DateTime?
   
   // Relações
   analytics       ProfileAnalytics?
@@ -59,6 +79,7 @@ model ProfileVersion {
   label       String?  // Ex: "v3", "com foto nova", nome de template
   
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 
   @@index([profileId])
   @@index([profileId, isActive])
@@ -68,7 +89,7 @@ model MoodBlock {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // text, ticker, subtitle, floating, gif, video, social, guestbook, tape, doodle, weather, media, music, quote, photo, moodStatus, countdown
+  type      String   // text, ticker, subtitle, etc.
   content   Json
   order     Int      @default(0)
   
@@ -81,7 +102,10 @@ model MoodBlock {
   rotation  Float    @default(0)
   
   messages  GuestbookMessage[]
+  
+  createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+  deletedAt DateTime?
   
   @@index([userId])
   @@index([userId, type])
@@ -97,8 +121,10 @@ model GuestbookMessage {
   block     MoodBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
   
   userId    String?  // Opcional: link com usuário logado
-  createdAt DateTime @default(now())
   
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([blockId])
 }
 
@@ -108,8 +134,40 @@ model ProfileAnalytics {
   profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
   views       Int       @default(0)
   lastViewAt  DateTime?
+  
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime  @default(now()) @updatedAt
 
   @@index([profileId])
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  isEnabled   Boolean  @default(true)
+  isPremium   Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     User     @relation("AdminActions", fields: [adminId], references: [id])
+  
+  action    String   // DELETE_BLOCK, BAN_USER, VERIFY_USER, SYNC_FLAGS, etc.
+  targetId  String?  // ID do recurso afetado
+  targetType String? // User, MoodBlock, System
+  
+  reason    String?  @db.Text
+  metadata  Json?    // Contexto extra (ex: conteúdo do bloco deletado)
+  
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([action])
+  @@index([targetId])
 }

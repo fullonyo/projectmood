@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { DashboardClientLayout } from "@/components/dashboard/dashboard-client-layout";
 import { computeHasUnpublishedChanges } from "@/actions/publish";
+import { getFeatureFlags } from "@/actions/system-config";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -18,6 +19,10 @@ export default async function DashboardPage() {
 
     if (!user) {
         redirect("/auth/register"); // Se o user sumiu do banco mas tem sessão, forçamos re-registro ou login
+    }
+
+    if (user.isBanned) {
+        redirect("/banned");
     }
 
     let currentProfile = user.profile;
@@ -78,10 +83,27 @@ export default async function DashboardPage() {
     // Detectar se há mudanças não publicadas
     const hasUnpublishedChanges = await computeHasUnpublishedChanges();
 
+    const isAdmin = (session.user as any)?.role === "ADMIN";
+
+    // Buscar as feature flags do sistema
+    const rawFlags = await getFeatureFlags();
+    const systemFlags = rawFlags.reduce((acc: Record<string, boolean>, flag: { key: string, isEnabled: boolean }) => {
+        acc[flag.key] = flag.isEnabled;
+        return acc;
+    }, {} as Record<string, boolean>);
+
     return (
         <div className="h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden">
             {/* Client Layout with Sidebars and Canvas - Header was merged into Right Sidebar */}
-            <DashboardClientLayout profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} />
+            <DashboardClientLayout
+                profile={profile}
+                moodBlocks={moodBlocks}
+                username={username}
+                publishedAt={publishedAt}
+                hasUnpublishedChanges={hasUnpublishedChanges}
+                isAdmin={isAdmin}
+                systemFlags={systemFlags}
+            />
         </div>
     );
 }

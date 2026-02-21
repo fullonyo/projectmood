@@ -30,6 +30,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         async jwt({ token, user }) {
             if (user) {
                 token.username = (user as any).username;
+                token.role = (user as any).role;
+                token.isBanned = (user as any).isBanned;
             }
             return token;
         },
@@ -37,6 +39,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (token.sub && session.user) {
                 session.user.id = token.sub;
                 (session.user as any).username = token.username;
+                (session.user as any).role = token.role;
+                (session.user as any).isBanned = token.isBanned;
             }
             return session;
         },

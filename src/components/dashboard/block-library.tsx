@@ -20,9 +20,10 @@ import {
 
 interface BlockLibraryProps {
     onAddBlock: (type: string) => void
+    systemFlags?: Record<string, boolean>
 }
 
-export function BlockLibrary({ onAddBlock }: BlockLibraryProps) {
+export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps) {
     const { t } = useTranslation()
 
     const categories = [
@@ -65,30 +66,41 @@ export function BlockLibrary({ onAddBlock }: BlockLibraryProps) {
             </header>
 
             <div className="space-y-6">
-                {categories.map((group, groupIdx) => (
-                    <div key={groupIdx} className="grid grid-cols-2 gap-3">
-                        {group.items.map((item) => {
-                            const Icon = item.icon
-                            return (
-                                <button
-                                    key={item.id}
-                                    onClick={() => onAddBlock(item.type)}
-                                    className="flex flex-col items-start p-4 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition-all group text-left shadow-none"
-                                >
-                                    <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50 mb-3 group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors">
-                                        <Icon className="w-4 h-4" />
-                                    </div>
-                                    <h4 className="text-[10px] font-black uppercase tracking-wider mb-1">
-                                        {t(`sidebar.library.items.${item.tk}.title`)}
-                                    </h4>
-                                    <p className="text-[8px] text-zinc-400 font-medium leading-relaxed opacity-80 decoration-zinc-300">
-                                        {t(`sidebar.library.items.${item.tk}.desc`)}
-                                    </p>
-                                </button>
-                            )
-                        })}
-                    </div>
-                ))}
+                {categories.map((group, groupIdx) => {
+                    // Filter items based on systemFlags. Default is true if flag is missing.
+                    const visibleItems = group.items.filter(item => {
+                        const flagKey = `block_${item.id}`;
+                        if (systemFlags[flagKey] === false) return false;
+                        return true;
+                    });
+
+                    if (visibleItems.length === 0) return null;
+
+                    return (
+                        <div key={groupIdx} className="grid grid-cols-2 gap-3">
+                            {visibleItems.map((item) => {
+                                const Icon = item.icon
+                                return (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => onAddBlock(item.type)}
+                                        className="flex flex-col items-start p-4 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition-all group text-left shadow-none"
+                                    >
+                                        <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50 mb-3 group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors">
+                                            <Icon className="w-4 h-4" />
+                                        </div>
+                                        <h4 className="text-[10px] font-black uppercase tracking-wider mb-1">
+                                            {t(`sidebar.library.items.${item.tk}.title`)}
+                                        </h4>
+                                        <p className="text-[8px] text-zinc-400 font-medium leading-relaxed opacity-80 decoration-zinc-300">
+                                            {t(`sidebar.library.items.${item.tk}.desc`)}
+                                        </p>
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    );
+                })}
             </div>
 
             <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800 my-8" />

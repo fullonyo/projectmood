@@ -12,6 +12,7 @@ import {
     Loader2
 } from "lucide-react"
 
+import Link from "next/link"
 import { TextEditor } from "./text-editor"
 import { PhraseEditor } from "./phrase-editor"
 import { ArtTools } from "./art-tools"
@@ -39,13 +40,15 @@ export function DashboardSidebar({
     selectedBlock,
     setSelectedId,
     onUpdateBlock,
-    onUpdateProfile
+    onUpdateProfile,
+    systemFlags
 }: {
-    profile: any,
-    selectedBlock?: any,
-    setSelectedId: (id: string | null) => void,
-    onUpdateBlock: (id: string, content: any) => void,
-    onUpdateProfile: (data: any) => void
+    profile: any;
+    selectedBlock?: any;
+    setSelectedId: (id: string | null) => void;
+    onUpdateBlock: (id: string, content: any) => void;
+    onUpdateProfile: (data: any) => void;
+    systemFlags?: Record<string, boolean>;
 }) {
     const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState<TopLevelTab>('elements')
@@ -151,7 +154,7 @@ export function DashboardSidebar({
                 {activeTab === 'elements' && (
                     <>
                         {!selectedBlock && !draftBlockType ? (
-                            <BlockLibrary onAddBlock={handleAddBlock} />
+                            <BlockLibrary onAddBlock={handleAddBlock} systemFlags={systemFlags} />
                         ) : (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
                                 <Button

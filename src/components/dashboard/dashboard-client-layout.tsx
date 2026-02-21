@@ -21,17 +21,19 @@ interface DashboardClientLayoutProps {
     username: string;
     publishedAt?: string | null;
     hasUnpublishedChanges?: boolean;
+    isAdmin?: boolean;
+    systemFlags?: Record<string, boolean>;
 }
 
-export function DashboardClientLayout({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges }: DashboardClientLayoutProps) {
+export function DashboardClientLayout({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
     return (
         <CanvasInteractionProvider>
-            <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} />
+            <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
         </CanvasInteractionProvider>
     )
 }
 
-function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges }: DashboardClientLayoutProps) {
+function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
     const [isMobile, setIsMobile] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
@@ -128,6 +130,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                                 setSelectedId={setSelectedId}
                                 onUpdateBlock={updateBlock}
                                 onUpdateProfile={handleUpdateLocalProfile}
+                                systemFlags={systemFlags}
                             />
 
                             {/* Inner Collapse Button */}
@@ -165,7 +168,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                         className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
                     >
                         <div className="pointer-events-auto h-full shadow-none relative">
-                            <ActionsSidebar username={username} profile={localProfile} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} />
+                            <ActionsSidebar username={username} profile={localProfile} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} />
 
                             {/* Inner Collapse Button */}
                             <button

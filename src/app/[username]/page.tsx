@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import { themeConfigs } from "@/lib/themes";
 import { PublicMoodPageClient } from "./page-client";
 import type { ProfileWithVersions, ProfileVisualConfig } from "@/types/database";
+import { getFeatureFlags } from "@/actions/system-config";
 
 
 
@@ -23,8 +24,12 @@ export async function generateMetadata({
 
     if (!user) return { title: "Usuário não encontrado | MoodSpace" };
 
+    const title = user.isVerified
+        ? `${user.name || user.username} ✓ (@${user.username}) | MoodSpace`
+        : `${user.name || user.username} (@${user.username}) | MoodSpace`;
+
     return {
-        title: `${user.name || user.username} (@${user.username}) | MoodSpace`,
+        title,
         description: `Confira o espaço criativo de @${user.username} no MoodSpace. Aesthetic moods, music & GIFs.`,
     };
 }
@@ -37,16 +42,33 @@ export default async function PublicMoodPage({
     const { getProfileWithTags } = await import("@/lib/data-fetching");
     const user = await getProfileWithTags(username);
 
-    if (!user || !user.profile) notFound();
+    if (!user || !(user as any).profile) notFound();
 
-    const { profile, moodBlocks: liveBlocks } = user;
+    if ((user as any).isBanned) notFound(); // Mask banned users as not found
+
+    const { profile, moodBlocks: liveBlocks } = user as any;
 
     // Draft/Publish: ler da versão ativa, com fallback para blocos live
     const profileWithVersions = profile as ProfileWithVersions;
     const activeVersion = profileWithVersions.versions?.[0];
-    const moodBlocks = activeVersion
+    const moodBlocksRaw = activeVersion
         ? (activeVersion.blocks as typeof liveBlocks)
         : liveBlocks;
+
+    // Filter blocks based on global Feature Flags (Kill-Switch)
+    const rawFlags = await getFeatureFlags();
+    const systemFlags = rawFlags.reduce((acc: Record<string, boolean>, flag: { key: string, isEnabled: boolean }) => {
+        acc[flag.key] = flag.isEnabled;
+        return acc;
+    }, {} as Record<string, boolean>);
+
+    const moodBlocks = moodBlocksRaw.filter((block: any) => {
+        const flagKey = `block_${block.type}`;
+        // If flag exists and is explicitly disabled, hide it.
+        // If flag doesn't exist, assume it's a core/always-on block.
+        if (systemFlags[flagKey] === false) return false;
+        return true;
+    });
 
     // Construir profileData efetivo: snapshot publicado > profile live
     // Usa ?? (nullish coalescing) ao invés de || para respeitar valores falsy como "" ou 0
@@ -84,7 +106,12 @@ export default async function PublicMoodPage({
             }}
         >
             <PublicMoodPageClient
-                publicUser={{ username: user.username, name: user.name }}
+                publicUser={{
+                    username: user.username,
+                    name: user.name,
+                    isVerified: user.isVerified,
+                    verificationType: user.verificationType
+                }}
                 profileId={effectiveProfile.id}
                 profile={effectiveProfile}
                 moodBlocks={moodBlocks}

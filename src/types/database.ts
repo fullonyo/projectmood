@@ -109,6 +109,8 @@ export interface ProfileWithVersions extends Profile {
 export interface PublicUser {
     username: string;
     name: string | null;
+    isVerified: boolean;
+    verificationType: string | null;
 }
 
 /** Props tipadas do componente PublicMoodPageClient */

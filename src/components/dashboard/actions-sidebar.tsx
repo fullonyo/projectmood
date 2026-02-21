@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, ExternalLink, User, Settings, Camera, Loader2, Upload, Clock, History, ChevronDown, RotateCcw } from "lucide-react"
+import { LogOut, ExternalLink, User, Settings, Camera, Loader2, Upload, Clock, History, ChevronDown, RotateCcw, Sparkles } from "lucide-react"
 import { Button } from "../ui/button"
 import { ShareProfileButton } from "./share-profile-button"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -21,9 +21,10 @@ interface ActionsSidebarProps {
     profile: any
     publishedAt?: Date | string | null
     hasUnpublishedChanges?: boolean
+    isAdmin?: boolean
 }
 
-export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedChanges }: ActionsSidebarProps) {
+export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedChanges, isAdmin }: ActionsSidebarProps) {
     const { t } = useTranslation()
     const [isUploading, setIsUploading] = useState(false)
     const [showPublishModal, setShowPublishModal] = useState(false)
@@ -295,6 +296,21 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                         <div className="transition-all duration-300">
                             <ShareProfileButton username={username} />
                         </div>
+
+                        {isAdmin && (
+                            <Link href="/admin" className="w-full mt-2">
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-between h-14 rounded-none text-[10px] font-black uppercase tracking-[0.3em] bg-[#1a0505] text-red-500 hover:bg-red-500 hover:text-white transition-all group shadow-none border border-red-900/50 hover:border-red-500"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                                        Command Center
+                                    </div>
+                                    <div className="w-1.5 h-1.5 bg-red-500 animate-pulse glow" />
+                                </Button>
+                            </Link>
+                        )}
 
                         {/* Histórico de Versões */}
                         <button

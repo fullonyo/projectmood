@@ -79,6 +79,8 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                     username={publicUser.username}
                     name={publicUser.name || undefined}
                     avatarUrl={profile.avatarUrl}
+                    isVerified={publicUser.isVerified}
+                    verificationType={publicUser.verificationType}
                 />
                 <StudioCatalogID
                     profileId={profile.id}
