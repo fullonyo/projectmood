@@ -11,7 +11,7 @@ export default function Home() {
   const { t } = useTranslation();
 
   return (
-    <div className="h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden relative">
+    <div className="min-h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden relative">
       {/* Background Atmosphere */}
       <div className="fixed inset-0 z-0 opacity-40">
         <BackgroundEffect type="aurora" primaryColor="#000000" />
@@ -49,7 +49,7 @@ export default function Home() {
             <div className="h-[1px] w-12 bg-black" />
           </div>
 
-          <h1 className="text-7xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase">
+          <h1 className="text-4xl sm:text-7xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase">
             {t('landing.hero_title_curate')} <br />
             <span className="italic text-zinc-300">{t('landing.hero_title_your')}</span> <br />
             {t('landing.hero_title_reality')}
@@ -61,8 +61,8 @@ export default function Home() {
 
         <div className="flex flex-col items-center gap-6">
           <Link href="/auth/register" className="group">
-            <div className="bg-black text-white px-16 py-6 transition-all duration-500 hover:scale-105 hover:bg-zinc-900 shadow-2xl relative overflow-hidden">
-              <span className="text-xl font-black uppercase tracking-widest relative z-10">{t('landing.btn_create_studio')}</span>
+            <div className="bg-black text-white px-8 sm:px-16 py-4 sm:py-6 transition-all duration-500 hover:scale-105 hover:bg-zinc-900 shadow-2xl relative overflow-hidden">
+              <span className="text-sm sm:text-xl font-black uppercase tracking-widest relative z-10">{t('landing.btn_create_studio')}</span>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             </div>
           </Link>
@@ -73,7 +73,7 @@ export default function Home() {
         </div>
 
         {/* Technical Showcase cards */}
-        <div className="flex gap-12 w-full max-w-5xl justify-center pt-12 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+        <div className="hidden sm:flex gap-6 md:gap-12 w-full max-w-5xl justify-center pt-12 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
           <div className="flex flex-col items-start">
             <span className="text-[8px] font-mono mb-2 uppercase">{t('landing.visuals')}</span>
             <div className="w-32 h-40 bg-zinc-100 border border-zinc-200" />
@@ -90,7 +90,7 @@ export default function Home() {
       </main>
 
       {/* Studio Footer */}
-      <footer className="relative z-10 py-8 px-12 flex justify-between items-end border-t border-zinc-100 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+      <footer className="relative z-10 py-6 sm:py-8 px-6 sm:px-12 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-2 border-t border-zinc-100 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
         <div>© {new Date().getFullYear()} MOODSPACE_SYSTEMS</div>
         <div className="flex gap-8">
           <span className="opacity-20">{t('landing.privacy')}</span>

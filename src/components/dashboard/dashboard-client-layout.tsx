@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -32,6 +32,7 @@ export function DashboardClientLayout({ profile, moodBlocks, username, published
 }
 
 function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges }: DashboardClientLayoutProps) {
+    const [isMobile, setIsMobile] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -40,6 +41,30 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
 
     // 🧠 CENTRAL CORTEX: Sovereign management of blocks and persistence
     const { blocks, updateBlock, isSaving } = useCanvasManager(moodBlocks);
+
+    // 📱 Mobile detection: auto-hide sidebars on small screens
+    useEffect(() => {
+        const mql = window.matchMedia('(max-width: 767px)');
+        const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+            const mobile = e.matches;
+            setIsMobile(mobile);
+            if (mobile) {
+                setIsSidebarOpen(false);
+                setIsRightSidebarOpen(false);
+            }
+        };
+        handleChange(mql);
+        mql.addEventListener('change', handleChange);
+        return () => mql.removeEventListener('change', handleChange);
+    }, []);
+
+    // Close sidebars when selecting a canvas item on mobile
+    const handleMobileClose = useCallback(() => {
+        if (isMobile) {
+            setIsSidebarOpen(false);
+            setIsRightSidebarOpen(false);
+        }
+    }, [isMobile]);
 
     useEffect(() => {
         setLocalProfile(profile);
@@ -74,6 +99,17 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
             <AnimatePresence>
                 {isDrawingMode && <FullscreenDoodleOverlay />}
             </AnimatePresence>
+
+            {/* Mobile Backdrop — closes sidebars on tap */}
+            {isMobile && (isSidebarOpen || isRightSidebarOpen) && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-10 bg-black/40 backdrop-blur-sm"
+                    onClick={handleMobileClose}
+                />
+            )}
 
             {/* Floating Sidebar Container (layer 20) */}
             <AnimatePresence>

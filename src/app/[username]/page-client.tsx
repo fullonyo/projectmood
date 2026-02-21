@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { useViewportScale, scaleBlockSize, getBlockFallbackSize } from "@/lib/canvas-scale"
 import { ProfileSignature } from "@/components/dashboard/profile-signature"
 import { AnalyticsDisplay } from "@/components/dashboard/analytics-display"
 import { ViralBadge } from "@/components/dashboard/viral-badge"
@@ -21,6 +22,9 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
     const [isFocusMode, setIsFocusMode] = useState(false)
     const [views, setViews] = useState<number>(0)
     const [loadingViews, setLoadingViews] = useState(true)
+
+    // 📌 Escala proporcional: fidelidade visual cross-resolution
+    const viewportScale = useViewportScale()
 
     useEffect(() => {
         const storageKey = `mood_v_${profileId}`
@@ -78,7 +82,7 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                 />
                 <StudioCatalogID
                     profileId={profile.id}
-                    createdAt={profile.createdAt}
+                    createdAt={profile.updatedAt}
                     views={views}
                 />
                 <AnalyticsDisplay
@@ -93,16 +97,16 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
             <button
                 onClick={() => setIsFocusMode(!isFocusMode)}
                 className={cn(
-                    "fixed top-12 right-1/2 translate-x-[200px] z-[70] p-3 rounded-full transition-all duration-500",
+                    "fixed top-12 right-4 sm:right-1/2 sm:translate-x-[200px] z-[70] p-3 rounded-full transition-all duration-500",
                     "bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10",
-                    isFocusMode && "translate-x-0 top-10 bg-white/20"
+                    isFocusMode && "sm:translate-x-0 top-10 bg-white/20"
                 )}
             >
                 {isFocusMode ? <Lightbulb className="w-4 h-4" /> : <LightbulbOff className="w-4 h-4 opacity-40 hover:opacity-100" />}
             </button>
 
-            {/* The Canvas Reality - Back to Static (Clean) */}
-            <main className="relative w-full h-full">
+            {/* The Canvas Reality - Scrollable on mobile, fixed on desktop */}
+            <main className="relative w-full h-full overflow-y-auto sm:overflow-hidden">
                 <BoardStage>
                     {moodBlocks.map((block: any) => (
                         <div
@@ -111,8 +115,8 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                             style={{
                                 left: `${block.x}%`,
                                 top: `${block.y}%`,
-                                width: block.width || (['photo', 'video', 'music', 'guestbook'].includes(block.type) ? 300 : 'auto'),
-                                height: block.height || (['photo', 'video', 'music', 'guestbook'].includes(block.type) ? 300 : 'auto'),
+                                width: scaleBlockSize(block.width, viewportScale, getBlockFallbackSize(block.type)),
+                                height: scaleBlockSize(block.height, viewportScale, getBlockFallbackSize(block.type)),
                                 rotate: block.rotation ? `${block.rotation}deg` : undefined,
                                 zIndex: block.zIndex || 1,
                             }}

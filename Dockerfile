@@ -35,7 +35,8 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN adduser --system --uid 1001 --home /home/nextjs nextjs
+ENV HOME=/home/nextjs
 
 # Set the correct permission for prerender cache
 RUN mkdir .next

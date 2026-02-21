@@ -6,12 +6,14 @@ import { MessageSquare, Send, User, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { useViewportScale } from "@/lib/canvas-scale"
 
 export function GuestbookBlock({ block, isPublic = false }: { block: any, isPublic?: boolean }) {
     const [messages, setMessages] = useState<any[]>([])
     const [newMessage, setNewMessage] = useState("")
     const [isSending, setIsSending] = useState(false)
     const { title = "Mural de Recados", color = "#000000" } = block.content as any
+    const scale = useViewportScale()
 
     useEffect(() => {
         const loadMessages = async () => {
@@ -42,45 +44,46 @@ export function GuestbookBlock({ block, isPublic = false }: { block: any, isPubl
             )}
             {/* Registry Header */}
             <div
-                className="px-4 py-3 flex items-center justify-between border-b border-black dark:border-white bg-zinc-50 dark:bg-zinc-900"
+                className="flex items-center justify-between border-b border-black dark:border-white bg-zinc-50 dark:bg-zinc-900"
+                style={{ padding: `${Math.round(12 * scale)}px ${Math.round(16 * scale)}px` }}
             >
-                <div className="flex items-center gap-2">
-                    <MessageSquare className="w-3 h-3 text-black dark:text-white" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black dark:text-white italic">
+                <div className="flex items-center" style={{ gap: Math.round(8 * scale) }}>
+                    <MessageSquare className="text-black dark:text-white" style={{ width: Math.round(12 * scale), height: Math.round(12 * scale) }} />
+                    <span className="font-black uppercase tracking-[0.3em] text-black dark:text-white italic" style={{ fontSize: Math.round(10 * scale) }}>
                         {title}
                     </span>
                 </div>
-                <div className="flex gap-1.5 opacity-20">
-                    <div className="w-1 h-1 bg-black dark:bg-white animate-pulse" />
-                    <div className="w-1 h-1 bg-black dark:bg-white animate-pulse delay-75" />
+                <div className="flex opacity-20" style={{ gap: Math.round(6 * scale) }}>
+                    <div className="bg-black dark:bg-white animate-pulse" style={{ width: Math.round(4 * scale), height: Math.round(4 * scale) }} />
+                    <div className="bg-black dark:bg-white animate-pulse delay-75" style={{ width: Math.round(4 * scale), height: Math.round(4 * scale) }} />
                 </div>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:16px_16px]">
+            <div className="flex-1 overflow-y-auto custom-scrollbar bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)]" style={{ padding: Math.round(16 * scale), backgroundSize: `${Math.round(16 * scale)}px ${Math.round(16 * scale)}px`, display: 'flex', flexDirection: 'column', gap: Math.round(16 * scale) }}>
                 {messages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-zinc-400 gap-2 opacity-50">
-                        <MessageSquare className="w-8 h-8" />
-                        <p className="text-[10px] uppercase font-bold tracking-tighter text-center">
+                    <div className="h-full flex flex-col items-center justify-center text-zinc-400 opacity-50" style={{ gap: Math.round(8 * scale) }}>
+                        <MessageSquare style={{ width: Math.round(32 * scale), height: Math.round(32 * scale) }} />
+                        <p className="uppercase font-bold tracking-tighter text-center" style={{ fontSize: Math.round(10 * scale) }}>
                             Nenhum recado ainda.<br />Seja o primeiro!
                         </p>
                     </div>
                 ) : (
                     messages.map((msg) => (
                         <div key={msg.id} className="group animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <div className="flex items-center gap-2 mb-1.5">
+                            <div className="flex items-center" style={{ gap: Math.round(8 * scale), marginBottom: Math.round(6 * scale) }}>
                                 <div className={cn(
-                                    "px-2 py-0.5 rounded-none text-[8px] font-black uppercase tracking-widest flex items-center gap-1 border border-zinc-100 dark:border-zinc-800",
+                                    "rounded-none font-black uppercase tracking-widest flex items-center border border-zinc-100 dark:border-zinc-800",
                                     msg.isAdmin ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400"
-                                )}>
-                                    {msg.isAdmin ? <ShieldCheck className="w-2.5 h-2.5" /> : <User className="w-2.5 h-2.5" />}
+                                )} style={{ padding: `${Math.round(2 * scale)}px ${Math.round(8 * scale)}px`, fontSize: Math.round(8 * scale), gap: Math.round(4 * scale) }}>
+                                    {msg.isAdmin ? <ShieldCheck style={{ width: Math.round(10 * scale), height: Math.round(10 * scale) }} /> : <User style={{ width: Math.round(10 * scale), height: Math.round(10 * scale) }} />}
                                     {msg.author}
                                 </div>
-                                <span className="text-[7px] text-zinc-300 dark:text-zinc-600 font-black uppercase tracking-widest">
+                                <span className="text-zinc-300 dark:text-zinc-600 font-black uppercase tracking-widest" style={{ fontSize: Math.round(7 * scale) }}>
                                     {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: ptBR })}
                                 </span>
                             </div>
-                            <div className="bg-white dark:bg-zinc-950 p-4 rounded-none border border-zinc-100 dark:border-zinc-800 shadow-none text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-mono">
+                            <div className="bg-white dark:bg-zinc-950 rounded-none border border-zinc-100 dark:border-zinc-800 shadow-none text-zinc-600 dark:text-zinc-400 leading-relaxed font-mono" style={{ padding: Math.round(16 * scale), fontSize: Math.round(12 * scale) }}>
                                 {msg.content}
                             </div>
                         </div>
@@ -90,20 +93,22 @@ export function GuestbookBlock({ block, isPublic = false }: { block: any, isPubl
 
             {/* Input Area */}
             {isPublic && (
-                <form onSubmit={handleSend} className="p-3 bg-zinc-50 dark:bg-zinc-900 border-t border-black dark:border-white flex gap-2">
+                <form onSubmit={handleSend} className="bg-zinc-50 dark:bg-zinc-900 border-t border-black dark:border-white flex" style={{ padding: Math.round(12 * scale), gap: Math.round(8 * scale) }}>
                     <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="INPUT_REGISTRY_DATA..."
-                        className="flex-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-none px-4 py-2 text-[11px] font-mono focus:ring-1 ring-black dark:ring-white transition-all outline-none uppercase"
+                        className="flex-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-none focus:ring-1 ring-black dark:ring-white transition-all outline-none uppercase font-mono"
+                        style={{ padding: `${Math.round(8 * scale)}px ${Math.round(16 * scale)}px`, fontSize: Math.round(11 * scale) }}
                     />
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || isSending}
-                        className="w-10 h-10 rounded-none bg-black dark:bg-white text-white dark:text-black flex items-center justify-center hover:scale-[1.05] active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all shadow-none border border-black dark:border-white"
+                        className="rounded-none bg-black dark:bg-white text-white dark:text-black flex items-center justify-center hover:scale-[1.05] active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all shadow-none border border-black dark:border-white"
+                        style={{ width: Math.round(40 * scale), height: Math.round(40 * scale) }}
                     >
-                        <Send className="w-3.5 h-3.5" />
+                        <Send style={{ width: Math.round(14 * scale), height: Math.round(14 * scale) }} />
                     </button>
                 </form>
             )}

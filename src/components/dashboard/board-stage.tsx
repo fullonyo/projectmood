@@ -23,7 +23,7 @@ export const BoardStage = forwardRef<HTMLDivElement, BoardStageProps>(
             <div
                 ref={ref}
                 className={cn(
-                    "relative w-full h-full p-10 canvas-items-wrapper",
+                    "relative w-full h-full p-4 sm:p-10 canvas-items-wrapper",
                     className
                 )}
                 {...props}

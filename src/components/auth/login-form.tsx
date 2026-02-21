@@ -46,7 +46,7 @@ export default function LoginForm() {
     }
 
     return (
-        <div className="h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden relative">
+        <div className="min-h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden relative">
             <div className="fixed inset-0 z-0 opacity-5 pointer-events-none">
                 <BackgroundEffect type="aurora" primaryColor="#000" />
             </div>
@@ -76,10 +76,10 @@ export default function LoginForm() {
                             <Fingerprint className="w-3 h-3 opacity-40" />
                             <span className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40">{t('auth.login.identify_presence')}</span>
                         </div>
-                        <h1 className="text-5xl font-black tracking-tighter uppercase leading-none">{t('auth.login.title')} <br /><span className="italic text-zinc-300">{t('auth.login.title_italic')}</span></h1>
+                        <h1 className="text-3xl sm:text-5xl font-black tracking-tighter uppercase leading-none">{t('auth.login.title')} <br /><span className="italic text-zinc-300">{t('auth.login.title_italic')}</span></h1>
                     </div>
 
-                    <div className="p-10 border border-zinc-200 bg-white relative">
+                    <div className="p-6 sm:p-10 border border-zinc-200 bg-white relative">
                         {/* Technical corner accents */}
                         <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-zinc-400" />
                         <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-zinc-400" />

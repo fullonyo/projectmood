@@ -13,6 +13,7 @@ import { BoardStage } from "./board-stage"
 import { useTranslation } from "@/i18n/context"
 import { useCanvasManager } from "@/hooks/use-canvas-manager"
 import { calculateResize, getResizeCursor, ResizeHandle, ResizeCorner, calculateRotation } from '@/lib/canvas-transforms'
+import { useViewportScale, getBlockFallbackSize } from '@/lib/canvas-scale'
 
 
 import { MoodBlock, Profile, ThemeConfig } from "@/types/database"
@@ -164,14 +165,19 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     const [isRotating, setIsRotating] = useState(false)
     const [localRotation, setLocalRotation] = useState(block.rotation || 0)
     const [shiftHeld, setShiftHeld] = useState(false)
-    const getFallbackSize = (type: string) => {
-        if (['photo', 'video', 'music', 'guestbook'].includes(type)) return 300
-        return 'auto'
-    }
+    const getFallbackSize = (type: string) => getBlockFallbackSize(type)
+
+    // 📌 Escala proporcional — consistente com página pública
+    const viewportScale = useViewportScale()
+
+    // State armazena valores em PIXELS DE TELA (já escalados)
+    // Isso garante que resize/drag opera no espaço visual correto
+    const scaleValue = (v: number | 'auto') => typeof v === 'number' ? v * viewportScale : v
+    const unscaleValue = (v: number | 'auto') => typeof v === 'number' ? Math.round(v / viewportScale) : v
 
     const [size, setSize] = useState({
-        width: block.width || getFallbackSize(block.type) as number | 'auto',
-        height: block.height || getFallbackSize(block.type) as number | 'auto'
+        width: scaleValue(block.width || getFallbackSize(block.type) as number | 'auto'),
+        height: scaleValue(block.height || getFallbackSize(block.type) as number | 'auto')
     })
     const [localPosition, setLocalPosition] = useState({ x: block.x, y: block.y })
 
@@ -189,16 +195,17 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     const mvY = useMotionValue(0)
 
     // Sync size with server props (when not actively resizing)
+    // Converte de pixels de referência para pixels de tela
     useEffect(() => {
         if (!isResizingRef.current) {
             const newSize = {
-                width: block.width || getFallbackSize(block.type) as number | 'auto',
-                height: block.height || getFallbackSize(block.type) as number | 'auto'
+                width: scaleValue(block.width || getFallbackSize(block.type) as number | 'auto'),
+                height: scaleValue(block.height || getFallbackSize(block.type) as number | 'auto')
             }
             setSize(newSize)
             sizeRef.current = newSize
         }
-    }, [block.width, block.height])
+    }, [block.width, block.height, viewportScale])
 
     // Sync position with server props (when not resizing/dragging)
     useEffect(() => {
@@ -288,8 +295,10 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
 
         const updates: any = {}
 
-        if (typeof finalSize.width === 'number') updates.width = Math.round(finalSize.width)
-        if (typeof finalSize.height === 'number') updates.height = Math.round(finalSize.height)
+        // Normalizar: dividir por scale para salvar em "pixels de referência"
+        // State já está em pixels de tela, então dividimos para obter referência
+        if (typeof finalSize.width === 'number') updates.width = unscaleValue(finalSize.width)
+        if (typeof finalSize.height === 'number') updates.height = unscaleValue(finalSize.height)
 
         // Send position for handles that move position
         if (['tl', 'bl', 'tr', 'top', 'left'].includes(handle)) {
@@ -514,7 +523,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             )}
 
             <div className={cn(
-                "w-full h-full transition-transform duration-200 overflow-hidden",
+                "w-full h-full transition-transform duration-200",
                 isDragging && "scale-[1.02] rotate-1",
                 (isDragging || isResizing) && "pointer-events-none"
             )}>

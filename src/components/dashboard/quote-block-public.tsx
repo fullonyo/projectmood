@@ -1,6 +1,7 @@
 "use client"
 
 import { QuoteBlockContent } from "@/lib/validations"
+import { useViewportScale } from "@/lib/canvas-scale"
 
 interface QuoteBlockPublicProps {
     content: QuoteBlockContent
@@ -16,17 +17,29 @@ export function QuoteBlockPublic({ content }: QuoteBlockPublicProps) {
         showQuotes = true
     } = content
 
+    const scale = useViewportScale()
+
     const getStyleClasses = () => {
         switch (style) {
             case 'bold':
-                return 'text-2xl font-black leading-tight'
+                return 'font-black leading-tight'
             case 'serif':
-                return 'text-xl font-serif italic leading-relaxed'
+                return 'font-serif italic leading-relaxed'
             case 'modern':
-                return 'text-lg font-medium tracking-tight leading-snug'
+                return 'font-medium tracking-tight leading-snug'
             case 'minimal':
             default:
-                return 'text-base font-normal leading-normal'
+                return 'font-normal leading-normal'
+        }
+    }
+
+    const getStyleFontSize = () => {
+        switch (style) {
+            case 'bold': return Math.round(24 * scale)
+            case 'serif': return Math.round(20 * scale)
+            case 'modern': return Math.round(18 * scale)
+            case 'minimal':
+            default: return Math.round(16 * scale)
         }
     }
 
@@ -34,7 +47,7 @@ export function QuoteBlockPublic({ content }: QuoteBlockPublicProps) {
         if (!showQuotes) return null
 
         return (
-            <span className="text-4xl leading-none opacity-30">
+            <span className="leading-none opacity-30" style={{ fontSize: Math.round(36 * scale) }}>
                 "
             </span>
         )
@@ -42,31 +55,36 @@ export function QuoteBlockPublic({ content }: QuoteBlockPublicProps) {
 
     return (
         <div
-            className="p-6 rounded-2xl shadow-lg relative overflow-hidden"
-            style={{ backgroundColor: bgColor, color }}
+            className="shadow-lg relative overflow-hidden"
+            style={{
+                backgroundColor: bgColor,
+                color,
+                padding: Math.round(24 * scale),
+                borderRadius: Math.round(16 * scale)
+            }}
         >
             {showQuotes && (
-                <div className="absolute top-2 left-2 opacity-10 text-6xl font-serif">
+                <div className="absolute opacity-10 font-serif" style={{ top: Math.round(8 * scale), left: Math.round(8 * scale), fontSize: Math.round(60 * scale) }}>
                     "
                 </div>
             )}
 
-            <div className="relative z-10 space-y-3">
-                <p className={getStyleClasses()}>
+            <div className="relative z-10 flex flex-col" style={{ gap: Math.round(12 * scale) }}>
+                <p className={getStyleClasses()} style={{ fontSize: getStyleFontSize() }}>
                     {showQuotes && <span className="opacity-50">"</span>}
                     {text}
                     {showQuotes && <span className="opacity-50">"</span>}
                 </p>
 
                 {author && (
-                    <p className="text-sm font-medium opacity-70 mt-3">
+                    <p className="font-medium opacity-70" style={{ fontSize: Math.round(14 * scale), marginTop: Math.round(12 * scale) }}>
                         — {author}
                     </p>
                 )}
             </div>
 
             {showQuotes && (
-                <div className="absolute bottom-2 right-2 opacity-10 text-6xl font-serif rotate-180">
+                <div className="absolute opacity-10 font-serif rotate-180" style={{ bottom: Math.round(8 * scale), right: Math.round(8 * scale), fontSize: Math.round(60 * scale) }}>
                     "
                 </div>
             )}

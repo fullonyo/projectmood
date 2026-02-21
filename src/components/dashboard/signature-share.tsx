@@ -25,7 +25,7 @@ export function SignatureShare({ username }: SignatureShareProps) {
     }
 
     return (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] mix-blend-difference pointer-events-auto group">
+        <div className="fixed bottom-4 sm:bottom-10 left-1/2 -translate-x-1/2 z-[60] mix-blend-difference pointer-events-auto group">
             <button
                 onClick={handleCopy}
                 className="flex items-center gap-4 group/btn outline-none"

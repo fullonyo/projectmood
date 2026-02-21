@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { useViewportScale } from "@/lib/canvas-scale"
 
 interface VideoBlockPublicProps {
     content: {
@@ -12,9 +13,10 @@ interface VideoBlockPublicProps {
 export function VideoBlockPublic({ content, isPublic = false }: VideoBlockPublicProps) {
     // User requested unmuted autoplay. Warning: Browsers may block this completely.
     const autoplayParams = isPublic ? '&autoplay=1&mute=0' : '';
+    const scale = useViewportScale()
 
     return (
-        <div className="w-full h-full p-2 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm rounded-none border border-black/10 dark:border-white/10 hover:scale-[1.02] transition-transform relative overflow-hidden flex flex-col">
+        <div className="w-full h-full bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm rounded-none border border-black/10 dark:border-white/10 hover:scale-[1.02] transition-transform relative overflow-hidden flex flex-col" style={{ padding: Math.round(8 * scale) }}>
             <iframe
                 src={`https://www.youtube.com/embed/${content.videoId}?loop=1&playlist=${content.videoId}&controls=1&rel=0${autoplayParams}`}
                 width="100%" height="100%" frameBorder="0"

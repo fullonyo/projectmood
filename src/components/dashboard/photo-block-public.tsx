@@ -1,6 +1,7 @@
 "use client"
 
 import { PhotoBlockContent } from "@/lib/validations"
+import { useViewportScale } from "@/lib/canvas-scale"
 
 import Image from "next/image"
 
@@ -16,6 +17,7 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
         frame = 'none',
         caption
     } = content
+    const scale = useViewportScale()
 
     const getFilterClass = () => {
         switch (filter) {
@@ -35,11 +37,11 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
     const getFrameClass = () => {
         switch (frame) {
             case 'polaroid':
-                return 'bg-white p-3 pb-12 border border-zinc-200 shadow-none'
+                return 'bg-white border border-zinc-200 shadow-none'
             case 'polaroid-dark':
-                return 'bg-zinc-900 p-3 pb-12 border border-zinc-800 shadow-none'
+                return 'bg-zinc-900 border border-zinc-800 shadow-none'
             case 'frame':
-                return 'border-4 border-white shadow-none'
+                return 'border-white shadow-none'
             case 'minimal':
                 return 'shadow-none border border-zinc-100 dark:border-zinc-900'
             case 'round':
@@ -49,9 +51,21 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
         }
     }
 
+    const getFrameStyles = () => {
+        switch (frame) {
+            case 'polaroid':
+            case 'polaroid-dark':
+                return { padding: `${Math.round(12 * scale)}px ${Math.round(12 * scale)}px ${Math.round(48 * scale)}px ${Math.round(12 * scale)}px` }
+            case 'frame':
+                return { borderWidth: Math.round(16 * scale) }
+            default:
+                return {}
+        }
+    }
+
     return (
-        <div className="w-full h-full flex flex-col p-2">
-            <div className={`relative w-full h-full flex-1 rounded-none overflow-hidden flex flex-col ${getFrameClass()}`}>
+        <div className="w-full h-full flex flex-col" style={{ padding: Math.round(8 * scale) }}>
+            <div className={`relative w-full h-full flex-1 rounded-none overflow-hidden flex flex-col ${getFrameClass()}`} style={getFrameStyles()}>
                 <div className="relative flex-1 w-full min-h-0 z-0">
                     <Image
                         src={imageUrl}
@@ -64,13 +78,13 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
                     />
                 </div>
                 {caption && (frame === 'polaroid' || frame === 'polaroid-dark') && (
-                    <div className="absolute bottom-3 left-3 right-3 text-center pointer-events-none">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 truncate">{caption}</p>
+                    <div className="absolute text-center pointer-events-none" style={{ left: Math.round(12 * scale), right: Math.round(12 * scale), bottom: Math.round(12 * scale) }}>
+                        <p className="font-black uppercase tracking-widest text-zinc-500 truncate" style={{ fontSize: Math.round(10 * scale) }}>{caption}</p>
                     </div>
                 )}
             </div>
             {caption && !(frame === 'polaroid' || frame === 'polaroid-dark') && (
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mt-2 text-center truncate">
+                <p className="font-black uppercase tracking-[0.2em] text-zinc-400 text-center truncate" style={{ fontSize: Math.round(9 * scale), marginTop: Math.round(8 * scale) }}>
                     {caption}
                 </p>
             )}

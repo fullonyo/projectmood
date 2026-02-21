@@ -15,7 +15,7 @@ export function ProfileSignature({ username, name, avatarUrl, isVerified = true 
     const { t } = useTranslation()
 
     return (
-        <header className="fixed top-10 left-10 z-50 mix-blend-difference group pointer-events-none">
+        <header className="fixed top-4 left-4 sm:top-10 sm:left-10 z-50 mix-blend-difference group pointer-events-none">
             <div className="flex items-start gap-5">
                 {/* Studio Avatar - High Fashion Style */}
                 <div className="relative pointer-events-auto">

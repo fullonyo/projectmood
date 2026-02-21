@@ -2,21 +2,27 @@
 
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { useViewportScale } from "@/lib/canvas-scale"
 
 interface TickerBlockProps {
     content: any
 }
 
 export function TickerBlockPublic({ content }: TickerBlockProps) {
+    const scale = useViewportScale()
+
     return (
         <div
             className={cn(
-                "p-6 rounded-none shadow-none border border-black/10 dark:border-white/10 relative overflow-hidden bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
-                "whitespace-nowrap border-y border-black/10 dark:border-white/10 shadow-none min-w-[300px] transition-all duration-500 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
-                "px-10 py-6 shadow-none border border-black/10 dark:border-white/10 relative overflow-hidden transition-all duration-500 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
+                "rounded-none shadow-none border border-black/10 dark:border-white/10 relative overflow-hidden bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
+                "whitespace-nowrap border-y shadow-none transition-all duration-500",
                 content.style === 'modern' && "bg-white dark:bg-zinc-950 rounded-none border border-black dark:border-white"
             )}
-            style={{ backgroundColor: content.bgColor }}
+            style={{
+                backgroundColor: content.bgColor,
+                minWidth: Math.round(300 * scale),
+                padding: `${Math.round(24 * scale)}px ${Math.round(40 * scale)}px`,
+            }}
         >
             <motion.div
                 animate={{
@@ -31,9 +37,10 @@ export function TickerBlockPublic({ content }: TickerBlockProps) {
             >
                 <span
                     className={cn(
-                        "text-sm font-black uppercase tracking-[0.2em] px-4",
+                        "font-black uppercase tracking-[0.2em]",
                         content.style === 'neon' && "animate-pulse"
                     )}
+                    style={{ fontSize: Math.round(14 * scale), paddingLeft: Math.round(16 * scale), paddingRight: Math.round(16 * scale) }}
                 >
                     {content.text} {content.text} {content.text} {content.text}
                 </span>

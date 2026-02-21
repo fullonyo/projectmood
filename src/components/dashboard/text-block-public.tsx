@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { useViewportScale } from "@/lib/canvas-scale"
 
 interface TextBlockPublicProps {
     content: {
@@ -14,29 +15,37 @@ interface TextBlockPublicProps {
 
 export function TextBlockPublic({ content }: TextBlockPublicProps) {
     const { text, style, bgColor, fontSize = 'xl', align = 'center' } = content
+    const scale = useViewportScale()
 
     return (
         <div
             className={cn(
-                "p-6 shadow-none border border-black/10 dark:border-white/10 transition-all duration-300 min-w-[220px] max-w-[450px] bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
-                style === 'postit' && "bg-[#ffff88] text-zinc-900 rotate-[-1deg] shadow-yellow-900/20 rounded-sm border-b-[20px] border-b-black/5 font-handwriting",
+                "shadow-none border border-black/10 dark:border-white/10 transition-all duration-300 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
+                style === 'postit' && "bg-[#ffff88] text-zinc-900 rotate-[-1deg] shadow-yellow-900/20 border-b-black/5 font-handwriting",
                 style === 'ripped' && "bg-white text-zinc-900 shadow-zinc-300/80",
-                style === 'typewriter' && "bg-transparent border-2 border-dashed border-current rounded-none px-4 py-8",
+                style === 'typewriter' && "bg-transparent border-2 border-dashed border-current rounded-none",
                 style === 'simple' && "bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none shadow-none"
             )}
             style={{
+                minWidth: Math.round(220 * scale),
+                maxWidth: Math.round(450 * scale),
+                padding: style === 'typewriter' ? `${Math.round(32 * scale)}px ${Math.round(16 * scale)}px` : `${Math.round(24 * scale)}px`,
                 backgroundColor: style === 'postit' ? undefined : bgColor,
                 clipPath: style === 'ripped' ? 'polygon(0% 2%, 98% 0%, 100% 100%, 2% 98%, 0% 50%)' : 'none',
-                textAlign: align
+                textAlign: align,
+                borderBottomWidth: style === 'postit' ? Math.round(20 * scale) : undefined,
+                borderRadius: style === 'postit' ? Math.round(2 * scale) : undefined
             }}
         >
-            <p className={cn(
-                "leading-relaxed transition-all whitespace-pre-wrap",
-                fontSize === 'sm' && "text-base",
-                fontSize === 'xl' && "text-3xl font-serif italic",
-                fontSize === '3xl' && "text-5xl font-black tracking-tighter font-mono uppercase",
-                style === 'typewriter' && "font-mono underline decoration-dotted"
-            )}>
+            <p
+                className={cn(
+                    "leading-relaxed transition-all whitespace-pre-wrap",
+                    fontSize === 'xl' && "font-serif italic",
+                    fontSize === '3xl' && "font-black tracking-tighter font-mono uppercase",
+                    style === 'typewriter' && "font-mono underline decoration-dotted"
+                )}
+                style={{ fontSize: Math.round((fontSize === 'sm' ? 16 : fontSize === '3xl' ? 48 : 30) * scale) }}
+            >
                 {text}
             </p>
         </div>

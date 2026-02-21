@@ -43,7 +43,7 @@ export default function RegisterForm() {
     }
 
     return (
-        <div className="h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden relative">
+        <div className="min-h-screen flex flex-col bg-white text-black selection:bg-black selection:text-white overflow-hidden relative">
             <div className="fixed inset-0 z-0 opacity-5 pointer-events-none">
                 <BackgroundEffect type="aurora" primaryColor="#000" />
             </div>
@@ -72,10 +72,10 @@ export default function RegisterForm() {
                             <UserPlus className="w-3 h-3 opacity-40" />
                             <span className="text-[8px] font-black uppercase tracking-[0.3em] opacity-40">{t('auth.register.request_alloc')}</span>
                         </div>
-                        <h1 className="text-5xl font-black tracking-tighter uppercase leading-none text-balance">{t('auth.register.title')} <br /><span className="italic text-zinc-300">{t('auth.register.title_italic')}</span></h1>
+                        <h1 className="text-3xl sm:text-5xl font-black tracking-tighter uppercase leading-none text-balance">{t('auth.register.title')} <br /><span className="italic text-zinc-300">{t('auth.register.title_italic')}</span></h1>
                     </div>
 
-                    <div className="p-10 border border-zinc-200 bg-white relative shadow-2xl">
+                    <div className="p-6 sm:p-10 border border-zinc-200 bg-white relative shadow-2xl">
                         {/* Technical accents */}
                         <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-black" />
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-black" />

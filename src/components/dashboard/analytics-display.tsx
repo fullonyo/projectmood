@@ -21,7 +21,7 @@ export function AnalyticsDisplay({ views, loading }: AnalyticsDisplayProps) {
     const vibe = getVibeStatus(views)
 
     return (
-        <div className="fixed bottom-10 left-10 z-[60] mix-blend-difference pointer-events-none">
+        <div className="fixed bottom-4 left-4 sm:bottom-10 sm:left-10 z-[60] mix-blend-difference pointer-events-none">
             <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-2">
                     <div className={cn("w-1 h-1 rounded-full animate-pulse bg-current", vibe.color)} />

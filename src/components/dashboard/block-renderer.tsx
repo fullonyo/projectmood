@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { useViewportScale } from "@/lib/canvas-scale"
 import { motion } from "framer-motion"
 import {
     Instagram, Twitter, Github, Linkedin, Youtube,
@@ -56,6 +57,7 @@ export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
 
 function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
     const content = block.content as any
+    const scale = useViewportScale()
 
     switch (block.type) {
         case 'text':
@@ -63,7 +65,7 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
 
         case 'gif':
             return (
-                <div className="w-full h-full p-1 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm rounded-none border border-black/10 dark:border-white/10 shadow-none flex items-center justify-center overflow-hidden">
+                <div className="w-full h-full bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm rounded-none border border-black/10 dark:border-white/10 shadow-none flex items-center justify-center overflow-hidden" style={{ padding: Math.round(4 * scale) }}>
                     <img src={content.url} alt="gif" className="rounded-none w-full h-full object-cover" />
                 </div>
             )
@@ -74,8 +76,8 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
                     className="w-full h-full shadow-none border border-black/5 backdrop-blur-[2px]"
                     style={{
                         backgroundColor: content.color,
-                        backgroundImage: content.pattern === 'dots' ? 'radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)' : 'none',
-                        backgroundSize: '4px 4px',
+                        backgroundImage: content.pattern === 'dots' ? `radial-gradient(rgba(0,0,0,0.1) ${Math.max(1, Math.round(1 * scale))}px, transparent ${Math.max(1, Math.round(1 * scale))}px)` : 'none',
+                        backgroundSize: `${Math.round(4 * scale)}px ${Math.round(4 * scale)}px`,
                         clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 98%)'
                     }}
                 />
