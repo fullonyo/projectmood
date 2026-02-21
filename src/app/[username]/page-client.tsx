@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { useViewportScale, scaleBlockSize, getBlockFallbackSize } from "@/lib/canvas-scale"
 import { ProfileSignature } from "@/components/dashboard/profile-signature"
 import { AnalyticsDisplay } from "@/components/dashboard/analytics-display"
-import { ViralBadge } from "@/components/dashboard/viral-badge"
+import { GuestPromotion } from "@/components/dashboard/guest-promotion"
 import { BoardStage } from "@/components/dashboard/board-stage"
 import { BlockRenderer } from "@/components/dashboard/block-renderer"
 import { StudioCatalogID } from "@/components/dashboard/studio-catalog-id"
@@ -18,7 +18,7 @@ import { FontLoader } from "@/components/dashboard/font-loader"
 import { Lightbulb, LightbulbOff } from "lucide-react"
 import type { PublicMoodPageProps } from "@/types/database"
 
-export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlocks, config, theme }: PublicMoodPageProps) {
+export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlocks, config, theme, isGuest }: PublicMoodPageProps) {
     const [isFocusMode, setIsFocusMode] = useState(false)
     const [views, setViews] = useState<number>(0)
     const [loadingViews, setLoadingViews] = useState(true)
@@ -91,7 +91,7 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                     views={views}
                     loading={loadingViews}
                 />
-                <ViralBadge />
+                {isGuest && <GuestPromotion username={publicUser.username} />}
                 <SignatureShare username={publicUser.username} />
             </div>
 

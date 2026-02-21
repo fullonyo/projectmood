@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,8 @@ export default async function PublicMoodPage({
     params,
 }: Props) {
     const { username } = await params;
+    const session = await auth();
+    const isGuest = !session;
 
     const { getProfileWithTags } = await import("@/lib/data-fetching");
     const user = await getProfileWithTags(username);
@@ -117,6 +120,7 @@ export default async function PublicMoodPage({
                 moodBlocks={moodBlocks}
                 config={config}
                 theme={theme}
+                isGuest={isGuest}
             />
         </div>
     );

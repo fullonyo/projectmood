@@ -121,6 +121,7 @@ export interface PublicMoodPageProps {
     moodBlocks: MoodBlock[];
     config: ThemeConfig;
     theme: string;
+    isGuest: boolean;
 }
 
 // ─── Content Types ───────────────────────────────────────────────────────────
