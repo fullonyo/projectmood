@@ -55,7 +55,7 @@ export function QuoteBlockPublic({ content }: QuoteBlockPublicProps) {
 
     return (
         <div
-            className="shadow-lg relative overflow-hidden"
+            className="w-full h-full flex flex-col justify-center shadow-lg relative overflow-hidden"
             style={{
                 backgroundColor: bgColor,
                 color,

@@ -12,7 +12,7 @@ export function SubtitleBlockPublic({ content }: SubtitleBlockProps) {
     const scale = useViewportScale()
 
     return (
-        <div style={{ padding: Math.round(24 * scale), maxWidth: Math.round(450 * scale) }}>
+        <div className="w-full h-full flex flex-col justify-center" style={{ padding: Math.round(24 * scale) }}>
             <motion.div
                 initial="hidden"
                 animate="visible"
@@ -26,7 +26,7 @@ export function SubtitleBlockPublic({ content }: SubtitleBlockProps) {
                     }
                 }}
                 className={cn(
-                    "shadow-none relative overflow-hidden transition-all duration-500 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm border border-black/10 dark:border-white/10",
+                    "w-full h-full flex flex-col justify-center shadow-none relative overflow-hidden transition-colors duration-500 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm border border-black/10 dark:border-white/10",
                     content.style === 'vhs' && "bg-[#050505]",
                     content.style === 'minimal' && "bg-transparent border-none rounded-none font-normal tracking-tight",
                     content.style === 'modern' && "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"

@@ -13,7 +13,7 @@ import { BoardStage } from "./board-stage"
 import { useTranslation } from "@/i18n/context"
 import { useCanvasManager } from "@/hooks/use-canvas-manager"
 import { calculateResize, getResizeCursor, ResizeHandle, ResizeCorner, calculateRotation } from '@/lib/canvas-transforms'
-import { useViewportScale, getBlockFallbackSize } from '@/lib/canvas-scale'
+import { useViewportScale } from '@/lib/canvas-scale'
 
 
 import { MoodBlock, Profile, ThemeConfig } from "@/types/database"
@@ -160,19 +160,46 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     onDeleteRequest: (id: string) => void
 }) {
     const { t } = useTranslation()
-    const getFallbackSize = (type: string) => getBlockFallbackSize(type)
-
     // 📌 Viewport Scale
     const viewportScale = useViewportScale()
-    const scaleValue = (v: number | 'auto') => typeof v === 'number' ? v * viewportScale : (v === 'auto' ? 200 * viewportScale : v)
+
+    // Smarter aspect-ratio fallback for brand new or 'auto' size blocks
+    const getDefaultDimensions = (type: string) => {
+        switch (type) {
+            case 'text':
+            case 'quote':
+            case 'subtitle':
+                return { w: 350, h: 150 };
+            case 'ticker':
+                return { w: 400, h: 80 };
+            case 'music':
+                return { w: 300, h: 120 };
+            case 'photo':
+            case 'video':
+            case 'guestbook':
+                return { w: 300, h: 300 };
+            case 'moodStatus':
+            case 'weather':
+                return { w: 300, h: 100 };
+            default:
+                return { w: 250, h: 250 };
+        }
+    }
+
+    // Convert 'auto' or undefined values to their fallback aspect ratio
+    const getInitialDimension = (val: number | 'auto' | undefined | null, axis: 'w' | 'h', type: string) => {
+        if (typeof val === 'number') return val * viewportScale;
+        return getDefaultDimensions(type)[axis] * viewportScale;
+    }
+
     const unscaleValue = (v: number | 'auto') => typeof v === 'number' ? Math.round(v / viewportScale) : v
 
     // ─── 1. ABSOLUTE SOURCE OF TRUTH (Bypasses React Render Cycle) ───
     const stateRef = useRef({
         x: block.x,
         y: block.y,
-        width: typeof block.width === 'number' ? scaleValue(block.width) : scaleValue(getFallbackSize(block.type) as number),
-        height: typeof block.height === 'number' ? scaleValue(block.height) : scaleValue(getFallbackSize(block.type) as number),
+        width: getInitialDimension(block.width, 'w', block.type),
+        height: getInitialDimension(block.height, 'h', block.type),
         rotation: block.rotation || 0,
         isInteracting: false,
         isInteractiveMode: false
@@ -205,8 +232,8 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     // Sync from server / other clients (ONLY when not user-interactings here)
     useEffect(() => {
         if (!stateRef.current.isInteracting) {
-            const newW = typeof block.width === 'number' ? scaleValue(block.width) : scaleValue(getFallbackSize(block.type) as number);
-            const newH = typeof block.height === 'number' ? scaleValue(block.height) : scaleValue(getFallbackSize(block.type) as number);
+            const newW = getInitialDimension(block.width, 'w', block.type);
+            const newH = getInitialDimension(block.height, 'h', block.type);
 
             stateRef.current.x = block.x;
             stateRef.current.y = block.y;
