@@ -1,4 +1,4 @@
-import { motion, useMotionValue } from "framer-motion"
+import { motion, useMotionValue, useTransform } from "framer-motion"
 import { toast } from "sonner"
 import { deleteMoodBlock } from "@/actions/profile"
 import { Trash2, RotateCw, Pencil, Move, MousePointer2 } from "lucide-react"
@@ -160,63 +160,37 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
     onDeleteRequest: (id: string) => void
 }) {
     const { t } = useTranslation()
-    const [isDragging, setIsDragging] = useState(false)
-    const [isResizing, setIsResizing] = useState(false)
-    const [isRotating, setIsRotating] = useState(false)
-    const [localRotation, setLocalRotation] = useState(block.rotation || 0)
-    const [shiftHeld, setShiftHeld] = useState(false)
     const getFallbackSize = (type: string) => getBlockFallbackSize(type)
 
-    // 📌 Escala proporcional — consistente com página pública
+    // 📌 Viewport Scale
     const viewportScale = useViewportScale()
-
-    // State armazena valores em PIXELS DE TELA (já escalados)
-    // Isso garante que resize/drag opera no espaço visual correto
-    const scaleValue = (v: number | 'auto') => typeof v === 'number' ? v * viewportScale : v
+    const scaleValue = (v: number | 'auto') => typeof v === 'number' ? v * viewportScale : (v === 'auto' ? 200 * viewportScale : v)
     const unscaleValue = (v: number | 'auto') => typeof v === 'number' ? Math.round(v / viewportScale) : v
 
-    const [size, setSize] = useState({
-        width: scaleValue(block.width || getFallbackSize(block.type) as number | 'auto'),
-        height: scaleValue(block.height || getFallbackSize(block.type) as number | 'auto')
+    // ─── 1. ABSOLUTE SOURCE OF TRUTH (Bypasses React Render Cycle) ───
+    const stateRef = useRef({
+        x: block.x,
+        y: block.y,
+        width: typeof block.width === 'number' ? scaleValue(block.width) : scaleValue(getFallbackSize(block.type) as number),
+        height: typeof block.height === 'number' ? scaleValue(block.height) : scaleValue(getFallbackSize(block.type) as number),
+        rotation: block.rotation || 0,
+        isInteracting: false,
+        isInteractiveMode: false
     })
-    const [localPosition, setLocalPosition] = useState({ x: block.x, y: block.y })
 
-    // ─── REFS: Source of truth for gesture handlers (avoid stale closures) ───
-    const sizeRef = useRef(size)
-    const positionRef = useRef(localPosition)
-    const isResizingRef = useRef(false)
+    // ─── 2. HIGH-PERFORMANCE DOM BINDINGS ───
+    const mvX = useMotionValue(stateRef.current.x)
+    const mvY = useMotionValue(stateRef.current.y)
+    const mvW = useMotionValue(stateRef.current.width)
+    const mvH = useMotionValue(stateRef.current.height)
+    const mvR = useMotionValue(stateRef.current.rotation)
 
-    // Keep refs in sync with state
-    useEffect(() => { sizeRef.current = size }, [size])
-    useEffect(() => { positionRef.current = localPosition }, [localPosition])
+    // CSS bindings for absolute positioning based on Canvas Parent
+    const styleLeft = useTransform(mvX, (v: number) => `${v}%`)
+    const styleTop = useTransform(mvY, (v: number) => `${v}%`)
 
-    // 🏎️ GPU-ACCELERATED VALUES: MotionValues bypass the React Render cycle
-    const mvX = useMotionValue(0)
-    const mvY = useMotionValue(0)
-
-    // Sync size with server props (when not actively resizing)
-    // Converte de pixels de referência para pixels de tela
-    useEffect(() => {
-        if (!isResizingRef.current) {
-            const newSize = {
-                width: scaleValue(block.width || getFallbackSize(block.type) as number | 'auto'),
-                height: scaleValue(block.height || getFallbackSize(block.type) as number | 'auto')
-            }
-            setSize(newSize)
-            sizeRef.current = newSize
-        }
-    }, [block.width, block.height, viewportScale])
-
-    // Sync position with server props (when not resizing/dragging)
-    useEffect(() => {
-        if (!isResizingRef.current && !isDragging) {
-            const newPos = { x: block.x, y: block.y }
-            setLocalPosition(newPos)
-            positionRef.current = newPos
-        }
-    }, [block.x, block.y, isDragging])
-
-    // Shift key tracking for aspect ratio lock
+    // Shift key tracking
+    const [shiftHeld, setShiftHeld] = useState(false)
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(true) }
         const onKeyUp = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(false) }
@@ -228,134 +202,174 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
         }
     }, [])
 
-    const handleDragStart = () => {
-        setIsDragging(true)
-        onSelect(false)
+    // Sync from server / other clients (ONLY when not user-interactings here)
+    useEffect(() => {
+        if (!stateRef.current.isInteracting) {
+            const newW = typeof block.width === 'number' ? scaleValue(block.width) : scaleValue(getFallbackSize(block.type) as number);
+            const newH = typeof block.height === 'number' ? scaleValue(block.height) : scaleValue(getFallbackSize(block.type) as number);
+
+            stateRef.current.x = block.x;
+            stateRef.current.y = block.y;
+            stateRef.current.width = newW as number;
+            stateRef.current.height = newH as number;
+            stateRef.current.rotation = block.rotation || 0;
+
+            mvX.set(block.x);
+            mvY.set(block.y);
+            mvW.set(newW as number);
+            mvH.set(newH as number);
+            mvR.set(block.rotation || 0);
+        }
+    }, [block.x, block.y, block.width, block.height, block.rotation, viewportScale])
+
+    // UI flags for styled classes (opacity, pointer-events, active borders)
+    const [isDragging, setIsDragging] = useState(false)
+    const [isResizing, setIsResizing] = useState(false)
+    const [isInteractiveMode, setIsInteractiveMode] = useState(false)
+    const isInteractiveBlock = ['video', 'music', 'guestbook', 'media'].includes(block.type)
+
+    useEffect(() => {
+        if (!isSelected) {
+            setIsInteractiveMode(false)
+            stateRef.current.isInteractiveMode = false
+        }
+    }, [isSelected])
+
+    // ─── 3. PAN HANDLERS (Drag, Resize, Rotate) ───
+
+    // DRAG BODY (Replacing unreliable drag={true} of Framer Motion)
+    const handleDragPan = (e: any, info: any) => {
+        if (stateRef.current.isInteractiveMode) return;
+        if (!canvasRef.current) return;
+
+        const canvas = canvasRef.current.getBoundingClientRect();
+        const dxPercent = (info.delta.x / canvas.width) * 100;
+        const dyPercent = (info.delta.y / canvas.height) * 100;
+
+        let newX = stateRef.current.x + dxPercent;
+        let newY = stateRef.current.y + dyPercent;
+
+        // Smart edge collision
+        const wPercent = (stateRef.current.width / canvas.width) * 100;
+        const hPercent = (stateRef.current.height / canvas.height) * 100;
+
+        newX = Math.max(0, Math.min(100 - wPercent, newX));
+        newY = Math.max(0, Math.min(100 - hPercent, newY));
+
+        stateRef.current.x = newX;
+        stateRef.current.y = newY;
+
+        mvX.set(newX);
+        mvY.set(newY);
     }
 
-    const handleDragEnd = (event: any, info: any) => {
-        setIsDragging(false)
-        if (!canvasRef.current) return
-
-        const canvasRect = canvasRef.current.getBoundingClientRect()
-
-        const deltaXPercent = (info.offset.x / canvasRect.width) * 100
-        const deltaYPercent = (info.offset.y / canvasRect.height) * 100
-
-        const newX = parseFloat(Math.max(0, Math.min(100, block.x + deltaXPercent)).toFixed(4))
-        const newY = parseFloat(Math.max(0, Math.min(100, block.y + deltaYPercent)).toFixed(4))
-
-        onUpdate({ x: newX, y: newY })
-
-        mvX.set(0)
-        mvY.set(0)
+    const handleDragStart = (e: any) => {
+        if (stateRef.current.isInteractiveMode) return;
+        setIsDragging(true);
+        stateRef.current.isInteracting = true;
+        onSelect(false);
     }
 
-    // ─── Figma-like Resize (reads from REFS to avoid stale closures) ────
-    const handleResize = (event: any, info: any, handle: ResizeHandle) => {
-        if (!canvasRef.current) return
-        setIsResizing(true)
-        isResizingRef.current = true
+    const handleDragEnd = () => {
+        if (stateRef.current.isInteractiveMode) return;
+        setIsDragging(false);
+        stateRef.current.isInteracting = false;
 
-        const canvasRect = canvasRef.current.getBoundingClientRect()
+        onUpdate({
+            x: parseFloat(stateRef.current.x.toFixed(4)),
+            y: parseFloat(stateRef.current.y.toFixed(4))
+        });
+    }
 
-        // Read from REFS (always latest values, immune to stale closures)
-        const currentSize = sizeRef.current
-        const currentPos = positionRef.current
-
-        const currentWidth = typeof currentSize.width === 'number' ? currentSize.width : event.target.closest('.absolute')?.offsetWidth || 200
-        const currentHeight = typeof currentSize.height === 'number' ? currentSize.height : event.target.closest('.absolute')?.offsetHeight || 100
+    // RESIZE HANDLES
+    const handleResizePan = (handle: ResizeHandle, e: any, info: any) => {
+        if (!canvasRef.current) return;
+        const canvas = canvasRef.current.getBoundingClientRect();
 
         const result = calculateResize(
             handle,
             info.delta.x,
             info.delta.y,
-            { x: currentPos.x, y: currentPos.y, width: currentWidth, height: currentHeight },
-            canvasRect.width,
-            canvasRect.height,
+            {
+                x: stateRef.current.x,
+                y: stateRef.current.y,
+                width: stateRef.current.width,
+                height: stateRef.current.height
+            },
+            canvas.width,
+            canvas.height,
             shiftHeld
-        )
+        );
 
-        // Update BOTH state (for React render) and refs (for next gesture frame)
-        const newSize = { width: result.width, height: result.height }
-        const newPos = { x: result.x, y: result.y }
-        setSize(newSize)
-        setLocalPosition(newPos)
-        sizeRef.current = newSize
-        positionRef.current = newPos
+        stateRef.current.x = result.x;
+        stateRef.current.y = result.y;
+        stateRef.current.width = result.width;
+        stateRef.current.height = result.height;
+
+        mvX.set(result.x);
+        mvY.set(result.y);
+        mvW.set(result.width);
+        mvH.set(result.height);
     }
 
-    const handleResizeEnd = (handle: ResizeHandle) => {
-        setIsResizing(false)
-        isResizingRef.current = false
-
-        // Read from REFS (guaranteed latest values after gesture)
-        const finalSize = sizeRef.current
-        const finalPos = positionRef.current
-
-        const updates: any = {}
-
-        // Normalizar: dividir por scale para salvar em "pixels de referência"
-        // State já está em pixels de tela, então dividimos para obter referência
-        if (typeof finalSize.width === 'number') updates.width = unscaleValue(finalSize.width)
-        if (typeof finalSize.height === 'number') updates.height = unscaleValue(finalSize.height)
-
-        // Send position for handles that move position
-        if (['tl', 'bl', 'tr', 'top', 'left'].includes(handle)) {
-            updates.x = finalPos.x
-            updates.y = finalPos.y
-        }
-
-        onUpdate(updates)
+    const handleResizeStart = (e: any) => {
+        e.stopPropagation();
+        setIsResizing(true);
+        stateRef.current.isInteracting = true;
     }
 
-    const handleRotate = (event: any, info: any) => {
-        if (!canvasRef.current) return
-        setIsRotating(true)
+    const handleResizeEnd = () => {
+        setIsResizing(false);
+        stateRef.current.isInteracting = false;
 
-        const canvasRect = canvasRef.current.getBoundingClientRect()
-        const currentPos = positionRef.current
-        const currentSize = sizeRef.current
+        onUpdate({
+            x: parseFloat(stateRef.current.x.toFixed(4)),
+            y: parseFloat(stateRef.current.y.toFixed(4)),
+            width: unscaleValue(stateRef.current.width) as number,
+            height: unscaleValue(stateRef.current.height) as number
+        });
+    }
 
-        // Fallback para DOM se size for auto (igual ao resize)
-        const currentWidth = typeof currentSize.width === 'number' ? currentSize.width : (canvasRef.current.querySelector(`[data-block-id="${block.id}"]`) as HTMLElement)?.offsetWidth || 100
-        const currentHeight = typeof currentSize.height === 'number' ? currentSize.height : (canvasRef.current.querySelector(`[data-block-id="${block.id}"]`) as HTMLElement)?.offsetHeight || 100
+    // ROTATE HANDLE
+    const handleRotatePan = (e: any, info: any) => {
+        if (!canvasRef.current) return;
 
-        // Centro do bloco em pixels relativos ao viewport
-        const blockCenterX = canvasRect.left + (currentPos.x / 100) * canvasRect.width + (currentWidth / 2)
-        const blockCenterY = canvasRect.top + (currentPos.y / 100) * canvasRect.height + (currentHeight / 2)
+        const canvas = canvasRef.current.getBoundingClientRect();
+        const blockCenterX = canvas.left + (stateRef.current.x / 100) * canvas.width + (stateRef.current.width / 2);
+        const blockCenterY = canvas.top + (stateRef.current.y / 100) * canvas.height + (stateRef.current.height / 2);
 
-        const newRotation = calculateRotation(
-            blockCenterX,
-            blockCenterY,
-            info.point.x,
-            info.point.y,
-            shiftHeld
-        )
+        const newRot = calculateRotation(blockCenterX, blockCenterY, info.point.x, info.point.y, shiftHeld);
 
-        setLocalRotation(newRotation)
+        stateRef.current.rotation = newRot;
+        mvR.set(newRot);
+    }
+
+    const handleRotateStart = (e: any) => {
+        e.stopPropagation();
+        stateRef.current.isInteracting = true;
     }
 
     const handleRotateEnd = () => {
-        setIsRotating(false)
-        onUpdate({ rotation: localRotation })
+        stateRef.current.isInteracting = false;
+        onUpdate({ rotation: stateRef.current.rotation });
     }
 
     const resetRotation = () => {
-        setLocalRotation(0)
+        stateRef.current.rotation = 0;
+        mvR.set(0);
         onUpdate({ rotation: 0 })
     }
 
     const handleDelete = () => onDeleteRequest(block.id)
 
-    const [isInteracting, setIsInteracting] = useState(false)
-    const isInteractiveBlock = ['video', 'music', 'guestbook', 'media'].includes(block.type)
+    const toggleInteraction = (e: any) => {
+        e.stopPropagation();
+        const nextState = !isInteractiveMode;
+        setIsInteractiveMode(nextState);
+        stateRef.current.isInteractiveMode = nextState;
+    }
 
-    useEffect(() => {
-        if (!isSelected) setIsInteracting(false)
-    }, [isSelected])
-
-    // ─── Render Resize Handle ───────────────────────────────────────────
+    // ─── Render Components ───────────────────────────────────────────
     const renderHandle = (handle: ResizeHandle) => {
         const isCorner = ['br', 'bl', 'tr', 'tl'].includes(handle)
         const handleSize = isCorner ? 'w-2.5 h-2.5' : (
@@ -374,70 +388,54 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
         }
 
         return (
-            <div
+            <motion.div
                 key={handle}
-                onPointerDown={(e) => {
-                    e.stopPropagation()
-                    setIsResizing(true)
-                }}
-                onPointerUp={() => setIsResizing(false)}
+                onPanStart={handleResizeStart}
+                onPan={(e, i) => handleResizePan(handle, e, i)}
+                onPanEnd={handleResizeEnd}
                 className={cn(
                     "absolute z-[1002] pointer-events-auto bg-black dark:bg-white border hover:scale-[1.2] active:scale-95 transition-transform",
                     positionClasses[handle],
                     handleSize,
                     isCorner ? "border-transparent" : "border-white dark:border-black"
                 )}
-                style={{ cursor: getResizeCursor(handle) }}
-            >
-                <motion.div
-                    onPan={(e, i) => handleResize(e, i, handle)}
-                    onPanEnd={() => handleResizeEnd(handle)}
-                    className="w-full h-full"
-                />
-            </div>
+                style={{ cursor: getResizeCursor(handle), touchAction: 'none' }}
+            />
         )
     }
 
-    // All handles: 4 corners + 4 edges
     const allHandles: ResizeHandle[] = ['br', 'bl', 'tr', 'tl', 'top', 'bottom', 'left', 'right']
 
     return (
         <motion.div
-            drag={!isResizing && !isRotating && !isInteracting}
-            dragMomentum={false}
-            dragConstraints={canvasRef}
-            dragElastic={0}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
+            onPanStart={handleDragStart}
+            onPan={handleDragPan}
+            onPanEnd={handleDragEnd}
             style={{
-                x: mvX,
-                y: mvY,
-                left: `${localPosition.x}%`,
-                top: `${localPosition.y}%`,
-                width: size.width,
-                height: size.height,
-                rotate: localRotation,
+                left: styleLeft,
+                top: styleTop,
+                width: mvW,
+                height: mvH,
+                rotate: mvR,
                 zIndex: isDragging || isSelected ? 999 : (block.zIndex || 1),
                 boxShadow: isSelected ? `0 0 0 2px ${themeConfig.bg}, 0 0 0 4px ${profile.primaryColor || '#3b82f6'}` : 'none',
-                touchAction: 'none'
-            }}
-            whileDrag={{
-                opacity: 0.8,
-                zIndex: 1000,
+                touchAction: 'none',
+                transformOrigin: 'center'
             }}
             onClick={(e) => {
-                if (isInteracting) return
+                if (isInteractiveMode) return
                 e.stopPropagation()
                 onSelect(false)
             }}
             onDoubleClick={(e) => {
-                if (isInteracting) return
+                if (isInteractiveMode) return
                 e.stopPropagation()
                 onSelect(false)
             }}
+            whileHover={{ zIndex: 998 }}
             className={cn(
                 "absolute group",
-                !isInteracting && "select-none touch-none",
+                !isInteractiveMode && "select-none touch-none",
                 isSelected ? "cursor-default" : "cursor-grab active:cursor-grabbing"
             )}
             data-block-id={block.id}
@@ -447,7 +445,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 <div
                     className={cn(
                         "absolute -inset-[3px] pointer-events-none z-[1001] transition-all",
-                        isInteracting ? "border-[3px] border-white shadow-none mix-blend-difference" : "border border-dashed border-black/50 dark:border-white/50 bg-black/5"
+                        isInteractiveMode ? "border-[3px] border-white shadow-none mix-blend-difference" : "border border-dashed border-black/50 dark:border-white/50 bg-black/5"
                     )}
                 />
             )}
@@ -466,10 +464,10 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                         <Move className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                     </div>
                     <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-                    {localRotation !== 0 && (
+                    {stateRef.current.rotation !== 0 && (
                         <>
                             <button onClick={resetRotation} className="px-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors text-[9px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400" title={t('common.reset_rotation')}>
-                                {localRotation}°
+                                {stateRef.current.rotation}°
                             </button>
                             <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
                         </>
@@ -477,17 +475,14 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                     {isInteractiveBlock && (
                         <>
                             <button
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    setIsInteracting(!isInteracting)
-                                }}
+                                onClick={toggleInteraction}
                                 className={cn(
                                     "p-1.5 transition-all outline outline-1 -outline-offset-1 border border-transparent",
-                                    isInteracting
+                                    isInteractiveMode
                                         ? "bg-black text-white dark:bg-white dark:text-black outline-current animate-pulse"
                                         : "hover:bg-black/5 text-zinc-600 dark:text-zinc-400 outline-transparent"
                                 )}
-                                title={isInteracting ? t('common.disable_interaction') : t('common.enable_interaction')}
+                                title={isInteractiveMode ? t('common.disable_interaction') : t('common.enable_interaction')}
                             >
                                 <MousePointer2 className="w-4 h-4" />
                             </button>
@@ -505,18 +500,14 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
                 <>
                     {allHandles.map(renderHandle)}
 
-                    {/* Rotation Handle (Lollipop Reto e Arestas Vivas) */}
-                    <div
-                        className="absolute left-1/2 -top-8 -translate-x-1/2 w-[2px] h-8 bg-black dark:bg-white z-[1002] pointer-events-auto cursor-grab active:cursor-grabbing origin-bottom"
-                    >
+                    {/* Rotation Handle */}
+                    <div className="absolute left-1/2 -top-8 -translate-x-1/2 w-[2px] h-8 bg-black dark:bg-white z-[1002] pointer-events-auto origin-bottom">
                         <motion.div
-                            drag
-                            dragMomentum={false}
-                            dragElastic={0}
-                            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                            onPan={handleRotate}
+                            onPanStart={handleRotateStart}
+                            onPan={handleRotatePan}
                             onPanEnd={handleRotateEnd}
-                            className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white dark:bg-zinc-950 border-2 border-black dark:border-white hover:scale-125 transition-transform"
+                            className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white dark:bg-zinc-950 border-2 border-black dark:border-white hover:scale-125 transition-transform cursor-grab active:cursor-grabbing"
+                            style={{ touchAction: 'none' }}
                         />
                     </div>
                 </>
@@ -529,7 +520,7 @@ function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile,
             )}>
                 <BlockRenderer
                     block={block}
-                    isPublic={isInteracting}
+                    isPublic={isInteractiveMode}
                 />
             </div>
         </motion.div>
