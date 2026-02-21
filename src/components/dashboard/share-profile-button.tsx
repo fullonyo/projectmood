@@ -60,7 +60,7 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
                     variant="outline"
                     size="sm"
                     onClick={handleCopyLink}
-                    className="h-10 rounded-none border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-[0.2em] px-4 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+                    className="h-10 rounded-none border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-[0.2em] px-4 gap-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                 >
                     {copied ? (
                         <>
@@ -79,7 +79,7 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowQR(!showQR)}
-                    className="h-10 rounded-none border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-[0.2em] px-4 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+                    className="h-10 rounded-none border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-[0.2em] px-4 gap-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                 >
                     <QrCode className="w-3.5 h-3.5" />
                     {t('editors.share.qr_code')}

@@ -91,7 +91,7 @@ export function ActionsSidebar({ username, profile, publishedAt }: ActionsSideba
 
     return (
         <aside className="relative w-80 h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-none z-50 overflow-hidden">
-            <LanguageSwitcher className="absolute top-8 right-6" />
+            <LanguageSwitcher className="absolute top-3 right-6" />
 
             {/* Hidden File Input */}
             <input
