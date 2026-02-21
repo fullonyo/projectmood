@@ -279,6 +279,13 @@ export const pt = {
             alias_placeholder: "Meu perfil...",
             style_manifesto: "Estilo do Botão",
             deploy: "Adicionar link",
+            custom_link: "Link Personalizado",
+            styles: {
+                tag: "Etiqueta",
+                glass: "Glass",
+                minimal: "Minimal",
+                neon: "Neon"
+            }
         },
         doodle: {
             title: "Sua folha de rascunhos",

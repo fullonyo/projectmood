@@ -279,6 +279,13 @@ export const en: Dictionary = {
             alias_placeholder: "My profile...",
             style_manifesto: "Button Style",
             deploy: "Add link",
+            custom_link: "Custom Link",
+            styles: {
+                tag: "Tag",
+                glass: "Glass",
+                minimal: "Minimal",
+                neon: "Neon"
+            }
         },
         doodle: {
             title: "Your draftpad",

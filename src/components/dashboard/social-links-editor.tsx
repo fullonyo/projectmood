@@ -30,14 +30,14 @@ const PLATFORMS = [
     { id: 'pinterest', icon: PinterestIcon, label: 'Pinterest', color: '#E60023' },
     { id: 'github', icon: Github, label: 'GitHub', color: '#333' },
     { id: 'youtube', icon: Youtube, label: 'YouTube', color: '#FF0000' },
-    { id: 'custom', icon: LinkIcon, label: 'Link Personalizado', color: '#666' },
+    { id: 'custom', icon: LinkIcon, label: 'custom_link', color: '#666' },
 ]
 
 const STYLES = [
-    { id: 'tag', label: 'Etiqueta' },
-    { id: 'glass', label: 'Glass' },
-    { id: 'minimal', label: 'Minimal' },
-    { id: 'neon', label: 'Neon' }
+    { id: 'tag', label: 'tag' },
+    { id: 'glass', label: 'glass' },
+    { id: 'minimal', label: 'minimal' },
+    { id: 'neon', label: 'neon' }
 ]
 
 export function SocialLinksEditor({
@@ -125,12 +125,12 @@ export function SocialLinksEditor({
                 <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
                     <Share2 className="w-3.5 h-3.5 text-black dark:text-white" />
                 </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.social_links.title')}</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.social.title')}</h3>
             </div>
 
             <div className="space-y-6 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
                 <div className="p-5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
-                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">{t('editors.social_links.node_identity')}</p>
+                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">{t('editors.social.nodes')}</p>
                     <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800">
                         {PLATFORMS.map((p) => (
                             <button
@@ -154,18 +154,18 @@ export function SocialLinksEditor({
 
                 <div className="p-5 space-y-4">
                     <div className="space-y-3">
-                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.social_links.link_protocol')}</p>
+                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.social.link_protocol')}</p>
                         <Input
-                            placeholder="https://..."
+                            placeholder={t('editors.social.link_placeholder')}
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
                             className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] font-mono h-11 uppercase tracking-tight focus-visible:ring-0"
                         />
                     </div>
                     <div className="space-y-3">
-                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.social_links.alias')}</p>
+                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.social.visual_alias')}</p>
                         <Input
-                            placeholder="Ex: Meu Perfil"
+                            placeholder={t('editors.social.alias_placeholder')}
                             value={label}
                             onChange={(e) => setLabel(e.target.value)}
                             className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] uppercase font-mono h-11 focus-visible:ring-0"
@@ -175,7 +175,7 @@ export function SocialLinksEditor({
 
                 <div className="p-5 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30 space-y-6">
                     <div className="space-y-3">
-                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.social_links.style')}</p>
+                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em]">{t('editors.social.style_manifesto')}</p>
                         <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                             {STYLES.map((s) => (
                                 <button
@@ -188,7 +188,7 @@ export function SocialLinksEditor({
                                             : "text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900"
                                     )}
                                 >
-                                    {s.label.toUpperCase()}
+                                    {t(`editors.social.styles.${s.id}`)}
                                 </button>
                             ))}
                         </div>
@@ -199,7 +199,7 @@ export function SocialLinksEditor({
                         disabled={isPending || (!url && !block?.id)}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-12 font-black uppercase tracking-widest text-xs shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] hover:shadow-none hover:translate-y-1 hover:translate-x-1 transition-all"
                     >
-                        {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.social_links.add_link'))}
+                        {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.social.deploy'))}
                     </Button>
                 </div>
             </div>
