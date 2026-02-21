@@ -1,11 +1,7 @@
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { DashboardClientLayout } from "@/components/dashboard/dashboard-client-layout";
-import Link from "next/link";
-import { ExternalLink, LogOut, Eye } from "lucide-react";
-import { ShareProfileButton } from "@/components/dashboard/share-profile-button";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -43,10 +39,17 @@ export default async function DashboardPage() {
         orderBy: { order: 'asc' },
     });
 
+    // Buscar última publicação ativa
+    const activeVersion = await prisma.profileVersion.findFirst({
+        where: { profileId: profile.id, isActive: true },
+        select: { createdAt: true }
+    });
+    const publishedAt = activeVersion?.createdAt?.toISOString() || null;
+
     return (
         <div className="h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden">
             {/* Client Layout with Sidebars and Canvas - Header was merged into Right Sidebar */}
-            <DashboardClientLayout profile={profile} moodBlocks={moodBlocks} username={username} />
+            <DashboardClientLayout profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} />
         </div>
     );
 }

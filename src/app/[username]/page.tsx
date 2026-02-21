@@ -5,8 +5,7 @@ import { Metadata } from "next";
 import { themeConfigs } from "@/lib/themes";
 import { PublicMoodPageClient } from "./page-client";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+
 
 type Props = {
     params: Promise<{ username: string }>;
@@ -39,20 +38,43 @@ export default async function PublicMoodPage({
 
     if (!user || !user.profile) notFound();
 
-    const { profile, moodBlocks } = user;
+    const { profile, moodBlocks: liveBlocks } = user;
 
-    const theme = profile.theme || 'light';
+    // Draft/Publish: ler da versão ativa, com fallback para blocos live
+    const activeVersion = (profile as any).versions?.[0];
+    const moodBlocks = activeVersion
+        ? (activeVersion.blocks as typeof liveBlocks)
+        : liveBlocks;
+
+    // Construir profileData efetivo: snapshot publicado > profile live
+    // Usa ?? (nullish coalescing) ao invés de || para respeitar valores falsy como "" ou 0
+    const visualConfig = activeVersion?.profileData as Record<string, any> | null;
+
+    const effectiveProfile = {
+        ...profile,
+        theme: visualConfig?.theme ?? profile.theme ?? 'light',
+        backgroundColor: visualConfig?.backgroundColor ?? profile.backgroundColor,
+        primaryColor: visualConfig?.primaryColor ?? profile.primaryColor,
+        fontStyle: visualConfig?.fontStyle ?? profile.fontStyle,
+        customCursor: visualConfig?.customCursor ?? profile.customCursor,
+        mouseTrails: visualConfig?.mouseTrails ?? profile.mouseTrails,
+        backgroundEffect: visualConfig?.backgroundEffect ?? profile.backgroundEffect,
+        customFont: visualConfig?.customFont ?? profile.customFont,
+        staticTexture: visualConfig?.staticTexture ?? profile.staticTexture,
+        avatarUrl: visualConfig?.avatarUrl ?? profile.avatarUrl,
+    };
+
+    const theme = effectiveProfile.theme;
     const config = themeConfigs[theme] || themeConfigs.light;
 
-    // Preserve custom background color if set in light theme
-    const finalBg = (theme === 'light' && profile.backgroundColor) ? profile.backgroundColor : config.bg;
-    const finalPrimary = (theme === 'light' && profile.primaryColor) ? profile.primaryColor : config.primary;
+    const finalBg = (theme === 'light' && effectiveProfile.backgroundColor) ? effectiveProfile.backgroundColor : config.bg;
+    const finalPrimary = (theme === 'light' && effectiveProfile.primaryColor) ? effectiveProfile.primaryColor : config.primary;
 
     return (
         <div
             className={cn(
                 "h-screen w-full relative overflow-hidden transition-all duration-1000",
-                profile.fontStyle === 'serif' ? 'font-serif' : profile.fontStyle === 'mono' ? 'font-mono' : 'font-sans'
+                effectiveProfile.fontStyle === 'serif' ? 'font-serif' : effectiveProfile.fontStyle === 'mono' ? 'font-mono' : 'font-sans'
             )}
             style={{
                 backgroundColor: finalBg,
@@ -61,7 +83,7 @@ export default async function PublicMoodPage({
         >
             <PublicMoodPageClient
                 user={user}
-                profile={profile}
+                profile={effectiveProfile}
                 moodBlocks={moodBlocks}
                 config={config}
                 theme={theme}

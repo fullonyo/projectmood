@@ -388,5 +388,17 @@ export const en: Dictionary = {
             stable: "Calm Tuning",
             views: "Visiting Souls"
         }
+    },
+    publish: {
+        button: "publish diorama",
+        confirm_title: "publish changes?",
+        confirm_message: "your diorama will be updated for all visitors.",
+        confirm_action: "publish now",
+        success: "diorama published",
+        last_published: "published",
+        unpublished_changes: "draft",
+        never_published: "never published",
+        rollback: "rollback to this version",
+        version_history: "history"
     }
 };

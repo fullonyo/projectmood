@@ -42,7 +42,26 @@ model Profile {
 
   updatedAt       DateTime @default(now()) @updatedAt
   
+  // Relações
   analytics       ProfileAnalytics?
+  versions        ProfileVersion[]
+}
+
+model ProfileVersion {
+  id          String   @id @default(cuid())
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  blocks      Json     // Snapshot completo dos blocos (array de MoodBlock serializado)
+  profileData Json?    // Snapshot das configs visuais (tema, cores, efeitos) para rollback completo
+  
+  isActive    Boolean  @default(false)
+  label       String?  // Ex: "v3", "com foto nova", nome de template
+  
+  createdAt   DateTime @default(now())
+
+  @@index([profileId])
+  @@index([profileId, isActive])
 }
 
 model MoodBlock {

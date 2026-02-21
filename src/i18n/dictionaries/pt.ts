@@ -388,5 +388,17 @@ export const pt = {
             stable: "Sintonia Calma",
             views: "Almas Visitantes"
         }
+    },
+    publish: {
+        button: "publicar diorama",
+        confirm_title: "publicar alterações?",
+        confirm_message: "seu diorama será atualizado para todos os visitantes.",
+        confirm_action: "publicar agora",
+        success: "diorama publicado",
+        last_published: "publicado",
+        unpublished_changes: "rascunho",
+        never_published: "nunca publicado",
+        rollback: "reverter para esta versão",
+        version_history: "histórico"
     }
 };

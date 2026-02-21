@@ -9,7 +9,14 @@ export const getProfileWithTags = async (username: string) => {
             return await prisma.user.findUnique({
                 where: { username },
                 include: {
-                    profile: true,
+                    profile: {
+                        include: {
+                            versions: {
+                                where: { isActive: true },
+                                take: 1
+                            }
+                        }
+                    },
                     moodBlocks: { orderBy: { order: "asc" } },
                 },
             });
