@@ -221,7 +221,8 @@ export function ActionsSidebar({ username, profile, publishedAt }: ActionsSideba
 
                         <Link href={`/${username}`} target="_blank" className="w-full">
                             <Button
-                                className="w-full justify-between h-14 rounded-none text-[10px] font-black uppercase tracking-[0.3em] bg-transparent text-black dark:text-white hover:scale-[1.02] active:scale-95 transition-all group shadow-none border border-black dark:border-white"
+                                variant="outline"
+                                className="w-full justify-between h-14 rounded-none text-[10px] font-black uppercase tracking-[0.3em] bg-transparent text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:scale-[1.02] active:scale-95 transition-all group shadow-none border border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white"
                             >
                                 <div className="flex items-center gap-3">
                                     <ExternalLink className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
