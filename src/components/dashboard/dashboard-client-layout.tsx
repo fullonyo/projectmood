@@ -20,17 +20,18 @@ interface DashboardClientLayoutProps {
     moodBlocks: MoodBlock[];
     username: string;
     publishedAt?: string | null;
+    hasUnpublishedChanges?: boolean;
 }
 
-export function DashboardClientLayout({ profile, moodBlocks, username, publishedAt }: DashboardClientLayoutProps) {
+export function DashboardClientLayout({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges }: DashboardClientLayoutProps) {
     return (
         <CanvasInteractionProvider>
-            <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} />
+            <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} />
         </CanvasInteractionProvider>
     )
 }
 
-function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt }: DashboardClientLayoutProps) {
+function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges }: DashboardClientLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -128,7 +129,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                         className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
                     >
                         <div className="pointer-events-auto h-full shadow-none relative">
-                            <ActionsSidebar username={username} profile={localProfile} publishedAt={publishedAt} />
+                            <ActionsSidebar username={username} profile={localProfile} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} />
 
                             {/* Inner Collapse Button */}
                             <button

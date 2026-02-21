@@ -39,6 +39,7 @@ const MediaBlockPublic = dynamic(() => import("./media-block-public").then(mod =
 const SocialBlockPublic = dynamic(() => import("./social-block-public").then(mod => mod.SocialBlockPublic))
 
 import { MoodBlock } from "@/types/database"
+import { BlockErrorBoundary } from "./block-error-boundary"
 
 interface BlockRendererProps {
     block: MoodBlock
@@ -46,6 +47,14 @@ interface BlockRendererProps {
 }
 
 export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
+    return (
+        <BlockErrorBoundary blockType={block.type}>
+            <BlockRendererInner block={block} isPublic={isPublic} />
+        </BlockErrorBoundary>
+    );
+}
+
+function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
     const content = block.content as any
 
     switch (block.type) {

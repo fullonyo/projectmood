@@ -403,9 +403,17 @@ export const en: Dictionary = {
         confirm_action: "publish now",
         success: "diorama published",
         last_published: "published",
-        unpublished_changes: "draft",
+        unpublished_changes: "pending changes",
+        synced: "synced",
         never_published: "never published",
-        rollback: "rollback to this version",
-        version_history: "history"
+        rollback: "rollback",
+        rollback_confirm_title: "rollback to this version?",
+        rollback_confirm_message: "the public diorama will be updated to this version.",
+        rollback_success: "version rolled back",
+        version_history: "history",
+        active_label: "active",
+        no_versions: "no versions",
+        loading_history: "loading...",
+        history_error: "error loading history"
     }
 };

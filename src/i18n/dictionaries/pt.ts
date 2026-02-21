@@ -403,9 +403,17 @@ export const pt = {
         confirm_action: "publicar agora",
         success: "diorama publicado",
         last_published: "publicado",
-        unpublished_changes: "rascunho",
+        unpublished_changes: "mudanças pendentes",
+        synced: "sincronizado",
         never_published: "nunca publicado",
-        rollback: "reverter para esta versão",
-        version_history: "histórico"
+        rollback: "reverter",
+        rollback_confirm_title: "reverter para esta versão?",
+        rollback_confirm_message: "o diorama público será atualizado para esta versão.",
+        rollback_success: "versão revertida",
+        version_history: "histórico",
+        active_label: "ativa",
+        no_versions: "nenhuma versão",
+        loading_history: "carregando...",
+        history_error: "erro ao carregar histórico"
     }
 };

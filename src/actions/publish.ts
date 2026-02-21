@@ -205,3 +205,90 @@ export async function getActiveVersion() {
         select: { id: true, label: true, createdAt: true }
     })
 }
+
+// ─── DRAFT CHANGE DETECTION ─────────────────────────────────────────────────
+
+/**
+ * Compara o estado atual (draft) com o último snapshot publicado.
+ * Retorna true se existem mudanças não publicadas.
+ * 
+ * Estratégia: serializa blocos + profileData e compara strings.
+ * Simples e determinístico — sem necessidade de hash criptográfico.
+ */
+export async function computeHasUnpublishedChanges() {
+    const session = await auth()
+    if (!session?.user?.id) return false
+
+    const userId = session.user.id
+
+    try {
+        const profile = await prisma.profile.findUnique({
+            where: { userId },
+            select: {
+                id: true,
+                theme: true,
+                backgroundColor: true,
+                primaryColor: true,
+                fontStyle: true,
+                customCursor: true,
+                mouseTrails: true,
+                backgroundEffect: true,
+                customFont: true,
+                staticTexture: true,
+                avatarUrl: true,
+            }
+        })
+
+        if (!profile) return false
+
+        // Buscar estado draft atual (excluir id — o snapshot publicado inclui id que não tem na query draft)
+        const draftBlocks = await prisma.moodBlock.findMany({
+            where: { userId },
+            orderBy: { order: 'asc' },
+            select: {
+                type: true, content: true,
+                x: true, y: true, width: true, height: true,
+                zIndex: true, rotation: true, order: true,
+            }
+        })
+
+        // Buscar último snapshot publicado
+        const activeVersion = await prisma.profileVersion.findFirst({
+            where: { profileId: profile.id, isActive: true },
+            select: { blocks: true, profileData: true }
+        })
+
+        if (!activeVersion) return true // Nunca publicou → tem mudanças
+
+        // Serializar e comparar
+        const draftProfileData = JSON.stringify({
+            theme: profile.theme,
+            backgroundColor: profile.backgroundColor,
+            primaryColor: profile.primaryColor,
+            fontStyle: profile.fontStyle,
+            customCursor: profile.customCursor,
+            mouseTrails: profile.mouseTrails,
+            backgroundEffect: profile.backgroundEffect,
+            customFont: profile.customFont,
+            staticTexture: profile.staticTexture,
+            avatarUrl: profile.avatarUrl,
+        })
+
+        const publishedProfileData = JSON.stringify(activeVersion.profileData)
+        const draftBlocksStr = JSON.stringify(draftBlocks)
+
+        // IMPORTANTE: normalizar blocos publicados para os MESMOS campos do draft
+        // O snapshot inclui 'id' que não existe no select do draft — precisamos excluí-lo
+        const publishedBlocks = (activeVersion.blocks as any[])?.map((b: any) => ({
+            type: b.type, content: b.content,
+            x: b.x, y: b.y, width: b.width, height: b.height,
+            zIndex: b.zIndex, rotation: b.rotation, order: b.order,
+        })) ?? []
+        const publishedBlocksStr = JSON.stringify(publishedBlocks)
+
+        return draftProfileData !== publishedProfileData || draftBlocksStr !== publishedBlocksStr
+    } catch (error) {
+        console.error('[computeHasUnpublishedChanges]', error)
+        return false
+    }
+}

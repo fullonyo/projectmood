@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import { themeConfigs } from "@/lib/themes";
 import { PublicMoodPageClient } from "./page-client";
+import type { ProfileWithVersions, ProfileVisualConfig } from "@/types/database";
 
 
 
@@ -41,14 +42,15 @@ export default async function PublicMoodPage({
     const { profile, moodBlocks: liveBlocks } = user;
 
     // Draft/Publish: ler da versão ativa, com fallback para blocos live
-    const activeVersion = (profile as any).versions?.[0];
+    const profileWithVersions = profile as ProfileWithVersions;
+    const activeVersion = profileWithVersions.versions?.[0];
     const moodBlocks = activeVersion
         ? (activeVersion.blocks as typeof liveBlocks)
         : liveBlocks;
 
     // Construir profileData efetivo: snapshot publicado > profile live
     // Usa ?? (nullish coalescing) ao invés de || para respeitar valores falsy como "" ou 0
-    const visualConfig = activeVersion?.profileData as Record<string, any> | null;
+    const visualConfig = activeVersion?.profileData as ProfileVisualConfig | null;
 
     const effectiveProfile = {
         ...profile,
@@ -82,7 +84,8 @@ export default async function PublicMoodPage({
             }}
         >
             <PublicMoodPageClient
-                user={user}
+                publicUser={{ username: user.username, name: user.name }}
+                profileId={effectiveProfile.id}
                 profile={effectiveProfile}
                 moodBlocks={moodBlocks}
                 config={config}

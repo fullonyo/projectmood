@@ -70,3 +70,85 @@ export interface ThemeConfig {
     bgSize: string;
     gridOpacity: string;
 }
+
+// ─── Draft/Publish System Types ──────────────────────────────────────────────
+
+/** Configurações visuais do perfil (snapshot imutável no ProfileVersion) */
+export interface ProfileVisualConfig {
+    theme: string;
+    backgroundColor: string | null;
+    primaryColor: string | null;
+    fontStyle: string | null;
+    customCursor: string | null;
+    mouseTrails: string | null;
+    backgroundEffect: string | null;
+    customFont: string | null;
+    staticTexture: string | null;
+    avatarUrl: string | null;
+}
+
+/** Versão publicada de um perfil (snapshot imutável) */
+export interface ProfileVersion {
+    id: string;
+    profileId: string;
+    blocks: MoodBlock[];
+    profileData: ProfileVisualConfig | null;
+    isActive: boolean;
+    label: string | null;
+    createdAt: Date | string;
+}
+
+/** Profile com versões incluídas (resultado do include do Prisma) */
+export interface ProfileWithVersions extends Profile {
+    versions?: ProfileVersion[];
+}
+
+// ─── Public Page Types ───────────────────────────────────────────────────────
+
+/** DTO sanitizado do User para envio ao client (sem password/email/id) */
+export interface PublicUser {
+    username: string;
+    name: string | null;
+}
+
+/** Props tipadas do componente PublicMoodPageClient */
+export interface PublicMoodPageProps {
+    publicUser: PublicUser;
+    profileId: string;
+    profile: Profile;
+    moodBlocks: MoodBlock[];
+    config: ThemeConfig;
+    theme: string;
+}
+
+// ─── Content Types ───────────────────────────────────────────────────────────
+
+export interface SocialContent {
+    platform: string;
+    url: string;
+    label?: string;
+    style?: 'tag' | 'glass' | 'minimal' | 'neon';
+}
+
+export interface CountdownContent {
+    label: string;
+    targetDate: string;
+    icon?: string;
+    style?: string;
+}
+
+export interface GuestbookContent {
+    title: string;
+    color?: string;
+}
+
+export interface MoodStatusContent {
+    emoji: string;
+    text?: string;
+}
+
+export interface WeatherContent {
+    state: string;
+    location?: string;
+    temperature?: string;
+}

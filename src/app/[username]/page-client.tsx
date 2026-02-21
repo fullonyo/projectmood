@@ -15,14 +15,14 @@ import { CustomCursor } from "@/components/effects/custom-cursor"
 import { MouseTrails } from "@/components/effects/mouse-trails"
 import { FontLoader } from "@/components/dashboard/font-loader"
 import { Lightbulb, LightbulbOff } from "lucide-react"
+import type { PublicMoodPageProps } from "@/types/database"
 
-export function PublicMoodPageClient({ user, profile, moodBlocks, config, theme }: any) {
+export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlocks, config, theme }: PublicMoodPageProps) {
     const [isFocusMode, setIsFocusMode] = useState(false)
     const [views, setViews] = useState<number>(0)
     const [loadingViews, setLoadingViews] = useState(true)
 
     useEffect(() => {
-        const profileId = user.profile.id
         const storageKey = `mood_v_${profileId}`
         const lastView = localStorage.getItem(storageKey)
         const now = Date.now()
@@ -45,11 +45,11 @@ export function PublicMoodPageClient({ user, profile, moodBlocks, config, theme 
                 setLoadingViews(false)
             })
             .catch(() => setLoadingViews(false))
-    }, [user.profile.id])
+    }, [profileId])
 
     return (
         <>
-            <FontLoader fontFamily={(profile as any).customFont} />
+            <FontLoader fontFamily={profile.customFont} />
             <CustomCursor type={profile.customCursor || 'auto'} />
             <MouseTrails type={profile.mouseTrails || 'none'} />
 
@@ -57,7 +57,7 @@ export function PublicMoodPageClient({ user, profile, moodBlocks, config, theme 
                 <BackgroundEffect type={profile.backgroundEffect || 'none'} primaryColor={profile.primaryColor || undefined} />
             </div>
             <div className="fixed inset-0 z-[1]">
-                <StaticTextures type={(profile as any).staticTexture || 'none'} />
+                <StaticTextures type={profile.staticTexture || 'none'} />
             </div>
 
             <div
@@ -72,9 +72,9 @@ export function PublicMoodPageClient({ user, profile, moodBlocks, config, theme 
             {/* UI Overlay - Controlled by Focus Mode */}
             <div className={cn("transition-all duration-700", isFocusMode ? "opacity-0 pointer-events-none translate-y-4" : "opacity-100")}>
                 <ProfileSignature
-                    username={user.username}
-                    name={user.name || undefined}
-                    avatarUrl={(profile as any).avatarUrl}
+                    username={publicUser.username}
+                    name={publicUser.name || undefined}
+                    avatarUrl={profile.avatarUrl}
                 />
                 <StudioCatalogID
                     profileId={profile.id}
@@ -86,7 +86,7 @@ export function PublicMoodPageClient({ user, profile, moodBlocks, config, theme 
                     loading={loadingViews}
                 />
                 <ViralBadge />
-                <SignatureShare username={user.username} />
+                <SignatureShare username={publicUser.username} />
             </div>
 
             {/* Focus Mode Toggle */}
