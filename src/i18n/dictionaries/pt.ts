@@ -363,14 +363,26 @@ export const pt = {
             link_placeholder: "https://...",
             visual_alias: "Como deve se chamar? (Opcional)",
             alias_placeholder: "Meu perfil...",
+            sub_label: "Legenda Pequena (Opcional)",
+            sub_label_placeholder: "ex: Novos vídeos toda sexta!",
+            layout_bento: "Layout em Cubo (Bento Box)",
+            layout_bento_desc: "Oculta textos e cria um botão circular/quadrado",
+            layout_borderless: "Ocultar Fundo e Borda",
+            layout_borderless_desc: "Desliga a caixa da rede social deixando-a flutuante",
             style_manifesto: "Estilo do Botão",
             deploy: "Adicionar link",
             custom_link: "Link Personalizado",
             styles: {
-                tag: "Etiqueta",
-                glass: "Glass",
+                tag: "Tag",
+                glass: "Vidro",
                 minimal: "Minimal",
-                neon: "Neon"
+                neon: "Neon",
+                pill: "Pílula",
+                brutalist: "Brutal",
+                ghost: "Fantasma",
+                clay: "Clay",
+                retro: "Retro",
+                aura: "Aura"
             }
         },
         doodle: {

@@ -197,7 +197,7 @@ export function DashboardSidebar({
                                     <SocialLinksEditor
                                         block={selectedBlocks[0] || { content: {} } as any}
                                         onUpdate={selectedBlocks[0] ? onUpdateBlock : async (_, content) => {
-                                            const result = await addMoodBlock('social', content, { x: 40, y: 40 })
+                                            const result = await addMoodBlock('social', content, { x: 40, y: 40, width: 150, height: 45 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
                                         onClose={() => {

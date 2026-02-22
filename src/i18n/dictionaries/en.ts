@@ -363,6 +363,12 @@ export const en: Dictionary = {
             link_placeholder: "https://...",
             visual_alias: "What should it be called? (Optional)",
             alias_placeholder: "My profile...",
+            sub_label: "Sub-label (Optional)",
+            sub_label_placeholder: "e.g. New videos every Friday!",
+            layout_bento: "Cube Layout (Bento Box)",
+            layout_bento_desc: "Hides text and creates a flexible miniature button",
+            layout_borderless: "Hide Background & Border",
+            layout_borderless_desc: "Turns off the block frame leaving it floating",
             style_manifesto: "Button Style",
             deploy: "Add link",
             custom_link: "Custom Link",
@@ -370,7 +376,13 @@ export const en: Dictionary = {
                 tag: "Tag",
                 glass: "Glass",
                 minimal: "Minimal",
-                neon: "Neon"
+                neon: "Neon",
+                pill: "Pill",
+                brutalist: "Brutalist",
+                ghost: "Ghost",
+                clay: "Clay",
+                retro: "RetroOS",
+                aura: "Aura"
             }
         },
         doodle: {
