@@ -3,8 +3,9 @@ import { toast } from "sonner"
 import { deleteMoodBlock } from "@/actions/profile"
 import { Trash2, RotateCw, Pencil, Move, MousePointer2, Lock, Eye, EyeOff } from "lucide-react"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { cn } from "@/lib/utils"
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { themeConfigs } from "@/lib/themes"
 import { BlockRenderer } from "./block-renderer"
 import { BackgroundEffect } from "../effects/background-effect"
@@ -35,22 +36,23 @@ interface MoodCanvasProps {
     blocks: MoodBlock[]
     profile: Profile
     backgroundEffect: string
-    selectedId: string | null
-    setSelectedId: (id: string | null) => void
+    selectedIds: string[]
+    setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void
     onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void
+    onUpdateBlocks: (ids: string[], updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => void
     isSaving: boolean
     blockToDelete: string | null
     setBlockToDelete: (id: string | null) => void
 }
 
-
 export function MoodCanvas({
     blocks,
     profile,
     backgroundEffect,
-    selectedId,
-    setSelectedId,
+    selectedIds,
+    setSelectedIds,
     onUpdateBlock,
+    onUpdateBlocks,
     isSaving,
     blockToDelete,
     setBlockToDelete
@@ -70,6 +72,75 @@ export function MoodCanvas({
     const lastPinchDist = useRef<number | null>(null)
 
     const viewportScale = useViewportScale() * zoom
+    const [selectionRect, setSelectionRect] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null);
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        // Only trigger on left click
+        if (e.button !== 0 || e.ctrlKey || e.metaKey) return;
+
+        const target = e.target as HTMLElement;
+        const isBlock = target.closest('[data-block-id]');
+        const isTool = target.closest('button, .action-toolbar, .context-menu');
+
+        // If we click on a block or tool, don't start lasso
+        if (isBlock || isTool) return;
+
+        setSelectionRect({
+            x1: e.clientX,
+            y1: e.clientY,
+            x2: e.clientX,
+            y2: e.clientY
+        });
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!selectionRect) return;
+        setSelectionRect(prev => prev ? ({ ...prev, x2: e.clientX, y2: e.clientY }) : null);
+    };
+
+    const handleMouseUp = (e: React.MouseEvent) => {
+        if (!selectionRect) return;
+
+        const rect = {
+            left: Math.min(selectionRect.x1, selectionRect.x2),
+            top: Math.min(selectionRect.y1, selectionRect.y2),
+            right: Math.max(selectionRect.x1, selectionRect.x2),
+            bottom: Math.max(selectionRect.y1, selectionRect.y2)
+        };
+
+        // Distinguish between a simple click and a drag for lasso
+        const isDrag = Math.abs(rect.right - rect.left) > 10 || Math.abs(rect.bottom - rect.top) > 10;
+
+        if (!isDrag) {
+            // It's a click: clear selection unless Shift is held
+            if (!e.shiftKey) setSelectedIds([]);
+            setSelectionRect(null);
+            return;
+        }
+
+        const newSelectedIds: string[] = e.shiftKey ? [...selectedIds] : [];
+        const blockElements = document.querySelectorAll('[data-block-id]');
+
+        blockElements.forEach(el => {
+            const blockRect = el.getBoundingClientRect();
+            const blockId = el.getAttribute('data-block-id');
+
+            // Intersection detection in viewport coordinates
+            if (blockId &&
+                blockRect.left < rect.right &&
+                blockRect.right > rect.left &&
+                blockRect.top < rect.bottom &&
+                blockRect.bottom > rect.top
+            ) {
+                if (!newSelectedIds.includes(blockId)) {
+                    newSelectedIds.push(blockId);
+                }
+            }
+        });
+
+        setSelectedIds(newSelectedIds);
+        setSelectionRect(null);
+    };
 
     const handleTouchStart = (e: React.TouchEvent) => {
         if (e.touches.length === 2) {
@@ -99,15 +170,41 @@ export function MoodCanvas({
         setIsPinching(false)
     }
 
-    const theme = profile.theme || 'light'
-    const config = themeConfigs[theme] || themeConfigs.light
-    const bgColor = config.bg
-    const primaryColor = config.primary
-    const gridOpacity = config.gridOpacity
+    const handleMenuAction = (action: string, blockId: string) => {
+        switch (action) {
+            case 'delete':
+                setBlockToDelete(blockId)
+                break
+            case 'duplicate':
+                duplicateMoodBlock(blockId)
+                break
+            case 'front':
+                bringToFront(blockId)
+                break
+            case 'back':
+                sendToBack(blockId)
+                break
+            case 'forward':
+                bringForward(blockId)
+                break
+            case 'backward':
+                sendBackward(blockId)
+                break
+            case 'lock':
+                const block = blocks.find(b => b.id === blockId)
+                if (block) onUpdateBlock(blockId, { isLocked: !block.isLocked })
+                break
+            case 'hide':
+                const hb = blocks.find(b => b.id === blockId)
+                if (hb) onUpdateBlock(blockId, { isHidden: !hb.isHidden })
+                break
+        }
+        setContextMenu(null)
+    }
 
     useEffect(() => {
-        if (blocks.length > 1) { // Adjusted for stress test or multiple blocks
-            const currentMax = Math.max(...blocks.map(b => b.zIndex || 1))
+        if (blocks.length > 0) {
+            const currentMax = Math.max(...blocks.map(b => b.zIndex || 10))
             setMaxZ(prev => Math.max(prev, currentMax))
         }
     }, [blocks])
@@ -128,17 +225,10 @@ export function MoodCanvas({
         const currentBlock = blocks.find(b => b.id === id)
         if (!currentBlock) return
         const currentZ = currentBlock.zIndex || 0
-
-        // Find all blocks above the current one, sorted by zIndex
-        const above = blocks
-            .filter(b => (b.zIndex || 0) > currentZ)
-            .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
-
+        const above = blocks.filter(b => (b.zIndex || 0) > currentZ).sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
         if (above.length > 0) {
-            // Set zIndex to be higher than the immediate next block
             onUpdateBlock(id, { zIndex: (above[0].zIndex || 0) + 1 })
         } else {
-            // Already at top, but ensure maxZ is synced
             bringToFront(id)
         }
     }
@@ -147,196 +237,144 @@ export function MoodCanvas({
         const currentBlock = blocks.find(b => b.id === id)
         if (!currentBlock) return
         const currentZ = currentBlock.zIndex || 0
-
-        // Find all blocks below the current one, sorted by zIndex desc
-        const below = blocks
-            .filter(b => (b.zIndex || 0) < currentZ)
-            .sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0))
-
+        const below = blocks.filter(b => (b.zIndex || 0) < currentZ).sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
         if (below.length > 0) {
-            // Set zIndex to be lower than the immediate previous block
             const targetZ = (below[0].zIndex || 10) - 1
             onUpdateBlock(id, { zIndex: Math.max(10, targetZ) })
         } else {
-            // Already at bottom
             sendToBack(id)
         }
     }
 
+    const handleMultiMove = useCallback((dx: number, dy: number) => {
+        if (selectedIds.length <= 1) return;
 
-    const handleDuplicate = async (id: string) => {
-        const result = await duplicateMoodBlock(id)
-        if (result?.error) {
-            toast.error(result.error)
-        } else {
-            toast.success("Bloco duplicado")
-        }
-    }
+        onUpdateBlocks(selectedIds, (block) => {
+            if (block.isLocked) return {};
+            return {
+                x: block.x + dx,
+                y: block.y + dy
+            };
+        });
+    }, [selectedIds, onUpdateBlocks]);
 
-    const handleContextMenu = (e: React.MouseEvent, blockId: string) => {
-        // Only trigger on right click
-        if (e.button !== 2) return
-        e.preventDefault()
-        e.stopPropagation()
-        setContextMenu({ x: e.clientX, y: e.clientY, blockId })
-        setSelectedId(blockId)
-    }
+    const handleMultiMoveEnd = useCallback(() => {
+        // Persistence handled by useCanvasManager
+    }, []);
 
-    const handleMenuAction = (actionId: string) => {
-        if (!contextMenu) return
-        const id = contextMenu.blockId
-
-        switch (actionId) {
-            case 'bring-to-front': bringToFront(id); break;
-            case 'send-to-back': sendToBack(id); break;
-            case 'bring-forward': bringForward(id); break;
-            case 'send-backward': sendBackward(id); break;
-            case 'duplicate': handleDuplicate(id); break;
-            case 'delete': setBlockToDelete(id); break;
-        }
-        setContextMenu(null)
-    }
-
-
-    // ⌨️ Keyboard Mastery
     useCanvasKeyboard({
-        selectedId,
-        setSelectedId,
+        selectedIds,
+        setSelectedIds,
         onUpdateBlock,
-        onDeleteRequest: (id) => setBlockToDelete(id),
-        onDuplicate: handleDuplicate,
+        setBlockToDelete,
+        duplicateMoodBlock,
+        bringToFront,
+        sendToBack,
         blocks
     })
 
-    const handleCanvasClick = (e: React.MouseEvent) => {
-        // If clicking on the canvas directly (not a block bubbling up)
-        if (e.target === e.currentTarget) {
-            setSelectedId(null)
-            setContextMenu(null)
-        }
-    }
-
-
     return (
         <div
-            onClick={handleCanvasClick}
-            onContextMenu={handleCanvasClick} // Close context menu if canvas is right-clicked
-            className="relative w-full h-full overflow-hidden cursor-crosshair transition-colors duration-1000"
-            style={{ backgroundColor: bgColor, color: primaryColor }}
+            className="w-full h-full relative cursor-crosshair overflow-hidden canvas-background select-none touch-none"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={() => setSelectionRect(null)}
         >
-            <div className="absolute inset-0 z-0">
-                <BackgroundEffect type={backgroundEffect} primaryColor={profile.primaryColor || undefined} />
-            </div>
-            <div className="absolute inset-0 z-[1]">
-                <StaticTextures type={profile.staticTexture || 'none'} />
-            </div>
+            {/* Lasso Selection Rect */}
+            {selectionRect && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        left: Math.min(selectionRect.x1, selectionRect.x2),
+                        top: Math.min(selectionRect.y1, selectionRect.y2),
+                        width: Math.abs(selectionRect.x2 - selectionRect.x1),
+                        height: Math.abs(selectionRect.y2 - selectionRect.y1),
+                        border: '1.5px solid #3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                        zIndex: 99999,
+                        pointerEvents: 'none',
+                        boxShadow: '0 0 15px rgba(59, 130, 246, 0.2)'
+                    }}
+                />
+            )}
 
-            {/* Saving Indicator */}
-            <div className={cn(
-                "absolute top-20 right-8 z-[1500] flex items-center gap-2 px-3 py-1.5 rounded-none bg-white dark:bg-zinc-950/80 backdrop-blur-md border border-black dark:border-white transition-all duration-300 pointer-events-none shadow-none",
-                isSaving ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-            )}>
-                <div className="w-1.5 h-1.5 rounded-none bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">{t('canvas.sync_active')}</span>
-            </div>
-
-            {/* Canvas Grid Layer */}
-            <div
-                className={cn("absolute inset-0 z-[2] pointer-events-none transition-opacity duration-1000", gridOpacity)}
-                style={{
-                    backgroundImage: config.grid,
-                    backgroundSize: config.bgSize,
-                    filter: theme === 'vintage' ? 'contrast(110%) brightness(105%) sepia(20%)' : 'none'
-                }}
-            />
-
-            {/* Guidelines Layer */}
-            <div
+            <motion.div
                 ref={canvasRef}
-                className="relative w-full h-full cursor-crosshair overflow-hidden touch-none"
-                onClick={handleCanvasClick}
-                onContextMenu={(e) => e.preventDefault()}
+                className="w-full h-full p-4 relative"
+                animate={{ scale: zoom }}
+                transition={{ type: 'spring', damping: 25, stiffness: 120 }}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
             >
-                <motion.div
-                    className="w-full h-full"
-                    style={{
-                        scale: zoom,
-                        transformOrigin: 'center center'
-                    }}
-                >
+                <div className="absolute inset-0 z-[-1] pointer-events-none">
+                    <BackgroundEffect type={backgroundEffect as any} />
+                    <StaticTextures type={profile.staticTexture || 'none'} />
+                </div>
+
+                <motion.div className="w-full h-full relative">
                     <BoardStage>
-
-
                         {blocks.map((block) => (
                             <CanvasItem
                                 key={block.id}
                                 block={block}
                                 canvasRef={canvasRef}
-                                isSelected={selectedId === block.id}
-                                onSelect={(editing = false) => {
-                                    if (isPinching) return
-                                    setSelectedId(block.id)
+                                isSelected={selectedIds.includes(block.id)}
+                                onSelect={(toggle = false) => {
+                                    if (toggle) {
+                                        setSelectedIds(prev =>
+                                            prev.includes(block.id)
+                                                ? prev.filter(id => id !== block.id)
+                                                : [...prev, block.id]
+                                        )
+                                    } else {
+                                        // If already selected, don't clear others (to allow dragging group)
+                                        if (!selectedIds.includes(block.id)) {
+                                            setSelectedIds([block.id])
+                                        }
+                                    }
                                 }}
                                 onUpdate={(updates) => onUpdateBlock(block.id, updates)}
-
                                 profile={profile}
-                                themeConfig={config}
-                                onDeleteRequest={setBlockToDelete}
+                                themeConfig={themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.dark}
+                                onDeleteRequest={(id) => setBlockToDelete(id)}
                                 blocks={blocks}
-                                setGuidelines={(feedback: any) => setVisualFeedback(feedback)}
-                                onContextMenu={handleContextMenu}
+                                setGuidelines={setVisualFeedback}
+                                onContextMenu={(e) => {
+                                    e.preventDefault()
+                                    setContextMenu({ x: e.clientX, y: e.clientY, blockId: block.id })
+                                    setSelectedIds([block.id])
+                                }}
+                                selectedIds={selectedIds}
+                                onMultiMove={handleMultiMove}
+                                onMultiMoveEnd={handleMultiMoveEnd}
                             />
                         ))}
 
-                        {/* Visual Guidelines for Snapping */}
                         <AnimatePresence>
-                            {/* alignment guidelines */}
-                            {visualFeedback.guidelines.map((g, i) => {
-                                const canvas = canvasRef.current;
-                                if (!canvas) return null;
-                                const rect = canvas.getBoundingClientRect();
-                                const w = canvas.clientWidth;
-                                const h = canvas.clientHeight;
+                            {visualFeedback.guidelines.map((g, i) => (
+                                <motion.div
+                                    key={`g-${i}`}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className={cn(
+                                        "fixed pointer-events-none z-[2000] bg-blue-500/50",
+                                        g.type === 'vertical' ? "w-px h-[200vh] -translate-y-1/2" : "h-px w-[200vw] -translate-x-1/2"
+                                    )}
+                                    style={{
+                                        left: g.type === 'vertical' ? g.pos : '0',
+                                        top: g.type === 'horizontal' ? g.pos : '0',
+                                    }}
+                                />
+                            ))}
 
-                                let pxPos = 0;
-                                if (g.type === 'vertical') {
-                                    const boardX = (g.pos / 100) * w;
-                                    pxPos = rect.left + (w / 2) + zoom * (boardX - (w / 2));
-                                } else {
-                                    const boardY = (g.pos / 100) * h;
-                                    pxPos = rect.top + (h / 2) + zoom * (boardY - (h / 2));
-                                }
-
-                                return (
-                                    <motion.div
-                                        key={`g-${i}`}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        className={cn(
-                                            "fixed pointer-events-none z-[2000]",
-                                            g.type === 'vertical' ? "w-[1px] h-screen bg-blue-500/50" : "h-[1px] w-screen bg-blue-500/50"
-                                        )}
-                                        style={{
-                                            left: g.type === 'vertical' ? `${pxPos}px` : 0,
-                                            top: g.type === 'horizontal' ? `${pxPos}px` : 0,
-                                        }}
-                                    />
-                                );
-                            })}
-                        </AnimatePresence>
-
-                        <AnimatePresence>
-                            {/* distance guides */}
                             {visualFeedback.distances.map((d, i) => {
-                                const canvas = canvasRef.current;
-                                if (!canvas) return null;
-                                const rect = canvas.getBoundingClientRect();
-                                const w = canvas.clientWidth;
-                                const h = canvas.clientHeight;
+                                const rect = canvasRef.current?.getBoundingClientRect();
+                                if (!rect) return null;
+                                const w = rect.width;
+                                const h = rect.height;
 
                                 const getPx = (p: number, axis: 'x' | 'y') => {
                                     const size = axis === 'x' ? w : h;
@@ -371,41 +409,23 @@ export function MoodCanvas({
                                         )}>
                                             {d.label}
                                         </div>
-                                        <div className={cn("absolute bg-blue-600", d.type === 'vertical' ? "top-0 left-[-2px] w-1.5 h-[1px]" : "left-0 top-[-2px] h-1.5 w-[1px]")} />
-                                        <div className={cn("absolute bg-blue-600", d.type === 'vertical' ? "bottom-0 left-[-2px] w-1.5 h-[1px]" : "right-0 top-[-2px] h-1.5 w-[1px]")} />
                                     </motion.div>
                                 )
                             })}
                         </AnimatePresence>
                     </BoardStage>
                 </motion.div>
-            </div>
+            </motion.div>
 
-            {/* Hidden Stress Test Trigger (Ctrl+Shift+S) */}
-            <StressTestButton onSpawn={(many: any[]) => {
-                // In stress test, we just want to see the UI performance.
-                // Doing 50 individual saves is not what we want to test here.
-                // We just update the local state.
-                // Note: these won't be persisted unless moved.
-                const updatedBlocks = [...blocks, ...many];
-                // Since we don't have setBlocks here (only onUpdateBlock), 
-                // we'll just use onUpdateBlock for now or skip saving.
-                // For a true stress test of the VIEW, just local state is enough.
-                // But since MoodCanvas is just a renderer of blocks, we need a way 
-                // to inject them without prop drilling setBlocks.
-                // For now, let's just use the established pattern but warn.
-                many.forEach((b: any) => onUpdateBlock(b.id, b))
-            }} />
+            <StressTestButton onSpawn={(many: any[]) => { many.forEach((b: any) => onUpdateBlock(b.id, b)) }} />
 
-
-            {/* Context Menu */}
             {contextMenu && (
                 <CanvasContextMenu
                     x={contextMenu.x}
                     y={contextMenu.y}
                     block={blocks.find(b => b.id === contextMenu.blockId)!}
                     onClose={() => setContextMenu(null)}
-                    onAction={handleMenuAction}
+                    onAction={(action) => handleMenuAction(action, contextMenu.blockId)}
                 />
             )}
 
@@ -433,4 +453,3 @@ export function MoodCanvas({
         </div>
     )
 }
-

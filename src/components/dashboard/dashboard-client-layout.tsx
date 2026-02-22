@@ -38,12 +38,12 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
     const [isMobile, setIsMobile] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
-    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [localProfile, setLocalProfile] = useState(profile);
     const { isDrawingMode } = useCanvasInteraction();
 
     // 🧠 CENTRAL CORTEX: Sovereign management of blocks and persistence
-    const { blocks, setBlocks, updateBlock, isSaving } = useCanvasManager(moodBlocks);
+    const { blocks, setBlocks, updateBlock, updateBlocks, isSaving } = useCanvasManager(moodBlocks);
     const [blockToDelete, setBlockToDelete] = useState<string | null>(null);
 
     const normalizeZIndexes = useCallback(async () => {
@@ -104,7 +104,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
         setLocalProfile((prev: any) => ({ ...prev, ...data }));
     };
 
-    const selectedBlock = blocks.find(b => b.id === selectedId);
+    const selectedBlocks = blocks.filter(b => selectedIds.includes(b.id));
 
     return (
         <main className="flex-1 relative overflow-hidden flex flex-col focus:outline-none">
@@ -118,9 +118,10 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                     blocks={blocks}
                     profile={localProfile}
                     backgroundEffect={localProfile.backgroundEffect || 'none'}
-                    selectedId={selectedId}
-                    setSelectedId={setSelectedId}
+                    selectedIds={selectedIds}
+                    setSelectedIds={setSelectedIds}
                     onUpdateBlock={updateBlock}
+                    onUpdateBlocks={updateBlocks}
                     isSaving={isSaving}
                     blockToDelete={blockToDelete}
                     setBlockToDelete={setBlockToDelete}
@@ -158,8 +159,8 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                             <DashboardSidebar
                                 profile={localProfile}
                                 blocks={blocks}
-                                selectedBlock={selectedBlock}
-                                setSelectedId={setSelectedId}
+                                selectedBlocks={selectedBlocks}
+                                setSelectedIds={setSelectedIds}
                                 onUpdateBlock={updateBlock}
                                 onDeleteRequest={(id) => setBlockToDelete(id)}
                                 onUpdateProfile={handleUpdateLocalProfile}

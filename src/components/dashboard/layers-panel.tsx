@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils"
 
 interface LayersPanelProps {
     blocks: MoodBlock[]
-    selectedId: string | null
-    setSelectedId: (id: string | null) => void
+    selectedIds: string[]
+    setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void
     onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void
     onDeleteRequest: (id: string) => void
     onNormalize?: () => void
@@ -24,8 +24,8 @@ interface LayersPanelProps {
 
 export function LayersPanel({
     blocks,
-    selectedId,
-    setSelectedId,
+    selectedIds,
+    setSelectedIds,
     onUpdateBlock,
     onDeleteRequest,
     onNormalize
@@ -98,8 +98,13 @@ export function LayersPanel({
                     <LayerItem
                         key={block.id}
                         block={block}
-                        isSelected={selectedId === block.id}
-                        onSelect={setSelectedId}
+                        isSelected={selectedIds.includes(block.id)}
+                        onSelect={(id) => {
+                            setSelectedIds(prev => {
+                                if (prev.includes(id)) return prev.filter(i => i !== id)
+                                return [...prev, id]
+                            })
+                        }}
                         onUpdate={onUpdateBlock}
                         onDelete={onDeleteRequest}
                         t={t}

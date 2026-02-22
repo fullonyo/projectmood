@@ -2,27 +2,31 @@ import { useEffect, useCallback, useRef } from 'react';
 import { MoodBlock } from '@/types/database';
 
 interface UseCanvasKeyboardProps {
-    selectedId: string | null;
-    setSelectedId: (id: string | null) => void;
+    selectedIds: string[];
+    setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void;
     onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void;
-    onDeleteRequest: (id: string) => void;
-    onDuplicate: (id: string) => void;
+    setBlockToDelete: (id: string | null) => void;
+    duplicateMoodBlock: (id: string) => void;
+    bringToFront: (id: string) => void;
+    sendToBack: (id: string) => void;
     blocks: MoodBlock[];
 }
 
 export function useCanvasKeyboard({
-    selectedId,
-    setSelectedId,
+    selectedIds,
+    setSelectedIds,
     onUpdateBlock,
-    onDeleteRequest,
-    onDuplicate,
+    setBlockToDelete,
+    duplicateMoodBlock,
+    bringToFront,
+    sendToBack,
     blocks
 }: UseCanvasKeyboardProps) {
     const blocksRef = useRef(blocks);
     blocksRef.current = blocks;
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
-        if (!selectedId) return;
+        if (selectedIds.length === 0) return;
 
         // Ignore if typing in an input or textarea
         const activeElement = document.activeElement as HTMLElement | null;
@@ -35,52 +39,70 @@ export function useCanvasKeyboard({
             return;
         }
 
-        const selectedBlock = blocksRef.current.find(b => b.id === selectedId);
-        if (!selectedBlock) return;
+        const selectedBlocks = blocksRef.current.filter(b => selectedIds.includes(b.id));
+        if (selectedBlocks.length === 0) return;
 
         const moveStep = e.shiftKey ? 2.5 : 0.5; // % coordinates
 
         switch (e.key) {
             case 'ArrowLeft':
-                if (selectedBlock.isLocked) break;
                 e.preventDefault();
-                onUpdateBlock(selectedId, { x: Math.max(0, selectedBlock.x - moveStep) });
+                selectedBlocks.forEach(b => {
+                    if (!b.isLocked) onUpdateBlock(b.id, { x: Math.max(0, b.x - moveStep) });
+                });
                 break;
             case 'ArrowRight':
-                if (selectedBlock.isLocked) break;
                 e.preventDefault();
-                onUpdateBlock(selectedId, { x: Math.min(100, selectedBlock.x + moveStep) });
+                selectedBlocks.forEach(b => {
+                    if (!b.isLocked) onUpdateBlock(b.id, { x: Math.min(100, b.x + moveStep) });
+                });
                 break;
             case 'ArrowUp':
-                if (selectedBlock.isLocked) break;
                 e.preventDefault();
-                onUpdateBlock(selectedId, { y: Math.max(0, selectedBlock.y - moveStep) });
+                selectedBlocks.forEach(b => {
+                    if (!b.isLocked) onUpdateBlock(b.id, { y: Math.max(0, b.y - moveStep) });
+                });
                 break;
             case 'ArrowDown':
-                if (selectedBlock.isLocked) break;
                 e.preventDefault();
-                onUpdateBlock(selectedId, { y: Math.min(100, selectedBlock.y + moveStep) });
+                selectedBlocks.forEach(b => {
+                    if (!b.isLocked) onUpdateBlock(b.id, { y: Math.min(100, b.y + moveStep) });
+                });
                 break;
             case 'Delete':
             case 'Backspace':
-                if (selectedBlock.isLocked) break;
                 e.preventDefault();
-                onDeleteRequest(selectedId);
+                selectedBlocks.forEach(b => {
+                    if (!b.isLocked) setBlockToDelete(b.id);
+                });
                 break;
             case 'Escape':
                 e.preventDefault();
-                setSelectedId(null);
+                setSelectedIds([]);
                 break;
             case 'd':
                 if ((e.ctrlKey || e.metaKey)) {
-                    if (selectedBlock.isLocked) break;
                     e.preventDefault();
-                    onDuplicate(selectedId);
+                    selectedBlocks.forEach(b => {
+                        if (!b.isLocked) duplicateMoodBlock(b.id);
+                    });
                 }
+                break;
+            case '[':
+                e.preventDefault();
+                selectedBlocks.forEach(b => {
+                    if (!b.isLocked) sendToBack(b.id);
+                });
+                break;
+            case ']':
+                e.preventDefault();
+                selectedBlocks.forEach(b => {
+                    if (!b.isLocked) bringToFront(b.id);
+                });
                 break;
         }
 
-    }, [selectedId, onUpdateBlock, onDeleteRequest, onDuplicate, setSelectedId]);
+    }, [selectedIds, onUpdateBlock, setBlockToDelete, duplicateMoodBlock, bringToFront, sendToBack, setSelectedIds]);
 
 
     useEffect(() => {

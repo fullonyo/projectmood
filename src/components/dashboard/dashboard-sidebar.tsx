@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useRef } from "react"
 import { cn } from "@/lib/utils"
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { LayersPanel } from "./layers-panel"
 
-// ... keep other imports ...
 import {
     Layout,
     Plus,
@@ -14,7 +14,6 @@ import {
     Loader2
 } from "lucide-react"
 
-import Link from "next/link"
 import { TextEditor } from "./text-editor"
 import { PhraseEditor } from "./phrase-editor"
 import { ArtTools } from "./art-tools"
@@ -39,8 +38,8 @@ type TopLevelTab = 'elements' | 'layers' | 'room'
 
 export function DashboardSidebar({
     profile,
-    selectedBlock,
-    setSelectedId,
+    selectedBlocks,
+    setSelectedIds,
     onUpdateBlock,
     onUpdateProfile,
     onDeleteRequest,
@@ -48,8 +47,8 @@ export function DashboardSidebar({
     systemFlags
 }: {
     profile: any;
-    selectedBlock?: any;
-    setSelectedId: (id: string | null) => void;
+    selectedBlocks: any[];
+    setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void;
     onUpdateBlock: (id: string, content: any) => void;
     onUpdateProfile: (data: any) => void;
     onDeleteRequest: (id: string) => void;
@@ -66,20 +65,13 @@ export function DashboardSidebar({
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     const handleAddBlock = async (type: string) => {
-        // Colocar SEMPRE em estado de draft para abrir o inspector,
-        // garantindo que não suje o mural até o usuário clicar em "adicionar".
         setDraftBlockType(type)
-        setSelectedId(null) // des-selecionar quaquer bloco real
+        setSelectedIds([])
     }
 
     useEffect(() => {
-        // Se houver um bloco selecionado, forçamos a aba para "Elementos"
-        // para exibir o inspector correspondente
-        if (selectedBlock && activeTab !== 'elements') {
+        if (selectedBlocks.length > 0 && activeTab !== 'elements') {
             setActiveTab('elements')
-
-            // Um leve delay pro DOM da Sidebar desenhar o componente inspector 
-            // antes de focar
             setTimeout(() => {
                 if (scrollContainerRef.current) {
                     scrollContainerRef.current.scrollTo({
@@ -89,7 +81,7 @@ export function DashboardSidebar({
                 }
             }, 50)
         }
-    }, [selectedBlock])
+    }, [selectedBlocks, activeTab])
 
     const tabs = [
         { id: 'elements', label: t('sidebar.tabs.elements'), icon: Plus, description: t('sidebar.tabs.elements_desc') },
@@ -97,21 +89,19 @@ export function DashboardSidebar({
         { id: 'room', label: t('sidebar.tabs.room'), icon: Sparkles, description: t('sidebar.tabs.room_desc') },
     ]
 
-
     return (
         <aside className="w-80 h-full bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col z-50 overflow-hidden">
-            {/* Sidebar Header - Studio Identity */}
             <div className="p-8 border-b border-zinc-100 dark:border-zinc-900">
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex flex-col">
                         <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-30 leading-none mb-1">{t('sidebar.header_subtitle')}</span>
                         <h1 className="text-2xl font-black tracking-tighter uppercase italic">{t('sidebar.header_title')}</h1>
                     </div>
-                    {selectedBlock && (
+                    {selectedBlocks.length > 0 && (
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setSelectedId(null)}
+                            onClick={() => setSelectedIds([])}
                             className="h-7 px-3 text-[8px] font-black uppercase tracking-widest border-black dark:border-white rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                         >
                             <Plus className="w-3 h-3 mr-1 rotate-45" />
@@ -120,15 +110,13 @@ export function DashboardSidebar({
                     )}
                 </div>
             </div>
-            {/* Top Categories Navigation */}
             <nav className="grid grid-cols-3 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
-
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => {
                             setActiveTab(tab.id as TopLevelTab)
-                            setSelectedId(null) // Reset selection when changing tabs
+                            setSelectedIds([])
                             setDraftBlockType(null)
                         }}
                         className={cn(
@@ -148,7 +136,6 @@ export function DashboardSidebar({
                 ))}
             </nav>
 
-            {/* Scrollable Editor Area */}
             <div
                 ref={scrollContainerRef}
                 className={cn(
@@ -156,8 +143,6 @@ export function DashboardSidebar({
                     activeTab === 'layers' ? "p-0" : "p-6 space-y-8"
                 )}
             >
-
-
                 {activeTab === 'room' && (
                     <RoomSettings
                         profile={profile}
@@ -169,28 +154,23 @@ export function DashboardSidebar({
                 {activeTab === 'layers' && (
                     <LayersPanel
                         blocks={blocks}
-                        selectedId={selectedBlock?.id || null}
-                        setSelectedId={setSelectedId}
+                        selectedIds={selectedBlocks.map(b => b.id)}
+                        setSelectedIds={setSelectedIds}
                         onUpdateBlock={onUpdateBlock}
-                        onDeleteRequest={(id) => {
-                            // Link with MoodCanvas delete logic if possible, or trigger here
-                            // For consistency, we'll need blocks to be passed down
-                            onDeleteRequest(id)
-                        }}
+                        onDeleteRequest={(id) => onDeleteRequest(id)}
                     />
                 )}
 
-
                 {activeTab === 'elements' && (
                     <>
-                        {!selectedBlock && !draftBlockType ? (
+                        {selectedBlocks.length === 0 && !draftBlockType ? (
                             <BlockLibrary onAddBlock={handleAddBlock} systemFlags={systemFlags} />
                         ) : (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
                                 <Button
                                     variant="ghost"
                                     onClick={() => {
-                                        setSelectedId(null)
+                                        setSelectedIds([])
                                         setDraftBlockType(null)
                                     }}
                                     className="w-full justify-start h-10 px-0 hover:bg-transparent hover:opacity-70 transition-opacity text-zinc-500 rounded-none mb-6 relative group"
@@ -201,94 +181,93 @@ export function DashboardSidebar({
                                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black dark:text-white">{t('sidebar.library.inspector_back')}</span>
                                 </Button>
 
-                                {/* Inspector Universal (Serve ambos: Novo Draft ou Bloco Selecionado) */}
-                                {((selectedBlock?.type || draftBlockType) === 'text') && (
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'text') && (
                                     <TextEditor
-                                        key={selectedBlock?.id || 'draft-text'}
-                                        block={selectedBlock}
+                                        key={selectedBlocks[0]?.id || 'draft-text'}
+                                        block={selectedBlocks[0]}
                                         onUpdate={onUpdateBlock}
                                         onAdd={async (content: any) => {
                                             const result = await addMoodBlock('text', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
                                         onClose={() => {
-                                            setSelectedId(null)
+                                            setSelectedIds([])
                                             setDraftBlockType(null)
                                         }}
                                     />
                                 )}
-                                {['ticker', 'subtitle', 'floating', 'phrase'].includes(selectedBlock?.type || draftBlockType || '') && (
+                                {['ticker', 'subtitle', 'floating', 'phrase'].includes(selectedBlocks[0]?.type || draftBlockType || '') && (
                                     <PhraseEditor
-                                        key={selectedBlock?.id || `draft-phrase`}
-                                        block={selectedBlock}
+                                        key={selectedBlocks[0]?.id || `draft-phrase`}
+                                        block={selectedBlocks[0]}
                                         onUpdate={onUpdateBlock}
                                         onAdd={async (type: string, content: any) => {
                                             const result = await addMoodBlock(type, content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
                                         onClose={() => {
-                                            setSelectedId(null)
+                                            setSelectedIds([])
                                             setDraftBlockType(null)
                                         }}
                                     />
                                 )}
-                                {((selectedBlock?.type || draftBlockType) === 'social') && (
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'social') && (
                                     <SocialLinksEditor
-                                        block={selectedBlock || { content: {} } as any}
-                                        onUpdate={selectedBlock ? onUpdateBlock : async (_, content) => {
+                                        block={selectedBlocks[0] || { content: {} } as any}
+                                        onUpdate={selectedBlocks[0] ? onUpdateBlock : async (_, content) => {
                                             const result = await addMoodBlock('social', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
                                         onClose={() => {
-                                            setSelectedId(null)
+                                            setSelectedIds([])
                                             setDraftBlockType(null)
                                         }}
                                     />
                                 )}
-                                {((selectedBlock?.type || draftBlockType) === 'quote') && (
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'quote') && (
                                     <QuoteEditor
-                                        key={selectedBlock?.id || 'draft-quote'}
-                                        block={selectedBlock}
+                                        key={selectedBlocks[0]?.id || 'draft-quote'}
+                                        block={selectedBlocks[0]}
                                         onUpdate={onUpdateBlock}
-                                        onAdd={selectedBlock ? undefined : async (content) => {
+                                        onAdd={selectedBlocks[0] ? undefined : async (content) => {
                                             const result = await addMoodBlock('quote', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
                                         onClose={() => {
-                                            setSelectedId(null)
+                                            setSelectedIds([])
                                             setDraftBlockType(null)
                                         }}
                                     />
                                 )}
-                                {((selectedBlock?.type || draftBlockType) === 'video') && <YoutubeEditor key={selectedBlock?.id || 'draft-video'} />}
-                                {((selectedBlock?.type || draftBlockType) === 'music') && <SpotifySearch key={selectedBlock?.id || 'draft-music'} />}
-                                {((selectedBlock?.type || draftBlockType) === 'photo') && (
-                                    <PhotoEditor key={selectedBlock?.id || 'draft-photo'} block={selectedBlock} onUpdate={onUpdateBlock} onAdd={selectedBlock ? undefined : async (content) => {
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'video') && <YoutubeEditor key={selectedBlocks[0]?.id || 'draft-video'} />}
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'music') && <SpotifySearch key={selectedBlocks[0]?.id || 'draft-music'} />}
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'photo') && (
+                                    <PhotoEditor key={selectedBlocks[0]?.id || 'draft-photo'} block={selectedBlocks[0]} onUpdate={onUpdateBlock} onAdd={selectedBlocks[0] ? undefined : async (content) => {
                                         const result = await addMoodBlock('photo', content, { x: 40, y: 40, width: 300, height: 300 })
                                         if (result?.success) setDraftBlockType(null)
-                                    }} onClose={() => { setSelectedId(null); setDraftBlockType(null) }} />
+                                    }} onClose={() => { setSelectedIds([]); setDraftBlockType(null) }} />
                                 )}
-                                {((selectedBlock?.type || draftBlockType) === 'gif') && <GifPicker key={selectedBlock?.id || 'draft-gif'} />}
-                                {((selectedBlock?.type || draftBlockType) === 'guestbook') && <GuestbookEditor key={selectedBlock?.id || 'draft-guestbook'} />}
-                                {['tape', 'weather', 'media'].includes(selectedBlock?.type || draftBlockType || '') && <ArtTools key={selectedBlock?.id || 'draft-art'} />}
-                                {((selectedBlock?.type || draftBlockType) === 'doodle') && <DoodlePad key={selectedBlock?.id || 'draft-doodle'} />}
-                                {((selectedBlock?.type || draftBlockType) === 'moodStatus') && (
-                                    <MoodStatusEditor key={selectedBlock?.id || 'draft-mood'} block={selectedBlock} onUpdate={onUpdateBlock} onAdd={selectedBlock ? undefined : async (content) => {
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'gif') && <GifPicker key={selectedBlocks[0]?.id || 'draft-gif'} />}
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'guestbook') && <GuestbookEditor key={selectedBlocks[0]?.id || 'draft-guestbook'} />}
+                                {['tape', 'weather', 'media'].includes(selectedBlocks[0]?.type || draftBlockType || '') && <ArtTools key={selectedBlocks[0]?.id || 'draft-art'} />}
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'doodle') && <DoodlePad key={selectedBlocks[0]?.id || 'draft-doodle'} />}
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'moodStatus') && (
+                                    <MoodStatusEditor key={selectedBlocks[0]?.id || 'draft-mood'} block={selectedBlocks[0]} onUpdate={onUpdateBlock} onAdd={selectedBlocks[0] ? undefined : async (content) => {
                                         const result = await addMoodBlock('moodStatus', content, { x: 40, y: 40 })
                                         if (result?.success) setDraftBlockType(null)
-                                    }} onClose={() => { setSelectedId(null); setDraftBlockType(null) }} />
+                                    }} onClose={() => { setSelectedIds([]); setDraftBlockType(null) }} />
                                 )}
-                                {((selectedBlock?.type || draftBlockType) === 'countdown') && (
+                                {((selectedBlocks[0]?.type || draftBlockType) === 'countdown') && (
                                     <CountdownEditor
-                                        key={selectedBlock?.id || 'draft-countdown'}
-                                        block={selectedBlock}
+                                        key={selectedBlocks[0]?.id || 'draft-countdown'}
+                                        block={selectedBlocks[0]}
                                         onUpdate={onUpdateBlock}
-                                        onAdd={selectedBlock ? undefined : async (content) => {
+                                        onAdd={selectedBlocks[0] ? undefined : async (content) => {
                                             const result = await addMoodBlock('countdown', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
                                         onClose={() => {
-                                            setSelectedId(null)
+                                            setSelectedIds([])
                                             setDraftBlockType(null)
                                         }}
                                     />
@@ -297,7 +276,6 @@ export function DashboardSidebar({
                         )}
                     </>
                 )}
-
             </div>
 
             <ConfirmModal
@@ -316,7 +294,6 @@ export function DashboardSidebar({
                 type="danger"
             />
 
-            {/* Bottom Tip Overlay (Conditional) */}
             <div className="p-4 bg-zinc-50 dark:bg-zinc-800/20 border-t border-zinc-100 dark:border-zinc-800 shrink-0">
                 <p className="text-[9px] text-zinc-400 text-center uppercase tracking-widest leading-relaxed">
                     {t('sidebar.bottom_tip')}

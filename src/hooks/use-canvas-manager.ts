@@ -50,72 +50,52 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         });
     }, [initialBlocks]);
 
-    const updateBlock = useCallback((id: string, updates: Partial<MoodBlock>) => {
-        // Increment Epoch (Lock)
-        epochRef.current[id] = (epochRef.current[id] || 0) + 1;
-
-        // Optimistic State Update
+    const updateBlocks = useCallback((ids: string[], updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => {
+        // Optimistic State Update for all
         setBlocks(prev => prev.map(block => {
-            if (block.id !== id) return block;
+            if (!ids.includes(block.id)) return block;
 
-            const updatedBlock = { ...block, ...updates };
+            const blockUpdates = typeof updates === 'function' ? updates(block) : updates;
+            const updatedBlock = { ...block, ...blockUpdates };
 
-            // Deep merge content if provided
-            if (updates.content) {
-                updatedBlock.content = { ...(block.content || {}), ...updates.content };
+            if (blockUpdates.content) {
+                updatedBlock.content = { ...(block.content || {}), ...blockUpdates.content };
             }
+
+            // Lock Epoch
+            epochRef.current[block.id] = (epochRef.current[block.id] || 0) + 1;
+            // Accumulate
+            pendingUpdates.current[block.id] = { ...pendingUpdates.current[block.id], ...blockUpdates };
 
             return updatedBlock;
         }));
 
-        // ACCUMULATE pending updates (don't lose previous ones!)
-        pendingUpdates.current[id] = { ...pendingUpdates.current[id], ...updates };
+        // Debounced Batch Backend Persistence
+        ids.forEach(id => {
+            if (saveTimers.current[id]) clearTimeout(saveTimers.current[id]);
+            saveTimers.current[id] = setTimeout(async () => {
+                setIsSaving(true);
+                const mergedUpdates = { ...pendingUpdates.current[id] };
+                delete pendingUpdates.current[id];
 
-        // Debounced Backend Persistence
-        if (saveTimers.current[id]) clearTimeout(saveTimers.current[id]);
-
-        saveTimers.current[id] = setTimeout(async () => {
-            setIsSaving(true);
-            // Grab ALL accumulated updates and clear
-            const mergedUpdates = { ...pendingUpdates.current[id] };
-            delete pendingUpdates.current[id];
-
-            try {
-                // Sanitize Payload: Convert nulls to undefined to match Server Action signature
-                const payload = {
-                    ...mergedUpdates,
-                    width: mergedUpdates.width ?? undefined,
-                    height: mergedUpdates.height ?? undefined,
-                };
-
-                const result = await updateMoodBlockLayout(id, payload);
-
-                if (result?.error) throw new Error(result.error);
-
-                // Release lock after stabilization
-                setTimeout(() => {
-                    epochRef.current[id] = Math.max(0, (epochRef.current[id] || 0) - 1);
-                }, 1500);
-
-            } catch (error: any) {
-                console.error("Failed to sync block:", id, error);
-                const blockName = blocks.find(b => b.id === id)?.type || "item";
-                toast.error(`Falha ao salvar ${blockName}`, {
-                    description: "Verifique sua conexão ou tente novamente.",
-                    action: {
-                        label: "Ok",
-                        onClick: () => { }
-                    }
-                });
-                // On error, we keep the epoch high for a bit longer to prevent desync
-                setTimeout(() => {
-                    epochRef.current[id] = Math.max(0, (epochRef.current[id] || 0) - 1);
-                }, 5000);
-            } finally {
-                setIsSaving(false);
-            }
-        }, 800);
+                try {
+                    const result = await updateMoodBlockLayout(id, mergedUpdates as any);
+                    if (result?.error) throw new Error(result.error);
+                    setTimeout(() => {
+                        epochRef.current[id] = Math.max(0, (epochRef.current[id] || 0) - 1);
+                    }, 1500);
+                } catch (error) {
+                    console.error("Batch sync failed for", id, error);
+                } finally {
+                    setIsSaving(false);
+                }
+            }, 800);
+        });
     }, []);
+
+    const updateBlock = useCallback((id: string, updates: Partial<MoodBlock>) => {
+        updateBlocks([id], updates);
+    }, [updateBlocks]);
 
     // Helper for direct property updates
     const moveBlock = useCallback((id: string, x: number, y: number) => {
@@ -126,6 +106,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         blocks,
         setBlocks,
         updateBlock,
+        updateBlocks,
         moveBlock,
         isSaving
     };
