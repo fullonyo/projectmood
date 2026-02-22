@@ -29,6 +29,10 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTe
 
     const textures = [
         { id: 'none', name: t('editors.theme.textures.none'), icon: Palette },
+        { id: 'noise', name: t('editors.theme.textures.noise'), icon: Sparkles },
+        { id: 'dots', name: t('editors.theme.textures.dots'), icon: Layout },
+        { id: 'lines', name: t('editors.theme.textures.lines'), icon: Scroll },
+        { id: 'cross', name: t('editors.theme.textures.cross'), icon: Type },
         { id: 'museum-paper', name: t('editors.theme.textures.museum_paper'), icon: Scroll },
         { id: 'raw-canvas', name: t('editors.theme.textures.raw_canvas'), icon: Layers },
         { id: 'fine-sand', name: t('editors.theme.textures.fine_sand'), icon: Feather },
@@ -47,13 +51,22 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTe
                 </p>
                 <div className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-1 px-1 custom-scrollbar snap-x no-scrollbar">
                     {[
-                        { id: 'light', label: t('editors.theme.light'), colors: 'bg-white border-zinc-200' },
-                        { id: 'dark', label: t('editors.theme.dark'), colors: 'bg-zinc-900 border-zinc-800' },
+                        { id: 'light', label: t('editors.theme.light'), colors: 'bg-white border-zinc-200', data: { theme: 'light', backgroundColor: '#fafafa', primaryColor: '#18181b' } },
+                        { id: 'dark', label: t('editors.theme.dark'), colors: 'bg-zinc-900 border-zinc-800', data: { theme: 'dark', backgroundColor: '#050505', primaryColor: '#ffffff' } },
                         { id: 'vintage', label: t('editors.theme.vintage'), colors: 'bg-[#f4ead5] border-[#d3c4a1]', data: { theme: 'vintage', backgroundColor: '#f4ead5', primaryColor: '#5d4037' } },
                         { id: 'notebook', label: t('editors.theme.notebook'), colors: 'bg-[#fafafa] border-blue-100', data: { theme: 'notebook', backgroundColor: '#fafafa', primaryColor: '#1e3a8a' } },
                         { id: 'blueprint', label: t('editors.theme.blueprint'), colors: 'bg-[#1a3a5f] border-[#2d5a8e]', data: { theme: 'blueprint', backgroundColor: '#1a3a5f', primaryColor: '#ffffff' } },
                         { id: 'canvas', label: t('editors.theme.canvas'), colors: 'bg-[#e7e5e4] border-[#d6d3d1]', data: { theme: 'canvas', backgroundColor: '#e7e5e4', primaryColor: '#44403c' } },
                         { id: 'cyberpunk', label: t('editors.theme.cyberpunk'), colors: 'bg-black border-pink-500/30', data: { theme: 'cyberpunk', backgroundColor: '#000000', primaryColor: '#ff00ff' } },
+                        { id: 'neobrutalism', label: t('editors.theme.neobrutalism'), colors: 'bg-[#fdf0d5] border-[#111111]', data: { theme: 'neobrutalism', backgroundColor: '#fdf0d5', primaryColor: '#111111' } },
+                        { id: 'botanical', label: t('editors.theme.botanical'), colors: 'bg-[#e6e9e1] border-[#334338]', data: { theme: 'botanical', backgroundColor: '#e6e9e1', primaryColor: '#334338' } },
+                        { id: 'ethereal', label: t('editors.theme.ethereal'), colors: 'bg-[#f5f5fa] border-[#3b2c63]', data: { theme: 'ethereal', backgroundColor: '#f5f5fa', primaryColor: '#3b2c63' } },
+                        { id: 'charcoal', label: t('editors.theme.charcoal'), colors: 'bg-[#1c1c1e] border-[#d1d1d6]', data: { theme: 'charcoal', backgroundColor: '#1c1c1e', primaryColor: '#d1d1d6' } },
+                        { id: 'terminal', label: t('editors.theme.terminal'), colors: 'bg-[#020B02] border-[#00ff41]', data: { theme: 'terminal', backgroundColor: '#020B02', primaryColor: '#00ff41' } },
+                        { id: 'doodle', label: t('editors.theme.doodle'), colors: 'bg-white border-black', data: { theme: 'doodle', backgroundColor: '#ffffff', primaryColor: '#1a1a1a' } },
+                        { id: 'manga', label: t('editors.theme.manga'), colors: 'bg-[#e8e8e8] border-black', data: { theme: 'manga', backgroundColor: '#e8e8e8', primaryColor: '#000000' } },
+                        { id: 'y2k', label: t('editors.theme.y2k'), colors: 'bg-[#cceeff] border-[#ff3399]', data: { theme: 'y2k', backgroundColor: '#cceeff', primaryColor: '#ff3399' } },
+                        { id: 'tarot', label: t('editors.theme.tarot'), colors: 'bg-[#140c21] border-[#d4af37]', data: { theme: 'tarot', backgroundColor: '#140c21', primaryColor: '#d4af37' } },
                     ].map((vibe) => (
                         <button
                             key={vibe.id}

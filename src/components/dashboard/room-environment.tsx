@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { Profile } from "@/types/database"
 import { themeConfigs } from "@/lib/themes"
 import { BackgroundEffect } from "../effects/background-effect"
-import { StaticTextures } from "../effects/static-textures"
+import { getStaticTextureStyle } from "../effects/static-textures"
 
 interface RoomEnvironmentProps {
     profile: Profile
@@ -14,42 +14,53 @@ interface RoomEnvironmentProps {
 export function RoomEnvironment({ profile, backgroundEffect }: RoomEnvironmentProps) {
     const themeConfig = themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.light
     const bgColor = profile.backgroundColor || themeConfig.bg || "#ffffff"
+    const resolvedPrimaryColor = profile.primaryColor || themeConfig.primary || "#000000"
+    const textureStyles = getStaticTextureStyle(profile.staticTexture || 'none', resolvedPrimaryColor)
 
     return (
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-            {/* Layer 1: Base Color (The foundation) */}
-            <div
-                className="absolute inset-0 transition-colors duration-700"
-                style={{
-                    backgroundColor: bgColor,
-                    filter: themeConfig.filter || 'none'
-                }}
-            />
-
-            {/* Layer 2: Animated Effects (The aura) */}
+        <div
+            className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-[var(--room-bg)] transition-colors duration-700"
+            style={{
+                '--room-bg': bgColor,
+                filter: themeConfig.filter || 'none',
+                ...textureStyles // Injecting --room-texture variables
+            } as React.CSSProperties}
+        >
+            {/* Layer 1: Animated Effects (The aura) */}
             <div className="absolute inset-0 opacity-100 z-[1]">
                 <BackgroundEffect
                     type={backgroundEffect as any}
-                    primaryColor={profile.primaryColor || undefined}
+                    primaryColor={resolvedPrimaryColor}
                 />
             </div>
 
-            {/* Layer 3: Grid (The structure) */}
+            {/* Layer 2: Grid Structure (Injected SVGs or gradients) */}
             <div
                 className={cn(
-                    "absolute inset-0 transition-opacity duration-1000 z-[2] mix-blend-overlay",
+                    "absolute inset-0 transition-opacity duration-1000 z-[2]",
+                    themeConfig.blend || 'mix-blend-normal',
                     themeConfig.gridOpacity || 'opacity-10'
                 )}
                 style={{
                     backgroundImage: themeConfig.grid,
                     backgroundSize: themeConfig.bgSize,
+                    color: profile.primaryColor || themeConfig.primary
                 }}
             />
 
-            {/* Layer 4: Material (The skin) */}
-            <div className="absolute inset-0 z-[3]">
-                <StaticTextures type={profile.staticTexture || 'none'} />
-            </div>
+            {/* Layer 3: Skin/Material (Pseudo-element behavior but rendered cleanly via inline background) */}
+            {profile.staticTexture && profile.staticTexture !== 'none' && (
+                <div
+                    className="absolute inset-0 z-[3] transition-opacity duration-1000"
+                    style={{
+                        backgroundImage: `var(--room-texture-img)`,
+                        opacity: `var(--room-texture-opacity)`,
+                        filter: `var(--room-texture-filter)`,
+                        mixBlendMode: `var(--room-texture-blend)` as any,
+                        color: profile.primaryColor || themeConfig.primary
+                    }}
+                />
+            )}
         </div>
     )
 }

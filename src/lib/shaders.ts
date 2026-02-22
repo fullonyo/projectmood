@@ -19,22 +19,6 @@ export const AURORA_SHADER = `
     }
 `
 
-export const NOISE_SHADER = `
-    precision highp float;
-    uniform float iTime;
-    uniform vec2 iResolution;
-
-    float random(vec2 st) {
-        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-    }
-
-    void main() {
-        vec2 uv = gl_FragCoord.xy / iResolution.xy;
-        float n = random(uv + iTime * 0.01);
-        gl_FragColor = vec4(vec3(n), 0.05);
-    }
-`
-
 export const LIQUID_SHADER = `
     precision highp float;
     uniform float iTime;
@@ -65,15 +49,15 @@ export const MESH_GRADIENT_SHADER = `
         vec2 uv = gl_FragCoord.xy / iResolution.xy;
         float t = iTime * 0.5;
         
-        vec3 col1 = uColor * 0.8;
-        vec3 col2 = vec3(uColor.g, uColor.b, uColor.r) * 0.5;
-        vec3 col3 = vec3(0.1, 0.1, 0.2);
+        vec3 col1 = uColor;
+        vec3 col2 = vec3(uColor.g, uColor.b, uColor.r) * 0.8;
+        vec3 col3 = uColor * 0.3;
         
         float n = sin(uv.x * 3.0 + t) * cos(uv.y * 2.0 - t * 0.5);
         vec3 finalCol = mix(col1, col2, uv.x + n * 0.2);
         finalCol = mix(finalCol, col3, uv.y - n * 0.1);
         
-        gl_FragColor = vec4(finalCol, 0.4);
+        gl_FragColor = vec4(finalCol, max(finalCol.r, max(finalCol.g, finalCol.b)) * 0.5);
     }
 `
 
@@ -133,25 +117,6 @@ export const HYPERSPEED_SHADER = `
     }
 `
 
-export const GRID_SHADER = `
-    precision highp float;
-    uniform float iTime;
-    uniform vec2 iResolution;
-    uniform vec3 uColor;
-
-    void main() {
-        vec2 uv = gl_FragCoord.xy / iResolution.xy;
-        float t = iTime * 0.2;
-        
-        vec2 grid = fract(uv * 20.0 + vec2(0.0, t));
-        float line = smoothstep(0.0, 0.05, grid.x) * smoothstep(1.0, 0.95, grid.x) *
-                     smoothstep(0.0, 0.05, grid.y) * smoothstep(1.0, 0.95, grid.y);
-        
-        vec3 color = uColor * (1.0 - line);
-        gl_FragColor = vec4(color, color.r * 0.1);
-    }
-`
-
 export const STARS_SHADER = `
     precision highp float;
     uniform float iTime;
@@ -167,11 +132,11 @@ export const STARS_SHADER = `
         float t = iTime * 0.1;
         
         vec3 color = vec3(0.0);
-        for(float i=0.0; i<50.0; i++) {
+        for(float i=0.0; i<50.0; i+=1.0) {
             float z = fract(hash(vec2(i, i)) + t);
             vec2 p = vec2(hash(vec2(i, i+1.0)), hash(vec2(i+2.0, i+3.0))) * 2.0 - 1.0;
-            p /= z;
-            float size = 0.002 / z;
+            p /= (z + 0.001); // Prevent division by zero
+            float size = 0.002 / (z + 0.001);
             float star = smoothstep(size, 0.0, length(uv - p));
             color += star * uColor;
         }
@@ -235,33 +200,6 @@ export const RHYTHM_SHADER = `
     }
 `
 
-export const VINTAGE_SHADER = `
-    precision highp float;
-    uniform float iTime;
-    uniform vec2 iResolution;
-
-    float random(vec2 p) {
-        return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
-    }
-
-    void main() {
-        vec2 uv = gl_FragCoord.xy / iResolution.xy;
-        
-        float grain = random(uv + iTime * 0.1);
-        float vignette = 1.0 - length(uv - 0.5) * 1.5;
-        
-        float scratch = step(0.999, random(vec2(uv.x, iTime * 0.001)));
-        scratch *= random(vec2(uv.x, iTime)) * 0.5;
-        
-        vec3 color = vec3(0.4, 0.35, 0.3); // Sepia base
-        color *= vignette;
-        color += grain * 0.08;
-        color += scratch * 1.0;
-        
-        gl_FragColor = vec4(color, 0.2);
-    }
-`
-
 export const UNIVERSE_SHADER = `
     precision highp float;
     uniform float iTime;
@@ -305,9 +243,9 @@ export const initShader = (gl: WebGLRenderingContext, source: string, type: numb
     gl.shaderSource(shader, source)
     gl.compileShader(shader)
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error(gl.getShaderInfoLog(shader))
+        const infoLog = gl.getShaderInfoLog(shader);
         gl.deleteShader(shader)
-        return null
+        throw new Error(`WebGL Shader Compilation Error:\n${infoLog}\n\nSource:\n${source}`)
     }
     return shader
 }
