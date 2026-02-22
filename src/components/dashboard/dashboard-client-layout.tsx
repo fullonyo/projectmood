@@ -143,40 +143,38 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
             )}
 
             {/* Floating Sidebar Container (layer 20) */}
-            <AnimatePresence>
-                {isSidebarOpen && (
-                    <motion.div
-                        initial={{ x: -320, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: -320, opacity: 0 }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-                        className="absolute top-0 left-0 bottom-0 z-20 pointer-events-none"
+            <motion.div
+                initial={false}
+                animate={{
+                    x: isSidebarOpen ? 0 : -320,
+                    opacity: isSidebarOpen ? 1 : 0
+                }}
+                transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+                className="absolute top-0 left-0 bottom-0 z-20 pointer-events-none"
+            >
+                <div className={`h-full shadow-none relative ${isSidebarOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
+                    <DashboardSidebar
+                        profile={localProfile}
+                        blocks={blocks}
+                        selectedBlocks={selectedBlocks}
+                        setSelectedIds={setSelectedIds}
+                        onUpdateBlock={updateBlock}
+                        onDeleteRequest={(id) => setBlockToDelete(id)}
+                        onUpdateProfile={handleUpdateLocalProfile}
+                        systemFlags={systemFlags}
+                        onNormalize={normalizeZIndexes}
+                    />
+
+
+                    {/* Inner Collapse Button */}
+                    <button
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors pointer-events-auto shadow-none group"
                     >
-                        <div className="pointer-events-auto h-full shadow-none relative">
-                            <DashboardSidebar
-                                profile={localProfile}
-                                blocks={blocks}
-                                selectedBlocks={selectedBlocks}
-                                setSelectedIds={setSelectedIds}
-                                onUpdateBlock={updateBlock}
-                                onDeleteRequest={(id) => setBlockToDelete(id)}
-                                onUpdateProfile={handleUpdateLocalProfile}
-                                systemFlags={systemFlags}
-                                onNormalize={normalizeZIndexes}
-                            />
-
-
-                            {/* Inner Collapse Button */}
-                            <button
-                                onClick={() => setIsSidebarOpen(false)}
-                                className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors pointer-events-auto shadow-none group"
-                            >
-                                <ChevronLeft className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        <ChevronLeft className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
+                    </button>
+                </div>
+            </motion.div>
 
             {/* Floating Expand Button (Visible when sidebar is closed) */}
             {!isSidebarOpen && (
@@ -191,29 +189,27 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
             )}
 
             {/* Floating Actions Sidebar Container (Right Side - layer 20) */}
-            <AnimatePresence>
-                {isRightSidebarOpen && (
-                    <motion.div
-                        initial={{ x: 320, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: 320, opacity: 0 }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-                        className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
-                    >
-                        <div className="pointer-events-auto h-full shadow-none relative">
-                            <ActionsSidebar username={username} profile={localProfile} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} />
+            <motion.div
+                initial={false}
+                animate={{
+                    x: isRightSidebarOpen ? 0 : 320,
+                    opacity: isRightSidebarOpen ? 1 : 0
+                }}
+                transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+                className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
+            >
+                <div className={`h-full shadow-none relative ${isRightSidebarOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
+                    <ActionsSidebar username={username} profile={localProfile} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} />
 
-                            {/* Inner Collapse Button */}
-                            <button
-                                onClick={() => setIsRightSidebarOpen(false)}
-                                className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors pointer-events-auto shadow-none group"
-                            >
-                                <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    {/* Inner Collapse Button */}
+                    <button
+                        onClick={() => setIsRightSidebarOpen(false)}
+                        className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors pointer-events-auto shadow-none group"
+                    >
+                        <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
+                    </button>
+                </div>
+            </motion.div>
 
             {/* Floating Expand Button Right (Visible when right sidebar is closed) */}
             {!isRightSidebarOpen && (

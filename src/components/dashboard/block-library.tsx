@@ -82,13 +82,13 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
                                         onClick={() => onAddBlock(item.type)}
                                         className="flex flex-col items-start p-4 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition-all group text-left shadow-none"
                                     >
-                                        <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50 mb-3 group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors">
-                                            <Icon className="w-4 h-4" />
+                                        <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50 mb-3 group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all duration-300 group-hover:scale-[1.15] group-hover:-rotate-3">
+                                            <Icon className="w-4 h-4 transition-transform duration-300" />
                                         </div>
-                                        <h4 className="text-[10px] font-black uppercase tracking-wider mb-1">
+                                        <h4 className="text-[10px] font-black uppercase tracking-wider mb-1 transition-transform duration-300 group-hover:translate-x-1">
                                             {t(`sidebar.library.items.${item.tk}.title`)}
                                         </h4>
-                                        <p className="text-[8px] text-zinc-400 font-medium leading-relaxed opacity-80 decoration-zinc-300">
+                                        <p className="text-[8px] text-zinc-400 font-medium leading-relaxed opacity-80 decoration-zinc-300 transition-transform duration-300 group-hover:translate-x-1">
                                             {t(`sidebar.library.items.${item.tk}.desc`)}
                                         </p>
                                     </button>
