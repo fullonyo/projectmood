@@ -11,8 +11,8 @@ import {
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { Textarea } from "@/components/ui/textarea"
-import { FrameType } from "./FrameContainer"
-import { TextBehavior } from "./SmartText"
+import { FrameType, FrameContainer } from "./FrameContainer"
+import { SmartText, TextBehavior } from "./SmartText"
 
 const BEHAVIORS: { id: TextBehavior; label: string; icon: any }[] = [
     { id: 'static', label: 'Estático', icon: Type },

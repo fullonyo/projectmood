@@ -4,10 +4,6 @@ import { cn } from "@/lib/utils"
 import { useViewportScale } from "@/lib/canvas-scale"
 import { motion } from "framer-motion"
 import {
-    Instagram, Twitter, Github, Linkedin, Youtube,
-    Link as LinkIcon, Music, Video
-} from "lucide-react"
-import {
     DiscordIcon, TikTokIcon, SteamIcon,
     SpotifyIcon, TwitchIcon, PinterestIcon
 } from "../icons"
@@ -18,18 +14,13 @@ import dynamic from "next/dynamic"
 // Universal Components
 import { FrameContainer, FrameType } from "./FrameContainer"
 import { SmartText, TextBehavior } from "./SmartText"
+import { SmartMedia, MediaType } from "./SmartMedia"
 
 // Modularized Public Blocks - Static (Critical for LCP/CLS)
 import { PhotoBlockPublic } from "./photo-block-public"
 import { CountdownBlockPublic } from "./countdown-block-public"
 
-// Dynamic Imports (Heavy/Interactive Blocks)
-const VideoBlockPublic = dynamic(() => import("./video-block-public").then(mod => mod.VideoBlockPublic), {
-    loading: () => <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
-})
-const MusicBlockPublic = dynamic(() => import("./music-block-public").then(mod => mod.MusicBlockPublic), {
-    loading: () => <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
-})
+// Video and Music are now handled by SmartMedia
 const GuestbookBlock = dynamic(() => import("./guestbook-block").then(mod => mod.GuestbookBlock), {
     loading: () => <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
 })
@@ -107,11 +98,36 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
             )
 
         case 'video':
-            return (
-                <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
-                    <VideoBlockPublic content={content} isPublic={isPublic} />
-                </FrameContainer>
-            )
+        case 'music':
+        case 'media':
+            // Se tiver 'mediaType', é o novo bloco SmartMedia
+            if (content.mediaType) {
+                return (
+                    <FrameContainer frame={content.frame || (content.mediaType === 'music' ? 'minimal' : 'none')}>
+                        <SmartMedia
+                            mediaType={content.mediaType}
+                            videoId={content.videoId}
+                            trackId={content.trackId}
+                            isPublic={isPublic}
+                        />
+                    </FrameContainer>
+                )
+            }
+            // Caso contrário, é um bloco legado ou o bloco de Curadoria (Analog)
+            if (block.type === 'video' || block.type === 'music') {
+                return (
+                    <FrameContainer frame={content.frame || (block.type === 'music' ? 'minimal' : 'none')}>
+                        <SmartMedia
+                            mediaType={block.type === 'music' ? 'music' : 'video'}
+                            videoId={content.videoId}
+                            trackId={content.trackId}
+                            isPublic={isPublic}
+                        />
+                    </FrameContainer>
+                )
+            }
+            // Se for 'media' sem 'mediaType', é o bloco analógico de Livros/Filmes
+            return <MediaBlockPublic content={content} isPublic={isPublic} />
 
         case 'gif':
             return renderWithFrame(
@@ -136,8 +152,6 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
         case 'weather':
             return <WeatherBlockPublic content={content} />
 
-        case 'media':
-            return <MediaBlockPublic content={content} isPublic={isPublic} />
 
         case 'doodle':
             return (
@@ -151,12 +165,6 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
         case 'social':
             return <SocialBlockPublic content={content} isPublic={isPublic} />
 
-        case 'music':
-            return (
-                <FrameContainer frame={content.frame || 'none'}>
-                    <MusicBlockPublic content={content} isPublic={isPublic} />
-                </FrameContainer>
-            )
 
         case 'guestbook':
             return (

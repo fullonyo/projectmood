@@ -35,9 +35,8 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
         },
         {
             items: [
-                { id: 'youtube', type: 'video', icon: Youtube, tk: 'youtube' },
-                { id: 'spotify', type: 'music', icon: Music, tk: 'spotify' },
-                { id: 'gif', type: 'gif', icon: Play, tk: 'gif' },
+                { id: 'universal_media', type: 'media', icon: Play, tk: 'universal_media' },
+                { id: 'gif', type: 'gif', icon: Youtube, tk: 'gif' },
                 { id: 'weather', type: 'weather', icon: Cloud, tk: 'weather' },
             ]
         },

@@ -67,7 +67,8 @@ export const pt = {
                 social: { title: "Link Salto", desc: "Leve para outro lugar" },
                 gif: { title: "Animação", desc: "Reações em GIF (Giphy)" },
                 weather: { title: "Clima", desc: "Como está o dia lá fora?" },
-                media: { title: "Mídia Análoga", desc: "Livros e fitas" }
+                universal_media: { title: "Mídia Universal", desc: "YouTube & Spotify" },
+                media: { title: "Registro Analógico", desc: "Livros e obras" }
             },
             inspector_back: "Voltar para Elementos",
             more_coming: "Mais componentes em breve"
@@ -174,6 +175,19 @@ export const pt = {
     },
 
     editors: {
+        universal_media: {
+            title: "Mídia Universal",
+            subtitle: "Sincronize sua vibe",
+            video_tab: "YouTube",
+            music_tab: "Spotify",
+            youtube_placeholder: "COLE O LINK DO YOUTUBE...",
+            youtube_btn: "Conectar Vídeo",
+            spotify_placeholder: "BUSQUE MÚSICA OU ARTISTA...",
+            spotify_btn: "Buscar no Spotify",
+            aesthetic_label: "Estética do Bloco",
+            update_btn: "Atualizar Mídia",
+            deploy_btn: "Pendurar Mídia"
+        },
         theme: {
             title: "Cores e vibes",
             light: "Clássico",

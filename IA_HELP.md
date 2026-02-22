@@ -46,10 +46,16 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **Migração Ghost**: Blocos legados (`ticker`, `subtitle`, `floating`, `phrase`, `quote`, `moodStatus`) são automaticamente convertidos para o tipo `text` com comportamento (`behavior`) específico ao serem editados, garantindo retrocompatibilidade sem arquivos duplicados.
 - **Limpeza de Base**: 10 arquivos obsoletos (editores e blocos públicos individuais) foram removidos em favor desta arquitetura modular.
 
+- **Mídia Ultra-Universal 📺🎵**:
+  - **SmartMedia (`src/components/dashboard/SmartMedia.tsx`)**: Renderizador único que processa iframes de YouTube e Spotify com lógica de escala responsiva e parâmetros de mute/autoplay.
+  - **UniversalMediaEditor (`src/components/dashboard/UniversalMediaEditor.tsx`)**: Interface modular que substitui os antigos buscadores individuais. Inclui suporte a todas as molduras (`FrameContainer`).
+  - **Unificação de Catálogo**: Botões individuais de YouTube/Spotify foram consolidados no componente `media` unificado no `BlockLibrary`.
+- **Limpeza de Base**: 14 arquivos obsoletos (editores e blocos públicos individuais) foram removidos em favor desta arquitetura modular de texto e mídia.
+
 ### Infraestrutura & Deploy
 - **Docker Standalone**: Configuração otimizada para baixo consumo de recursos em instâncias AWS EC2.
 - **CI/CD (GitHub Actions)**: Deploy automático via SSH. O pipeline realiza `git pull`, rebuild de containers e migrações Prisma (`db push`) automaticamente ao dar push na branch `main`.
 - **Reverse Proxy**: Recomendado uso de Nginx no host da EC2 para SSL (Certbot) e encaminhamento para a porta 3000.
 
 ---
-*Documentação atualizada por Antigravity em 18/02/2026. Identidade MoodSpace consolidada.*
+*Documentação atualizada por Antigravity em 22/02/2026. Identidade MoodSpace consolidada.*

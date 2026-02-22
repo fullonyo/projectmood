@@ -67,7 +67,8 @@ export const en: Dictionary = {
                 social: { title: "Portal Link", desc: "Take anywhere else" },
                 gif: { title: "Animation", desc: "GIF reactions (Giphy)" },
                 weather: { title: "Weather", desc: "How is the day outside?" },
-                media: { title: "Analog Media", desc: "Books and tapes" }
+                universal_media: { title: "Universal Media", desc: "YouTube & Spotify" },
+                media: { title: "Analog Record", desc: "Books and tapes" }
             },
             inspector_back: "Back to Elements",
             more_coming: "More components coming soon"
@@ -174,6 +175,19 @@ export const en: Dictionary = {
     },
 
     editors: {
+        universal_media: {
+            title: "Universal Media",
+            subtitle: "Sync your vibe",
+            video_tab: "YouTube",
+            music_tab: "Spotify",
+            youtube_placeholder: "PASTE YOUTUBE LINK...",
+            youtube_btn: "Connect Video",
+            spotify_placeholder: "SEARCH MUSIC OR ARTIST...",
+            spotify_btn: "Search Spotify",
+            aesthetic_label: "Block Aesthetic",
+            update_btn: "Update Media",
+            deploy_btn: "Deploy Media"
+        },
         theme: {
             title: "Colors & vibes",
             light: "Classic",

@@ -15,12 +15,11 @@ import {
 } from "lucide-react"
 
 import { UniversalTextEditor } from "./UniversalTextEditor"
+import { UniversalMediaEditor } from "./UniversalMediaEditor"
 import { ArtTools } from "./art-tools"
 import { DoodlePad } from "./doodle-pad"
 import { SocialLinksEditor } from "./social-links-editor"
 import { GifPicker } from "./gif-picker"
-import { SpotifySearch } from "./spotify-search"
-import { YoutubeEditor } from "./youtube-editor"
 import { GuestbookEditor } from "./guestbook-editor"
 import { ActionsSidebar } from "./actions-sidebar"
 import { PhotoEditor } from "./photo-editor"
@@ -207,8 +206,21 @@ export function DashboardSidebar({
                                         }}
                                     />
                                 )}
-                                {((selectedBlocks[0]?.type || draftBlockType) === 'video') && <YoutubeEditor key={selectedBlocks[0]?.id || 'draft-video'} />}
-                                {((selectedBlocks[0]?.type || draftBlockType) === 'music') && <SpotifySearch key={selectedBlocks[0]?.id || 'draft-music'} />}
+                                {['video', 'music', 'media'].includes(selectedBlocks[0]?.type || draftBlockType || '') && (
+                                    <UniversalMediaEditor
+                                        key={selectedBlocks[0]?.id || 'draft-universal-media'}
+                                        block={selectedBlocks[0]}
+                                        onUpdate={onUpdateBlock}
+                                        onAdd={async (type: string, content: any) => {
+                                            const result = await addMoodBlock('media', content, { x: 40, y: 40, width: 320, height: 200 })
+                                            if (result?.success) setDraftBlockType(null)
+                                        }}
+                                        onClose={() => {
+                                            setSelectedIds([])
+                                            setDraftBlockType(null)
+                                        }}
+                                    />
+                                )}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'photo') && (
                                     <PhotoEditor key={selectedBlocks[0]?.id || 'draft-photo'} block={selectedBlocks[0]} onUpdate={onUpdateBlock} onAdd={selectedBlocks[0] ? undefined : async (content) => {
                                         const result = await addMoodBlock('photo', content, { x: 40, y: 40, width: 300, height: 300 })
@@ -217,7 +229,7 @@ export function DashboardSidebar({
                                 )}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'gif') && <GifPicker key={selectedBlocks[0]?.id || 'draft-gif'} />}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'guestbook') && <GuestbookEditor key={selectedBlocks[0]?.id || 'draft-guestbook'} />}
-                                {['tape', 'weather', 'media'].includes(selectedBlocks[0]?.type || draftBlockType || '') && <ArtTools key={selectedBlocks[0]?.id || 'draft-art'} />}
+                                {['tape', 'weather'].includes(selectedBlocks[0]?.type || draftBlockType || '') && <ArtTools key={selectedBlocks[0]?.id || 'draft-art'} />}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'doodle') && <DoodlePad key={selectedBlocks[0]?.id || 'draft-doodle'} />}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'countdown') && (
                                     <CountdownEditor
