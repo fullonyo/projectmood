@@ -25,7 +25,7 @@ import { ActionsSidebar } from "./actions-sidebar"
 import { PhotoEditor } from "./photo-editor"
 import { CountdownEditor } from "./countdown-editor"
 import { BlockLibrary } from "./block-library"
-import { RoomSettings } from "./room-settings"
+import { UniversalRoomEditor } from "./universal-room-editor"
 import { clearMoodBlocks, addMoodBlock } from "@/actions/profile"
 import { Button } from "../ui/button"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -141,7 +141,7 @@ export function DashboardSidebar({
                 )}
             >
                 {activeTab === 'room' && (
-                    <RoomSettings
+                    <UniversalRoomEditor
                         profile={profile}
                         onUpdateProfile={onUpdateProfile}
                         onClearWall={() => setShowClearConfirm(true)}

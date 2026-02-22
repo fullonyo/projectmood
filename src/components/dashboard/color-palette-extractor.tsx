@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react"
 import { useDropzone } from "react-dropzone"
 import { Button } from "@/components/ui/button"
-import { Palette, Upload, X, Sparkles } from "lucide-react"
+import { Palette, Upload, X, Sparkles, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
@@ -86,49 +86,40 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-3">
-                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-                    <Sparkles className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
-                </div>
-                <div>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">{t('editors.palette.title')}</h3>
-                    <p className="text-[9px] text-zinc-400 uppercase tracking-tighter">{t('editors.palette.desc')}</p>
-                </div>
-            </div>
-
+        <div className="space-y-4">
             {!previewUrl ? (
                 <div
                     {...getRootProps()}
                     className={cn(
-                        "border border-dashed border-zinc-200 dark:border-zinc-800 rounded-none p-6 text-center transition-all cursor-pointer group bg-zinc-50/50 dark:bg-zinc-900/30",
+                        "border border-dashed rounded-none p-6 text-center transition-all cursor-pointer group relative overflow-hidden",
                         isDragActive
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                            ? 'border-black dark:border-white bg-black/5 dark:bg-white/5'
+                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-zinc-50/50 dark:bg-black/20'
                     )}
                 >
                     <input {...getInputProps()} />
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-zinc-400 group-hover:scale-110 transition-transform" />
-                    <p className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400">
+                    <Upload className="w-5 h-5 mx-auto mb-2 text-zinc-400 group-hover:scale-110 transition-transform" />
+                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
                         {isDragActive ? t('editors.palette.drop') : t('editors.palette.drag')}
                     </p>
-                    <p className="text-[10px] text-zinc-400 mt-1">{t('editors.palette.hint')}</p>
+                    <p className="text-[7px] text-zinc-400 mt-1 uppercase tracking-tighter">{t('editors.palette.hint')}</p>
                 </div>
             ) : (
-                <div className="space-y-4 animate-in fade-in zoom-in duration-300">
-                    <div className="relative aspect-video rounded-none overflow-hidden border border-zinc-200 dark:border-zinc-800 group">
-                        <img src={previewUrl} className="w-full h-full object-cover" alt="Source" />
-                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="space-y-4 animate-in fade-in zoom-in duration-500">
+                    <div className="relative aspect-video rounded-none overflow-hidden border border-black/10 dark:border-white/10 group shadow-lg">
+                        <img src={previewUrl} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700" alt="Source" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                             <button
                                 onClick={reset}
-                                className="p-2 bg-white/20 backdrop-blur-md rounded-none hover:bg-white/40 transition-colors"
+                                className="p-2 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all active:scale-95"
                             >
-                                <X className="w-4 h-4 text-white" />
+                                <X className="w-3.5 h-3.5 text-white" />
                             </button>
                         </div>
                         {loading && (
-                            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-white animate-pulse">
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center gap-2">
+                                <Loader2 className="w-4 h-4 text-white animate-spin opacity-50" />
+                                <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/50">
                                     {t('editors.palette.analyzing')}
                                 </p>
                             </div>
@@ -141,11 +132,11 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                                 {extractedColors.map((color, idx) => (
                                     <div key={idx} className="group relative">
                                         <div
-                                            className="w-10 h-10 rounded-none border border-white dark:border-zinc-900 shadow-none transition-transform hover:scale-110"
+                                            className="w-8 h-8 border border-black/5 dark:border-white/5 transition-all hover:scale-110 hover:-translate-y-1 shadow-sm active:scale-95"
                                             style={{ backgroundColor: color }}
                                         />
-                                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="text-[8px] font-mono uppercase bg-zinc-900 text-white px-1 rounded-none">
+                                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none translate-y-2 group-hover:translate-y-0 z-20">
+                                            <span className="text-[7px] font-black font-mono uppercase bg-black text-white dark:bg-white dark:text-black px-1 py-0.5 whitespace-nowrap">
                                                 {color}
                                             </span>
                                         </div>
@@ -154,7 +145,7 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                             </div>
                             <Button
                                 onClick={() => onApplyPalette(extractedColors)}
-                                className="w-full bg-black text-white hover:bg-zinc-900 dark:bg-white dark:text-black h-12 rounded-none text-[10px] font-black uppercase tracking-widest border border-black dark:border-white transition-all"
+                                className="w-full bg-black text-white hover:bg-zinc-900 dark:bg-white dark:text-black h-12 rounded-none text-[8px] font-black uppercase tracking-[0.3em] border border-black dark:border-white transition-all hover:shadow-xl active:scale-[0.98]"
                             >
                                 {t('editors.palette.apply')}
                             </Button>

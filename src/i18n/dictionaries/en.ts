@@ -200,7 +200,14 @@ export const en: Dictionary = {
             node_luminance: "Highlight color",
             luminance_desc: "Pick the color that best represents you right now.",
             atomic_typography: "Main letter",
-            base_system: "Base lettering style",
+            base_system: "Letter Styles",
+            textures_title: "Wall Texture",
+            textures: {
+                none: "Plain",
+                museum_paper: "Museum Paper",
+                raw_canvas: "Raw Canvas",
+                fine_sand: "Fine Sand"
+            }
         },
         text: {
             title: "Write something",
@@ -269,6 +276,34 @@ export const en: Dictionary = {
             active: "Selected",
             syncing: "Changing the atmosphere...",
             deployed: "All set.",
+            cursors: {
+                auto: "Standard Arrow",
+                retro: "Retro Arrow",
+                heart: "Heart",
+                pixel: "Pixel Grid",
+                ghost: "Ghostly"
+            },
+            trails: {
+                none: "None",
+                sparkles: "Sparkles",
+                ghost: "Ghost",
+                "pixel-dust": "Pixel Dust"
+            },
+            backgrounds: {
+                none: "Solid Color",
+                noise: "Analog Noise",
+                aurora: "Aurora Borealis",
+                liquid: "Liquid Flow",
+                "mesh-gradient": "Mesh Gradient",
+                metaballs: "Metaballs",
+                hyperspeed: "Hyperspeed",
+                rain: "Melancholy Rain",
+                rhythm: "Wave Rhythm",
+                vintage: "Vintage Movie",
+                universe: "Deep Universe",
+                "grid-move": "Retro Grid",
+                stars: "Starfield"
+            }
         },
         countdown: {
             title: "Countdown",
@@ -390,6 +425,15 @@ export const en: Dictionary = {
                 wind: "Windy and dynamic"
             }
         },
+        palette: {
+            title: "Extract Atmosphere",
+            desc: "Define colors through an image",
+            drag: "Drag an image here",
+            drop: "Drop the image",
+            hint: "FORMATS // PNG, JPG, WEBP",
+            analyzing: "Analyzing aura...",
+            apply: "Apply Colors to Room"
+        },
 
         spotify: {
             title: "Soundtrack",
@@ -398,15 +442,6 @@ export const en: Dictionary = {
             error: "Search Error",
             results: "Results",
             source: "Source"
-        },
-        palette: {
-            title: "Auto Palette",
-            desc: "Extract colors from an image",
-            drop: "Drop to analyze",
-            drag: "Drag an image",
-            hint: "Smart vibe extraction",
-            analyzing: "Analyzing...",
-            apply: "Apply to Mural"
         },
         share: {
             link: "Share Link",

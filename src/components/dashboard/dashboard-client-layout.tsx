@@ -9,7 +9,6 @@ import { MoodCanvas } from "./mood-canvas";
 import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
 import { BackgroundEffect } from "../effects/background-effect";
-import { FontLoader } from "./font-loader";
 import { MoodBlock, Profile } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
 import { updateMoodBlocksZIndex } from "@/actions/profile";
@@ -108,7 +107,6 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
 
     return (
         <main className="flex-1 relative overflow-hidden flex flex-col focus:outline-none">
-            <FontLoader fontFamily={localProfile.customFont} />
             <CustomCursor type={localProfile.customCursor || 'auto'} />
             <MouseTrails type={localProfile.mouseTrails || 'none'} />
 

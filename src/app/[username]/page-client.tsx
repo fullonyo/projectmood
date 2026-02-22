@@ -14,7 +14,6 @@ import { BackgroundEffect } from "@/components/effects/background-effect"
 import { StaticTextures } from "@/components/effects/static-textures"
 import { CustomCursor } from "@/components/effects/custom-cursor"
 import { MouseTrails } from "@/components/effects/mouse-trails"
-import { FontLoader } from "@/components/dashboard/font-loader"
 import { Lightbulb, LightbulbOff } from "lucide-react"
 import type { PublicMoodPageProps } from "@/types/database"
 
@@ -53,7 +52,6 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
 
     return (
         <>
-            <FontLoader fontFamily={profile.customFont} />
             <CustomCursor type={profile.customCursor || 'auto'} />
             <MouseTrails type={profile.mouseTrails || 'none'} />
 

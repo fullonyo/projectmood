@@ -200,7 +200,14 @@ export const pt = {
             node_luminance: "Cor do destaque",
             luminance_desc: "Escolha a cor que mais te representa agora.",
             atomic_typography: "Letra principal",
-            base_system: "Estilo base de letreiro",
+            base_system: "Estilos de Letra",
+            textures_title: "Textura das paredes",
+            textures: {
+                none: "Plano",
+                museum_paper: "Papel Museu",
+                raw_canvas: "Canvas Cru",
+                fine_sand: "Areia Fina"
+            }
         },
         text: {
             title: "Escrever algo",
@@ -269,6 +276,34 @@ export const pt = {
             active: "Selecionado",
             syncing: "Mudando a atmosfera...",
             deployed: "Tudo pronto.",
+            cursors: {
+                auto: "Seta Padrão",
+                retro: "Seta Retro",
+                heart: "Coração",
+                pixel: "Pixel Grid",
+                ghost: "Fantasmagórico"
+            },
+            trails: {
+                none: "Nenhum",
+                sparkles: "Brilhos",
+                ghost: "Fantasma",
+                "pixel-dust": "Poeira Pixel"
+            },
+            backgrounds: {
+                none: "Cor Sólida",
+                noise: "Ruído Analógico",
+                aurora: "Aurora Boreal",
+                liquid: "Fluxo Líquido",
+                "mesh-gradient": "Gradiente Mesh",
+                metaballs: "Metaballs",
+                hyperspeed: "Velocidade Luz",
+                rain: "Chuva de Melancolia",
+                rhythm: "Ritmo de Ondas",
+                vintage: "Filme Vintage",
+                universe: "Universo Profundo",
+                "grid-move": "Grade Retro",
+                stars: "Campo Estelar"
+            }
         },
         countdown: {
             title: "Contagem regressiva",
@@ -388,7 +423,16 @@ export const pt = {
                 snow: "Frio e aconchegante",
                 cloud: "Nublado e urbano",
                 wind: "Ventoso e dinâmico"
-            }
+            },
+        },
+        palette: {
+            title: "Extrair Atmosfera",
+            desc: "Defina cores através de uma imagem",
+            drag: "Arraste uma imagem para cá",
+            drop: "Pode soltar a imagem",
+            hint: "FORMATOS // PNG, JPG, WEBP",
+            analyzing: "Analisando aura...",
+            apply: "Aplicar Cores no Quarto"
         },
 
         spotify: {
@@ -398,15 +442,6 @@ export const pt = {
             error: "Erro de busca",
             results: "Resultados",
             source: "Fonte"
-        },
-        palette: {
-            title: "Auto Palette",
-            desc: "Extraia cores de uma imagem",
-            drop: "Solte para analisar",
-            drag: "Arraste uma imagem",
-            hint: "Extração inteligente de vibes",
-            analyzing: "Analisando...",
-            apply: "Aplicar no Mural"
         },
         share: {
             link: "Compartilhar",
