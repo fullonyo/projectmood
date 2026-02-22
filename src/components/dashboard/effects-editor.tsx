@@ -101,8 +101,8 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                                 className={cn(
                                     "p-4 border transition-all group flex flex-col items-center gap-2",
                                     isSelected
-                                        ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
-                                        : "bg-white dark:bg-black/20 border-zinc-100 dark:border-zinc-800 opacity-60 hover:opacity-100 hover:border-zinc-400 dark:hover:border-zinc-600"
+                                        ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-lg scale-105"
+                                        : "bg-white dark:bg-black/20 border-zinc-100 dark:border-zinc-800 opacity-60 hover:opacity-100 hover:border-zinc-300 dark:hover:border-zinc-600"
                                 )}
                             >
                                 <c.icon className={cn("w-4 h-4 transition-transform group-hover:scale-110", isSelected && "animate-pulse")} />
@@ -131,8 +131,8 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                                 className={cn(
                                     "p-4 border transition-all group flex items-center justify-center gap-3",
                                     isSelected
-                                        ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
-                                        : "bg-white dark:bg-black/20 border-zinc-100 dark:border-zinc-800 opacity-60 hover:opacity-100 hover:border-zinc-400 dark:hover:border-zinc-600"
+                                        ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-lg scale-105"
+                                        : "bg-white dark:bg-black/20 border-zinc-100 dark:border-zinc-800 opacity-60 hover:opacity-100 hover:border-zinc-300 dark:hover:border-zinc-600"
                                 )}
                             >
                                 <t.icon className={cn("w-3.5 h-3.5 transition-transform group-hover:scale-110", isSelected && "animate-pulse")} />
@@ -161,8 +161,8 @@ export function EffectsEditor({ profile }: EffectsEditorProps) {
                                 className={cn(
                                     "w-full p-4 border transition-all group relative overflow-hidden flex items-center justify-between",
                                     isSelected
-                                        ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
-                                        : "bg-white dark:bg-black/20 border-zinc-100 dark:border-zinc-800 opacity-60 hover:opacity-100 hover:border-zinc-400 dark:hover:border-zinc-600"
+                                        ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-lg"
+                                        : "bg-white dark:bg-black/20 border-zinc-100 dark:border-zinc-800 opacity-60 hover:opacity-100 hover:border-zinc-300 dark:hover:border-zinc-600"
                                 )}
                             >
                                 <div className="flex items-center gap-3 z-10 relative">

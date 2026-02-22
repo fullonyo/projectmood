@@ -11,12 +11,10 @@ interface ThemeEditorProps {
     currentTheme: string
     currentPrimaryColor: string
     currentStaticTexture: string
-    currentFontStyle: string
-    currentCustomFont?: string
     onUpdate?: (data: any) => void
 }
 
-export function ThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTexture, currentFontStyle, currentCustomFont, onUpdate }: ThemeEditorProps) {
+export function ThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTexture, onUpdate }: ThemeEditorProps) {
     const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
     const [showExtractor, setShowExtractor] = useState(false)
@@ -142,7 +140,7 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTe
                     </div>
                 ) : (
                     <div className="flex flex-wrap gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        {['#000000', '#FFFFFF', '#666666', '#FF0000', '#22C55E', '#3B82F6', '#DA3232', '#FFD700', '#8A2BE2'].map(color => (
+                        {['#000000', '#FFFFFF', '#A3A3A3', '#F87171', '#34D399', '#60A5FA', '#E879F9', '#FBBF24', '#8B5CF6'].map(color => (
                             <button
                                 key={color}
                                 onClick={() => handleUpdate({ primaryColor: color })}

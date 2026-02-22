@@ -65,8 +65,6 @@ export function UniversalRoomEditor({ profile, onUpdateProfile, onClearWall }: U
                                 currentTheme={profile.theme}
                                 currentPrimaryColor={profile.primaryColor || '#000'}
                                 currentStaticTexture={profile.staticTexture || 'none'}
-                                currentFontStyle={profile.fontStyle || 'sans'}
-                                currentCustomFont={profile.customFont}
                                 onUpdate={onUpdateProfile}
                             />
                         </section>
