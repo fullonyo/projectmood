@@ -29,17 +29,16 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
     const categories = [
         {
             items: [
-                { id: 'text', type: 'text', icon: Type, tk: 'text' },
-                { id: 'phrase', type: 'ticker', icon: Sparkles, tk: 'phrase' },
-                { id: 'quote', type: 'quote', icon: Quote, tk: 'quote' }
+                { id: 'typography', type: 'text', icon: Type, tk: 'typography' },
+                { id: 'photo', type: 'photo', icon: ImageIcon, tk: 'photo' },
             ]
         },
         {
             items: [
-                { id: 'photo', type: 'photo', icon: ImageIcon, tk: 'photo' },
                 { id: 'youtube', type: 'video', icon: Youtube, tk: 'youtube' },
                 { id: 'spotify', type: 'music', icon: Music, tk: 'spotify' },
-                { id: 'gif', type: 'gif', icon: Play, tk: 'gif' }
+                { id: 'gif', type: 'gif', icon: Play, tk: 'gif' },
+                { id: 'weather', type: 'weather', icon: Cloud, tk: 'weather' },
             ]
         },
         {
@@ -47,8 +46,6 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
                 { id: 'doodle', type: 'doodle', icon: Pencil, tk: 'doodle' },
                 { id: 'guestbook', type: 'guestbook', icon: MessageSquare, tk: 'guestbook' },
                 { id: 'countdown', type: 'countdown', icon: Clock, tk: 'countdown' },
-                { id: 'moodStatus', type: 'moodStatus', icon: Sparkles, tk: 'moodStatus' },
-                { id: 'weather', type: 'weather', icon: Cloud, tk: 'weather' },
                 { id: 'social', type: 'social', icon: Share2, tk: 'social' },
                 { id: 'media', type: 'media', icon: Book, tk: 'media' },
             ]

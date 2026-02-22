@@ -15,15 +15,13 @@ import {
 // Modularized Public Blocks
 import dynamic from "next/dynamic"
 
+// Universal Components
+import { FrameContainer, FrameType } from "./FrameContainer"
+import { SmartText, TextBehavior } from "./SmartText"
+
 // Modularized Public Blocks - Static (Critical for LCP/CLS)
-import { TextBlockPublic } from "./text-block-public"
 import { PhotoBlockPublic } from "./photo-block-public"
-import { QuoteBlockPublic } from "./quote-block-public"
-import { TickerBlockPublic } from "./ticker-block-public"
-import { SubtitleBlockPublic } from "./subtitle-block-public"
-import { FloatingBlockPublic } from "./floating-block-public"
 import { CountdownBlockPublic } from "./countdown-block-public"
-import { MoodStatusBlockPublic } from "./mood-status-block-public"
 
 // Dynamic Imports (Heavy/Interactive Blocks)
 const VideoBlockPublic = dynamic(() => import("./video-block-public").then(mod => mod.VideoBlockPublic), {
@@ -59,15 +57,67 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
     const content = block.content as any
     const scale = useViewportScale()
 
+    // Helper to wrap content in a Frame
+    const renderWithFrame = (children: React.ReactNode, frame: FrameType = 'none', caption?: string) => (
+        <FrameContainer frame={frame} caption={caption}>
+            {children}
+        </FrameContainer>
+    )
+
     switch (block.type) {
         case 'text':
-            return <TextBlockPublic content={content} />
+        case 'ticker':
+        case 'subtitle':
+        case 'floating':
+        case 'quote':
+        case 'moodStatus':
+        case 'mood-status':
+            const behavior = content.behavior || (
+                block.type === 'ticker' ? 'ticker' :
+                    block.type === 'floating' ? 'floating' :
+                        block.type === 'subtitle' ? 'typewriter' :
+                            block.type === 'quote' ? 'quote' :
+                                (block.type === 'moodStatus' || block.type === 'mood-status') ? 'status' :
+                                    'static'
+            )
+            return (
+                <FrameContainer frame={content.frame || (content.style === 'simple' ? 'none' : content.style as any) || (['ticker', 'subtitle', 'floating'].includes(block.type) ? 'minimal' : 'none')}>
+                    <SmartText
+                        text={content.text}
+                        behavior={behavior as TextBehavior}
+                        style={content.style}
+                        textColor={content.textColor}
+                        fontSize={content.fontSize}
+                        align={content.align}
+                        speed={content.speed}
+                        direction={content.direction}
+                        cursorType={content.cursorType}
+                        author={content.author}
+                        showQuotes={content.showQuotes}
+                        icon={content.icon}
+                    />
+                </FrameContainer>
+            )
+
+        case 'photo':
+            return (
+                <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
+                    <PhotoBlockPublic content={content} />
+                </FrameContainer>
+            )
+
+        case 'video':
+            return (
+                <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
+                    <VideoBlockPublic content={content} isPublic={isPublic} />
+                </FrameContainer>
+            )
 
         case 'gif':
-            return (
-                <div className="w-full h-full bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm rounded-none border border-black/10 dark:border-white/10 shadow-none flex items-center justify-center overflow-hidden" style={{ padding: Math.round(4 * scale) }}>
-                    <img src={content.url} alt="gif" className="rounded-none w-full h-full object-cover" />
-                </div>
+            return renderWithFrame(
+                <img src={content.url} alt="gif" className="w-full h-full object-cover" />,
+                content.frame || 'none',
+                content.caption
             )
 
         case 'tape':
@@ -102,19 +152,11 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
             return <SocialBlockPublic content={content} isPublic={isPublic} />
 
         case 'music':
-            return <MusicBlockPublic content={content} isPublic={isPublic} />
-
-        case 'video':
-            return <VideoBlockPublic content={content} isPublic={isPublic} />
-
-        case 'ticker':
-            return <TickerBlockPublic content={content} />
-
-        case 'subtitle':
-            return <SubtitleBlockPublic content={content} />
-
-        case 'floating':
-            return <FloatingBlockPublic content={content} />
+            return (
+                <FrameContainer frame={content.frame || 'none'}>
+                    <MusicBlockPublic content={content} isPublic={isPublic} />
+                </FrameContainer>
+            )
 
         case 'guestbook':
             return (
@@ -122,15 +164,6 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
                     <GuestbookBlock block={block} isPublic={isPublic} />
                 </div>
             )
-
-        case 'quote':
-            return <QuoteBlockPublic content={content} />
-
-        case 'photo':
-            return <PhotoBlockPublic content={content} />
-
-        case 'moodStatus':
-            return <MoodStatusBlockPublic content={content} />
 
         case 'countdown':
             return <CountdownBlockPublic content={content} />

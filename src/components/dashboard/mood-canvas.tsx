@@ -29,7 +29,7 @@ import { useViewportScale } from '@/lib/canvas-scale'
 import { useCanvasKeyboard } from '@/hooks/use-canvas-keyboard'
 
 import { CanvasItem } from "./canvas-item"
-import { StressTestButton } from "./stress-test-button"
+import { StressTestButton } from "./StressTestButton"
 import { MoodBlock, Profile, ThemeConfig } from "@/types/database"
 
 interface MoodCanvasProps {

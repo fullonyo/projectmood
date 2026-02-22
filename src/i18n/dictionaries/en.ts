@@ -60,6 +60,7 @@ export const en: Dictionary = {
                 doodle: { title: "Draft", desc: "Freehand drawing" },
                 phrase: { title: "Marquee", desc: "Animated text" },
                 quote: { title: "Quote", desc: "Highlight statements" },
+                typography: { title: "Typography & Vibes", desc: "Notes, Marquees, Quotes and Status" },
                 countdown: { title: "Timer", desc: "Mark a date" },
                 guestbook: { title: "Guestbook", desc: "Let others sign" },
                 moodStatus: { title: "Current State", desc: "How are you right now?" },

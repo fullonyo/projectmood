@@ -14,8 +14,7 @@ import {
     Loader2
 } from "lucide-react"
 
-import { TextEditor } from "./text-editor"
-import { PhraseEditor } from "./phrase-editor"
+import { UniversalTextEditor } from "./UniversalTextEditor"
 import { ArtTools } from "./art-tools"
 import { DoodlePad } from "./doodle-pad"
 import { SocialLinksEditor } from "./social-links-editor"
@@ -23,9 +22,8 @@ import { GifPicker } from "./gif-picker"
 import { SpotifySearch } from "./spotify-search"
 import { YoutubeEditor } from "./youtube-editor"
 import { GuestbookEditor } from "./guestbook-editor"
-import { QuoteEditor } from "./quote-editor"
+import { ActionsSidebar } from "./actions-sidebar"
 import { PhotoEditor } from "./photo-editor"
-import { MoodStatusEditor } from "./mood-status-editor"
 import { CountdownEditor } from "./countdown-editor"
 import { BlockLibrary } from "./block-library"
 import { RoomSettings } from "./room-settings"
@@ -181,28 +179,13 @@ export function DashboardSidebar({
                                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black dark:text-white">{t('sidebar.library.inspector_back')}</span>
                                 </Button>
 
-                                {((selectedBlocks[0]?.type || draftBlockType) === 'text') && (
-                                    <TextEditor
-                                        key={selectedBlocks[0]?.id || 'draft-text'}
-                                        block={selectedBlocks[0]}
-                                        onUpdate={onUpdateBlock}
-                                        onAdd={async (content: any) => {
-                                            const result = await addMoodBlock('text', content, { x: 40, y: 40 })
-                                            if (result?.success) setDraftBlockType(null)
-                                        }}
-                                        onClose={() => {
-                                            setSelectedIds([])
-                                            setDraftBlockType(null)
-                                        }}
-                                    />
-                                )}
-                                {['ticker', 'subtitle', 'floating', 'phrase'].includes(selectedBlocks[0]?.type || draftBlockType || '') && (
-                                    <PhraseEditor
-                                        key={selectedBlocks[0]?.id || `draft-phrase`}
+                                {['text', 'ticker', 'subtitle', 'floating', 'phrase', 'quote', 'moodStatus', 'mood-status'].includes(selectedBlocks[0]?.type || draftBlockType || '') && (
+                                    <UniversalTextEditor
+                                        key={selectedBlocks[0]?.id || 'draft-universal-text'}
                                         block={selectedBlocks[0]}
                                         onUpdate={onUpdateBlock}
                                         onAdd={async (type: string, content: any) => {
-                                            const result = await addMoodBlock(type, content, { x: 40, y: 40 })
+                                            const result = await addMoodBlock('text', content, { x: 40, y: 40 })
                                             if (result?.success) setDraftBlockType(null)
                                         }}
                                         onClose={() => {
@@ -224,21 +207,6 @@ export function DashboardSidebar({
                                         }}
                                     />
                                 )}
-                                {((selectedBlocks[0]?.type || draftBlockType) === 'quote') && (
-                                    <QuoteEditor
-                                        key={selectedBlocks[0]?.id || 'draft-quote'}
-                                        block={selectedBlocks[0]}
-                                        onUpdate={onUpdateBlock}
-                                        onAdd={selectedBlocks[0] ? undefined : async (content) => {
-                                            const result = await addMoodBlock('quote', content, { x: 40, y: 40 })
-                                            if (result?.success) setDraftBlockType(null)
-                                        }}
-                                        onClose={() => {
-                                            setSelectedIds([])
-                                            setDraftBlockType(null)
-                                        }}
-                                    />
-                                )}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'video') && <YoutubeEditor key={selectedBlocks[0]?.id || 'draft-video'} />}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'music') && <SpotifySearch key={selectedBlocks[0]?.id || 'draft-music'} />}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'photo') && (
@@ -251,12 +219,6 @@ export function DashboardSidebar({
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'guestbook') && <GuestbookEditor key={selectedBlocks[0]?.id || 'draft-guestbook'} />}
                                 {['tape', 'weather', 'media'].includes(selectedBlocks[0]?.type || draftBlockType || '') && <ArtTools key={selectedBlocks[0]?.id || 'draft-art'} />}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'doodle') && <DoodlePad key={selectedBlocks[0]?.id || 'draft-doodle'} />}
-                                {((selectedBlocks[0]?.type || draftBlockType) === 'moodStatus') && (
-                                    <MoodStatusEditor key={selectedBlocks[0]?.id || 'draft-mood'} block={selectedBlocks[0]} onUpdate={onUpdateBlock} onAdd={selectedBlocks[0] ? undefined : async (content) => {
-                                        const result = await addMoodBlock('moodStatus', content, { x: 40, y: 40 })
-                                        if (result?.success) setDraftBlockType(null)
-                                    }} onClose={() => { setSelectedIds([]); setDraftBlockType(null) }} />
-                                )}
                                 {((selectedBlocks[0]?.type || draftBlockType) === 'countdown') && (
                                     <CountdownEditor
                                         key={selectedBlocks[0]?.id || 'draft-countdown'}

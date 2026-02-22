@@ -60,6 +60,7 @@ export const pt = {
                 doodle: { title: "Rascunho", desc: "Desenho à mão livre" },
                 phrase: { title: "Letreiro", desc: "Animação de texto" },
                 quote: { title: "Citação", desc: "Destaque frases marcantes" },
+                typography: { title: "Tipografia & Vibes", desc: "Notas, Letreiros, Citações e Status" },
                 countdown: { title: "Contagem", desc: "Marque uma data" },
                 guestbook: { title: "Recados", desc: "Deixe os outros assinarem" },
                 moodStatus: { title: "Estado Atual", desc: "Como você está agora?" },
