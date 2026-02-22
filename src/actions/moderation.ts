@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache"
 
 async function requireAdmin() {
     const session = await auth()
-    if ((session?.user as any)?.role !== "ADMIN") {
+    if (session?.user?.role !== "ADMIN") {
         throw new Error("Unauthorized Access: Admin role required.")
     }
     return session
@@ -69,7 +69,7 @@ export async function adminDeleteBlock(blockId: string) {
         // Log the action
         await prisma.auditLog.create({
             data: {
-                adminId: (session as any).user.id,
+                adminId: session.user.id,
                 action: "DELETE_BLOCK",
                 targetId: blockId,
                 targetType: "MoodBlock",
@@ -79,6 +79,9 @@ export async function adminDeleteBlock(blockId: string) {
 
         revalidatePath("/admin/audit")
         revalidatePath("/dashboard")
+        if (block?.user?.username) {
+            revalidatePath(`/${block.user.username}`)
+        }
         return { success: true }
     } catch (error) {
         console.error("[adminDeleteBlock] Error:", error)
@@ -86,38 +89,54 @@ export async function adminDeleteBlock(blockId: string) {
     }
 }
 
-export async function adminBanUser(userId: string) {
+export async function adminBanUser(userId: string, isBanned: boolean) {
     const session = await requireAdmin()
 
     try {
+        // Pre-fetch user for metadata and revalidation
+        const targetUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { username: true }
+        })
+
         await prisma.user.update({
             where: { id: userId },
-            data: { isBanned: true }
+            data: { isBanned }
         })
 
         // Log the action
         await prisma.auditLog.create({
             data: {
-                adminId: (session as any).user.id,
-                action: "BAN_USER",
+                adminId: session.user.id,
+                action: isBanned ? "BAN_USER" : "UNBAN_USER",
                 targetId: userId,
-                targetType: "User"
+                targetType: "User",
+                metadata: { username: targetUser?.username }
             }
         });
 
         revalidatePath("/admin/audit")
         revalidatePath("/admin/users")
         revalidatePath("/dashboard")
+        if (targetUser) revalidatePath(`/${targetUser.username}`)
+
         return { success: true }
     } catch (error) {
         console.error("[adminBanUser] Error:", error)
-        return { error: "Failed to ban user" }
+        return { error: "Failed to update ban status" }
     }
 }
+
 export async function adminVerifyUser(userId: string, isVerified: boolean, type: string = "verified") {
     const session = await requireAdmin()
 
     try {
+        // Pre-fetch user for metadata and revalidation
+        const targetUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { username: true }
+        })
+
         await prisma.user.update({
             where: { id: userId },
             data: {
@@ -129,29 +148,40 @@ export async function adminVerifyUser(userId: string, isVerified: boolean, type:
         // Log the action
         await prisma.auditLog.create({
             data: {
-                adminId: (session as any).user.id,
+                adminId: session.user.id,
                 action: isVerified ? "VERIFY_USER" : "UNVERIFY_USER",
                 targetId: userId,
                 targetType: "User",
-                metadata: { type }
+                metadata: {
+                    type,
+                    username: targetUser?.username
+                }
             }
         });
 
         revalidatePath("/admin/users")
         revalidatePath("/dashboard")
+        if (targetUser) revalidatePath(`/${targetUser.username}`)
         return { success: true }
     } catch (error) {
         console.error("[adminVerifyUser] Error:", error)
         return { error: "Failed to update verification status" }
     }
 }
-export async function getAuditLogs(page = 1, pageSize = 30) {
+
+export async function getAuditLogs(page = 1, pageSize = 30, filters?: { action?: string; targetId?: string }) {
     await requireAdmin()
 
     try {
         const skip = (page - 1) * pageSize
+        const where: import("@prisma/client").Prisma.AuditLogWhereInput = {}
+
+        if (filters?.action) where.action = filters.action
+        if (filters?.targetId) where.targetId = { contains: filters.targetId, mode: 'insensitive' }
+
         const [logs, total] = await Promise.all([
             prisma.auditLog.findMany({
+                where,
                 take: pageSize,
                 skip: skip,
                 orderBy: { createdAt: 'desc' },
@@ -164,7 +194,7 @@ export async function getAuditLogs(page = 1, pageSize = 30) {
                     }
                 }
             }),
-            prisma.auditLog.count()
+            prisma.auditLog.count({ where })
         ])
 
         return {

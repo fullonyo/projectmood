@@ -6,8 +6,14 @@ export const en: Dictionary = {
         cancel: "Cancel",
         close: "Close",
         confirm: "Confirm",
-        loading: "Processing...",
+        loading: "Loading...",
+        items: "items",
+        delete: "Delete",
+        duplicate: "Duplicate",
+        enable_interaction: "Enable Interaction",
+        disable_interaction: "Disable Interaction",
     },
+
     sidebar: {
         header_subtitle: "Your digital space",
         header_title: "Diorama",
@@ -17,7 +23,11 @@ export const en: Dictionary = {
             elements_desc: "Add notes, photos and physical memories.",
             room: "Room",
             room_desc: "Lights, colors and effects.",
+            layers: "Layers",
+            layers_desc: "Manage order and visibility",
         },
+
+
         style: {
             atmosphere_title: "Base atmosphere",
             atmosphere_desc: "Light, shadow and color of your space",
@@ -58,8 +68,10 @@ export const en: Dictionary = {
                 weather: { title: "Weather", desc: "How is the day outside?" },
                 media: { title: "Analog Media", desc: "Books and tapes" }
             },
-            inspector_back: "Back to Elements"
+            inspector_back: "Back to Elements",
+            more_coming: "More components coming soon"
         },
+
         bottom_tip: "Click on the blocks on the wall to rotate or delete them",
     },
     modals: {
@@ -149,6 +161,7 @@ export const en: Dictionary = {
         system_status: "Status",
         authorized: "Settled in",
         deployment_area: "Share your key",
+
         external_visibility: "Let others enter your room",
         launch_public_space: "Visit public space",
         system_configuration: "Settings",
@@ -156,7 +169,9 @@ export const en: Dictionary = {
         system_ux: "Room preferences",
         terminate_session: "Leave the room",
         exit_hex: "Lock the door",
+        command_center: "Command Center",
     },
+
     editors: {
         theme: {
             title: "Colors & vibes",
@@ -217,7 +232,13 @@ export const en: Dictionary = {
             left: "Left",
             right: "Right",
             deploy: "Let it roll",
+            types: {
+                ticker: "Ticker",
+                subtitle: "Subtitle",
+                floating: "Free Text"
+            }
         },
+
         youtube: {
             title: "Play a clip",
             placeholder: "Paste the YouTube link here...",
@@ -337,8 +358,24 @@ export const en: Dictionary = {
             media_work_title_placeholder: "Work name...",
             media_critique: "3-word summary",
             media_critique_placeholder: "Amazing, Boring, Surreal...",
-            media_deploy: "Stick Review"
+            media_deploy: "Stick Review",
+            tapes: {
+                classic_white: "Classic White",
+                vintage_paper: "Vintage Paper",
+                sky_blue: "Sky Blue",
+                rose_petal: "Rose Petal",
+                mint_leaf: "Mint Leaf",
+                washi_dot: "Washi Dot"
+            },
+            weather_vibes: {
+                sun: "Sunny and calm",
+                rain: "Rainy and reflective",
+                snow: "Cold and cozy",
+                cloud: "Cloudy and urban",
+                wind: "Windy and dynamic"
+            }
         },
+
         spotify: {
             title: "Soundtrack",
             search_placeholder: "What song to find?",
@@ -369,8 +406,26 @@ export const en: Dictionary = {
         creativity_domain: "Your Space",
         delete_modal_title: "Delete Item?",
         delete_modal_message: "This action cannot be undone. The item will be permanently removed from your mural.",
-        delete_modal_confirm: "Delete"
+        delete_modal_confirm: "Delete",
+        layers: "Layers",
+        layer_hide: "Hide",
+        layer_show: "Show",
+        layer_lock: "Lock",
+        layer_unlock: "Unlock",
+        layer_to_front: "Bring to Front",
+        layer_to_back: "Send to Back",
+        layer_forward: "Bring Forward",
+        layer_backward: "Send Backward",
+        layers_precision: "Precision",
+        layers_safe: "Safe Rendering",
+        layers_normalize: "Normalize Layers",
+        layers_normalized: "Layers Normalized",
+        distance_label: "Distance",
+        align_label: "Alignment",
     },
+
+
+
     public_page: {
         signature: {
             role: "Creator",

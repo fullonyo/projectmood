@@ -1,7 +1,7 @@
-import { motion, useMotionValue, useTransform } from "framer-motion"
+import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { deleteMoodBlock } from "@/actions/profile"
-import { Trash2, RotateCw, Pencil, Move, MousePointer2 } from "lucide-react"
+import { Trash2, RotateCw, Pencil, Move, MousePointer2, Lock, Eye, EyeOff } from "lucide-react"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
 import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
@@ -12,10 +12,23 @@ import { StaticTextures } from "../effects/static-textures"
 import { BoardStage } from "./board-stage"
 import { useTranslation } from "@/i18n/context"
 import { useCanvasManager } from "@/hooks/use-canvas-manager"
-import { calculateResize, getResizeCursor, ResizeHandle, ResizeCorner, calculateRotation } from '@/lib/canvas-transforms'
+import { duplicateMoodBlock } from "@/actions/profile"
+import { CanvasContextMenu } from "./canvas-context-menu"
+import {
+    calculateResize,
+    getResizeCursor,
+    ResizeHandle,
+    ResizeCorner,
+    calculateRotation,
+    calculateSnap,
+    Guideline,
+    DistanceGuide
+} from '@/lib/canvas-transforms'
 import { useViewportScale } from '@/lib/canvas-scale'
+import { useCanvasKeyboard } from '@/hooks/use-canvas-keyboard'
 
-
+import { CanvasItem } from "./canvas-item"
+import { StressTestButton } from "./stress-test-button"
 import { MoodBlock, Profile, ThemeConfig } from "@/types/database"
 
 interface MoodCanvasProps {
@@ -26,7 +39,10 @@ interface MoodCanvasProps {
     setSelectedId: (id: string | null) => void
     onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void
     isSaving: boolean
+    blockToDelete: string | null
+    setBlockToDelete: (id: string | null) => void
 }
+
 
 export function MoodCanvas({
     blocks,
@@ -35,13 +51,53 @@ export function MoodCanvas({
     selectedId,
     setSelectedId,
     onUpdateBlock,
-    isSaving
+    isSaving,
+    blockToDelete,
+    setBlockToDelete
 }: MoodCanvasProps) {
+
     const { t } = useTranslation()
     const canvasRef = useRef<HTMLDivElement>(null)
-    const [maxZ, setMaxZ] = useState(10)
-    const [blockToDelete, setBlockToDelete] = useState<string | null>(null)
+    const [maxZ, setMaxZ] = useState(20)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [visualFeedback, setVisualFeedback] = useState<{
+        guidelines: Guideline[],
+        distances: DistanceGuide[]
+    }>({ guidelines: [], distances: [] })
+    const [contextMenu, setContextMenu] = useState<{ x: number, y: number, blockId: string } | null>(null)
+    const [zoom, setZoom] = useState(1)
+    const [isPinching, setIsPinching] = useState(false)
+    const lastPinchDist = useRef<number | null>(null)
+
+    const viewportScale = useViewportScale() * zoom
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (e.touches.length === 2) {
+            const dist = Math.hypot(
+                e.touches[0].pageX - e.touches[1].pageX,
+                e.touches[0].pageY - e.touches[1].pageY
+            )
+            lastPinchDist.current = dist
+            setIsPinching(true)
+        }
+    }
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (e.touches.length === 2 && lastPinchDist.current !== null) {
+            const dist = Math.hypot(
+                e.touches[0].pageX - e.touches[1].pageX,
+                e.touches[0].pageY - e.touches[1].pageY
+            )
+            const delta = dist / lastPinchDist.current
+            setZoom(prev => Math.max(0.2, Math.min(3, prev * delta)))
+            lastPinchDist.current = dist
+        }
+    }
+
+    const handleTouchEnd = () => {
+        lastPinchDist.current = null
+        setIsPinching(false)
+    }
 
     const theme = profile.theme || 'light'
     const config = themeConfigs[theme] || themeConfigs.light
@@ -50,25 +106,121 @@ export function MoodCanvas({
     const gridOpacity = config.gridOpacity
 
     useEffect(() => {
-        if (blocks.length > 0) {
+        if (blocks.length > 1) { // Adjusted for stress test or multiple blocks
             const currentMax = Math.max(...blocks.map(b => b.zIndex || 1))
             setMaxZ(prev => Math.max(prev, currentMax))
         }
     }, [blocks])
 
-    const bringToFront = async (blockId: string) => {
+    const bringToFront = (id: string) => {
         const newZ = maxZ + 1
         setMaxZ(newZ)
-        onUpdateBlock(blockId, { zIndex: newZ })
+        onUpdateBlock(id, { zIndex: newZ })
     }
 
-    const handleCanvasClick = (e: React.MouseEvent) => {
-        setSelectedId(null)
+    const sendToBack = (id: string) => {
+        const minZ = Math.min(...blocks.map(b => b.zIndex || 10))
+        const newZ = Math.max(10, minZ - 1)
+        onUpdateBlock(id, { zIndex: newZ })
     }
+
+    const bringForward = (id: string) => {
+        const currentBlock = blocks.find(b => b.id === id)
+        if (!currentBlock) return
+        const currentZ = currentBlock.zIndex || 0
+
+        // Find all blocks above the current one, sorted by zIndex
+        const above = blocks
+            .filter(b => (b.zIndex || 0) > currentZ)
+            .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+
+        if (above.length > 0) {
+            // Set zIndex to be higher than the immediate next block
+            onUpdateBlock(id, { zIndex: (above[0].zIndex || 0) + 1 })
+        } else {
+            // Already at top, but ensure maxZ is synced
+            bringToFront(id)
+        }
+    }
+
+    const sendBackward = (id: string) => {
+        const currentBlock = blocks.find(b => b.id === id)
+        if (!currentBlock) return
+        const currentZ = currentBlock.zIndex || 0
+
+        // Find all blocks below the current one, sorted by zIndex desc
+        const below = blocks
+            .filter(b => (b.zIndex || 0) < currentZ)
+            .sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0))
+
+        if (below.length > 0) {
+            // Set zIndex to be lower than the immediate previous block
+            const targetZ = (below[0].zIndex || 10) - 1
+            onUpdateBlock(id, { zIndex: Math.max(10, targetZ) })
+        } else {
+            // Already at bottom
+            sendToBack(id)
+        }
+    }
+
+
+    const handleDuplicate = async (id: string) => {
+        const result = await duplicateMoodBlock(id)
+        if (result?.error) {
+            toast.error(result.error)
+        } else {
+            toast.success("Bloco duplicado")
+        }
+    }
+
+    const handleContextMenu = (e: React.MouseEvent, blockId: string) => {
+        // Only trigger on right click
+        if (e.button !== 2) return
+        e.preventDefault()
+        e.stopPropagation()
+        setContextMenu({ x: e.clientX, y: e.clientY, blockId })
+        setSelectedId(blockId)
+    }
+
+    const handleMenuAction = (actionId: string) => {
+        if (!contextMenu) return
+        const id = contextMenu.blockId
+
+        switch (actionId) {
+            case 'bring-to-front': bringToFront(id); break;
+            case 'send-to-back': sendToBack(id); break;
+            case 'bring-forward': bringForward(id); break;
+            case 'send-backward': sendBackward(id); break;
+            case 'duplicate': handleDuplicate(id); break;
+            case 'delete': setBlockToDelete(id); break;
+        }
+        setContextMenu(null)
+    }
+
+
+    // ⌨️ Keyboard Mastery
+    useCanvasKeyboard({
+        selectedId,
+        setSelectedId,
+        onUpdateBlock,
+        onDeleteRequest: (id) => setBlockToDelete(id),
+        onDuplicate: handleDuplicate,
+        blocks
+    })
+
+    const handleCanvasClick = (e: React.MouseEvent) => {
+        // If clicking on the canvas directly (not a block bubbling up)
+        if (e.target === e.currentTarget) {
+            setSelectedId(null)
+            setContextMenu(null)
+        }
+    }
+
 
     return (
         <div
             onClick={handleCanvasClick}
+            onContextMenu={handleCanvasClick} // Close context menu if canvas is right-clicked
             className="relative w-full h-full overflow-hidden cursor-crosshair transition-colors duration-1000"
             style={{ backgroundColor: bgColor, color: primaryColor }}
         >
@@ -81,7 +233,7 @@ export function MoodCanvas({
 
             {/* Saving Indicator */}
             <div className={cn(
-                "absolute top-20 right-8 z-50 flex items-center gap-2 px-3 py-1.5 rounded-none bg-white dark:bg-zinc-950/80 backdrop-blur-md border border-black dark:border-white transition-all duration-300 pointer-events-none shadow-none",
+                "absolute top-20 right-8 z-[1500] flex items-center gap-2 px-3 py-1.5 rounded-none bg-white dark:bg-zinc-950/80 backdrop-blur-md border border-black dark:border-white transition-all duration-300 pointer-events-none shadow-none",
                 isSaving ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
             )}>
                 <div className="w-1.5 h-1.5 rounded-none bg-green-500 animate-pulse" />
@@ -98,30 +250,164 @@ export function MoodCanvas({
                 }}
             />
 
-            <BoardStage ref={canvasRef}>
-                {blocks.map((block) => (
-                    <CanvasItem
-                        key={block.id}
-                        block={block}
-                        canvasRef={canvasRef}
-                        isSelected={selectedId === block.id}
-                        profile={profile}
-                        themeConfig={config}
-                        onSelect={(toggle = false) => {
-                            if (toggle && selectedId === block.id) {
-                                setSelectedId(null)
-                            } else {
-                                setSelectedId(block.id)
-                                if (selectedId !== block.id) {
-                                    bringToFront(block.id)
+            {/* Guidelines Layer */}
+            <div
+                ref={canvasRef}
+                className="relative w-full h-full cursor-crosshair overflow-hidden touch-none"
+                onClick={handleCanvasClick}
+                onContextMenu={(e) => e.preventDefault()}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+            >
+                <motion.div
+                    className="w-full h-full"
+                    style={{
+                        scale: zoom,
+                        transformOrigin: 'center center'
+                    }}
+                >
+                    <BoardStage>
+
+
+                        {blocks.map((block) => (
+                            <CanvasItem
+                                key={block.id}
+                                block={block}
+                                canvasRef={canvasRef}
+                                isSelected={selectedId === block.id}
+                                onSelect={(editing = false) => {
+                                    if (isPinching) return
+                                    setSelectedId(block.id)
+                                }}
+                                onUpdate={(updates) => onUpdateBlock(block.id, updates)}
+
+                                profile={profile}
+                                themeConfig={config}
+                                onDeleteRequest={setBlockToDelete}
+                                blocks={blocks}
+                                setGuidelines={(feedback: any) => setVisualFeedback(feedback)}
+                                onContextMenu={handleContextMenu}
+                            />
+                        ))}
+
+                        {/* Visual Guidelines for Snapping */}
+                        <AnimatePresence>
+                            {/* alignment guidelines */}
+                            {visualFeedback.guidelines.map((g, i) => {
+                                const canvas = canvasRef.current;
+                                if (!canvas) return null;
+                                const rect = canvas.getBoundingClientRect();
+                                const w = canvas.clientWidth;
+                                const h = canvas.clientHeight;
+
+                                let pxPos = 0;
+                                if (g.type === 'vertical') {
+                                    const boardX = (g.pos / 100) * w;
+                                    pxPos = rect.left + (w / 2) + zoom * (boardX - (w / 2));
+                                } else {
+                                    const boardY = (g.pos / 100) * h;
+                                    pxPos = rect.top + (h / 2) + zoom * (boardY - (h / 2));
                                 }
-                            }
-                        }}
-                        onUpdate={(updates) => onUpdateBlock(block.id, updates)}
-                        onDeleteRequest={(id) => setBlockToDelete(id)}
-                    />
-                ))}
-            </BoardStage>
+
+                                return (
+                                    <motion.div
+                                        key={`g-${i}`}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className={cn(
+                                            "fixed pointer-events-none z-[2000]",
+                                            g.type === 'vertical' ? "w-[1px] h-screen bg-blue-500/50" : "h-[1px] w-screen bg-blue-500/50"
+                                        )}
+                                        style={{
+                                            left: g.type === 'vertical' ? `${pxPos}px` : 0,
+                                            top: g.type === 'horizontal' ? `${pxPos}px` : 0,
+                                        }}
+                                    />
+                                );
+                            })}
+                        </AnimatePresence>
+
+                        <AnimatePresence>
+                            {/* distance guides */}
+                            {visualFeedback.distances.map((d, i) => {
+                                const canvas = canvasRef.current;
+                                if (!canvas) return null;
+                                const rect = canvas.getBoundingClientRect();
+                                const w = canvas.clientWidth;
+                                const h = canvas.clientHeight;
+
+                                const getPx = (p: number, axis: 'x' | 'y') => {
+                                    const size = axis === 'x' ? w : h;
+                                    const boardPos = (p / 100) * size;
+                                    return axis === 'x'
+                                        ? rect.left + (w / 2) + zoom * (boardPos - (w / 2))
+                                        : rect.top + (h / 2) + zoom * (boardPos - (h / 2));
+                                }
+
+                                const centerPx = d.type === 'vertical' ? getPx(d.pos, 'x') : getPx(d.pos, 'y');
+                                const startPx = d.type === 'vertical' ? getPx(d.start, 'y') : getPx(d.start, 'x');
+                                const endPx = d.type === 'vertical' ? getPx(d.end, 'y') : getPx(d.end, 'x');
+
+                                return (
+                                    <motion.div
+                                        key={`d-${i}`}
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        className="fixed pointer-events-none z-[1999] flex items-center justify-center overflow-visible"
+                                        style={{
+                                            left: d.type === 'vertical' ? centerPx - 0.5 : startPx,
+                                            top: d.type === 'vertical' ? startPx : centerPx - 0.5,
+                                            width: d.type === 'vertical' ? 1 : endPx - startPx,
+                                            height: d.type === 'vertical' ? endPx - startPx : 1,
+                                            backgroundColor: 'rgba(59, 130, 246, 0.4)'
+                                        }}
+                                    >
+                                        <div className={cn(
+                                            "absolute bg-blue-600 text-white text-[8px] px-1 py-0.5 font-black rounded-none shadow-sm whitespace-nowrap",
+                                            d.type === 'vertical' ? "left-3" : "-top-5"
+                                        )}>
+                                            {d.label}
+                                        </div>
+                                        <div className={cn("absolute bg-blue-600", d.type === 'vertical' ? "top-0 left-[-2px] w-1.5 h-[1px]" : "left-0 top-[-2px] h-1.5 w-[1px]")} />
+                                        <div className={cn("absolute bg-blue-600", d.type === 'vertical' ? "bottom-0 left-[-2px] w-1.5 h-[1px]" : "right-0 top-[-2px] h-1.5 w-[1px]")} />
+                                    </motion.div>
+                                )
+                            })}
+                        </AnimatePresence>
+                    </BoardStage>
+                </motion.div>
+            </div>
+
+            {/* Hidden Stress Test Trigger (Ctrl+Shift+S) */}
+            <StressTestButton onSpawn={(many: any[]) => {
+                // In stress test, we just want to see the UI performance.
+                // Doing 50 individual saves is not what we want to test here.
+                // We just update the local state.
+                // Note: these won't be persisted unless moved.
+                const updatedBlocks = [...blocks, ...many];
+                // Since we don't have setBlocks here (only onUpdateBlock), 
+                // we'll just use onUpdateBlock for now or skip saving.
+                // For a true stress test of the VIEW, just local state is enough.
+                // But since MoodCanvas is just a renderer of blocks, we need a way 
+                // to inject them without prop drilling setBlocks.
+                // For now, let's just use the established pattern but warn.
+                many.forEach((b: any) => onUpdateBlock(b.id, b))
+            }} />
+
+
+            {/* Context Menu */}
+            {contextMenu && (
+                <CanvasContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    block={blocks.find(b => b.id === contextMenu.blockId)!}
+                    onClose={() => setContextMenu(null)}
+                    onAction={handleMenuAction}
+                />
+            )}
 
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-none bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm border border-black/10 dark:border-white/10 text-[9px] font-black tracking-[0.5em] uppercase text-zinc-400">
                 {t('canvas.creativity_domain')}
@@ -148,408 +434,3 @@ export function MoodCanvas({
     )
 }
 
-
-function CanvasItem({ block, canvasRef, isSelected, onSelect, onUpdate, profile, themeConfig, onDeleteRequest }: {
-    block: MoodBlock,
-    canvasRef: React.RefObject<HTMLDivElement | null>,
-    isSelected: boolean,
-    onSelect: (toggle?: boolean) => void,
-    onUpdate: (content: Partial<MoodBlock>) => void,
-    profile: Profile,
-    themeConfig: ThemeConfig,
-    onDeleteRequest: (id: string) => void
-}) {
-    const { t } = useTranslation()
-    // 📌 Viewport Scale
-    const viewportScale = useViewportScale()
-
-    // Smarter aspect-ratio fallback for brand new or 'auto' size blocks
-    const getDefaultDimensions = (type: string) => {
-        switch (type) {
-            case 'text':
-            case 'quote':
-            case 'subtitle':
-                return { w: 350, h: 150 };
-            case 'ticker':
-                return { w: 400, h: 80 };
-            case 'music':
-                return { w: 300, h: 120 };
-            case 'photo':
-            case 'video':
-            case 'guestbook':
-                return { w: 300, h: 300 };
-            case 'moodStatus':
-            case 'weather':
-                return { w: 300, h: 100 };
-            default:
-                return { w: 250, h: 250 };
-        }
-    }
-
-    // Convert 'auto' or undefined values to their fallback aspect ratio
-    const getInitialDimension = (val: number | 'auto' | undefined | null, axis: 'w' | 'h', type: string) => {
-        if (typeof val === 'number') return val * viewportScale;
-        return getDefaultDimensions(type)[axis] * viewportScale;
-    }
-
-    const unscaleValue = (v: number | 'auto') => typeof v === 'number' ? Math.round(v / viewportScale) : v
-
-    // ─── 1. ABSOLUTE SOURCE OF TRUTH (Bypasses React Render Cycle) ───
-    const stateRef = useRef({
-        x: block.x,
-        y: block.y,
-        width: getInitialDimension(block.width, 'w', block.type),
-        height: getInitialDimension(block.height, 'h', block.type),
-        rotation: block.rotation || 0,
-        isInteracting: false,
-        isInteractiveMode: false
-    })
-
-    // ─── 2. HIGH-PERFORMANCE DOM BINDINGS ───
-    const mvX = useMotionValue(stateRef.current.x)
-    const mvY = useMotionValue(stateRef.current.y)
-    const mvW = useMotionValue(stateRef.current.width)
-    const mvH = useMotionValue(stateRef.current.height)
-    const mvR = useMotionValue(stateRef.current.rotation)
-
-    // CSS bindings for absolute positioning based on Canvas Parent
-    const styleLeft = useTransform(mvX, (v: number) => `${v}%`)
-    const styleTop = useTransform(mvY, (v: number) => `${v}%`)
-
-    // Shift key tracking
-    const [shiftHeld, setShiftHeld] = useState(false)
-    useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(true) }
-        const onKeyUp = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(false) }
-        window.addEventListener('keydown', onKeyDown)
-        window.addEventListener('keyup', onKeyUp)
-        return () => {
-            window.removeEventListener('keydown', onKeyDown)
-            window.removeEventListener('keyup', onKeyUp)
-        }
-    }, [])
-
-    // Sync from server / other clients (ONLY when not user-interactings here)
-    useEffect(() => {
-        if (!stateRef.current.isInteracting) {
-            const newW = getInitialDimension(block.width, 'w', block.type);
-            const newH = getInitialDimension(block.height, 'h', block.type);
-
-            stateRef.current.x = block.x;
-            stateRef.current.y = block.y;
-            stateRef.current.width = newW as number;
-            stateRef.current.height = newH as number;
-            stateRef.current.rotation = block.rotation || 0;
-
-            mvX.set(block.x);
-            mvY.set(block.y);
-            mvW.set(newW as number);
-            mvH.set(newH as number);
-            mvR.set(block.rotation || 0);
-        }
-    }, [block.x, block.y, block.width, block.height, block.rotation, viewportScale])
-
-    // UI flags for styled classes (opacity, pointer-events, active borders)
-    const [isDragging, setIsDragging] = useState(false)
-    const [isResizing, setIsResizing] = useState(false)
-    const [isInteractiveMode, setIsInteractiveMode] = useState(false)
-    const isInteractiveBlock = ['video', 'music', 'guestbook', 'media'].includes(block.type)
-
-    useEffect(() => {
-        if (!isSelected) {
-            setIsInteractiveMode(false)
-            stateRef.current.isInteractiveMode = false
-        }
-    }, [isSelected])
-
-    // ─── 3. PAN HANDLERS (Drag, Resize, Rotate) ───
-
-    // DRAG BODY (Replacing unreliable drag={true} of Framer Motion)
-    const handleDragPan = (e: any, info: any) => {
-        if (stateRef.current.isInteractiveMode) return;
-        if (!canvasRef.current) return;
-
-        const canvas = canvasRef.current.getBoundingClientRect();
-        const dxPercent = (info.delta.x / canvas.width) * 100;
-        const dyPercent = (info.delta.y / canvas.height) * 100;
-
-        let newX = stateRef.current.x + dxPercent;
-        let newY = stateRef.current.y + dyPercent;
-
-        // Smart edge collision
-        const wPercent = (stateRef.current.width / canvas.width) * 100;
-        const hPercent = (stateRef.current.height / canvas.height) * 100;
-
-        newX = Math.max(0, Math.min(100 - wPercent, newX));
-        newY = Math.max(0, Math.min(100 - hPercent, newY));
-
-        stateRef.current.x = newX;
-        stateRef.current.y = newY;
-
-        mvX.set(newX);
-        mvY.set(newY);
-    }
-
-    const handleDragStart = (e: any) => {
-        if (stateRef.current.isInteractiveMode) return;
-        setIsDragging(true);
-        stateRef.current.isInteracting = true;
-        onSelect(false);
-    }
-
-    const handleDragEnd = () => {
-        if (stateRef.current.isInteractiveMode) return;
-        setIsDragging(false);
-        stateRef.current.isInteracting = false;
-
-        onUpdate({
-            x: parseFloat(stateRef.current.x.toFixed(4)),
-            y: parseFloat(stateRef.current.y.toFixed(4))
-        });
-    }
-
-    // RESIZE HANDLES
-    const handleResizePan = (handle: ResizeHandle, e: any, info: any) => {
-        if (!canvasRef.current) return;
-        const canvas = canvasRef.current.getBoundingClientRect();
-
-        const result = calculateResize(
-            handle,
-            info.delta.x,
-            info.delta.y,
-            {
-                x: stateRef.current.x,
-                y: stateRef.current.y,
-                width: stateRef.current.width,
-                height: stateRef.current.height
-            },
-            canvas.width,
-            canvas.height,
-            shiftHeld
-        );
-
-        stateRef.current.x = result.x;
-        stateRef.current.y = result.y;
-        stateRef.current.width = result.width;
-        stateRef.current.height = result.height;
-
-        mvX.set(result.x);
-        mvY.set(result.y);
-        mvW.set(result.width);
-        mvH.set(result.height);
-    }
-
-    const handleResizeStart = (e: any) => {
-        e.stopPropagation();
-        setIsResizing(true);
-        stateRef.current.isInteracting = true;
-    }
-
-    const handleResizeEnd = () => {
-        setIsResizing(false);
-        stateRef.current.isInteracting = false;
-
-        onUpdate({
-            x: parseFloat(stateRef.current.x.toFixed(4)),
-            y: parseFloat(stateRef.current.y.toFixed(4)),
-            width: unscaleValue(stateRef.current.width) as number,
-            height: unscaleValue(stateRef.current.height) as number
-        });
-    }
-
-    // ROTATE HANDLE
-    const handleRotatePan = (e: any, info: any) => {
-        if (!canvasRef.current) return;
-
-        const canvas = canvasRef.current.getBoundingClientRect();
-        const blockCenterX = canvas.left + (stateRef.current.x / 100) * canvas.width + (stateRef.current.width / 2);
-        const blockCenterY = canvas.top + (stateRef.current.y / 100) * canvas.height + (stateRef.current.height / 2);
-
-        const newRot = calculateRotation(blockCenterX, blockCenterY, info.point.x, info.point.y, shiftHeld);
-
-        stateRef.current.rotation = newRot;
-        mvR.set(newRot);
-    }
-
-    const handleRotateStart = (e: any) => {
-        e.stopPropagation();
-        stateRef.current.isInteracting = true;
-    }
-
-    const handleRotateEnd = () => {
-        stateRef.current.isInteracting = false;
-        onUpdate({ rotation: stateRef.current.rotation });
-    }
-
-    const resetRotation = () => {
-        stateRef.current.rotation = 0;
-        mvR.set(0);
-        onUpdate({ rotation: 0 })
-    }
-
-    const handleDelete = () => onDeleteRequest(block.id)
-
-    const toggleInteraction = (e: any) => {
-        e.stopPropagation();
-        const nextState = !isInteractiveMode;
-        setIsInteractiveMode(nextState);
-        stateRef.current.isInteractiveMode = nextState;
-    }
-
-    // ─── Render Components ───────────────────────────────────────────
-    const renderHandle = (handle: ResizeHandle) => {
-        const isCorner = ['br', 'bl', 'tr', 'tl'].includes(handle)
-        const handleSize = isCorner ? 'w-2.5 h-2.5' : (
-            handle === 'top' || handle === 'bottom' ? 'w-6 h-1' : 'w-1 h-6'
-        )
-
-        const positionClasses: Record<ResizeHandle, string> = {
-            br: '-bottom-1.5 -right-1.5',
-            bl: '-bottom-1.5 -left-1.5',
-            tr: '-top-1.5 -right-1.5',
-            tl: '-top-1.5 -left-1.5',
-            top: '-top-0.5 left-1/2 -translate-x-1/2',
-            bottom: '-bottom-0.5 left-1/2 -translate-x-1/2',
-            left: 'top-1/2 -left-0.5 -translate-y-1/2',
-            right: 'top-1/2 -right-0.5 -translate-y-1/2',
-        }
-
-        return (
-            <motion.div
-                key={handle}
-                onPanStart={handleResizeStart}
-                onPan={(e, i) => handleResizePan(handle, e, i)}
-                onPanEnd={handleResizeEnd}
-                className={cn(
-                    "absolute z-[1002] pointer-events-auto bg-black dark:bg-white border hover:scale-[1.2] active:scale-95 transition-transform",
-                    positionClasses[handle],
-                    handleSize,
-                    isCorner ? "border-transparent" : "border-white dark:border-black"
-                )}
-                style={{ cursor: getResizeCursor(handle), touchAction: 'none' }}
-            />
-        )
-    }
-
-    const allHandles: ResizeHandle[] = ['br', 'bl', 'tr', 'tl', 'top', 'bottom', 'left', 'right']
-
-    return (
-        <motion.div
-            onPanStart={handleDragStart}
-            onPan={handleDragPan}
-            onPanEnd={handleDragEnd}
-            style={{
-                left: styleLeft,
-                top: styleTop,
-                width: mvW,
-                height: mvH,
-                rotate: mvR,
-                zIndex: isDragging || isSelected ? 999 : (block.zIndex || 1),
-                boxShadow: isSelected ? `0 0 0 2px ${themeConfig.bg}, 0 0 0 4px ${profile.primaryColor || '#3b82f6'}` : 'none',
-                touchAction: 'none',
-                transformOrigin: 'center'
-            }}
-            onClick={(e) => {
-                if (isInteractiveMode) return
-                e.stopPropagation()
-                onSelect(false)
-            }}
-            onDoubleClick={(e) => {
-                if (isInteractiveMode) return
-                e.stopPropagation()
-                onSelect(false)
-            }}
-            whileHover={{ zIndex: 998 }}
-            className={cn(
-                "absolute group",
-                !isInteractiveMode && "select-none touch-none",
-                isSelected ? "cursor-default" : "cursor-grab active:cursor-grabbing"
-            )}
-            data-block-id={block.id}
-        >
-            {/* Selection Border Outline */}
-            {isSelected && (
-                <div
-                    className={cn(
-                        "absolute -inset-[3px] pointer-events-none z-[1001] transition-all",
-                        isInteractiveMode ? "border-[3px] border-white shadow-none mix-blend-difference" : "border border-dashed border-black/50 dark:border-white/50 bg-black/5"
-                    )}
-                />
-            )}
-            {/* Action Toolbar */}
-            {isSelected && (
-                <div className="absolute -top-[52px] left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2 py-1.5 bg-white dark:bg-zinc-950 border border-black dark:border-white z-[1001] animate-in fade-in zoom-in duration-200 pointer-events-auto">
-                    <button
-                        onClick={() => onSelect(false)}
-                        className="p-1.5 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors group/edit"
-                        title={t('common.edit')}
-                    >
-                        <Pencil className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover/edit:text-current" />
-                    </button>
-                    <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-                    <div className="p-1.5 cursor-move transition-colors border border-transparent hover:bg-black/5 dark:hover:bg-white/5 group/move" title={t('common.move')}>
-                        <Move className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                    </div>
-                    <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-                    {stateRef.current.rotation !== 0 && (
-                        <>
-                            <button onClick={resetRotation} className="px-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors text-[9px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400" title={t('common.reset_rotation')}>
-                                {stateRef.current.rotation}°
-                            </button>
-                            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-                        </>
-                    )}
-                    {isInteractiveBlock && (
-                        <>
-                            <button
-                                onClick={toggleInteraction}
-                                className={cn(
-                                    "p-1.5 transition-all outline outline-1 -outline-offset-1 border border-transparent",
-                                    isInteractiveMode
-                                        ? "bg-black text-white dark:bg-white dark:text-black outline-current animate-pulse"
-                                        : "hover:bg-black/5 text-zinc-600 dark:text-zinc-400 outline-transparent"
-                                )}
-                                title={isInteractiveMode ? t('common.disable_interaction') : t('common.enable_interaction')}
-                            >
-                                <MousePointer2 className="w-4 h-4" />
-                            </button>
-                            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-                        </>
-                    )}
-                    <button onClick={handleDelete} className="p-1.5 hover:bg-red-500/10 hover:text-red-500 transition-colors group/del text-zinc-600 dark:text-zinc-400" title={t('common.delete')}>
-                        <Trash2 className="w-4 h-4 group-hover/del:text-red-500" />
-                    </button>
-                </div>
-            )}
-
-            {/* Resize Handles — 4 Corners + 4 Edges */}
-            {isSelected && (
-                <>
-                    {allHandles.map(renderHandle)}
-
-                    {/* Rotation Handle */}
-                    <div className="absolute left-1/2 -top-8 -translate-x-1/2 w-[2px] h-8 bg-black dark:bg-white z-[1002] pointer-events-auto origin-bottom">
-                        <motion.div
-                            onPanStart={handleRotateStart}
-                            onPan={handleRotatePan}
-                            onPanEnd={handleRotateEnd}
-                            className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white dark:bg-zinc-950 border-2 border-black dark:border-white hover:scale-125 transition-transform cursor-grab active:cursor-grabbing"
-                            style={{ touchAction: 'none' }}
-                        />
-                    </div>
-                </>
-            )}
-
-            <div className={cn(
-                "w-full h-full transition-transform duration-200",
-                isDragging && "scale-[1.02] rotate-1",
-                (isDragging || isResizing) && "pointer-events-none"
-            )}>
-                <BlockRenderer
-                    block={block}
-                    isPublic={isInteractiveMode}
-                />
-            </div>
-        </motion.div>
-    )
-}

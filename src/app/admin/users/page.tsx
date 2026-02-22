@@ -15,18 +15,22 @@ export default async function AdminUsersPage({
 }) {
     const { page, search } = await searchParams;
     const session = await auth()
-    if ((session?.user as any)?.role !== "ADMIN") redirect("/dashboard")
+    if (session?.user?.role !== "ADMIN") redirect("/dashboard")
 
     const currentPage = Number(page) || 1
     const pageSize = 20
     const searchTerm = search || ""
 
-    const whereClause = searchTerm ? {
-        OR: [
-            { username: { contains: searchTerm, mode: "insensitive" as any } },
-            { email: { contains: searchTerm, mode: "insensitive" as any } }
+    const whereClause: import("@prisma/client").Prisma.UserWhereInput = {
+        deletedAt: null,
+    }
+
+    if (searchTerm) {
+        whereClause.OR = [
+            { username: { contains: searchTerm, mode: "insensitive" } },
+            { email: { contains: searchTerm, mode: "insensitive" } }
         ]
-    } : {}
+    }
 
     const [users, totalCount] = await Promise.all([
         prisma.user.findMany({
@@ -83,7 +87,7 @@ export default async function AdminUsersPage({
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-900/50">
-                        {users.map((user: any) => (
+                        {users.map((user) => (
                             <tr key={user.id} className="hover:bg-zinc-900/40 transition-colors">
                                 <td className="px-6 py-4">
                                     <div className="flex flex-wrap items-center gap-2">

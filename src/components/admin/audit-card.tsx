@@ -2,8 +2,10 @@
 
 import * as React from "react"
 import { Trash2, UserX, ExternalLink, Calendar, User as UserIcon } from "lucide-react"
+import Link from "next/link"
 import { BlockRenderer } from "../dashboard/block-renderer"
 import { adminDeleteBlock, adminBanUser } from "@/actions/moderation"
+import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { cn } from "@/lib/utils"
@@ -24,8 +26,9 @@ export function AuditCard({ block }: AuditCardProps) {
         const res = await adminDeleteBlock(block.id)
         if (res.success) {
             setIsVisible(false)
+            toast.success("Bloco removido com sucesso")
         } else {
-            alert("Erro ao excluir bloco.")
+            toast.error(res.error || "Erro ao excluir bloco.")
             setIsDeleting(false)
         }
     }
@@ -33,11 +36,11 @@ export function AuditCard({ block }: AuditCardProps) {
     const handleBan = async () => {
         if (!confirm(`Banir usuário @${block.user.username} permanentemente?`)) return
         setIsBanning(true)
-        const res = await adminBanUser(block.userId)
+        const res = await adminBanUser(block.userId, true)
         if (res.success) {
-            alert(`Usuário @${block.user.username} banido com sucesso.`)
+            toast.success(`Usuário @${block.user.username} banido`)
         } else {
-            alert("Erro ao banir usuário.")
+            toast.error(res.error || "Erro ao banir usuário.")
         }
         setIsBanning(false)
     }
@@ -109,9 +112,13 @@ export function AuditCard({ block }: AuditCardProps) {
             {/* 3. Footer: Interaction hints */}
             <div className="p-3 flex items-center justify-between text-[10px] bg-zinc-950/30">
                 <span className="text-zinc-600 font-mono">ID: {block.id.slice(0, 8)}...</span>
-                <button className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors font-black uppercase tracking-tighter">
+                <Link
+                    href={`/${block.user.username}`}
+                    target="_blank"
+                    className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors font-black uppercase tracking-tighter"
+                >
                     Full Profile <ExternalLink className="w-3 h-3" />
-                </button>
+                </Link>
             </div>
         </div>
     )

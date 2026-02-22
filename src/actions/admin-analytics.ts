@@ -5,7 +5,7 @@ import { auth } from "@/auth"
 
 export async function getAdminAnalytics() {
     const session = await auth()
-    if ((session?.user as any)?.role !== "ADMIN") {
+    if (session?.user?.role !== "ADMIN") {
         throw new Error("Unauthorized")
     }
 
@@ -14,12 +14,16 @@ export async function getAdminAnalytics() {
         const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000)
         const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        const last48h = new Date(now.getTime() - 48 * 60 * 60 * 1000)
+        const last14d = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
 
         // 1. User Metrics
-        const [totalUsers, newUsers24h, activeProfiles7d, bannedCount] = await Promise.all([
+        const [totalUsers, newUsers24h, prevNewUsers24h, activeProfiles7d, prevActiveProfiles7d, bannedCount] = await Promise.all([
             prisma.user.count({ where: { deletedAt: null } }),
             prisma.user.count({ where: { createdAt: { gte: last24h }, deletedAt: null } }),
+            prisma.user.count({ where: { createdAt: { gte: last48h, lt: last24h }, deletedAt: null } }),
             prisma.profile.count({ where: { updatedAt: { gte: last7d }, deletedAt: null } }),
+            prisma.profile.count({ where: { updatedAt: { gte: last14d, lt: last7d }, deletedAt: null } }),
             prisma.user.count({ where: { isBanned: true, deletedAt: null } })
         ])
 
@@ -65,6 +69,7 @@ export async function getAdminAnalytics() {
         // 5. Role Distribution
         const usersByRole = await prisma.user.groupBy({
             by: ['role'],
+            where: { deletedAt: null },
             _count: { _all: true }
         })
 
@@ -85,14 +90,25 @@ export async function getAdminAnalytics() {
         return {
             metrics: {
                 totalUsers,
-                newUsers24h,
-                activeProfiles7d,
+                newUsers24h: {
+                    current: newUsers24h,
+                    prev: prevNewUsers24h
+                },
+                activeProfiles7d: {
+                    current: activeProfiles7d,
+                    prev: prevActiveProfiles7d
+                },
                 bannedCount,
                 totalViews: viewStats._sum.views || 0,
                 maxViewsInOneProfile: viewStats._max.views || 0,
             },
             growthData,
             roleDistribution: usersByRole.map((r: { role: string; _count: { _all: number } }) => ({ role: r.role, count: r._count._all })),
+            verificationDistribution: await prisma.user.groupBy({
+                by: ['verificationType'],
+                where: { deletedAt: null, isVerified: true },
+                _count: { _all: true }
+            }),
             blockUsage: blockUsage.map((b: { type: string; _count: { _all: number } }) => ({
                 type: b.type,
                 count: b._count._all

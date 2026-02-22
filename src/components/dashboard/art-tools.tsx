@@ -21,13 +21,13 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { useTranslation } from "@/i18n/context"
 
-const TAPES = [
-    { name: 'Classic White', color: 'rgba(255, 255, 255, 0.4)', pattern: 'none' },
-    { name: 'Vintage Paper', color: 'rgba(245, 245, 220, 0.6)', pattern: 'grain' },
-    { name: 'Sky Blue', color: 'rgba(186, 225, 255, 0.5)', pattern: 'none' },
-    { name: 'Rose Petal', color: 'rgba(255, 179, 186, 0.5)', pattern: 'none' },
-    { name: 'Mint Leaf', color: 'rgba(186, 255, 201, 0.5)', pattern: 'none' },
-    { name: 'Washi Dot', color: 'rgba(255, 255, 255, 0.5)', pattern: 'dots' },
+const TAPE_DATA = [
+    { id: 'classic_white', color: 'rgba(255, 255, 255, 0.4)', pattern: 'none' },
+    { id: 'vintage_paper', color: 'rgba(245, 245, 220, 0.6)', pattern: 'grain' },
+    { id: 'sky_blue', color: 'rgba(186, 225, 255, 0.5)', pattern: 'none' },
+    { id: 'rose_petal', color: 'rgba(255, 179, 186, 0.5)', pattern: 'none' },
+    { id: 'mint_leaf', color: 'rgba(186, 255, 201, 0.5)', pattern: 'none' },
+    { id: 'washi_dot', color: 'rgba(255, 255, 255, 0.5)', pattern: 'dots' },
 ]
 
 export function ArtTools({ highlight }: { highlight?: boolean }) {
@@ -43,11 +43,19 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
     const [mediaReview, setMediaReview] = useState("")
     const [mediaCategory, setMediaCategory] = useState<'book' | 'movie'>('book')
 
-    const addTape = (tape: typeof TAPES[0]) => {
+    const WEATHER_OPTIONS = [
+        { icon: Sun, id: 'sun', vibe: t('editors.art.weather_vibes.sun') },
+        { icon: CloudRain, id: 'rain', vibe: t('editors.art.weather_vibes.rain') },
+        { icon: Snowflake, id: 'snow', vibe: t('editors.art.weather_vibes.snow') },
+        { icon: Cloud, id: 'cloud', vibe: t('editors.art.weather_vibes.cloud') },
+        { icon: Wind, id: 'wind', vibe: t('editors.art.weather_vibes.wind') },
+    ]
+
+    const addTape = (tapeId: string, color: string, pattern: string) => {
         startTransition(async () => {
             await addMoodBlock('tape', {
-                color: tape.color,
-                pattern: tape.pattern
+                color: color,
+                pattern: pattern
             }, { width: 140, height: 35 })
         })
     }
@@ -92,12 +100,12 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                 </div>
 
                 <div className="grid grid-cols-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-                    {TAPES.map((tape) => (
+                    {TAPE_DATA.map((tape) => (
                         <button
-                            key={tape.name}
-                            onClick={() => addTape(tape)}
+                            key={tape.id}
+                            onClick={() => addTape(tape.id, tape.color, tape.pattern)}
                             disabled={isPending}
-                            title={tape.name}
+                            title={t(`editors.art.tapes.${tape.id as any}`)}
                             className="aspect-square border-r last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all hover:bg-black group relative"
                         >
                             <div
@@ -126,13 +134,7 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                     <div className="p-5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
                         <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">{t('editors.art.weather_state')}</p>
                         <div className="grid grid-cols-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-                            {[
-                                { icon: Sun, id: 'sun', vibe: 'Ensolarado e calmo' },
-                                { icon: CloudRain, id: 'rain', vibe: 'Chuvoso e reflexivo' },
-                                { icon: Snowflake, id: 'snow', vibe: 'Frio e aconchegante' },
-                                { icon: Cloud, id: 'cloud', vibe: 'Nublado e urbano' },
-                                { icon: Wind, id: 'wind', vibe: 'Ventoso e dinâmico' },
-                            ].map((w) => (
+                            {WEATHER_OPTIONS.map((w) => (
                                 <button
                                     key={w.id}
                                     onClick={() => setWeatherVibe(w.vibe)}
@@ -172,13 +174,7 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
 
                         <Button
                             onClick={() => {
-                                const icon = [
-                                    { icon: Sun, id: 'sun', vibe: 'Ensolarado e calmo' },
-                                    { icon: CloudRain, id: 'rain', vibe: 'Chuvoso e reflexivo' },
-                                    { icon: Snowflake, id: 'snow', vibe: 'Frio e aconchegante' },
-                                    { icon: Cloud, id: 'cloud', vibe: 'Nublado e urbano' },
-                                    { icon: Wind, id: 'wind', vibe: 'Ventoso e dinâmico' },
-                                ].find(w => w.vibe === weatherVibe)?.id || 'cloud'
+                                const icon = WEATHER_OPTIONS.find(w => w.vibe === weatherVibe)?.id || 'cloud'
 
                                 startTransition(async () => {
                                     await addMoodBlock('weather', {
@@ -259,3 +255,4 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
         </div>
     )
 }
+

@@ -106,7 +106,7 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
             <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800 my-8" />
 
             <p className="text-[8px] text-center font-mono text-zinc-400 uppercase tracking-widest opacity-50">
-                Mais componentes em breve
+                {t('sidebar.library.more_coming')}
             </p>
         </div>
     )

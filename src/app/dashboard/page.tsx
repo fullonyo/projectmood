@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { DashboardClientLayout } from "@/components/dashboard/dashboard-client-layout";
 import { computeHasUnpublishedChanges } from "@/actions/publish";
 import { getFeatureFlags } from "@/actions/system-config";
+import { MoodBlock } from "@/types/database";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -68,10 +69,10 @@ export default async function DashboardPage() {
     const { username } = user;
     const profile = currentProfile;
 
-    const moodBlocks = await prisma.moodBlock.findMany({
-        where: { userId: session.user.id },
+    const moodBlocks = (await prisma.moodBlock.findMany({
+        where: { userId: session.user.id, deletedAt: null },
         orderBy: { order: 'asc' },
-    });
+    })) as MoodBlock[];
 
     // Buscar última publicação ativa
     const activeVersion = await prisma.profileVersion.findFirst({

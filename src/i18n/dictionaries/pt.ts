@@ -7,7 +7,13 @@ export const pt = {
         close: "Fechar",
         confirm: "Confirmar",
         loading: "Processando...",
+        items: "itens",
+        delete: "Excluir",
+        duplicate: "Duplicar",
+        enable_interaction: "Habilitar Interação",
+        disable_interaction: "Desabilitar Interação",
     },
+
     sidebar: {
         header_subtitle: "Seu espaço digital",
         header_title: "Diorama",
@@ -17,7 +23,11 @@ export const pt = {
             elements_desc: "Adicionar notas, fotos e memórias físicas.",
             room: "Quarto",
             room_desc: "Luzes, cores e efeitos.",
+            layers: "Camadas",
+            layers_desc: "Gerenciar ordem e visibilidade",
         },
+
+
         style: {
             atmosphere_title: "Atmosfera base",
             atmosphere_desc: "Luz, sombra e cor do seu espaço",
@@ -58,8 +68,10 @@ export const pt = {
                 weather: { title: "Clima", desc: "Como está o dia lá fora?" },
                 media: { title: "Mídia Análoga", desc: "Livros e fitas" }
             },
-            inspector_back: "Voltar para Elementos"
+            inspector_back: "Voltar para Elementos",
+            more_coming: "Mais componentes em breve"
         },
+
         bottom_tip: "Clique nos blocos do mural para girar ou deletar",
     },
     modals: {
@@ -149,6 +161,7 @@ export const pt = {
         system_status: "Status",
         authorized: "Acomodado",
         deployment_area: "Compartilhar a chave",
+
         external_visibility: "Deixe os outros entrarem no seu quarto",
         launch_public_space: "Visitar espaço público",
         system_configuration: "Configurações",
@@ -156,7 +169,9 @@ export const pt = {
         system_ux: "Preferências do quarto",
         terminate_session: "Sair do quarto",
         exit_hex: "Trancar a porta",
+        command_center: "Centro de Comando",
     },
+
     editors: {
         theme: {
             title: "Cores e vibes",
@@ -217,7 +232,13 @@ export const pt = {
             left: "Esq.",
             right: "Dir.",
             deploy: "Deixar rolar",
+            types: {
+                ticker: "Letreiro",
+                subtitle: "Legenda Cine",
+                floating: "Texto Livre"
+            }
         },
+
         youtube: {
             title: "Tocar um clipe",
             placeholder: "Cole o link do YouTube aqui...",
@@ -337,8 +358,24 @@ export const pt = {
             media_work_title_placeholder: "Nome da obra...",
             media_critique: "Resumo em 3 palavras",
             media_critique_placeholder: "Incrível, Chato, Surreal...",
-            media_deploy: "Colar Resenha"
+            media_deploy: "Colar Resenha",
+            tapes: {
+                classic_white: "Branco Clássico",
+                vintage_paper: "Papel Vintage",
+                sky_blue: "Azul Céu",
+                rose_petal: "Pétala de Rosa",
+                mint_leaf: "Folha de Menta",
+                washi_dot: "Washi Dot"
+            },
+            weather_vibes: {
+                sun: "Ensolarado e calmo",
+                rain: "Chuvoso e reflexivo",
+                snow: "Frio e aconchegante",
+                cloud: "Nublado e urbano",
+                wind: "Ventoso e dinâmico"
+            }
         },
+
         spotify: {
             title: "Trilha Sonora",
             search_placeholder: "Qual música procurar?",
@@ -369,8 +406,26 @@ export const pt = {
         creativity_domain: "Seu Espaço",
         delete_modal_title: "Deletar Item?",
         delete_modal_message: "Essa ação não pode ser desfeita. O item será removido permanentemente do seu mural.",
-        delete_modal_confirm: "Excluir"
+        delete_modal_confirm: "Excluir",
+        layers: "Camadas",
+        layer_hide: "Ocultar",
+        layer_show: "Mostrar",
+        layer_lock: "Bloquear",
+        layer_unlock: "Desbloquear",
+        layer_to_front: "Trazer para o topo",
+        layer_to_back: "Enviar para o fundo",
+        layer_forward: "Trazer para frente",
+        layer_backward: "Recuar",
+        layers_precision: "Precisão",
+        layers_safe: "Renderização Segura",
+        layers_normalize: "Normalizar Camadas",
+        layers_normalized: "Camadas Normalizadas",
+        distance_label: "Distância",
+        align_label: "Alinhamento",
     },
+
+
+
     public_page: {
         signature: {
             role: "Criador(a)",

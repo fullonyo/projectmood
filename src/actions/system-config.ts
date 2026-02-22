@@ -28,7 +28,7 @@ const CORE_BLOCKS = [
 // 1. Safe Seeder (Run on demand by Admin)
 export async function seedFeatureFlags() {
     const session = await auth()
-    if ((session?.user as any)?.role !== "ADMIN") return { error: "Unauthorized" }
+    if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" }
 
     try {
         let count = 0
@@ -53,6 +53,18 @@ export async function seedFeatureFlags() {
             count++
         }
         revalidatePath("/admin/config")
+
+        // Log the action
+        await prisma.auditLog.create({
+            data: {
+                adminId: session.user.id,
+                action: "SYNC_FLAGS",
+                targetId: "SYSTEM",
+                targetType: "FeatureFlag",
+                metadata: { updatedCount: count }
+            }
+        });
+
         return { success: true, count }
     } catch (error) {
         console.error("[seedFeatureFlags]", error)
@@ -76,7 +88,7 @@ export async function getFeatureFlags() {
 // 3. Toggles (Admin Only)
 export async function toggleFeatureFlag(key: string, field: "isEnabled" | "isPremium", currentValue: boolean) {
     const session = await auth()
-    if ((session?.user as any)?.role !== "ADMIN") return { error: "Unauthorized" }
+    if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" }
 
     try {
         await prisma.featureFlag.update({
@@ -84,8 +96,19 @@ export async function toggleFeatureFlag(key: string, field: "isEnabled" | "isPre
             data: { [field]: !currentValue }
         })
         revalidatePath("/admin/config")
-        // Também pode ser necessário revalidar rotas visuais se quisermos q mude na hora
         revalidatePath("/dashboard")
+
+        // Log the action
+        await prisma.auditLog.create({
+            data: {
+                adminId: session.user.id,
+                action: "UPDATE_FLAG",
+                targetId: key,
+                targetType: "FeatureFlag",
+                metadata: { field, value: !currentValue }
+            }
+        });
+
         return { success: true }
     } catch (error) {
         console.error("[toggleFeatureFlag]", error)

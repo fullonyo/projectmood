@@ -47,8 +47,11 @@ export const UpdateMoodBlockLayoutSchema = z.object({
     height: z.number().positive().int().max(2000).optional(),
     zIndex: z.number().int().optional(),
     rotation: z.number().optional(),
+    isLocked: z.boolean().optional(),
+    isHidden: z.boolean().optional(),
     content: MoodBlockContentSchema.optional()
 })
+
 
 // Validação de mensagem do guestbook
 export const GuestbookMessageSchema = z.object({

@@ -305,8 +305,9 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                                 >
                                     <div className="flex items-center gap-3">
                                         <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                                        Command Center
+                                        {t('leftSidebar.command_center')}
                                     </div>
+
                                     <div className="w-1.5 h-1.5 bg-red-500 animate-pulse glow" />
                                 </Button>
                             </Link>

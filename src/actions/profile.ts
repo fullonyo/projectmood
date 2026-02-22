@@ -91,7 +91,7 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
     }
 }
 
-export async function updateMoodBlockLayout(blockId: string, data: { x?: number, y?: number, width?: number, height?: number, zIndex?: number, rotation?: number, content?: any }) {
+export async function updateMoodBlockLayout(blockId: string, data: { x?: number, y?: number, width?: number, height?: number, zIndex?: number, rotation?: number, isLocked?: boolean, isHidden?: boolean, content?: any }) {
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
 
@@ -140,6 +140,39 @@ export async function deleteMoodBlock(blockId: string) {
     }
 }
 
+export async function duplicateMoodBlock(blockId: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { error: "Não autorizado" };
+
+    try {
+        const source = await prisma.moodBlock.findUnique({
+            where: { id: blockId, userId: session.user.id }
+        });
+
+        if (!source) return { error: "Bloco não encontrado" };
+
+        const { id, createdAt, updatedAt, deletedAt, ...rest } = source;
+
+        const newBlock = await prisma.moodBlock.create({
+            data: {
+                ...rest,
+                content: rest.content as any,
+                userId: session.user.id,
+                x: Math.min(95, source.x + 2),
+                y: Math.min(95, source.y + 2),
+            }
+        });
+
+
+        revalidatePath("/dashboard");
+        return { success: true, block: newBlock };
+    } catch (error) {
+        console.error('[duplicateMoodBlock]', error);
+        return { error: "Erro ao duplicar bloco" };
+    }
+}
+
+
 export async function clearMoodBlocks() {
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };
@@ -179,5 +212,28 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
     } catch (error) {
         console.error('[reorderMoodBlocks]', error);
         return { error: "Erro ao reordenar blocos" };
+    }
+}
+
+export async function updateMoodBlocksZIndex(updates: { id: string, zIndex: number }[]) {
+    const session = await auth();
+    if (!session?.user?.id) return { error: "Não autorizado" };
+
+    const userId = session.user.id;
+
+    try {
+        await prisma.$transaction(
+            updates.map((update) =>
+                prisma.moodBlock.update({
+                    where: { id: update.id, userId, deletedAt: null },
+                    data: { zIndex: update.zIndex }
+                })
+            )
+        );
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch (error) {
+        console.error('[updateMoodBlocksZIndex]', error);
+        return { error: "Erro ao atualizar camadas" };
     }
 }

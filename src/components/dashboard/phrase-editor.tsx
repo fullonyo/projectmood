@@ -138,26 +138,27 @@ export function PhraseEditor({
                 <div className="p-5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
                     <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4 text-center">{t('editors.phrase.protocol_type')}</p>
                     <div className="grid grid-cols-2 border border-zinc-200 dark:border-zinc-800 gap-[1px] bg-zinc-200 dark:bg-zinc-800">
-                        {PHRASE_STYLES.map((t) => (
+                        {PHRASE_STYLES.map((item) => (
                             <button
-                                key={t.id}
+                                key={item.id}
                                 onClick={() => {
-                                    setSelectedType(t.id)
-                                    setActiveStyle(t.styles[0])
-                                    setSpeed(t.id === 'ticker' ? 20 : (t.id === 'floating' ? 3 : 10))
+                                    setSelectedType(item.id)
+                                    setActiveStyle(item.styles[0])
+                                    setSpeed(item.id === 'ticker' ? 20 : (item.id === 'floating' ? 3 : 10))
                                 }}
                                 className={cn(
                                     "flex flex-col items-center gap-3 p-4 transition-all col-span-1",
-                                    t.id === 'floating' ? "col-span-2" : "",
-                                    selectedType === t.id
+                                    item.id === 'floating' ? "col-span-2" : "",
+                                    selectedType === item.id
                                         ? "bg-black text-white dark:bg-white dark:text-black"
                                         : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
                                 )}
                             >
-                                <t.icon className="w-4 h-4" />
-                                <span className="text-[7px] font-black uppercase tracking-[0.2em]">{t.label}</span>
+                                <item.icon className="w-4 h-4" />
+                                <span className="text-[7px] font-black uppercase tracking-[0.2em]">{t(`editors.phrase.types.${item.id as any}`)}</span>
                             </button>
                         ))}
+
                     </div>
                 </div>
 

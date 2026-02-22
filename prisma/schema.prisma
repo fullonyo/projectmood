@@ -100,6 +100,9 @@ model MoodBlock {
   height    Int?
   zIndex    Int      @default(1)
   rotation  Float    @default(0)
+  isLocked  Boolean  @default(false)
+  isHidden  Boolean  @default(false)
+
   
   messages  GuestbookMessage[]
   

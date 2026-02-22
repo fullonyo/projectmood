@@ -12,6 +12,7 @@ import { BackgroundEffect } from "../effects/background-effect";
 import { FontLoader } from "./font-loader";
 import { MoodBlock, Profile } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
+import { updateMoodBlocksZIndex } from "@/actions/profile";
 import { CanvasInteractionProvider, useCanvasInteraction } from "./canvas-interaction-context";
 import { FullscreenDoodleOverlay } from "./fullscreen-doodle-overlay";
 
@@ -42,7 +43,34 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
     const { isDrawingMode } = useCanvasInteraction();
 
     // 🧠 CENTRAL CORTEX: Sovereign management of blocks and persistence
-    const { blocks, updateBlock, isSaving } = useCanvasManager(moodBlocks);
+    const { blocks, setBlocks, updateBlock, isSaving } = useCanvasManager(moodBlocks);
+    const [blockToDelete, setBlockToDelete] = useState<string | null>(null);
+
+    const normalizeZIndexes = useCallback(async () => {
+        const sorted = [...blocks].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+        const updates: { id: string, zIndex: number }[] = []
+
+        const newBlocks = blocks.map(block => {
+            const index = sorted.findIndex(b => b.id === block.id)
+            const targetZ = index + 10
+            if (block.zIndex !== targetZ) {
+                updates.push({ id: block.id, zIndex: targetZ })
+                return { ...block, zIndex: targetZ }
+            }
+            return block
+        })
+
+        if (updates.length === 0) return
+
+        setBlocks(newBlocks)
+
+        try {
+            await updateMoodBlocksZIndex(updates)
+        } catch (error) {
+            console.error("Batch z-index sync failed", error)
+        }
+    }, [blocks, setBlocks])
+
 
     // 📱 Mobile detection: auto-hide sidebars on small screens
     useEffect(() => {
@@ -94,7 +122,10 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                     setSelectedId={setSelectedId}
                     onUpdateBlock={updateBlock}
                     isSaving={isSaving}
+                    blockToDelete={blockToDelete}
+                    setBlockToDelete={setBlockToDelete}
                 />
+
             </div>
 
             {/* Drawing Layer (z-index between Canvas and Sidebars) */}
@@ -126,12 +157,16 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                         <div className="pointer-events-auto h-full shadow-none relative">
                             <DashboardSidebar
                                 profile={localProfile}
+                                blocks={blocks}
                                 selectedBlock={selectedBlock}
                                 setSelectedId={setSelectedId}
                                 onUpdateBlock={updateBlock}
+                                onDeleteRequest={(id) => setBlockToDelete(id)}
                                 onUpdateProfile={handleUpdateLocalProfile}
                                 systemFlags={systemFlags}
+                                onNormalize={normalizeZIndexes}
                             />
+
 
                             {/* Inner Collapse Button */}
                             <button

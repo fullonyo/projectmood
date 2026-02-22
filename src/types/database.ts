@@ -27,8 +27,13 @@ export type MoodBlockType =
 
 export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content'> {
     type: string; // Prisma stores as string, but we can narrow it down in UI
-    content: any; // Using any for now as content logic is dynamic, but we can refine specific interfaces
+    zIndex: number;
+    rotation: number;
+    isLocked: boolean;
+    isHidden: boolean;
+    content: any;
 }
+
 
 // Specific Content Interfaces for stricter typing where possible
 export interface TextContent {

@@ -1,8 +1,9 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Activity, Users, Settings, ShieldAlert, Database, ChevronLeft, History } from "lucide-react"
+import { Activity, Users, Settings, ShieldAlert, Database, ChevronLeft, History, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { AdminNav } from "@/components/admin/admin-nav"
 
 export default async function AdminLayout({
     children,
@@ -12,17 +13,9 @@ export default async function AdminLayout({
     const session = await auth()
 
     // Double-check protection (Middleware handles edge, this handles internal routing)
-    if ((session?.user as any)?.role !== "ADMIN") {
+    if (session?.user?.role !== "ADMIN") {
         redirect("/dashboard")
     }
-
-    const navigation = [
-        { name: "Command Center", href: "/admin", icon: Activity },
-        { name: "Visual Audit", href: "/admin/audit", icon: Database },
-        { name: "Histórico Admin", href: "/admin/logs", icon: History },
-        { name: "Users & Moderation", href: "/admin/users", icon: Users },
-        { name: "System Config", href: "/admin/config", icon: Settings },
-    ]
 
     return (
         <div className="min-h-screen bg-[#050505] text-[#ededed] font-sans selection:bg-white selection:text-black flex">
@@ -35,23 +28,24 @@ export default async function AdminLayout({
                     </div>
                 </div>
 
-                <div className="p-4 flex-1 space-y-1">
+                <div className="p-4 flex-1 space-y-1 overflow-y-auto">
                     <div className="px-2 mb-4">
                         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Modules</p>
                     </div>
-                    {navigation.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-900/50 rounded-md transition-all group"
-                        >
-                            <item.icon className="w-4 h-4 group-hover:text-white" />
-                            <span className="font-medium tracking-wide">{item.name}</span>
-                        </Link>
-                    ))}
+                    <AdminNav />
                 </div>
 
-                <div className="p-4 border-t border-zinc-900">
+                <div className="p-4 border-t border-zinc-900 space-y-3">
+                    <div className="px-3 py-2 flex items-center gap-3 bg-white/5 border border-white/5">
+                        <div className="w-6 h-6 bg-zinc-800 flex items-center justify-center text-[10px] font-black uppercase">
+                            {session?.user?.username?.[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-black truncate">@{session?.user?.username}</p>
+                            <p className="text-[8px] font-mono text-zinc-500 uppercase">Administrator</p>
+                        </div>
+                    </div>
+
                     <Link
                         href="/dashboard"
                         className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-500 hover:text-white transition-all group"

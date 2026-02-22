@@ -40,7 +40,10 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
                     initial.height !== current.height ||
                     initial.zIndex !== current.zIndex ||
                     initial.rotation !== current.rotation ||
+                    initial.isLocked !== current.isLocked ||
+                    initial.isHidden !== current.isHidden ||
                     JSON.stringify(initial.content) !== JSON.stringify(current.content);
+
 
                 return hasChanged ? initial : current;
             });
@@ -94,9 +97,20 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
                     epochRef.current[id] = Math.max(0, (epochRef.current[id] || 0) - 1);
                 }, 1500);
 
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Failed to sync block:", id, error);
-                toast.error("Erro de sincronização");
+                const blockName = blocks.find(b => b.id === id)?.type || "item";
+                toast.error(`Falha ao salvar ${blockName}`, {
+                    description: "Verifique sua conexão ou tente novamente.",
+                    action: {
+                        label: "Ok",
+                        onClick: () => { }
+                    }
+                });
+                // On error, we keep the epoch high for a bit longer to prevent desync
+                setTimeout(() => {
+                    epochRef.current[id] = Math.max(0, (epochRef.current[id] || 0) - 1);
+                }, 5000);
             } finally {
                 setIsSaving(false);
             }

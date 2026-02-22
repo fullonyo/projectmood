@@ -38,6 +38,28 @@ export interface ResizeResult {
     height: number;
 }
 
+export interface Guideline {
+    type: 'horizontal' | 'vertical';
+    pos: number; // % ou px dependendo do contexto
+}
+
+export interface DistanceGuide {
+    type: 'horizontal' | 'vertical';
+    pos: number; // %
+    start: number; // %
+    end: number; // %
+    distance: number; // px ou % 
+    label: string;
+}
+
+export interface SnapResult {
+    x: number;
+    y: number;
+    guidelines: Guideline[];
+    distances: DistanceGuide[];
+}
+
+
 // ─── Funções Puras ──────────────────────────────────────────────────────────
 
 /**
@@ -194,6 +216,218 @@ export function calculateResize(
         height: clamped.height,
     };
 }
+
+/**
+ * Calcula o snap do bloco baseado no grid e em outros blocos.
+ */
+export function calculateSnap(
+    x: number, // % 
+    y: number, // %
+    width: number, // px
+    height: number, // px
+    canvasWidth: number,
+    canvasHeight: number,
+    otherBlocks: Array<{ x: number, y: number, width: number | 'auto', height: number | 'auto' }>,
+    snapThreshold = 1, // %
+    gridSize = 2.5 // % (conforme definido no themeConfig)
+): SnapResult {
+    let finalX = x;
+    let finalY = y;
+    const guidelines: Guideline[] = [];
+
+    const wPercent = (width / canvasWidth) * 100;
+    const hPercent = (height / canvasHeight) * 100;
+
+    // 1. Grid & Canvas Edge Snapping
+    const safePaddingX = (40 / canvasWidth) * 100;
+    const safePaddingY = (40 / canvasHeight) * 100;
+
+    // Grid Snap
+    const snappedX = Math.round(x / gridSize) * gridSize;
+    const snappedY = Math.round(y / gridSize) * gridSize;
+
+    if (Math.abs(x - snappedX) < snapThreshold) finalX = snappedX;
+    if (Math.abs(y - snappedY) < snapThreshold) finalY = snappedY;
+
+    // Canvas Edges Snap (with Safe Area)
+    // Left
+    if (Math.abs(finalX - safePaddingX) < snapThreshold) {
+        finalX = safePaddingX;
+        guidelines.push({ type: 'vertical', pos: safePaddingX });
+    } else if (Math.abs(finalX - 0) < snapThreshold) {
+        finalX = 0;
+        guidelines.push({ type: 'vertical', pos: 0 });
+    }
+
+    // Right
+    if (Math.abs((finalX + wPercent) - (100 - safePaddingX)) < snapThreshold) {
+        finalX = 100 - wPercent - safePaddingX;
+        guidelines.push({ type: 'vertical', pos: 100 - safePaddingX });
+    } else if (Math.abs((finalX + wPercent) - 100) < snapThreshold) {
+        finalX = 100 - wPercent;
+        guidelines.push({ type: 'vertical', pos: 100 });
+    }
+
+    // Top
+    if (Math.abs(finalY - safePaddingY) < snapThreshold) {
+        finalY = safePaddingY;
+        guidelines.push({ type: 'horizontal', pos: safePaddingY });
+    } else if (Math.abs(finalY - 0) < snapThreshold) {
+        finalY = 0;
+        guidelines.push({ type: 'horizontal', pos: 0 });
+    }
+
+    // Bottom
+    if (Math.abs((finalY + hPercent) - (100 - safePaddingY)) < snapThreshold) {
+        finalY = 100 - hPercent - safePaddingY;
+        guidelines.push({ type: 'horizontal', pos: 100 - safePaddingY });
+    } else if (Math.abs((finalY + hPercent) - 100) < snapThreshold) {
+        finalY = 100 - hPercent;
+        guidelines.push({ type: 'horizontal', pos: 100 });
+    }
+
+    // 2. Block-to-Block Snapping (simplificado)
+    // No futuro podemos expandir para centros e bordas opostas
+    for (const block of otherBlocks) {
+        const bW = typeof block.width === 'number' ? (block.width / canvasWidth) * 100 : 0;
+        const bH = typeof block.height === 'number' ? (block.height / canvasHeight) * 100 : 0;
+
+        // X Alignments
+        // Left - Left
+        if (Math.abs(finalX - block.x) < snapThreshold) {
+            finalX = block.x;
+            guidelines.push({ type: 'vertical', pos: block.x });
+        }
+        // Right - Right
+        if (Math.abs((finalX + wPercent) - (block.x + bW)) < snapThreshold) {
+            finalX = block.x + bW - wPercent;
+            guidelines.push({ type: 'vertical', pos: block.x + bW });
+        }
+
+        // Center - Center
+        const bCenterX = block.x + (bW / 2);
+        if (Math.abs((finalX + wPercent / 2) - bCenterX) < snapThreshold) {
+            finalX = bCenterX - (wPercent / 2);
+            guidelines.push({ type: 'vertical', pos: bCenterX });
+        }
+
+        // Y Alignments
+        // Top - Top
+        if (Math.abs(finalY - block.y) < snapThreshold) {
+            finalY = block.y;
+            guidelines.push({ type: 'horizontal', pos: block.y });
+        }
+        // Bottom - Bottom
+        if (Math.abs((finalY + hPercent) - (block.y + bH)) < snapThreshold) {
+            finalY = block.y + bH - hPercent;
+            guidelines.push({ type: 'horizontal', pos: block.y + bH });
+        }
+        // Center - Center
+        const bCenterY = block.y + (bH / 2);
+        if (Math.abs((finalY + hPercent / 2) - bCenterY) < snapThreshold) {
+            finalY = bCenterY - (hPercent / 2);
+            guidelines.push({ type: 'horizontal', pos: bCenterY });
+        }
+
+        // 3. Edge-to-Edge Snapping (New: Align opposite edges)
+        // Left - Right
+        if (Math.abs(finalX - (block.x + bW)) < snapThreshold) {
+            finalX = block.x + bW;
+            guidelines.push({ type: 'vertical', pos: block.x + bW });
+        }
+        // Right - Left
+        if (Math.abs((finalX + wPercent) - block.x) < snapThreshold) {
+            finalX = block.x - wPercent;
+            guidelines.push({ type: 'vertical', pos: block.x });
+        }
+        // Top - Bottom
+        if (Math.abs(finalY - (block.y + bH)) < snapThreshold) {
+            finalY = block.y + bH;
+            guidelines.push({ type: 'horizontal', pos: block.y + bH });
+        }
+        // Bottom - Top
+        if (Math.abs((finalY + hPercent) - block.y) < snapThreshold) {
+            finalY = block.y - hPercent;
+            guidelines.push({ type: 'horizontal', pos: block.y });
+        }
+    }
+
+    // 4. Distance Guides (Advanced precision UI)
+    const distances: DistanceGuide[] = [];
+    const thresholdDist = 15; // % - Distância máxima para mostrar guia
+
+    for (const block of otherBlocks) {
+        const bW = typeof block.width === 'number' ? (block.width / canvasWidth) * 100 : 0;
+        const bH = typeof block.height === 'number' ? (block.height / canvasHeight) * 100 : 0;
+
+        // Horizontais (Gap entre blocos lado a lado)
+        // Checa se há sobreposição vertical
+        const overlapsY = (finalY < block.y + bH) && (finalY + hPercent > block.y);
+
+        if (overlapsY) {
+            // Bloco à DIREITA do atual
+            if (block.x >= finalX + wPercent && block.x <= finalX + wPercent + thresholdDist) {
+                const dist = block.x - (finalX + wPercent);
+                distances.push({
+                    type: 'vertical',
+                    pos: finalX + wPercent + (dist / 2),
+                    start: Math.max(finalY, block.y),
+                    end: Math.min(finalY + hPercent, block.y + hPercent),
+                    distance: dist,
+                    label: `${Math.round(dist)}%`
+                });
+            }
+            // Bloco à ESQUERDA do atual
+            if (finalX >= block.x + bW && finalX <= block.x + bW + thresholdDist) {
+                const dist = finalX - (block.x + bW);
+                distances.push({
+                    type: 'vertical',
+                    pos: block.x + bW + (dist / 2),
+                    start: Math.max(finalY, block.y),
+                    end: Math.min(finalY + hPercent, block.y + hHPercent(block, canvasHeight)),
+                    distance: dist,
+                    label: `${Math.round(dist)}%`
+                });
+            }
+        }
+
+        // Verticais (Gap entre blocos topo/baixo)
+        const overlapsX = (finalX < block.x + bW) && (finalX + wPercent > block.x);
+        if (overlapsX) {
+            // Bloco ABAIXO do atual
+            if (block.y >= finalY + hPercent && block.y <= finalY + hPercent + thresholdDist) {
+                const dist = block.y - (finalY + hPercent);
+                distances.push({
+                    type: 'horizontal',
+                    pos: finalY + hPercent + (dist / 2),
+                    start: Math.max(finalX, block.x),
+                    end: Math.min(finalX + wPercent, block.x + bW),
+                    distance: dist,
+                    label: `${Math.round(dist)}%`
+                });
+            }
+            // Bloco ACIMA do atual
+            if (finalY >= block.y + bH && finalY <= block.y + bH + thresholdDist) {
+                const dist = finalY - (block.y + bH);
+                distances.push({
+                    type: 'horizontal',
+                    pos: block.y + bH + (dist / 2),
+                    start: Math.max(finalX, block.x),
+                    end: Math.min(finalX + wPercent, block.x + bW),
+                    distance: dist,
+                    label: `${Math.round(dist)}%`
+                });
+            }
+        }
+    }
+
+    return { x: finalX, y: finalY, guidelines, distances };
+}
+
+function hHPercent(block: any, canvasHeight: number) {
+    return typeof block.height === 'number' ? (block.height / canvasHeight) * 100 : 0;
+}
+
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

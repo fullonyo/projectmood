@@ -1,15 +1,28 @@
-import { Users, HardDrive, Eye, CalendarClock, Zap, Activity, ShieldAlert, UserX } from "lucide-react"
+import { Users, Eye, Zap, Activity, ShieldAlert, UserX, CheckCircle2 } from "lucide-react"
 import { getAdminAnalytics } from "@/actions/admin-analytics"
 import { MetricCard } from "@/components/admin/metric-card"
 import { UsageChart } from "@/components/admin/usage-chart"
 import { GrowthChart } from "@/components/admin/growth-chart"
+import { SystemHealth } from "@/components/admin/system-health"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 export default async function AdminDashboardPage() {
-    const { metrics, blockUsage, recentUsers, growthData, roleDistribution } = await getAdminAnalytics()
+    const { metrics, blockUsage, recentUsers, growthData, roleDistribution, verificationDistribution } = await getAdminAnalytics()
+
+    const calculateTrend = (current: number, prev: number) => {
+        if (prev === 0) return { value: "100%", isUp: current > 0 }
+        const diff = ((current - prev) / prev) * 100
+        return {
+            value: `${Math.abs(Math.round(diff))}%`,
+            isUp: diff >= 0
+        }
+    }
+
+    const userTrend = calculateTrend(metrics.newUsers24h.current, metrics.newUsers24h.prev)
+    const activeTrend = calculateTrend(metrics.activeProfiles7d.current, metrics.activeProfiles7d.prev)
 
     return (
         <div className="space-y-10">
@@ -32,23 +45,30 @@ export default async function AdminDashboardPage() {
             {/* 1. Primary Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <MetricCard
-                    title="Total Citizens"
+                    title="Active Citizens"
                     value={metrics.totalUsers}
                     icon={Users}
-                    description="Total user registrations"
-                    trend={{ value: `${metrics.newUsers24h} today`, isUp: true }}
+                    description="Total non-deleted accounts"
                 />
                 <MetricCard
-                    title="Active Souls"
-                    value={metrics.activeProfiles7d}
+                    title="New Residents (24h)"
+                    value={metrics.newUsers24h.current}
+                    icon={Zap}
+                    trend={userTrend}
+                    description="vs. previous 24h period"
+                />
+                <MetricCard
+                    title="Active Moods (7d)"
+                    value={metrics.activeProfiles7d.current}
                     icon={Activity}
-                    description="Updated profiles (7d)"
+                    trend={activeTrend}
+                    description="vs. previous week"
                 />
                 <MetricCard
-                    title="Banned / Masked"
+                    title="Banned / Isolated"
                     value={metrics.bannedCount}
                     icon={UserX}
-                    description="Total restricted accounts"
+                    description="Protected access limit"
                     className={metrics.bannedCount > 0 ? "border-red-900/10 bg-red-950/5" : ""}
                 />
                 <MetricCard
@@ -82,6 +102,22 @@ export default async function AdminDashboardPage() {
                         ))}
                     </div>
 
+                    <header className="flex items-center gap-3 mt-10 mb-6">
+                        <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                        <h3 className="text-sm font-black uppercase tracking-widest">Verification Status</h3>
+                    </header>
+
+                    <div className="space-y-3">
+                        {verificationDistribution.map((v: any) => (
+                            <div key={v.verificationType || 'verified'} className="flex items-center justify-between">
+                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-600 italic">
+                                    {v.verificationType || 'Standard'}
+                                </span>
+                                <span className="text-xs font-mono font-black">{v._count._all}</span>
+                            </div>
+                        ))}
+                    </div>
+
                     <div className="mt-8 pt-6 border-t border-zinc-900">
                         <div className="flex justify-between items-end">
                             <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Safety Ratio</span>
@@ -99,14 +135,17 @@ export default async function AdminDashboardPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* 4. Content Analytics */}
-                <div className="lg:col-span-2">
-                    <UsageChart data={blockUsage} title="Manifested Content Distribution" />
+            {/* 2. System Health & Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-8 space-y-6">
+                    <SystemHealth />
+                    <UsageChart
+                        data={blockUsage}
+                        title="Composition Analysis"
+                    />
                 </div>
 
-                {/* 5. Recent Activity */}
-                <div className="p-8 border border-zinc-900 bg-[#0a0a0a]">
+                <div className="lg:col-span-4 bg-[#0a0a0a] border border-zinc-900 p-8">
                     <header className="flex items-center gap-3 mb-8">
                         <Zap className="w-4 h-4 text-amber-500" />
                         <h3 className="text-sm font-black uppercase tracking-widest">Recent Activity</h3>

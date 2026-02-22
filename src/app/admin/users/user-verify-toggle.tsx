@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { BadgeCheck, Loader2 } from "lucide-react";
 import { adminVerifyUser } from "@/actions/moderation";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface UserVerifyToggleProps {
     userId: string;
@@ -22,8 +23,9 @@ export function UserVerifyToggle({ userId, isVerified: initialVerified, verifica
             const result = await adminVerifyUser(userId, nextVerified, "verified");
             if (result.success) {
                 setIsVerified(nextVerified);
+                toast.success(nextVerified ? "Usuário verificado" : "Verificação removida");
             } else {
-                // Could add toast here
+                toast.error(result.error || "Erro ao atualizar status");
                 console.error(result.error);
             }
         });

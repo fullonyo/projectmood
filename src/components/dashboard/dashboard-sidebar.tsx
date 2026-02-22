@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from "react"
 import { cn } from "@/lib/utils"
+import { LayersPanel } from "./layers-panel"
+
 // ... keep other imports ...
 import {
     Layout,
@@ -33,7 +35,7 @@ import { Button } from "../ui/button"
 import { ConfirmModal } from "../ui/confirm-modal"
 import { useTranslation } from "@/i18n/context"
 
-type TopLevelTab = 'elements' | 'room'
+type TopLevelTab = 'elements' | 'layers' | 'room'
 
 export function DashboardSidebar({
     profile,
@@ -41,6 +43,8 @@ export function DashboardSidebar({
     setSelectedId,
     onUpdateBlock,
     onUpdateProfile,
+    onDeleteRequest,
+    blocks,
     systemFlags
 }: {
     profile: any;
@@ -48,8 +52,12 @@ export function DashboardSidebar({
     setSelectedId: (id: string | null) => void;
     onUpdateBlock: (id: string, content: any) => void;
     onUpdateProfile: (data: any) => void;
+    onDeleteRequest: (id: string) => void;
+    blocks: any[];
     systemFlags?: Record<string, boolean>;
+    onNormalize?: () => void;
 }) {
+
     const { t } = useTranslation()
     const [activeTab, setActiveTab] = useState<TopLevelTab>('elements')
     const [draftBlockType, setDraftBlockType] = useState<string | null>(null)
@@ -84,9 +92,11 @@ export function DashboardSidebar({
     }, [selectedBlock])
 
     const tabs = [
-        { id: 'elements', label: t('sidebar.tabs.elements'), icon: Box, description: t('sidebar.tabs.elements_desc') },
+        { id: 'elements', label: t('sidebar.tabs.elements'), icon: Plus, description: t('sidebar.tabs.elements_desc') },
+        { id: 'layers', label: t('sidebar.tabs.layers') || 'Camadas', icon: Layout, description: t('sidebar.tabs.layers_desc') },
         { id: 'room', label: t('sidebar.tabs.room'), icon: Sparkles, description: t('sidebar.tabs.room_desc') },
     ]
+
 
     return (
         <aside className="w-80 h-full bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col z-50 overflow-hidden">
@@ -111,7 +121,8 @@ export function DashboardSidebar({
                 </div>
             </div>
             {/* Top Categories Navigation */}
-            <nav className="grid grid-cols-2 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
+            <nav className="grid grid-cols-3 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
+
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
@@ -140,8 +151,12 @@ export function DashboardSidebar({
             {/* Scrollable Editor Area */}
             <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-y-auto overflow-x-hidden p-6 custom-scrollbar space-y-8 animate-in fade-in slide-in-from-left-2 duration-300"
+                className={cn(
+                    "flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar animate-in fade-in slide-in-from-left-2 duration-300",
+                    activeTab === 'layers' ? "p-0" : "p-6 space-y-8"
+                )}
             >
+
 
                 {activeTab === 'room' && (
                     <RoomSettings
@@ -150,6 +165,21 @@ export function DashboardSidebar({
                         onClearWall={() => setShowClearConfirm(true)}
                     />
                 )}
+
+                {activeTab === 'layers' && (
+                    <LayersPanel
+                        blocks={blocks}
+                        selectedId={selectedBlock?.id || null}
+                        setSelectedId={setSelectedId}
+                        onUpdateBlock={onUpdateBlock}
+                        onDeleteRequest={(id) => {
+                            // Link with MoodCanvas delete logic if possible, or trigger here
+                            // For consistency, we'll need blocks to be passed down
+                            onDeleteRequest(id)
+                        }}
+                    />
+                )}
+
 
                 {activeTab === 'elements' && (
                     <>
