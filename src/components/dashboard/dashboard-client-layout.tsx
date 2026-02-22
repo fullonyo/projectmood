@@ -8,7 +8,6 @@ import { ActionsSidebar } from "./actions-sidebar";
 import { MoodCanvas } from "./mood-canvas";
 import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
-import { BackgroundEffect } from "../effects/background-effect";
 import { MoodBlock, Profile } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
 import { updateMoodBlocksZIndex } from "@/actions/profile";

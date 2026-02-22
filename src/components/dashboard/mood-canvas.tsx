@@ -2,14 +2,13 @@ import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-mo
 import { toast } from "sonner"
 import { deleteMoodBlock } from "@/actions/profile"
 import { Trash2, RotateCw, Pencil, Move, MousePointer2, Lock, Eye, EyeOff } from "lucide-react"
+import { ActionTooltip } from "@/components/ui/action-tooltip";
+import { RoomEnvironment } from "./room-environment";
 import { ConfirmModal } from "@/components/ui/confirm-modal"
 import { useState, useRef, useEffect, useCallback } from "react"
 import { cn } from "@/lib/utils"
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { themeConfigs } from "@/lib/themes"
 import { BlockRenderer } from "./block-renderer"
-import { BackgroundEffect } from "../effects/background-effect"
-import { StaticTextures } from "../effects/static-textures"
 import { BoardStage } from "./board-stage"
 import { useTranslation } from "@/i18n/context"
 import { useCanvasManager } from "@/hooks/use-canvas-manager"
@@ -275,7 +274,10 @@ export function MoodCanvas({
 
     return (
         <div
-            className="w-full h-full relative cursor-crosshair overflow-hidden canvas-background select-none touch-none"
+            className={cn(
+                "w-full h-full relative cursor-crosshair overflow-hidden select-none touch-none",
+                profile.theme === 'dark' ? "bg-zinc-950" : "bg-white"
+            )}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -299,20 +301,24 @@ export function MoodCanvas({
                 />
             )}
 
+            {/* 🏰 SCREEN SPACE ENVIRONMENT */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                <RoomEnvironment
+                    profile={profile}
+                    backgroundEffect={backgroundEffect}
+                />
+            </div>
+
+            {/* 📸 CAMERA CONTEXT (ZOOM & PAN) */}
             <motion.div
                 ref={canvasRef}
-                className="w-full h-full p-4 relative"
+                className="w-full h-full p-4 relative z-10"
                 animate={{ scale: zoom }}
                 transition={{ type: 'spring', damping: 25, stiffness: 120 }}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
             >
-                <div className="absolute inset-0 z-[-1] pointer-events-none">
-                    <BackgroundEffect type={backgroundEffect as any} />
-                    <StaticTextures type={profile.staticTexture || 'none'} />
-                </div>
-
                 <motion.div className="w-full h-full relative">
                     <BoardStage>
                         {blocks.map((block) => (

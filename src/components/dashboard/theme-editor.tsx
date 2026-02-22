@@ -10,12 +10,13 @@ import { ColorPaletteExtractor } from "./color-palette-extractor"
 interface ThemeEditorProps {
     currentTheme: string
     currentPrimaryColor: string
+    currentStaticTexture: string
     currentFontStyle: string
     currentCustomFont?: string
     onUpdate?: (data: any) => void
 }
 
-export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyle, currentCustomFont, onUpdate }: ThemeEditorProps) {
+export function ThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTexture, currentFontStyle, currentCustomFont, onUpdate }: ThemeEditorProps) {
     const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
     const [showExtractor, setShowExtractor] = useState(false)
@@ -42,8 +43,10 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                     <div className="p-2 border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
                         <Palette className="w-3.5 h-3.5 text-black dark:text-white" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.theme.title')}</h3>
                 </div>
+                <p className="text-[8px] text-zinc-400 uppercase tracking-widest pl-11 -mt-2 mb-4">
+                    {t('editors.theme.title_desc')}
+                </p>
                 <div className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-1 px-1 custom-scrollbar snap-x no-scrollbar">
                     {[
                         { id: 'light', label: t('editors.theme.light'), colors: 'bg-white border-zinc-200' },
@@ -79,13 +82,16 @@ export function ThemeEditor({ currentTheme, currentPrimaryColor, currentFontStyl
                     </div>
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.theme.textures_title')}</h3>
                 </div>
+                <p className="text-[8px] text-zinc-400 uppercase tracking-widest pl-11 -mt-2 mb-4">
+                    {t('editors.theme.textures_desc')}
+                </p>
                 <div className="grid grid-cols-4 gap-2">
                     {textures.map((text) => {
-                        const isSelected = currentTheme === text.id || (text.id === 'none' && !currentTheme)
+                        const isSelected = currentStaticTexture === text.id || (text.id === 'none' && !currentStaticTexture)
                         return (
                             <button
                                 key={text.id}
-                                onClick={() => handleUpdate({ theme: text.id })}
+                                onClick={() => handleUpdate({ staticTexture: text.id })}
                                 disabled={isPending}
                                 className={cn(
                                     "p-3 border transition-all flex flex-col items-center gap-2 group",

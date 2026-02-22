@@ -189,7 +189,8 @@ export const pt = {
             deploy_btn: "Pendurar Mídia"
         },
         theme: {
-            title: "Cores e vibes",
+            title: "1. Clima e Vibe",
+            title_desc: "A cor e iluminação principal do ambiente.",
             light: "Clássico",
             dark: "Meia-noite",
             vintage: "Vintage",
@@ -201,7 +202,8 @@ export const pt = {
             luminance_desc: "Escolha a cor que mais te representa agora.",
             atomic_typography: "Letra principal",
             base_system: "Estilos de Letra",
-            textures_title: "Textura das paredes",
+            textures_title: "2. Material da Parede",
+            textures_desc: "O acabamento tátil que vai por cima da cor.",
             textures: {
                 none: "Plano",
                 museum_paper: "Papel Museu",

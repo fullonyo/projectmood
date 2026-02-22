@@ -10,8 +10,7 @@ import { BoardStage } from "@/components/dashboard/board-stage"
 import { BlockRenderer } from "@/components/dashboard/block-renderer"
 import { StudioCatalogID } from "@/components/dashboard/studio-catalog-id"
 import { SignatureShare } from "@/components/dashboard/signature-share"
-import { BackgroundEffect } from "@/components/effects/background-effect"
-import { StaticTextures } from "@/components/effects/static-textures"
+import { RoomEnvironment } from "@/components/dashboard/room-environment"
 import { CustomCursor } from "@/components/effects/custom-cursor"
 import { MouseTrails } from "@/components/effects/mouse-trails"
 import { Lightbulb, LightbulbOff } from "lucide-react"
@@ -55,21 +54,13 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
             <CustomCursor type={profile.customCursor || 'auto'} />
             <MouseTrails type={profile.mouseTrails || 'none'} />
 
+            {/* 🏰 CONSOLIDATED ENVIRONMENT FOR PUBLIC PAGE */}
             <div className="fixed inset-0 z-0">
-                <BackgroundEffect type={profile.backgroundEffect || 'none'} primaryColor={profile.primaryColor || undefined} />
+                <RoomEnvironment
+                    profile={profile}
+                    backgroundEffect={profile.backgroundEffect || 'none'}
+                />
             </div>
-            <div className="fixed inset-0 z-[1]">
-                <StaticTextures type={profile.staticTexture || 'none'} />
-            </div>
-
-            <div
-                className={cn("fixed inset-0 z-[2] pointer-events-none transition-opacity duration-1000", config.gridOpacity)}
-                style={{
-                    backgroundImage: config.grid,
-                    backgroundSize: config.bgSize,
-                    filter: theme === 'vintage' ? 'contrast(110%) brightness(105%) sepia(20%)' : 'none'
-                }}
-            />
 
             {/* UI Overlay - Controlled by Focus Mode */}
             <div className={cn("transition-all duration-700", isFocusMode ? "opacity-0 pointer-events-none translate-y-4" : "opacity-100")}>

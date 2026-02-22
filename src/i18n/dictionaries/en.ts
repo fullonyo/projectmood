@@ -189,7 +189,8 @@ export const en: Dictionary = {
             deploy_btn: "Deploy Media"
         },
         theme: {
-            title: "Colors & vibes",
+            title: "1. Climate & Vibe",
+            title_desc: "The main color and lighting of the environment.",
             light: "Classic",
             dark: "Midnight",
             vintage: "Vintage",
@@ -201,7 +202,8 @@ export const en: Dictionary = {
             luminance_desc: "Pick the color that best represents you right now.",
             atomic_typography: "Main letter",
             base_system: "Letter Styles",
-            textures_title: "Wall Texture",
+            textures_title: "2. Wall Material",
+            textures_desc: "The tactile finish that goes over the color.",
             textures: {
                 none: "Plain",
                 museum_paper: "Museum Paper",
