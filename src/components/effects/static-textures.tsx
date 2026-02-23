@@ -1,10 +1,11 @@
-import { cn } from "@/lib/utils"
-
-interface StaticTexturesProps {
-    type: string
+interface CustomTextureStyle extends React.CSSProperties {
+    '--room-texture-img'?: string;
+    '--room-texture-opacity'?: number;
+    '--room-texture-filter'?: string;
+    '--room-texture-blend'?: string;
 }
 
-export function getStaticTextureStyle(type: string, color?: string): React.CSSProperties {
+export function getStaticTextureStyle(type: string, color?: string): CustomTextureStyle {
     if (!type || type === 'none') return {}
 
     const svgColor = encodeURIComponent(color || '#000000')
@@ -46,5 +47,21 @@ export function getStaticTextureStyle(type: string, color?: string): React.CSSPr
         '--room-texture-opacity': config.opacity,
         '--room-texture-filter': config.filter || 'none',
         '--room-texture-blend': config.blend || 'normal'
-    } as React.CSSProperties
+    };
+}
+
+export function StaticTextures({ type, color }: { type: string, color?: string }) {
+    const style = getStaticTextureStyle(type, color);
+    if (!style || Object.keys(style).length === 0) return null;
+    return (
+        <div
+            className="absolute inset-0 z-0 pointer-events-none"
+            style={{
+                backgroundImage: style['--room-texture-img'],
+                opacity: style['--room-texture-opacity'],
+                filter: style['--room-texture-filter'],
+                mixBlendMode: (style['--room-texture-blend'] as React.CSSProperties['mixBlendMode']) || 'normal'
+            }}
+        />
+    )
 }

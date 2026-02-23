@@ -8,7 +8,17 @@ import { MessageSquare, Plus, Palette } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
-export function GuestbookEditor({ highlight }: { highlight?: boolean }) {
+import { MoodBlock, GuestbookContent } from "@/types/database"
+
+interface GuestbookEditorProps {
+    block?: MoodBlock | null
+    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
+    onAdd?: (content: GuestbookContent) => Promise<void>
+    onClose?: () => void
+    highlight?: boolean
+}
+
+export function GuestbookEditor({ block, onUpdate, onAdd, onClose, highlight }: GuestbookEditorProps) {
     const { t } = useTranslation()
     const [title, setTitle] = useState(t('editors.guestbook.title'))
     const [color, setColor] = useState("#000000")

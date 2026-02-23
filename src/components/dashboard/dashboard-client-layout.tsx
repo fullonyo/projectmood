@@ -41,8 +41,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
     const { isDrawingMode } = useCanvasInteraction();
 
     // 🧠 CENTRAL CORTEX: Sovereign management of blocks and persistence
-    const { blocks, setBlocks, updateBlock, updateBlocks, isSaving } = useCanvasManager(moodBlocks);
-    const [blockToDelete, setBlockToDelete] = useState<string | null>(null);
+    const { blocks, setBlocks, updateBlock, updateBlocks, removeBlocks, isSaving, undo, redo, canUndo, canRedo } = useCanvasManager(moodBlocks);
 
     const normalizeZIndexes = useCallback(async () => {
         const sorted = [...blocks].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
@@ -119,9 +118,9 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                     setSelectedIds={setSelectedIds}
                     onUpdateBlock={updateBlock}
                     onUpdateBlocks={updateBlocks}
-                    isSaving={isSaving}
-                    blockToDelete={blockToDelete}
-                    setBlockToDelete={setBlockToDelete}
+                    removeBlocks={removeBlocks}
+                    undo={undo}
+                    redo={redo}
                 />
 
             </div>
@@ -159,7 +158,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                         selectedBlocks={selectedBlocks}
                         setSelectedIds={setSelectedIds}
                         onUpdateBlock={updateBlock}
-                        onDeleteRequest={(id) => setBlockToDelete(id)}
+                        removeBlocks={removeBlocks}
                         onUpdateProfile={handleUpdateLocalProfile}
                         systemFlags={systemFlags}
                         onNormalize={normalizeZIndexes}

@@ -11,12 +11,12 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { toast } from "sonner"
 
-import { addMoodBlock } from "@/actions/profile"
+import { MoodBlock, PhotoContent } from "@/types/database"
 
 interface PhotoEditorProps {
-    block?: any
-    onUpdate?: (id: string, content: any) => void
-    onAdd?: (content: any) => Promise<void>
+    block?: MoodBlock | null
+    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
+    onAdd?: (content: PhotoContent) => Promise<void>
     onClose?: () => void
 }
 
@@ -27,7 +27,7 @@ export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProp
     const [alt, setAlt] = useState(defaultContent.alt || "")
     const [caption, setCaption] = useState(defaultContent.caption || "")
     const [filter, setFilter] = useState<'none' | 'vintage' | 'bw' | 'warm' | 'cool'>(defaultContent.filter || 'none')
-    const [frame, setFrame] = useState<'none' | 'polaroid' | 'border' | 'shadow'>(defaultContent.frame || 'none')
+    const [frame, setFrame] = useState<'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'border' | 'shadow' | 'glass'>(defaultContent.frame || 'none')
     const [isUploading, setIsUploading] = useState(false)
     const [isPending, setIsPending] = useState(false)
 
@@ -247,7 +247,7 @@ export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProp
                         <div className="space-y-3">
                             <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.photo.geometry')}</Label>
                             <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800">
-                                {(['none', 'polaroid', 'border', 'shadow'] as const).map((frm) => (
+                                {(['none', 'polaroid', 'border', 'shadow', 'frame', 'minimal', 'round', 'glass'] as const).map((frm) => (
                                     <button
                                         key={frm}
                                         onClick={() => setFrame(frm)}

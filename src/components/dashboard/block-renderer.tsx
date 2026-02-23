@@ -45,7 +45,7 @@ export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
 }
 
 function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
-    const content = block.content as any
+    const { content } = block
     const scale = useViewportScale()
 
     // Helper to wrap content in a Frame

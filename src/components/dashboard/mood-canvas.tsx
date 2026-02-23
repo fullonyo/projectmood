@@ -2,34 +2,25 @@ import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-mo
 import { toast } from "sonner"
 import { deleteMoodBlock } from "@/actions/profile"
 import { Trash2, RotateCw, Pencil, Move, MousePointer2, Lock, Eye, EyeOff } from "lucide-react"
-import { ActionTooltip } from "@/components/ui/action-tooltip";
 import { RoomEnvironment } from "./room-environment";
 import { ConfirmModal } from "@/components/ui/confirm-modal"
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { themeConfigs } from "@/lib/themes"
 import { BlockRenderer } from "./block-renderer"
 import { BoardStage } from "./board-stage"
 import { useTranslation } from "@/i18n/context"
-import { useCanvasManager } from "@/hooks/use-canvas-manager"
 import { duplicateMoodBlock } from "@/actions/profile"
 import { CanvasContextMenu } from "./canvas-context-menu"
+import { useCanvasKeyboard } from "@/hooks/use-canvas-keyboard"
 import {
-    calculateResize,
-    getResizeCursor,
-    ResizeHandle,
-    ResizeCorner,
     calculateRotation,
-    calculateSnap,
     Guideline,
     DistanceGuide
-} from '@/lib/canvas-transforms'
-import { useViewportScale } from '@/lib/canvas-scale'
-import { useCanvasKeyboard } from '@/hooks/use-canvas-keyboard'
+} from "@/lib/canvas-transforms"
 
 import { CanvasItem } from "./canvas-item"
-import { StressTestButton } from "./StressTestButton"
-import { MoodBlock, Profile, ThemeConfig } from "@/types/database"
+import { MoodBlock, Profile } from "@/types/database"
 
 interface MoodCanvasProps {
     blocks: MoodBlock[]
@@ -39,9 +30,9 @@ interface MoodCanvasProps {
     setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void
     onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void
     onUpdateBlocks: (ids: string[], updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => void
-    isSaving: boolean
-    blockToDelete: string | null
-    setBlockToDelete: (id: string | null) => void
+    removeBlocks: (ids: string[]) => void
+    undo: () => void
+    redo: () => void
 }
 
 export function MoodCanvas({
@@ -52,25 +43,28 @@ export function MoodCanvas({
     setSelectedIds,
     onUpdateBlock,
     onUpdateBlocks,
-    isSaving,
-    blockToDelete,
-    setBlockToDelete
+    removeBlocks,
+    undo,
+    redo
 }: MoodCanvasProps) {
 
     const { t } = useTranslation()
     const canvasRef = useRef<HTMLDivElement>(null)
-    const [maxZ, setMaxZ] = useState(20)
-    const [isDeleting, setIsDeleting] = useState(false)
+
+    // Calculate maxZ derived from blocks to avoid cascading renders
+    const maxZ = useMemo(() => {
+        if (blocks.length === 0) return 20;
+        return Math.max(20, ...blocks.map(b => b.zIndex || 0));
+    }, [blocks]);
+
     const [visualFeedback, setVisualFeedback] = useState<{
         guidelines: Guideline[],
         distances: DistanceGuide[]
     }>({ guidelines: [], distances: [] })
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number, blockId: string } | null>(null)
     const [zoom, setZoom] = useState(1)
-    const [isPinching, setIsPinching] = useState(false)
     const lastPinchDist = useRef<number | null>(null)
 
-    const viewportScale = useViewportScale() * zoom
     const [selectionRect, setSelectionRect] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null);
 
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -148,7 +142,6 @@ export function MoodCanvas({
                 e.touches[0].pageY - e.touches[1].pageY
             )
             lastPinchDist.current = dist
-            setIsPinching(true)
         }
     }
 
@@ -166,13 +159,12 @@ export function MoodCanvas({
 
     const handleTouchEnd = () => {
         lastPinchDist.current = null
-        setIsPinching(false)
     }
 
     const handleMenuAction = (action: string, blockId: string) => {
         switch (action) {
             case 'delete':
-                setBlockToDelete(blockId)
+                removeBlocks([blockId])
                 break
             case 'duplicate':
                 duplicateMoodBlock(blockId)
@@ -201,26 +193,16 @@ export function MoodCanvas({
         setContextMenu(null)
     }
 
-    useEffect(() => {
-        if (blocks.length > 0) {
-            const currentMax = Math.max(...blocks.map(b => b.zIndex || 10))
-            setMaxZ(prev => Math.max(prev, currentMax))
-        }
-    }, [blocks])
+    const bringToFront = useCallback((id: string) => {
+        onUpdateBlock(id, { zIndex: maxZ + 1 })
+    }, [maxZ, onUpdateBlock])
 
-    const bringToFront = (id: string) => {
-        const newZ = maxZ + 1
-        setMaxZ(newZ)
-        onUpdateBlock(id, { zIndex: newZ })
-    }
-
-    const sendToBack = (id: string) => {
+    const sendToBack = useCallback((id: string) => {
         const minZ = Math.min(...blocks.map(b => b.zIndex || 10))
-        const newZ = Math.max(10, minZ - 1)
-        onUpdateBlock(id, { zIndex: newZ })
-    }
+        onUpdateBlock(id, { zIndex: Math.max(1, minZ - 1) })
+    }, [blocks, onUpdateBlock])
 
-    const bringForward = (id: string) => {
+    const bringForward = useCallback((id: string) => {
         const currentBlock = blocks.find(b => b.id === id)
         if (!currentBlock) return
         const currentZ = currentBlock.zIndex || 0
@@ -230,20 +212,19 @@ export function MoodCanvas({
         } else {
             bringToFront(id)
         }
-    }
+    }, [blocks, bringToFront, onUpdateBlock])
 
-    const sendBackward = (id: string) => {
+    const sendBackward = useCallback((id: string) => {
         const currentBlock = blocks.find(b => b.id === id)
         if (!currentBlock) return
         const currentZ = currentBlock.zIndex || 0
-        const below = blocks.filter(b => (b.zIndex || 0) < currentZ).sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+        const below = blocks.filter(b => (b.zIndex || 0) < currentZ).sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0))
         if (below.length > 0) {
-            const targetZ = (below[0].zIndex || 10) - 1
-            onUpdateBlock(id, { zIndex: Math.max(10, targetZ) })
+            onUpdateBlock(id, { zIndex: Math.max(1, (below[0].zIndex || 10) - 1) })
         } else {
             sendToBack(id)
         }
-    }
+    }, [blocks, sendToBack, onUpdateBlock])
 
     const handleMultiMove = useCallback((dx: number, dy: number) => {
         if (selectedIds.length <= 1) return;
@@ -265,11 +246,13 @@ export function MoodCanvas({
         selectedIds,
         setSelectedIds,
         onUpdateBlock,
-        setBlockToDelete,
+        removeBlocks,
         duplicateMoodBlock,
         bringToFront,
         sendToBack,
-        blocks
+        blocks,
+        undo,
+        redo
     })
 
     return (
@@ -301,13 +284,10 @@ export function MoodCanvas({
                 />
             )}
 
-            {/* 🏰 SCREEN SPACE ENVIRONMENT */}
-            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                <RoomEnvironment
-                    profile={profile}
-                    backgroundEffect={backgroundEffect}
-                />
-            </div>
+            {/* Room Environment Effects */}
+            {backgroundEffect !== 'none' && (
+                <RoomEnvironment profile={profile} backgroundEffect={backgroundEffect} />
+            )}
 
             {/* 📸 CAMERA CONTEXT (ZOOM & PAN) */}
             <motion.div
@@ -344,7 +324,7 @@ export function MoodCanvas({
                                 onUpdate={(updates) => onUpdateBlock(block.id, updates)}
                                 profile={profile}
                                 themeConfig={themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.dark}
-                                onDeleteRequest={(id) => setBlockToDelete(id)}
+                                onDeleteRequest={(id) => removeBlocks([id])}
                                 blocks={blocks}
                                 setGuidelines={setVisualFeedback}
                                 onContextMenu={(e) => {
@@ -376,54 +356,33 @@ export function MoodCanvas({
                                 />
                             ))}
 
-                            {visualFeedback.distances.map((d, i) => {
-                                const rect = canvasRef.current?.getBoundingClientRect();
-                                if (!rect) return null;
-                                const w = rect.width;
-                                const h = rect.height;
-
-                                const getPx = (p: number, axis: 'x' | 'y') => {
-                                    const size = axis === 'x' ? w : h;
-                                    const boardPos = (p / 100) * size;
-                                    return axis === 'x'
-                                        ? rect.left + (w / 2) + zoom * (boardPos - (w / 2))
-                                        : rect.top + (h / 2) + zoom * (boardPos - (h / 2));
-                                }
-
-                                const centerPx = d.type === 'vertical' ? getPx(d.pos, 'x') : getPx(d.pos, 'y');
-                                const startPx = d.type === 'vertical' ? getPx(d.start, 'y') : getPx(d.start, 'x');
-                                const endPx = d.type === 'vertical' ? getPx(d.end, 'y') : getPx(d.end, 'x');
-
-                                return (
-                                    <motion.div
-                                        key={`d-${i}`}
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.8 }}
-                                        className="fixed pointer-events-none z-[1999] flex items-center justify-center overflow-visible"
-                                        style={{
-                                            left: d.type === 'vertical' ? centerPx - 0.5 : startPx,
-                                            top: d.type === 'vertical' ? startPx : centerPx - 0.5,
-                                            width: d.type === 'vertical' ? 1 : endPx - startPx,
-                                            height: d.type === 'vertical' ? endPx - startPx : 1,
-                                            backgroundColor: 'rgba(59, 130, 246, 0.4)'
-                                        }}
-                                    >
-                                        <div className={cn(
-                                            "absolute bg-blue-600 text-white text-[8px] px-1 py-0.5 font-black rounded-none shadow-sm whitespace-nowrap",
-                                            d.type === 'vertical' ? "left-3" : "-top-5"
-                                        )}>
-                                            {d.label}
-                                        </div>
-                                    </motion.div>
-                                )
-                            })}
+                            {visualFeedback.distances.map((d, i) => (
+                                <motion.div
+                                    key={`d-${i}`}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    className="absolute pointer-events-none z-[1999] flex items-center justify-center overflow-visible"
+                                    style={{
+                                        left: d.type === 'vertical' ? `${d.pos}%` : `${d.start}%`,
+                                        top: d.type === 'vertical' ? `${d.start}%` : `${d.pos}%`,
+                                        width: d.type === 'vertical' ? 1 : `${d.end - d.start}%`,
+                                        height: d.type === 'vertical' ? `${d.end - d.start}%` : 1,
+                                        backgroundColor: 'rgba(59, 130, 246, 0.4)'
+                                    }}
+                                >
+                                    <div className={cn(
+                                        "absolute bg-blue-600 text-white text-[8px] px-1 py-0.5 font-black rounded-none shadow-sm whitespace-nowrap",
+                                        d.type === 'vertical' ? "left-3" : "-top-5"
+                                    )}>
+                                        {d.label}
+                                    </div>
+                                </motion.div>
+                            ))}
                         </AnimatePresence>
                     </BoardStage>
                 </motion.div>
             </motion.div>
-
-            <StressTestButton onSpawn={(many: any[]) => { many.forEach((b: any) => onUpdateBlock(b.id, b)) }} />
 
             {contextMenu && (
                 <CanvasContextMenu
@@ -438,24 +397,6 @@ export function MoodCanvas({
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-none bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm border border-black/10 dark:border-white/10 text-[9px] font-black tracking-[0.5em] uppercase text-zinc-400">
                 {t('canvas.creativity_domain')}
             </div>
-
-            <ConfirmModal
-                isOpen={!!blockToDelete}
-                onClose={() => setBlockToDelete(null)}
-                onConfirm={async () => {
-                    if (blockToDelete) {
-                        setIsDeleting(true)
-                        await deleteMoodBlock(blockToDelete)
-                        setIsDeleting(false)
-                        setBlockToDelete(null)
-                    }
-                }}
-                title={t('canvas.delete_modal_title')}
-                message={t('canvas.delete_modal_message')}
-                confirmText={t('canvas.delete_modal_confirm')}
-                type="danger"
-                isLoading={isDeleting}
-            />
         </div>
     )
 }

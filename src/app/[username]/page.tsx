@@ -26,12 +26,35 @@ export async function generateMetadata({
     if (!user) return { title: "Usuário não encontrado | MoodSpace" };
 
     const title = user.isVerified
-        ? `${user.name || user.username} ✓ (@${user.username}) | MoodSpace`
-        : `${user.name || user.username} (@${user.username}) | MoodSpace`;
+        ? `${user.name || user.username} ✓ (@${user.username})`
+        : `${user.name || user.username} (@${user.username})`;
+
+    const description = `Confira o espaço criativo de @${user.username} no MoodSpace. Aesthetic moods, music & GIFs.`;
 
     return {
         title,
-        description: `Confira o espaço criativo de @${user.username} no MoodSpace. Aesthetic moods, music & GIFs.`,
+        description,
+        openGraph: {
+            title,
+            description,
+            type: "profile",
+            username: user.username,
+            images: [
+                {
+                    url: `/${user.username}/opengraph-image`,
+                    width: 1200,
+                    height: 630,
+                    alt: `${user.username}'s MoodSpace`,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [`/${user.username}/opengraph-image`],
+        },
+        themeColor: "#000000", // Pode ser extendido para usar as cores do perfil se desejar
     };
 }
 

@@ -46,6 +46,8 @@ const STYLES = [
     { id: 'aura', label: 'aura' }
 ]
 
+import { MoodBlock, SocialContent } from "@/types/database"
+
 export function SocialLinksEditor({
     block,
     onUpdate,
@@ -53,9 +55,9 @@ export function SocialLinksEditor({
     onClose,
     highlight
 }: {
-    block?: any,
-    onUpdate?: (id: string, content: any) => void,
-    onAdd?: (content: any) => Promise<void>,
+    block?: MoodBlock | null,
+    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void,
+    onAdd?: (content: SocialContent) => Promise<void>,
     onClose?: () => void,
     highlight?: boolean
 }) {
@@ -72,15 +74,16 @@ export function SocialLinksEditor({
     // 1. Sync with selected block
     useEffect(() => {
         if (block && block.type === 'social') {
-            const platformId = (block.content as any).platform
+            const content = block.content as SocialContent
+            const platformId = content.platform
             const platform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0]
             setSelectedPlatform(platform)
-            setUrl((block.content as any).url || "")
-            setLabel((block.content as any).label || "")
-            setSubLabel((block.content as any).subLabel || "")
-            setStyle((block.content as any).style || 'tag')
-            setIsGrid(!!(block.content as any).isGrid)
-            setShowBg((block.content as any).showBg !== false)
+            setUrl(content.url || "")
+            setLabel(content.label || "")
+            setSubLabel(content.subLabel || "")
+            setStyle(content.style || 'tag')
+            setIsGrid(!!content.isGrid)
+            setShowBg(content.showBg !== false)
         }
     }, [block?.id])
 

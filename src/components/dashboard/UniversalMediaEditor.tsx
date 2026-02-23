@@ -15,9 +15,11 @@ import { useTranslation } from "@/i18n/context"
 import { FrameType, FrameContainer } from "./FrameContainer"
 import { SmartMedia, MediaType } from "./SmartMedia"
 
+import { MoodBlock, MoodBlockContent } from "@/types/database"
+
 interface UniversalMediaEditorProps {
-    block?: any
-    onUpdate?: (id: string, updates: any) => void
+    block?: MoodBlock | null
+    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
     onAdd?: (type: string, content: any) => Promise<void>
     onClose?: () => void
 }

@@ -23,7 +23,23 @@ export type MoodBlockType =
     | 'quote'
     | 'photo'
     | 'moodStatus'
-    | 'countdown';
+    | 'countdown'
+    | 'rorschach'; // Future block placeholder
+
+export type MoodBlockContent =
+    | TextContent
+    | PhotoContent
+    | VideoContent
+    | MusicContent
+    | SocialContent
+    | CountdownContent
+    | GuestbookContent
+    | MoodStatusContent
+    | WeatherContent
+    | { mediaType: 'video' | 'music' | 'media'; videoId?: string; trackId?: string; frame?: string; caption?: string;[key: string]: any } // Catch-all for unified media
+    | { image: string;[key: string]: any } // Doodle
+    | { color: string; pattern?: string;[key: string]: any } // Tape
+    | any;
 
 export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content'> {
     type: string; // Prisma stores as string, but we can narrow it down in UI
@@ -31,7 +47,7 @@ export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content
     rotation: number;
     isLocked: boolean;
     isHidden: boolean;
-    content: any;
+    content: MoodBlockContent;
 }
 
 
@@ -48,7 +64,7 @@ export interface TextContent {
 export interface PhotoContent {
     imageUrl: string;
     caption?: string;
-    frame?: 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round';
+    frame?: 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'border' | 'shadow' | 'glass';
     filter?: 'none' | 'vintage' | 'bw' | 'warm' | 'cool';
     alt?: string;
 }
@@ -135,7 +151,10 @@ export interface SocialContent {
     platform: string;
     url: string;
     label?: string;
-    style?: 'tag' | 'glass' | 'minimal' | 'neon';
+    subLabel?: string;
+    style?: string;
+    isGrid?: boolean;
+    showBg?: boolean;
 }
 
 export interface CountdownContent {

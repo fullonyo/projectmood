@@ -21,19 +21,21 @@ const ICONS = [
 
 import { addMoodBlock } from "@/actions/profile"
 
+import { MoodBlock, CountdownContent } from "@/types/database"
+
 interface CountdownEditorProps {
-    block?: any
-    onUpdate?: (id: string, content: any) => void
-    onAdd?: (content: any) => Promise<void>
+    block?: MoodBlock | null
+    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
+    onAdd?: (content: CountdownContent) => Promise<void>
     onClose?: () => void
 }
 
 export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
-    const [title, setTitle] = useState(defaultContent.title || "")
+    const [label, setLabel] = useState(defaultContent.label || "")
     const [targetDate, setTargetDate] = useState(defaultContent.targetDate || "")
-    const [selectedIcon, setSelectedIcon] = useState(defaultContent.emoji || "PartyPopper")
+    const [selectedIcon, setSelectedIcon] = useState(defaultContent.icon || "PartyPopper")
     const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>(defaultContent.style || 'minimal')
     const [isPending, setIsPending] = useState(false)
 
@@ -41,24 +43,24 @@ export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEd
     useEffect(() => {
         if (!block?.id || !onUpdate) return
 
-        const content = {
-            title: title.trim(),
+        const content: CountdownContent = {
+            label: label.trim(),
             targetDate,
-            emoji: selectedIcon,
+            icon: selectedIcon,
             style
         }
 
         onUpdate(block.id, { content })
-    }, [title, targetDate, selectedIcon, style, block?.id])
+    }, [label, targetDate, selectedIcon, style, block?.id])
 
     const handleAdd = async () => {
-        if ((!title.trim() || !targetDate) && !block?.id) return
+        if ((!label.trim() || !targetDate) && !block?.id) return
 
         setIsPending(true)
-        const content = {
-            title: title.trim(),
+        const content: CountdownContent = {
+            label: label.trim(),
             targetDate,
-            emoji: selectedIcon, // Mantendo o nome da prop por compatibilidade
+            icon: selectedIcon,
             style
         }
 
@@ -66,7 +68,7 @@ export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEd
             if (onClose) onClose()
         } else if (onAdd) {
             await onAdd(content)
-            setTitle("")
+            setLabel("")
             setTargetDate("")
             setSelectedIcon("PartyPopper")
             setStyle('minimal')
@@ -88,14 +90,14 @@ export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEd
                     <div className="space-y-3">
                         <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.countdown.label')}</Label>
                         <Input
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            value={label}
+                            onChange={(e) => setLabel(e.target.value)}
                             placeholder={t('editors.countdown.placeholder')}
                             maxLength={50}
                             className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none h-12 text-[10px] uppercase font-mono tracking-tight focus-visible:ring-0"
                         />
                         <div className="flex justify-between items-center px-1">
-                            <span className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">{title.length} // 50</span>
+                            <span className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">{label.length} // 50</span>
                         </div>
                     </div>
 
@@ -157,7 +159,7 @@ export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEd
 
                     <Button
                         onClick={handleAdd}
-                        disabled={isPending || ((!title.trim() || !targetDate) && !block?.id)}
+                        disabled={isPending || ((!label.trim() || !targetDate) && !block?.id)}
                         className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
                     >
                         {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.countdown.deploy'))}

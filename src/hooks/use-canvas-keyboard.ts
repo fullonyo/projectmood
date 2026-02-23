@@ -5,25 +5,32 @@ interface UseCanvasKeyboardProps {
     selectedIds: string[];
     setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void;
     onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void;
-    setBlockToDelete: (id: string | null) => void;
+    removeBlocks: (ids: string[]) => void;
     duplicateMoodBlock: (id: string) => void;
     bringToFront: (id: string) => void;
     sendToBack: (id: string) => void;
     blocks: MoodBlock[];
+    undo: () => void;
+    redo: () => void;
 }
 
 export function useCanvasKeyboard({
     selectedIds,
     setSelectedIds,
     onUpdateBlock,
-    setBlockToDelete,
+    removeBlocks,
     duplicateMoodBlock,
     bringToFront,
     sendToBack,
-    blocks
+    blocks,
+    undo,
+    redo
 }: UseCanvasKeyboardProps) {
     const blocksRef = useRef(blocks);
-    blocksRef.current = blocks;
+
+    useEffect(() => {
+        blocksRef.current = blocks;
+    }, [blocks]);
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (selectedIds.length === 0) return;
@@ -72,9 +79,10 @@ export function useCanvasKeyboard({
             case 'Delete':
             case 'Backspace':
                 e.preventDefault();
-                selectedBlocks.forEach(b => {
-                    if (!b.isLocked) setBlockToDelete(b.id);
-                });
+                const idsToDelete = selectedBlocks.filter(b => !b.isLocked).map(b => b.id);
+                if (idsToDelete.length > 0) {
+                    removeBlocks(idsToDelete);
+                }
                 break;
             case 'Escape':
                 e.preventDefault();
@@ -100,9 +108,22 @@ export function useCanvasKeyboard({
                     if (!b.isLocked) bringToFront(b.id);
                 });
                 break;
+            case 'z':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (e.shiftKey) redo();
+                    else undo();
+                }
+                break;
+            case 'y':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    redo();
+                }
+                break;
         }
 
-    }, [selectedIds, onUpdateBlock, setBlockToDelete, duplicateMoodBlock, bringToFront, sendToBack, setSelectedIds]);
+    }, [selectedIds, onUpdateBlock, removeBlocks, duplicateMoodBlock, bringToFront, sendToBack, setSelectedIds, undo, redo]);
 
 
     useEffect(() => {

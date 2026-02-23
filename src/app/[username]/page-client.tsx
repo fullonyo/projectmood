@@ -14,7 +14,7 @@ import { RoomEnvironment } from "@/components/dashboard/room-environment"
 import { CustomCursor } from "@/components/effects/custom-cursor"
 import { MouseTrails } from "@/components/effects/mouse-trails"
 import { Lightbulb, LightbulbOff } from "lucide-react"
-import type { PublicMoodPageProps } from "@/types/database"
+import type { PublicMoodPageProps, MoodBlock } from "@/types/database"
 
 export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlocks, config, theme, isGuest }: PublicMoodPageProps) {
     const [isFocusMode, setIsFocusMode] = useState(false)
@@ -67,7 +67,7 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                 <ProfileSignature
                     username={publicUser.username}
                     name={publicUser.name || undefined}
-                    avatarUrl={profile.avatarUrl}
+                    avatarUrl={profile.avatarUrl || undefined}
                     isVerified={publicUser.isVerified}
                     verificationType={publicUser.verificationType}
                 />
@@ -99,15 +99,15 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
             {/* The Canvas Reality - Scrollable on mobile, fixed on desktop */}
             <main className="relative w-full h-full overflow-y-auto sm:overflow-hidden">
                 <BoardStage>
-                    {moodBlocks.map((block: any) => (
+                    {moodBlocks.map((block: MoodBlock) => (
                         <div
                             key={block.id}
                             className="absolute select-none pointer-events-auto"
                             style={{
                                 left: `${block.x}%`,
                                 top: `${block.y}%`,
-                                width: scaleBlockSize(block.width, viewportScale, getBlockFallbackSize(block.type)),
-                                height: scaleBlockSize(block.height, viewportScale, getBlockFallbackSize(block.type)),
+                                width: scaleBlockSize(block.width, viewportScale, block.type, 'w'),
+                                height: scaleBlockSize(block.height, viewportScale, block.type, 'h'),
                                 rotate: block.rotation ? `${block.rotation}deg` : undefined,
                                 zIndex: block.zIndex || 1,
                             }}

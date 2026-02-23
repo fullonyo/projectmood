@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
-import { revalidatePath, revalidateTag } from "next/cache"
+import { revalidatePath } from "next/cache"
 
 /**
  * Sistema de Publicação — Vercel Deployments Pattern
@@ -100,7 +100,6 @@ export async function publishProfile() {
         // 6. Invalidar cache APENAS da página pública
         if (username) {
             revalidatePath(`/${username}`)
-            revalidateTag(`profile:${username}`)
         }
 
         return { success: true, version: versionCount + 1 }
@@ -144,7 +143,6 @@ export async function rollbackToVersion(versionId: string) {
         // 3. Invalidar cache da página pública
         if (username) {
             revalidatePath(`/${username}`)
-            revalidateTag(`profile:${username}`)
         }
 
         return { success: true }

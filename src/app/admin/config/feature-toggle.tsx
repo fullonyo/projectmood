@@ -36,7 +36,7 @@ export function FeatureToggle({
                     <Switch
                         disabled={isPending}
                         checked={flag.isPremium}
-                        onCheckedChange={() => startTransition(() => toggleFeatureFlag(flag.key, "isPremium", flag.isPremium))}
+                        onCheckedChange={() => startTransition(async () => { await toggleFeatureFlag(flag.key, "isPremium", flag.isPremium) })}
                         className={`${flag.isPremium ? 'bg-amber-500' : 'bg-zinc-800'}`}
                     />
                 </div>
@@ -59,7 +59,7 @@ export function FeatureToggle({
                     <Switch
                         disabled={isPending}
                         checked={flag.isEnabled}
-                        onCheckedChange={() => startTransition(() => toggleFeatureFlag(flag.key, "isEnabled", flag.isEnabled))}
+                        onCheckedChange={() => startTransition(async () => { await toggleFeatureFlag(flag.key, "isEnabled", flag.isEnabled) })}
                         className={`${flag.isEnabled ? 'bg-emerald-500' : 'bg-red-500/50'}`}
                     />
                 </div>

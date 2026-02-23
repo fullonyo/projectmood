@@ -11,7 +11,8 @@ import {
     ChevronLeft,
     Box,
     Sparkles,
-    Loader2
+    Loader2,
+    Trash2
 } from "lucide-react"
 
 import { BlockLibrary } from "./block-library"
@@ -25,23 +26,25 @@ import { useTranslation } from "@/i18n/context"
 
 type TopLevelTab = 'elements' | 'layers' | 'room'
 
+import { MoodBlock, Profile } from "@/types/database"
+
 export function DashboardSidebar({
     profile,
     selectedBlocks,
     setSelectedIds,
     onUpdateBlock,
+    removeBlocks, // Added removeBlocks prop
     onUpdateProfile,
-    onDeleteRequest,
     blocks,
     systemFlags
 }: {
-    profile: any;
-    selectedBlocks: any[];
+    profile: Profile;
+    selectedBlocks: MoodBlock[];
     setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void;
-    onUpdateBlock: (id: string, content: any) => void;
-    onUpdateProfile: (data: any) => void;
-    onDeleteRequest: (id: string) => void;
-    blocks: any[];
+    onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void;
+    removeBlocks: (ids: string[]) => void;
+    onUpdateProfile: (data: Partial<Profile>) => void;
+    blocks: MoodBlock[];
     systemFlags?: Record<string, boolean>;
     onNormalize?: () => void;
 }) {
@@ -87,15 +90,29 @@ export function DashboardSidebar({
                         <h1 className="text-2xl font-black tracking-tighter uppercase italic">{t('sidebar.header_title')}</h1>
                     </div>
                     {selectedBlocks.length > 0 && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedIds([])}
-                            className="h-7 px-3 text-[8px] font-black uppercase tracking-widest border-black dark:border-white rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
-                        >
-                            <Plus className="w-3 h-3 mr-1 rotate-45" />
-                            {t('sidebar.discard_changes')}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedIds([])}
+                                className="h-7 px-3 text-[8px] font-black uppercase tracking-widest border-black dark:border-white rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+                            >
+                                <Plus className="w-3 h-3 mr-1 rotate-45" />
+                                {t('sidebar.discard_changes')} (Esc)
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    removeBlocks(selectedBlocks.map(b => b.id))
+                                    setSelectedIds([])
+                                }}
+                                className="h-7 px-3 text-[8px] font-black uppercase tracking-widest rounded-none text-red-500 border-red-500 hover:bg-red-500 hover:text-white dark:border-red-900 dark:hover:bg-red-900"
+                            >
+                                <Trash2 className="w-3 h-3 mr-1" />
+                                {t('sidebar.delete_selected')} (Del)
+                            </Button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -146,7 +163,7 @@ export function DashboardSidebar({
                         selectedIds={selectedBlocks.map(b => b.id)}
                         setSelectedIds={setSelectedIds}
                         onUpdateBlock={onUpdateBlock}
-                        onDeleteRequest={(id) => onDeleteRequest(id)}
+                        onDeleteRequest={(id) => removeBlocks([id])}
                     />
                 )}
 

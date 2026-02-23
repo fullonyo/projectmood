@@ -20,8 +20,41 @@ const geistMono = Geist_Mono({
 });
 //teste
 export const metadata: Metadata = {
-  title: "MoodSpace | Seu espaço, seu mood",
-  description: "Crie e compartilhe seu mural pessoal estético e imersivo.",
+  title: {
+    default: "MoodSpace | Seu espaço, seu mood",
+    template: "%s | MoodSpace"
+  },
+  description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, music & GIFs.",
+  keywords: ["moodboard", "aesthetic", "creative space", "personal profile", "moodspace"],
+  authors: [{ name: "MoodSpace Team" }],
+  creator: "MoodSpace",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://moodproject.vercel.app", // Fallback URL
+    siteName: "MoodSpace",
+    title: "MoodSpace | Seu espaço, seu mood",
+    description: "Crie e compartilhe seu mural pessoal estético e imersivo.",
+    images: [
+      {
+        url: "/og-base.png", // Imagem base caso não tenha uma dinâmica
+        width: 1200,
+        height: 630,
+        alt: "MoodSpace",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MoodSpace | Seu espaço, seu mood",
+    description: "Crie e compartilhe seu mural pessoal estético e imersivo.",
+    images: ["/og-base.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

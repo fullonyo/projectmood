@@ -56,19 +56,23 @@ const COLORS = [
     { name: 'Red', value: '#ff0000' },
 ]
 
+import { MoodBlock, TextContent } from "@/types/database"
+
+interface UniversalTextEditorProps {
+    block?: MoodBlock | null
+    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
+    onAdd?: (type: string, content: TextContent) => Promise<void>
+    onClose?: () => void
+    highlight?: boolean
+}
+
 export function UniversalTextEditor({
     block,
     onUpdate,
     onAdd,
     onClose,
     highlight
-}: {
-    block?: any,
-    onUpdate?: (id: string, content: any) => void,
-    onAdd?: (type: string, content: any) => Promise<void>,
-    onClose?: () => void,
-    highlight?: boolean
-}) {
+}: UniversalTextEditorProps) {
     const { t } = useTranslation()
     const content = block?.content || {}
 

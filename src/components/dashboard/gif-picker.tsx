@@ -8,10 +8,12 @@ import { Search, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
+import { MoodBlock } from "@/types/database"
+
 export function GifPicker({ highlight }: { highlight?: boolean }) {
     const { t } = useTranslation()
     const [query, setQuery] = useState("")
-    const [gifs, setGifs] = useState<any[]>([])
+    const [gifs, setGifs] = useState<{ id: string, url: string, title: string }[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [isAdding, startTransition] = useTransition()
 

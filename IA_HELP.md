@@ -60,5 +60,11 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **CI/CD (GitHub Actions)**: Deploy automático via SSH. O pipeline realiza `git pull`, rebuild de containers e migrações Prisma (`db push`) automaticamente ao dar push na branch `main`.
 - **Reverse Proxy**: Recomendado uso de Nginx no host da EC2 para SSL (Certbot) e encaminhamento para a porta 3000.
 
+### Blindagem Técnica & Hardening (React 19 / Next.js 15)
+- **Geometria Desacoplada**: A renderização de réguas e guias no Canvas deve usar **coordenadas 100% baseadas em porcentagem**. NUNCA acesse `.getBoundingClientRect()` ou propriedades de Refs durante o ciclo de renderização (React Ref Anti-pattern).
+- **Derivação de Estado (maxZ)**: O índice `maxZ` para ordenação de blocos deve ser derivado via `useMemo` a partir da lista de blocos, evitando estados sincronizados em `useEffect` que causam renderizações em cascata.
+- **Tipagem de Estilos Customizados**: Use a interface `CustomTextureStyle` (estendendo `React.CSSProperties`) para gerenciar variáveis CSS dinâmicas (ex.: `--room-texture-*`) sem recorrer ao tipo `any`.
+- **Sanitização de Actions**: Server Actions devem receber dados limpos (substituindo `null` por `undefined` onde necessário) para evitar conflitos entre as tipagens do Prisma e os schemas de validação Zod.
+
 ---
-*Documentação atualizada por Antigravity em 22/02/2026. Identidade MoodSpace consolidada.*
+*Documentação atualizada por Antigravity em 22/02/2026. Canvas blindado e pronto para escala.*

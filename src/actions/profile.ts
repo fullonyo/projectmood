@@ -140,6 +140,23 @@ export async function deleteMoodBlock(blockId: string) {
     }
 }
 
+export async function restoreMoodBlock(blockId: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { error: "Não autorizado" };
+
+    try {
+        await prisma.moodBlock.update({
+            where: { id: blockId, userId: session.user.id },
+            data: { deletedAt: null }
+        });
+        // We don't revalidate immediately to avoid blocking optimistic UI
+        return { success: true };
+    } catch (error) {
+        console.error('[restoreMoodBlock]', error);
+        return { error: "Erro ao restaurar bloco" };
+    }
+}
+
 export async function duplicateMoodBlock(blockId: string) {
     const session = await auth();
     if (!session?.user?.id) return { error: "Não autorizado" };

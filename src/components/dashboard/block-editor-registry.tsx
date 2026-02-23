@@ -10,9 +10,11 @@ import { ArtTools } from "./art-tools"
 import { DoodlePad } from "./doodle-pad"
 import { CountdownEditor } from "./countdown-editor"
 import { addMoodBlock } from "@/actions/profile"
+import { MoodBlock } from "@/types/database"
+import { getInitialBlockSize } from "@/lib/canvas-scale"
 
 interface BlockEditorRegistryProps {
-    selectedBlock: any | null;
+    selectedBlock: MoodBlock | null;
     draftBlockType: string | null;
     onUpdateBlock: (id: string, content: any) => void;
     onClose: () => void;
@@ -28,29 +30,31 @@ export function BlockEditorRegistry({
 }: BlockEditorRegistryProps) {
     const activeType = selectedBlock?.type || draftBlockType || '';
 
+    // Helper to add block with centralized defaults
+    const handleAdd = async (type: string, content: any, typeOverride?: string) => {
+        const { width, height } = getInitialBlockSize(type);
+        const result = await addMoodBlock(typeOverride || type, content, { x: 40, y: 40, width, height });
+        if (result?.success) setDraftBlockType(null);
+    }
+
     if (['text', 'ticker', 'subtitle', 'floating', 'phrase', 'quote', 'moodStatus', 'mood-status'].includes(activeType)) {
         return (
             <UniversalTextEditor
                 key={selectedBlock?.id || 'draft-universal-text'}
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
-                onAdd={async (type: string, content: any) => {
-                    const result = await addMoodBlock('text', content, { x: 40, y: 40 })
-                    if (result?.success) setDraftBlockType(null)
-                }}
+                onAdd={(type, content) => handleAdd('text', content)}
                 onClose={onClose}
             />
         )
     }
 
     if (activeType === 'social') {
+        const socialBlock = selectedBlock || { content: {} } as MoodBlock;
         return (
             <SocialLinksEditor
-                block={selectedBlock || { content: {} } as any}
-                onUpdate={selectedBlock ? onUpdateBlock : async (_, content) => {
-                    const result = await addMoodBlock('social', content, { x: 40, y: 40, width: 150, height: 45 })
-                    if (result?.success) setDraftBlockType(null)
-                }}
+                block={socialBlock}
+                onUpdate={selectedBlock ? onUpdateBlock : (_, content) => handleAdd('social', content)}
                 onClose={onClose}
             />
         )
@@ -62,10 +66,7 @@ export function BlockEditorRegistry({
                 key={selectedBlock?.id || 'draft-universal-media'}
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
-                onAdd={async (type: string, content: any) => {
-                    const result = await addMoodBlock('media', content, { x: 40, y: 40, width: 320, height: 200 })
-                    if (result?.success) setDraftBlockType(null)
-                }}
+                onAdd={(type, content) => handleAdd('media', content)}
                 onClose={onClose}
             />
         )
@@ -77,10 +78,7 @@ export function BlockEditorRegistry({
                 key={selectedBlock?.id || 'draft-photo'}
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
-                onAdd={selectedBlock ? undefined : async (content) => {
-                    const result = await addMoodBlock('photo', content, { x: 40, y: 40, width: 300, height: 300 })
-                    if (result?.success) setDraftBlockType(null)
-                }}
+                onAdd={selectedBlock ? undefined : (content) => handleAdd('photo', content)}
                 onClose={onClose}
             />
         )
@@ -108,10 +106,7 @@ export function BlockEditorRegistry({
                 key={selectedBlock?.id || 'draft-countdown'}
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
-                onAdd={selectedBlock ? undefined : async (content) => {
-                    const result = await addMoodBlock('countdown', content, { x: 40, y: 40 })
-                    if (result?.success) setDraftBlockType(null)
-                }}
+                onAdd={selectedBlock ? undefined : (content) => handleAdd('countdown', content)}
                 onClose={onClose}
             />
         )

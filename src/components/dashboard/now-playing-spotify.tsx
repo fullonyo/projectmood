@@ -3,12 +3,19 @@
 import { useState, useEffect, useRef } from "react"
 import { Music2, Volume2, VolumeX, Pause, Play } from "lucide-react"
 
+interface SpotifyTrack {
+    name: string;
+    artist: string;
+    albumArt?: string;
+    previewUrl?: string;
+}
+
 interface NowPlayingSpotifyProps {
     userId: string
 }
 
 export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
-    const [track, setTrack] = useState<any>(null)
+    const [track, setTrack] = useState<SpotifyTrack | null>(null)
     const [loading, setLoading] = useState(true)
     const [isPlaying, setIsPlaying] = useState(false)
     const [isMuted, setIsMuted] = useState(false)
@@ -21,7 +28,7 @@ export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
                 const data = await res.json()
 
                 if (data.track) {
-                    setTrack((prev: any) => {
+                    setTrack((prev: SpotifyTrack | null) => {
                         if (prev?.name !== data.track.name) {
                             return data.track
                         }
@@ -50,7 +57,6 @@ export function NowPlayingSpotify({ userId }: NowPlayingSpotifyProps) {
                     setIsPlaying(true)
                     setIsMuted(false)
                 } catch (error) {
-                    console.log("Autoplay blocked (needs interaction):", error)
                     setIsPlaying(false)
                 }
             }

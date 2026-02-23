@@ -39,13 +39,13 @@ export function CanvasContextMenu({ x, y, block, onClose, onAction }: ContextMen
     }, [onClose])
 
     const items = [
-        { id: 'bring-to-front', label: t('canvas.layer_to_front'), icon: BringToFront },
+        { id: 'bring-to-front', label: t('canvas.layer_to_front'), icon: BringToFront, shortcut: ']' },
         { id: 'bring-forward', label: t('canvas.layer_forward'), icon: ArrowUp },
         { id: 'send-backward', label: t('canvas.layer_backward'), icon: ArrowDown },
-        { id: 'send-to-back', label: t('canvas.layer_to_back'), icon: SendToBack },
+        { id: 'send-to-back', label: t('canvas.layer_to_back'), icon: SendToBack, shortcut: '[' },
         { id: 'divider', type: 'divider' },
-        { id: 'duplicate', label: t('common.duplicate'), icon: Copy, disabled: block.isLocked },
-        { id: 'delete', label: t('common.delete'), icon: Trash2, variant: 'danger', disabled: block.isLocked },
+        { id: 'duplicate', label: t('common.duplicate'), icon: Copy, disabled: block.isLocked, shortcut: 'Ctrl+D' },
+        { id: 'delete', label: t('common.delete'), icon: Trash2, variant: 'danger', disabled: block.isLocked, shortcut: 'Del' },
     ]
 
 
@@ -79,7 +79,12 @@ export function CanvasContextMenu({ x, y, block, onClose, onAction }: ContextMen
                         )}
                     >
                         {item.icon && <item.icon className="w-3.5 h-3.5" />}
-                        {item.label}
+                        <span className="flex-1 text-left">{item.label}</span>
+                        {item.shortcut && (
+                            <span className="opacity-40 text-[8px] font-mono tracking-tighter">
+                                {item.shortcut}
+                            </span>
+                        )}
                     </button>
                 )
             })}

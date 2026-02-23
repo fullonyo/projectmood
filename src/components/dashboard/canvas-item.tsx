@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { Pencil, Lock, Move, MousePointer2, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
-import { useViewportScale } from "@/lib/canvas-scale"
+import { useViewportScale, scaleBlockSize } from "@/lib/canvas-scale"
 import { BlockRenderer } from "./block-renderer"
 import {
     calculateResize,
@@ -54,36 +54,14 @@ export function CanvasItem({
     const { t } = useTranslation()
     const viewportScale = useViewportScale()
 
-    // Fallback logic for dimensions
-    const getDefaultDimensions = (type: string) => {
-        switch (type) {
-            case 'text':
-            case 'quote':
-            case 'subtitle': return { w: 350, h: 150 };
-            case 'ticker': return { w: 400, h: 80 };
-            case 'music': return { w: 300, h: 120 };
-            case 'photo':
-            case 'video':
-            case 'guestbook': return { w: 300, h: 300 };
-            case 'moodStatus':
-            case 'weather': return { w: 300, h: 100 };
-            default: return { w: 250, h: 250 };
-        }
-    }
-
-    const getInitialDimension = (val: number | 'auto' | undefined | null, axis: 'w' | 'h', type: string) => {
-        if (typeof val === 'number') return val * viewportScale;
-        return getDefaultDimensions(type)[axis] * viewportScale;
-    }
-
     const unscaleValue = (v: number | 'auto') => typeof v === 'number' ? Math.round(v / viewportScale) : v
 
     // --- State & Motion Values ---
     const stateRef = useRef({
         x: block.x,
         y: block.y,
-        width: getInitialDimension(block.width, 'w', block.type),
-        height: getInitialDimension(block.height, 'h', block.type),
+        width: scaleBlockSize(block.width, viewportScale, block.type, 'w') as number,
+        height: scaleBlockSize(block.height, viewportScale, block.type, 'h') as number,
         rotation: block.rotation || 0,
         isInteracting: false,
         isInteractiveMode: false,
@@ -122,17 +100,17 @@ export function CanvasItem({
 
     useEffect(() => {
         if (!stateRef.current.isInteracting) {
-            const newW = getInitialDimension(block.width, 'w', block.type);
-            const newH = getInitialDimension(block.height, 'h', block.type);
+            const newW = scaleBlockSize(block.width, viewportScale, block.type, 'w') as number;
+            const newH = scaleBlockSize(block.height, viewportScale, block.type, 'h') as number;
             stateRef.current.x = block.x;
             stateRef.current.y = block.y;
-            stateRef.current.width = newW as number;
-            stateRef.current.height = newH as number;
+            stateRef.current.width = newW;
+            stateRef.current.height = newH;
             stateRef.current.rotation = block.rotation || 0;
             mvX.set(block.x);
             mvY.set(block.y);
-            mvW.set(newW as number);
-            mvH.set(newH as number);
+            mvW.set(newW);
+            mvH.set(newH);
             mvR.set(block.rotation || 0);
         }
     }, [block.x, block.y, block.width, block.height, block.rotation, viewportScale])
@@ -437,8 +415,8 @@ export function CanvasItem({
                                 <button
                                     onClick={() => onDeleteRequest(block.id)}
                                     className="p-1.5 hover:bg-red-500/10 hover:text-red-500 transition-colors text-zinc-600 dark:text-zinc-400 group/del"
-                                    title={t('common.delete')}
-                                    aria-label={t('common.delete')}
+                                    title={`${t('common.delete')} (Del)`}
+                                    aria-label={`${t('common.delete')} (Del)`}
                                 >
                                     <Trash2 className="w-4 h-4 group-hover/del:scale-110 transition-transform" />
                                 </button>

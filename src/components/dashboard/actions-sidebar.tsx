@@ -18,9 +18,11 @@ import { toast } from "sonner"
 import { getRelativeTime } from "@/lib/utils"
 import { VersionHistoryPanel } from "./version-history-panel"
 
+import { Profile } from "@/types/database"
+
 interface ActionsSidebarProps {
     username: string
-    profile: any
+    profile: Profile
     publishedAt?: Date | string | null
     hasUnpublishedChanges?: boolean
     isAdmin?: boolean
@@ -80,7 +82,7 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
         })
     }
 
-    const firstName = profile.name?.split(' ')[0] || username
+    const firstName = username
     const avatarSrc = profile.avatarUrl || `https://avatar.vercel.sh/${username}`
     // isDraft: true se há mudanças não publicadas OU se nunca publicou
     const isDraft = hasUnpublishedChanges ?? !publishedAt

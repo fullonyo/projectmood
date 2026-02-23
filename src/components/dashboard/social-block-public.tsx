@@ -11,7 +11,9 @@ import {
     SpotifyIcon, TwitchIcon, PinterestIcon
 } from "../icons"
 
-const ICONS: Record<string, any> = {
+type SocialIconType = React.ElementType;
+
+const ICONS: Record<string, SocialIconType> = {
     instagram: Instagram,
     twitter: Twitter,
     discord: DiscordIcon,

@@ -8,7 +8,15 @@ import { useTranslation } from "@/i18n/context"
 
 
 
-export function DoodlePad() {
+import { MoodBlock } from "@/types/database"
+
+interface DoodlePadProps {
+    block?: MoodBlock | null
+    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
+    onClose?: () => void
+}
+
+export function DoodlePad({ block, onUpdate, onClose }: DoodlePadProps) {
     const {
         isDrawingMode, setIsDrawingMode,
         brushColor, setBrushColor,
