@@ -15,11 +15,13 @@ import { CustomCursor } from "@/components/effects/custom-cursor"
 import { MouseTrails } from "@/components/effects/mouse-trails"
 import { Lightbulb, LightbulbOff } from "lucide-react"
 import type { PublicMoodPageProps, MoodBlock } from "@/types/database"
+import { ExperienceOverlay } from "@/components/dashboard/ExperienceOverlay"
 
 export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlocks, config, theme, isGuest }: PublicMoodPageProps) {
     const [isFocusMode, setIsFocusMode] = useState(false)
     const [views, setViews] = useState<number>(0)
     const [loadingViews, setLoadingViews] = useState(true)
+    const [hasInteracted, setHasInteracted] = useState(false)
 
     // 📌 Escala proporcional: fidelidade visual cross-resolution
     const viewportScale = useViewportScale()
@@ -53,6 +55,12 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
         <>
             <CustomCursor type={profile.customCursor || 'auto'} />
             <MouseTrails type={profile.mouseTrails || 'none'} />
+
+            <ExperienceOverlay
+                isVisible={!hasInteracted}
+                onEnter={() => setHasInteracted(true)}
+                username={publicUser.username}
+            />
 
             {/* 🏰 CONSOLIDATED ENVIRONMENT FOR PUBLIC PAGE */}
             <div className="fixed inset-0 z-0">
@@ -112,7 +120,7 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                                 zIndex: block.zIndex || 1,
                             }}
                         >
-                            <BlockRenderer block={block} isPublic={true} />
+                            <BlockRenderer block={block} isPublic={true} hasInteracted={hasInteracted} />
                         </div>
                     ))}
                 </BoardStage>

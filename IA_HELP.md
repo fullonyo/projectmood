@@ -55,6 +55,11 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
   - **Unificação de Catálogo**: Botões individuais de YouTube/Spotify foram consolidados no componente `media` unificado no `BlockLibrary`.
 - **Limpeza de Base**: 14 arquivos obsoletos (editores e blocos públicos individuais) foram removidos em favor desta arquitetura modular de texto e mídia.
 
+### Experiência Pública & Autoplay 🎬🔊
+- **Experience Overlay**: A página pública inicia com um overlay de Glassmorphism (`src/components/dashboard/ExperienceOverlay.tsx`).
+- **User Activation**: O clique no botão "Entrar" captura a interação necessária pelo navegador para permitir autoplay com som.
+- **Lógica de Mídia**: O estado `hasInteracted` é propagado do `page-client.tsx` até o `SmartMedia.tsx`, configurando `mute=0` no YouTube e tentando autoplay no Spotify após o desbloqueio.
+
 ### Infraestrutura & Deploy
 - **Docker Standalone**: Configuração otimizada para baixo consumo de recursos em instâncias AWS EC2.
 - **CI/CD (GitHub Actions)**: Deploy automático via SSH. O pipeline realiza `git pull`, rebuild de containers e migrações Prisma (`db push`) automaticamente ao dar push na branch `main`.
@@ -66,5 +71,13 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **Tipagem de Estilos Customizados**: Use a interface `CustomTextureStyle` (estendendo `React.CSSProperties`) para gerenciar variáveis CSS dinâmicas (ex.: `--room-texture-*`) sem recorrer ao tipo `any`.
 - **Sanitização de Actions**: Server Actions devem receber dados limpos (substituindo `null` por `undefined` onde necessário) para evitar conflitos entre as tipagens do Prisma e os schemas de validação Zod.
 
+### Administração & Moderação 🛡️
+- **Gestão de Roles**: O sistema utiliza um enum `Role` (`USER`, `CURATOR`, `MODERATOR`, `ADMIN`).
+- **Comando Manual (Emergência)**: Para conceder acesso administrativo via SSH:
+  ```bash
+  docker exec moodspace_db psql -U mood_admin -d moodspace_prod -c "UPDATE \"User\" SET role = 'ADMIN' WHERE username = 'Nyo';"
+  ```
+- **Auditoria**: Todas as ações administrativas são registradas na tabela `AuditLog`.
+
 ---
-*Documentação atualizada por Antigravity em 22/02/2026. Canvas blindado e pronto para escala.*
+*Documentação atualizada por Antigravity em 23/02/2026. Acesso administrativo concedido ao usuário Nyo conforme solicitado.*

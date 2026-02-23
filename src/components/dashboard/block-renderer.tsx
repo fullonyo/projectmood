@@ -34,17 +34,18 @@ import { BlockErrorBoundary } from "./block-error-boundary"
 interface BlockRendererProps {
     block: MoodBlock
     isPublic?: boolean
+    hasInteracted?: boolean
 }
 
-export function BlockRenderer({ block, isPublic = false }: BlockRendererProps) {
+export function BlockRenderer({ block, isPublic = false, hasInteracted = false }: BlockRendererProps) {
     return (
         <BlockErrorBoundary blockType={block.type}>
-            <BlockRendererInner block={block} isPublic={isPublic} />
+            <BlockRendererInner block={block} isPublic={isPublic} hasInteracted={hasInteracted} />
         </BlockErrorBoundary>
     );
 }
 
-function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
+function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: BlockRendererProps) {
     const { content } = block
     const scale = useViewportScale()
 
@@ -109,6 +110,7 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
                             videoId={content.videoId}
                             trackId={content.trackId}
                             isPublic={isPublic}
+                            hasInteracted={hasInteracted}
                         />
                     </FrameContainer>
                 )
@@ -122,6 +124,7 @@ function BlockRendererInner({ block, isPublic = false }: BlockRendererProps) {
                             videoId={content.videoId}
                             trackId={content.trackId}
                             isPublic={isPublic}
+                            hasInteracted={hasInteracted}
                         />
                     </FrameContainer>
                 )
