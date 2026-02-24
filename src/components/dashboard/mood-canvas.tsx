@@ -21,6 +21,7 @@ import {
 
 import { CanvasItem } from "./canvas-item"
 import { MoodBlock, Profile } from "@/types/database"
+import { TemplateChooser } from "./template-chooser"
 
 interface MoodCanvasProps {
     blocks: MoodBlock[]
@@ -266,6 +267,9 @@ export function MoodCanvas({
             onMouseUp={handleMouseUp}
             onMouseLeave={() => setSelectionRect(null)}
         >
+            {/* Template Chooser — Show if canvas is empty */}
+            {blocks.length === 0 && <TemplateChooser />}
+
             {/* Lasso Selection Rect */}
             {selectionRect && (
                 <div
@@ -284,10 +288,12 @@ export function MoodCanvas({
                 />
             )}
 
-            {/* Room Environment Effects */}
-            {backgroundEffect !== 'none' && (
-                <RoomEnvironment profile={profile} backgroundEffect={backgroundEffect} />
-            )}
+            {/* Room Environment Effects (Background, Textures, Atmosphere) */}
+            <RoomEnvironment
+                profile={profile}
+                backgroundEffect={backgroundEffect}
+                weatherSync={blocks.find(b => b.type === 'weather')?.content?.icon}
+            />
 
             {/* 📸 CAMERA CONTEXT (ZOOM & PAN) */}
             <motion.div
@@ -299,44 +305,61 @@ export function MoodCanvas({
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
             >
-                <motion.div className="w-full h-full relative">
+                <motion.div
+                    key={profile.theme} // Garante que a coreografia reinicie apenas na troca de Vibe
+                    className="w-full h-full relative"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                            opacity: 1,
+                            transition: {
+                                staggerChildren: 0.03,
+                                delayChildren: 0.05
+                            }
+                        }
+                    }}
+                >
                     <BoardStage>
-                        {blocks.map((block) => (
-                            <CanvasItem
-                                key={block.id}
-                                block={block}
-                                canvasRef={canvasRef}
-                                isSelected={selectedIds.includes(block.id)}
-                                onSelect={(toggle = false) => {
-                                    if (toggle) {
-                                        setSelectedIds(prev =>
-                                            prev.includes(block.id)
-                                                ? prev.filter(id => id !== block.id)
-                                                : [...prev, block.id]
-                                        )
-                                    } else {
-                                        // If already selected, don't clear others (to allow dragging group)
-                                        if (!selectedIds.includes(block.id)) {
-                                            setSelectedIds([block.id])
+                        <AnimatePresence mode="popLayout">
+                            {blocks.map((block) => (
+                                <CanvasItem
+                                    key={block.id}
+                                    block={block}
+                                    canvasRef={canvasRef}
+                                    isSelected={selectedIds.includes(block.id)}
+                                    onSelect={(toggle = false) => {
+                                        if (toggle) {
+                                            setSelectedIds(prev =>
+                                                prev.includes(block.id)
+                                                    ? prev.filter(id => id !== block.id)
+                                                    : [...prev, block.id]
+                                            )
+                                        } else {
+                                            // If already selected, don't clear others (to allow dragging group)
+                                            if (!selectedIds.includes(block.id)) {
+                                                setSelectedIds([block.id])
+                                            }
                                         }
-                                    }
-                                }}
-                                onUpdate={(updates) => onUpdateBlock(block.id, updates)}
-                                profile={profile}
-                                themeConfig={themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.dark}
-                                onDeleteRequest={(id) => removeBlocks([id])}
-                                blocks={blocks}
-                                setGuidelines={setVisualFeedback}
-                                onContextMenu={(e) => {
-                                    e.preventDefault()
-                                    setContextMenu({ x: e.clientX, y: e.clientY, blockId: block.id })
-                                    setSelectedIds([block.id])
-                                }}
-                                selectedIds={selectedIds}
-                                onMultiMove={handleMultiMove}
-                                onMultiMoveEnd={handleMultiMoveEnd}
-                            />
-                        ))}
+                                    }}
+                                    onUpdate={(updates) => onUpdateBlock(block.id, updates)}
+                                    profile={profile}
+                                    themeConfig={themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.dark}
+                                    onDeleteRequest={(id) => removeBlocks([id])}
+                                    blocks={blocks}
+                                    setGuidelines={setVisualFeedback}
+                                    onContextMenu={(e) => {
+                                        e.preventDefault()
+                                        setContextMenu({ x: e.clientX, y: e.clientY, blockId: block.id })
+                                        setSelectedIds([block.id])
+                                    }}
+                                    selectedIds={selectedIds}
+                                    onMultiMove={handleMultiMove}
+                                    onMultiMoveEnd={handleMultiMoveEnd}
+                                />
+                            ))}
+                        </AnimatePresence>
 
                         <AnimatePresence>
                             {visualFeedback.guidelines.map((g, i) => (

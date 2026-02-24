@@ -31,8 +31,16 @@ export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
         }
     }
 
+    if (!imageUrl || imageUrl.trim() === "") {
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 text-zinc-400">
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-20">No Image</div>
+            </div>
+        )
+    }
+
     return (
-        <div className="relative w-full h-full">
+        <div className="relative w-full h-full overflow-hidden">
             <Image
                 src={imageUrl}
                 alt={alt || "Mood photo"}

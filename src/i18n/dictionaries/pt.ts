@@ -12,6 +12,7 @@ export const pt = {
         duplicate: "Duplicar",
         enable_interaction: "Habilitar Interação",
         disable_interaction: "Desabilitar Interação",
+        select: "Selecionar",
     },
 
     sidebar: {
@@ -626,5 +627,34 @@ export const pt = {
         no_versions: "nenhuma versão",
         loading_history: "carregando...",
         history_error: "erro ao carregar histórico"
+    },
+    templates: {
+        chooser_title: "Qual é a sua vibe hoje?",
+        chooser_subtitle: "Escolha um template para começar ou crie do zero",
+        empty_state: "O seu mural está vazio",
+        items: {
+            focus: {
+                title: "Deep Work",
+                vibe: "Aurora • Spotify Lo-fi • Focus",
+                desc: "Estação de trabalho imersiva: cronômetro POMODORO, trilha sonora Lo-fi e links rápidos para produção."
+            },
+            scrapbook: {
+                title: "Scrapbook",
+                vibe: "Papel • Polaroid • Afeto",
+                desc: "O santuário das memórias: texturas táteis, fotos Polaroid e um mural coletivo para registrar afetos."
+            },
+            cyber: {
+                title: "Cyber Station",
+                vibe: "Grid • YouTube VHS • Neon",
+                desc: "Interface tech-noir: logs de rede em tempo real, ambientação Glitch de vídeo e curadoria neon."
+            },
+            zen: {
+                title: "Atmospheric Zen",
+                vibe: "Líquido • Kyoto • Fluidez",
+                desc: "Paz etérea: clima síncrono, meditação fluida e frases que flutuam para acalmar a mente."
+            }
+        },
+        applying: "Sintonizando Vibe...",
+        start_fresh: "Começar do Zero"
     }
 };

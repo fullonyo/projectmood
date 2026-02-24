@@ -40,9 +40,11 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **Adaptive Toolbar**: Ferramenta de ação que inverte sua posição (top/bottom) automaticamente se o bloco estiver muito próximo da borda superior, garantindo visibilidade total.
 - **WYSIWYG Garantido**: `page-client.tsx` aplica `width`/`height` nos blocos públicos, espelhando o editor.
 - **Persistência**: Hook `useCanvasManager` com epoch system + debounce 800ms. Sync bidirecional server ↔ local com feedback de erro resiliente.
-- **Padrão FUS (Fluid Unit Scaling) 💎📐**: Sistema de escala responsiva por área para blocos complexos (Weather, Countdown, Guestbook). 
-  - Ao invés de usar apenas o zoom do viewport, o sistema detecta as dimensões reais do container via `useStudioBlock`.
-  - Utiliza normalização baseada na raiz quadrada da área (`computeStudioNormalization`) para manter a densidade visual e evitar quebras em proporções extremas (muito largo ou muito fino).
+- **Coreografia Studio 3.1 🎭✨**:
+  - **Orquestração Blindada**: O `MoodCanvas` utiliza a chave `profile.theme` para disparar o `stagger` apenas em momentos críticos (troca de vibe/carregamento).
+  - **Staggered Blur (Fast)**: Entrada sequencial (stagger: 0.03s) com foco dinâmico (blur: 10px -> 0px) e escala (0.96 -> 1).
+  - **AnimatePresence & Layout**: Uso de `popLayout` e prop `layout` no `CanvasItem` para garantir que adições/remoções e mudanças de posição sejam fluidas e não re-trigguem a animação de entrada.
+  - **GPU Optimized**: Uso de `will-change: transform, opacity, filter` para preparar a GPU e manter 60fps estáveis.
 
 ### Arquitetura Universal de Blocos 🏛️💎
 - **Universal Architecture**: O sistema foi consolidado para eliminar redundâncias.
@@ -107,5 +109,19 @@ O Mural de Recados foi elevado para além do container tradicional, permitindo c
   - **Cloud (Floating)**: Mensagens sem bordas, apenas texto com glow sutil, flutuando organicamente.
 - **Micro-Aesthetics Engine**: O escalonamento FUS foi recalibrado em 15% para uma estética mais minimalista e arquitetural ("Small-tech"). Densidade e escala podem ser ajustadas via slider no editor.
 
+### Mood Templates 2.0 (Harmonic Vibes) 🎨🌪️✨
+Sistema para reduzir a paralisia do canvas vazio e inspirar novos usuários através de curadorias detalhadas.
+- **DNA Visual 2.0**: Templates agora são composições avançadas que incluem:
+    - **Base Atmosférica**: Combinações de `backgroundEffect`, `backgroundColor` e `theme`.
+    - **Textura & Grão**: Uso de `staticTexture` (`museum_paper`, `noise`, `fine_sand`) para profundidade tátil.
+    - **Auras Decorativas**: Uso de `SmartShapes` em camadas inferiores (opacidade baixa e blur alto) agindo como decoração de fundo.
+    - **Persistência Estendida**: Persiste não apenas blocos, mas também `customCursor` e `mouseTrails` específicos para cada vibe.
+- **Vibes Atuais**:
+    - **Deep Work**: Mono, Aurora, Timer Pomodoro.
+    - **Scrapbook**: Sépia, Textura de Papel, Formas Orgânicas (Blobs/Flowers).
+    - **Cyber Station**: Tech-Noir, Grid-Move, VHS, Pixel Trails.
+    - **Atmospheric Zen**: Lavanda, Liquid, Clima de Kyoto, Movimento Ethereal.
+- **Template Chooser**: UI automática renderizada no `MoodCanvas` quando `blocks.length === 0`. Inclui opção de "Start Fresh" para pular o onboarding.
+
 ---
-*Documentação atualizada por Antigravity em 24/02/2026. Acesso administrativo concedido ao usuário Nyo conforme solicitado. Guestbook Studio 3.0 (Além do Container) entregue.*
+*Documentação atualizada por Antigravity em 24/02/2026. Acesso administrativo concedido ao usuário Nyo conforme solicitado. Mood Templates 1.0 (Onboarding Criativo) entregue.*

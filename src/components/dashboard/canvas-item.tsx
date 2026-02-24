@@ -296,10 +296,40 @@ export const CanvasItem = memo(({
 
     return (
         <motion.div
+            layout // Suaviza mudanças de posição 
+            variants={{
+                hidden: {
+                    opacity: 0,
+                    scale: 0.96,
+                    filter: 'blur(10px)',
+                    y: 10
+                },
+                visible: {
+                    opacity: 1,
+                    scale: 1,
+                    filter: 'blur(0px)',
+                    y: 0,
+                    transition: {
+                        type: 'spring',
+                        damping: 20,
+                        stiffness: 150,
+                        opacity: { duration: 0.2 },
+                        filter: { duration: 0.3 }
+                    }
+                },
+                exit: {
+                    opacity: 0,
+                    scale: 0.92,
+                    filter: 'blur(8px)',
+                    transition: { duration: 0.2 }
+                }
+            }}
             onPanStart={handleDragStart}
             onPan={handleDragPan}
             onPanEnd={handleDragEnd}
+            exit="exit"
             style={{
+                willChange: 'transform, opacity, filter',
                 left: styleLeft, top: styleTop, width: mvW, height: mvH, rotate: mvR,
                 zIndex: isDragging || isSelected ? 999 : (block.zIndex || 10),
                 boxShadow: isSelected ? `0 0 0 2px ${themeConfig?.bg || '#000'}, 0 0 0 4px ${profile?.primaryColor || '#3b82f6'}` : 'none',

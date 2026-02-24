@@ -19,8 +19,15 @@ export function RoomEnvironment({ profile, backgroundEffect, weatherSync }: Room
     const textureStyles = getStaticTextureStyle(profile.staticTexture || 'none', resolvedPrimaryColor)
 
     // Detecção de clima para atmosfera automática (sutil)
-    const activeAtmosphere = backgroundEffect !== 'none' ? backgroundEffect : (weatherSync === 'rain' ? 'rain' : 'none')
-    const atmosphereOpacity = backgroundEffect === 'none' && weatherSync === 'rain' ? 'opacity-30' : 'opacity-100'
+    // Se não houver efeito de fundo, sintoniza com o clima detectado no canvas (chuva, neve, vento)
+    const weatherEffects = ['rain', 'snow', 'wind']
+    const activeAtmosphere = backgroundEffect !== 'none'
+        ? backgroundEffect
+        : (weatherSync && weatherEffects.includes(weatherSync) ? weatherSync : 'none')
+
+    const atmosphereOpacity = backgroundEffect === 'none' && weatherSync && weatherEffects.includes(weatherSync)
+        ? 'opacity-20' // Clima sutil se for automático
+        : 'opacity-100' // Opacidade total se for efeito escolhido
 
     return (
         <div

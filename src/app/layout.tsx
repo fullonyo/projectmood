@@ -69,7 +69,25 @@ export default function RootLayout({
       >
         <I18nProvider>
           {children}
-          <Toaster position="bottom-center" richColors theme="system" />
+          <Toaster
+            position="bottom-right"
+            theme="dark"
+            toastOptions={{
+              style: {
+                background: 'rgba(9, 9, 11, 0.95)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#ffffff',
+                borderRadius: '0px',
+                fontFamily: 'var(--font-geist-mono)',
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+              },
+              className: "font-mono",
+            }}
+          />
         </I18nProvider>
       </body>
     </html>

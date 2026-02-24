@@ -52,13 +52,18 @@ export function CanvasContextMenu({ x, y, block, onClose, onAction }: ContextMen
     return (
         <div
             ref={menuRef}
-            className="fixed z-[2000] w-48 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl p-1 animate-in fade-in zoom-in duration-150"
+            className="fixed z-[2000] w-48 bg-zinc-950/95 backdrop-blur-2xl border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.5)] p-1 animate-in fade-in zoom-in duration-150 rounded-none overflow-hidden"
             style={{ left: x, top: y }}
         >
+            {/* Subtle Scanning Detail */}
+            <div className="absolute left-0 right-0 h-[1px] bg-white/5 top-0 animate-[studio-scan_4s_linear_infinite] pointer-events-none" />
+
             {items.map((item, index) => {
                 if (item.type === 'divider') {
-                    return <div key={`divider-${index}`} className="my-1 border-t border-zinc-100 dark:border-zinc-900" />
+                    return <div key={`divider-${index}`} className="my-1 border-t border-white/5 mx-2" />
                 }
+
+                const Icon = item.icon
 
                 return (
                     <button
@@ -70,25 +75,29 @@ export function CanvasContextMenu({ x, y, block, onClose, onAction }: ContextMen
                             onClose()
                         }}
                         className={cn(
-                            "w-full flex items-center gap-3 px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors",
+                            "w-full flex items-center gap-3 px-3 py-2 text-[8px] font-black uppercase tracking-[0.2em] transition-all font-mono",
                             item.disabled
-                                ? "opacity-30 cursor-not-allowed text-zinc-400"
+                                ? "opacity-20 cursor-not-allowed text-white"
                                 : item.variant === 'danger'
-                                    ? "text-red-500 hover:bg-red-500/10"
-                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                                    ? "text-red-400 hover:bg-red-500/10 hover:text-red-500"
+                                    : "text-white/60 hover:bg-white/5 hover:text-white"
                         )}
                     >
-                        {item.icon && <item.icon className="w-3.5 h-3.5" />}
+                        {Icon && (
+                            <Icon className={cn(
+                                "w-3 h-3 transition-transform duration-300 group-hover:scale-110",
+                                item.variant === 'danger' ? "text-red-400/60" : "text-white/40"
+                            )} />
+                        )}
                         <span className="flex-1 text-left">{item.label}</span>
                         {item.shortcut && (
-                            <span className="opacity-40 text-[8px] font-mono tracking-tighter">
+                            <span className="opacity-30 text-[7px] font-mono tracking-tighter">
                                 {item.shortcut}
                             </span>
                         )}
                     </button>
                 )
             })}
-
         </div>
     )
 }

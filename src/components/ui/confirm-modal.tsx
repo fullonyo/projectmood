@@ -41,68 +41,81 @@ export function ConfirmModal({
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-                    {/* Backdrop */}
+                    {/* Backdrop — High Immersion Blur */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/70 backdrop-blur-[3px]"
+                        className="absolute inset-0 bg-black/80 backdrop-blur-xl"
                     />
 
-                    {/* Modal — Caixa Bruta */}
+                    {/* Modal — Studio Immersive Box */}
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 12 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="relative w-full max-w-[340px] bg-white dark:bg-zinc-950 border-2 border-black dark:border-white overflow-hidden"
+                        initial={{ opacity: 0, scale: 0.98, y: 8 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.98, y: 8 }}
+                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        className={cn(
+                            "relative w-full max-w-[340px] bg-zinc-950/90 backdrop-blur-2xl border rounded-none overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]",
+                            type === 'danger' ? "border-red-500/20" : "border-white/10"
+                        )}
                     >
-                        {/* Faixa superior de contexto (Danger / Info) */}
+                        {/* Background Texture */}
+                        <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay">
+                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                                <filter id="noiseFilterConfirm">
+                                    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+                                </filter>
+                                <rect width="100%" height="100%" filter="url(#noiseFilterConfirm)" />
+                            </svg>
+                        </div>
+
+                        {/* Top Indicator Strip - Extra Subtlety */}
                         <div className={cn(
-                            "h-1 w-full",
-                            type === 'danger' ? "bg-red-500" : "bg-black dark:bg-white"
+                            "h-[1px] w-full",
+                            type === 'danger' ? "bg-red-500/40" : "bg-white/10"
                         )} />
 
-                        {/* Botão Fechar */}
+                        {/* Close Toggle */}
                         <button
                             onClick={onClose}
-                            className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center border border-transparent hover:border-black dark:hover:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all text-zinc-400"
+                            className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center border border-white/5 hover:border-white/20 hover:bg-white/5 text-white/30 hover:text-white transition-all transition-all"
                         >
                             <X className="w-3.5 h-3.5" />
                         </button>
 
-                        <div className="flex flex-col items-center text-center px-8 py-8 space-y-5">
-                            {/* Ícone — Quadrado brutalist */}
+                        <div className="relative z-10 flex flex-col items-center text-center px-8 py-10 space-y-6">
+                            {/* Icon — Studio Geometric Shield */}
                             <div className={cn(
-                                "w-14 h-14 flex items-center justify-center border-2",
+                                "w-16 h-16 flex items-center justify-center border transition-colors duration-500",
                                 type === 'danger'
-                                    ? "border-red-500 text-red-500 bg-red-500/5"
-                                    : "border-black dark:border-white text-black dark:text-white bg-black/5 dark:bg-white/5"
+                                    ? "border-red-500/30 text-red-500 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.05)]"
+                                    : "border-white/10 text-white bg-white/5"
                             )}>
                                 {type === 'danger' ? <AlertTriangle className="w-7 h-7" /> : <Info className="w-7 h-7" />}
                             </div>
 
-                            {/* Texto */}
-                            <div className="space-y-2">
-                                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-900 dark:text-zinc-100">
+                            {/* Typography System */}
+                            <div className="space-y-3">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/90 font-mono">
                                     {title}
                                 </h3>
-                                <p className="text-[10px] uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                                <p className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-mono leading-relaxed px-2">
                                     {message}
                                 </p>
                             </div>
 
-                            {/* Ações */}
-                            <div className="flex flex-col w-full gap-2 pt-2">
+                            {/* Actions Group */}
+                            <div className="flex flex-col w-full gap-3 pt-4">
                                 <Button
                                     onClick={onConfirm}
                                     isLoading={isLoading}
                                     className={cn(
-                                        "w-full h-12 font-black uppercase tracking-[0.3em] text-[10px] border-2 hover:scale-[1.02] active:scale-95 transition-all",
+                                        "w-full h-11 font-black uppercase tracking-[0.4em] text-[9px] font-mono border rounded-none hover:translate-x-1 hover:-translate-y-1 transition-all shadow-[4px_4px_0_0_rgba(255,255,255,0.05)] active:shadow-none hover:shadow-none",
                                         type === 'danger'
-                                            ? "bg-red-500 hover:bg-red-600 text-white border-red-500"
-                                            : "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
+                                            ? "bg-red-500/80 hover:bg-red-500 text-white border-red-400/20"
+                                            : "bg-white text-black border-white"
                                     )}
                                 >
                                     {confirmText}
@@ -110,7 +123,7 @@ export function ConfirmModal({
                                 <button
                                     onClick={onClose}
                                     disabled={isLoading}
-                                    className="w-full h-10 text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 border border-transparent hover:border-black/10 dark:hover:border-white/10 transition-all"
+                                    className="w-full h-10 text-[8px] font-black uppercase tracking-[0.4em] text-white/30 hover:text-white font-mono hover:bg-white/5 transition-all"
                                 >
                                     {cancelText}
                                 </button>

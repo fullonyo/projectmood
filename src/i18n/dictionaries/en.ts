@@ -6,12 +6,13 @@ export const en: Dictionary = {
         cancel: "Cancel",
         close: "Close",
         confirm: "Confirm",
-        loading: "Loading...",
+        loading: "Processing...",
         items: "items",
         delete: "Delete",
         duplicate: "Duplicate",
         enable_interaction: "Enable Interaction",
         disable_interaction: "Disable Interaction",
+        select: "Select"
     },
 
     sidebar: {
@@ -26,7 +27,6 @@ export const en: Dictionary = {
             layers: "Layers",
             layers_desc: "Manage order and visibility",
         },
-
 
         style: {
             atmosphere_title: "Base atmosphere",
@@ -51,35 +51,36 @@ export const en: Dictionary = {
         },
         library: {
             title: "Catalog",
-            subtitle: "Drop elements in space",
+            subtitle: "Inject elements into space",
             items: {
                 text: { title: "Paper Note", desc: "Write loose thoughts" },
-                photo: { title: "Photograph", desc: "Stick images & photos" },
-                youtube: { title: "Video Tape", desc: "YouTube embed" },
+                photo: { title: "Photograph", desc: "Paste images and photos" },
+                youtube: { title: "Video Tape", desc: "Embed YouTube" },
                 spotify: { title: "Vinyl Record", desc: "Spotify Music" },
-                doodle: { title: "Draft", desc: "Freehand drawing" },
-                phrase: { title: "Marquee", desc: "Animated text" },
-                quote: { title: "Quote", desc: "Highlight statements" },
+                doodle: { title: "Sketch", desc: "Freehand drawing" },
+                phrase: { title: "Marquee", desc: "Text animation" },
+                quote: { title: "Quote", desc: "Highlight striking phrases" },
                 typography: { title: "Typography & Vibes", desc: "Notes, Marquees, Quotes and Status" },
-                countdown: { title: "Timer", desc: "Mark a date" },
+                countdown: { title: "Countdown", desc: "Mark a date" },
                 guestbook: { title: "Guestbook", desc: "Let others sign" },
                 moodStatus: { title: "Current State", desc: "How are you right now?" },
-                social: { title: "Portal Link", desc: "Take anywhere else" },
+                social: { title: "Jump Link", desc: "Take elsewhere" },
                 gif: { title: "Animation", desc: "GIF reactions (Giphy)" },
-                weather: { title: "Weather", desc: "How is the day outside?" },
+                weather: { title: "Weather", desc: "How's the day outside?" },
                 universal_media: { title: "Universal Media", desc: "YouTube & Spotify" },
-                media: { title: "Analog Record", desc: "Books and tapes" }
+                media: { title: "Analog Record", desc: "Books and works" },
+                shape: { title: "Artistic Shapes", desc: "Geometry and Blending" }
             },
             inspector_back: "Back to Elements",
-            more_coming: "More components coming soon"
+            more_coming: "More components soon"
         },
 
-        bottom_tip: "Click on the blocks on the wall to rotate or delete them",
+        bottom_tip: "Click on blocks to rotate or delete them",
     },
     modals: {
         clear_wall: {
             title: "Clear Wall?",
-            message: "This will erase all the memories drawn in this space. Are you ready for a fresh start?",
+            message: "This will erase all memories drawn in this space. Are you ready for a fresh start?",
             confirm_btn: "Yes, let it go"
         }
     },
@@ -89,9 +90,9 @@ export const en: Dictionary = {
         start_drawing: "Doodle on the wall",
         cancel_drawing: "Forget doodle",
         clear_screen: "Clear Screen",
-        kinetic_active: "Letting the emotion flow...",
-        manifesting: "Keeping...",
-        confirm_save: "Pin doodle on board",
+        kinetic_active: "Letting emotion flow...",
+        manifesting: "Saving...",
+        confirm_save: "Place doodle on panel",
         stroke_weight: "Thickness",
         identity_chrome: "Ink"
     },
@@ -101,7 +102,7 @@ export const en: Dictionary = {
         hero_title_curate: "Build",
         hero_title_your: "Your",
         hero_title_reality: "Atmosphere.",
-        hero_subtitle: "A minimalist canvas for digital curatorship. Music, media, and atmosphere all in one place.",
+        hero_subtitle: "A minimalist mural for digital curation. Music, media and atmosphere in one place.",
         btn_create_studio: "My first room",
         version_deployment: "Syncing reality...",
         visuals: "01 // VISUALS",
@@ -115,18 +116,18 @@ export const en: Dictionary = {
         login: {
             auth_protocol: "Identification",
             identify_presence: "Aura recognition",
-            title: "Enter",
+            title: "Enter the",
             title_italic: "Room",
-            identity_url: "Your mail (Email)",
-            placeholder_email: "your@access.com",
+            identity_url: "Your Email",
+            placeholder_email: "your@email.com",
             access_key: "Your secret key (Password)",
             placeholder_password: "••••••••",
             initiate_access: "Open the door",
-            unauthorized: "Don't have a key yet?",
+            unauthorized: "Don't have the password yet?",
             establish_identity: "Create one",
             protocol_denied: "Your aura was not recognized.",
-            protocol_error: "System Error: Connection failed",
-            abort: "Go Back",
+            protocol_error: "System error: Connection failure",
+            abort: "Back",
             footer: "Secure Connection // TLS_v1.3",
             authorizing: "Verifying..."
         },
@@ -136,19 +137,19 @@ export const en: Dictionary = {
             title: "Create",
             title_italic: "Room",
             unique_identifier: "What should we call you? (Username)",
-            placeholder_username: "entity_name",
-            communication_node: "Your mail (Email)",
-            placeholder_email: "entity@access.com",
+            placeholder_username: "your_name",
+            communication_node: "Your Email",
+            placeholder_email: "your@email.com",
             private_key: "Your secret key (Password)",
             placeholder_password: "••••••••",
             register_identity: "Get my keys",
-            already_registered: "Already have a key?",
+            already_registered: "Already have the key?",
             resume_session: "Open the door",
             identity_rejected: "Manifestation denied",
-            identity_established: "Keys delivered. Opening room door...",
-            cancel: "Go Back",
+            identity_established: "Keys delivered. Opening the room door...",
+            cancel: "Back",
             footer: "Allocation System // MoodSpace",
-            establishing: "Forging keys..."
+            establishing: "Creating keys..."
         }
     },
     leftSidebar: {
@@ -156,20 +157,20 @@ export const en: Dictionary = {
         greeting_afternoon: "Good afternoon",
         greeting_night: "Good night",
         system_node: "Your online spot",
-        active_studio: "Room opened",
+        active_studio: "Opened room",
         identity_protocol: "Current visitor",
         access_level: "Your plan",
         studio_free: "Free",
         system_status: "Status",
         authorized: "Settled in",
-        deployment_area: "Share your key",
+        deployment_area: "Share the key",
 
-        external_visibility: "Let others enter your room",
+        external_visibility: "Let others into your room",
         launch_public_space: "Visit public space",
         system_configuration: "Settings",
         identity_registry: "Your account",
         system_ux: "Room preferences",
-        terminate_session: "Leave the room",
+        terminate_session: "Leave room",
         exit_hex: "Lock the door",
         command_center: "Command Center",
     },
@@ -183,13 +184,13 @@ export const en: Dictionary = {
             youtube_placeholder: "PASTE YOUTUBE LINK...",
             youtube_btn: "Connect Video",
             spotify_placeholder: "SEARCH MUSIC OR ARTIST...",
-            spotify_btn: "Search Spotify",
+            spotify_btn: "Search on Spotify",
             aesthetic_label: "Block Aesthetic",
             update_btn: "Update Media",
-            deploy_btn: "Deploy Media"
+            deploy_btn: "Hang Media"
         },
         theme: {
-            title: "1. Climate & Vibe",
+            title: "1. Weather & Vibe",
             title_desc: "The main color and lighting of the environment.",
             light: "Classic",
             dark: "Midnight",
@@ -199,16 +200,16 @@ export const en: Dictionary = {
             canvas: "Canvas",
             cyberpunk: "Cyberpunk",
             neobrutalism: "Neo-Brutalism",
-            botanical: "Botanical",
-            ethereal: "Ethereal Glass",
-            charcoal: "Midnight Charcoal",
+            botanical: "Biophilic",
+            ethereal: "Ethereal",
+            charcoal: "Lead (Monochrome)",
             terminal: "Retro Terminal",
-            doodle: "Sketchbook Doodle",
-            manga: "Manga Halftone",
+            doodle: "Sketchbook",
+            manga: "Manga",
             y2k: "Frutiger Y2K",
             tarot: "Mystic Tarot",
             node_luminance: "Highlight color",
-            luminance_desc: "Pick the color that best represents you right now.",
+            luminance_desc: "Choose the color that represents you most now.",
             atomic_typography: "Main letter",
             base_system: "Letter Styles",
             textures_title: "2. Wall Material",
@@ -226,12 +227,12 @@ export const en: Dictionary = {
         },
         text: {
             title: "Write something",
-            placeholder: "What's on your mind?",
+            placeholder: "What are you thinking about?",
             substrate: "Paper type",
             node_color: "Paper color",
             font_scale: "Letter size",
             alignment: "Alignment",
-            deploy: "Stick to the wall",
+            deploy: "Paste on mural",
             styles: {
                 simple: "Simple",
                 postit: "Post-it",
@@ -241,20 +242,20 @@ export const en: Dictionary = {
         },
         photo: {
             title: "Develop a photo",
-            drop_link: "Drop your photo here",
+            drop_link: "Drop photo here",
             inject_visual: "Drag your photo here",
             format_hint: "FORMATS // PNG, JPG, WEBP",
             processing: "Developing...",
             live_preview: "How it looks:",
             caption: "Memory (Caption)",
             caption_placeholder: "Write something about this photo...",
-            alt_text: "Alternative Text (Accessibility)",
+            alt_text: "Alt Text (Accessibility)",
             alt_placeholder: "Describe the image for those who can't see...",
             filter: "Photo Filter",
             geometry: "Frame",
             deploy: "Hang photo",
-            error_load: "Photographic aura corrupted. Cannot read.",
-            error_process: "The image couldn't survive the compression process."
+            error_load: "Photographic aura corrupted. Could not read.",
+            error_process: "The image did not resist the compression process."
         },
         phrase: {
             title: "Loose thoughts",
@@ -271,17 +272,17 @@ export const en: Dictionary = {
             deploy: "Let it roll",
             types: {
                 ticker: "Ticker",
-                subtitle: "Subtitle",
+                subtitle: "Movie Subtitle",
                 floating: "Free Text"
             }
         },
 
         youtube: {
             title: "Play a clip",
-            placeholder: "Paste the YouTube link here...",
+            placeholder: "Paste YouTube link here...",
             established: "Video connected",
-            deploy: "Play the tape",
-            error: "We couldn't connect to this link.",
+            deploy: "Start the tape",
+            error: "Could not connect to this link.",
             supported: "We support links like: youtu.be, youtube.com/watch",
         },
         effects: {
@@ -289,8 +290,8 @@ export const en: Dictionary = {
             trails_title: "Mouse trail",
             atmosphere_title: "Room atmosphere",
             active: "Selected",
-            syncing: "Changing the atmosphere...",
-            deployed: "All set.",
+            syncing: "Changing atmosphere...",
+            deployed: "All ready.",
             cursors: {
                 auto: "Standard Arrow",
                 retro: "Retro Arrow",
@@ -307,14 +308,14 @@ export const en: Dictionary = {
             backgrounds: {
                 none: "Solid Color",
                 noise: "Analog Noise",
-                aurora: "Aurora Borealis",
+                aurora: "Northern Lights",
                 liquid: "Liquid Flow",
                 "mesh-gradient": "Mesh Gradient",
                 metaballs: "Metaballs",
-                hyperspeed: "Hyperspeed",
+                hyperspeed: "Light Speed",
                 rain: "Melancholy Rain",
                 rhythm: "Wave Rhythm",
-                vintage: "Vintage Movie",
+                vintage: "Vintage Film",
                 universe: "Deep Universe",
                 "grid-move": "Retro Grid",
                 stars: "Starfield"
@@ -327,27 +328,46 @@ export const en: Dictionary = {
             target: "Marked date",
             registry: "Special icon",
             substrate: "Appearance",
-            deploy: "Start counting",
+            deploy: "Start countdown",
         },
         guestbook: {
             title: "Guestbook mural",
+            subtitle: "Connection Registry",
             label: "What's the question or title?",
             placeholder: "Leave a little note...",
-            color_label: "Note color",
-            deploy: "Stick to mural",
+            color_label: "Main Color",
+            deploy: "Paste on mural",
+            update: "Update Mural",
             visit_active: "People will be able to write in your room.",
+            tabs: {
+                connection: "Connection",
+                esthetics: "Aesthetics"
+            },
+            style_label: "Visual Theme",
+            layout_label: "Display Mode",
+            layouts: {
+                classic: "Classic (Box)",
+                scattered: "Scattered (Post-it)",
+                cloud: "Cloud (Floating)"
+            },
+            styles: {
+                glass: "Studio Glass (Premium)",
+                vhs: "VHS / Retro (Analog)",
+                cyber: "Cyber / Minimal (Cleaner)",
+                paper: "Paper / Post-it (Physical)"
+            }
         },
         mood: {
             title: "Your current state",
             registry: "How are you?",
-            buffer: "Write what you are feeling (optional)",
+            buffer: "Write what you're feeling (optional)",
             placeholder: "Everything's chill...",
-            deploy: "Leave a feeling",
+            deploy: "Leave feeling",
         },
         quote: {
             title: "Quote",
             label_text: "What was said?",
-            placeholder: "Write the quote here...",
+            placeholder: "Write quote here...",
             label_author: "Who said that? (Optional)",
             author: "Author",
             style_title: "Style",
@@ -363,12 +383,12 @@ export const en: Dictionary = {
             link_placeholder: "https://...",
             visual_alias: "What should it be called? (Optional)",
             alias_placeholder: "My profile...",
-            sub_label: "Sub-label (Optional)",
-            sub_label_placeholder: "e.g. New videos every Friday!",
-            layout_bento: "Cube Layout (Bento Box)",
-            layout_bento_desc: "Hides text and creates a flexible miniature button",
+            sub_label: "Small Caption (Optional)",
+            sub_label_placeholder: "ex: New videos every Friday!",
+            layout_bento: "Bento Box Layout",
+            layout_bento_desc: "Hides text and creates a circular/square button",
             layout_borderless: "Hide Background & Border",
-            layout_borderless_desc: "Turns off the block frame leaving it floating",
+            layout_borderless_desc: "Turns off the social block frame leaving it floating",
             style_manifesto: "Button Style",
             deploy: "Add link",
             custom_link: "Custom Link",
@@ -378,15 +398,15 @@ export const en: Dictionary = {
                 minimal: "Minimal",
                 neon: "Neon",
                 pill: "Pill",
-                brutalist: "Brutalist",
+                brutalist: "Brutal",
                 ghost: "Ghost",
                 clay: "Clay",
-                retro: "RetroOS",
+                retro: "Retro",
                 aura: "Aura"
             }
         },
         doodle: {
-            title: "Your draftpad",
+            title: "Your sketch page",
             manifest: "Draw fullscreen on your wall."
         },
         gif: {
@@ -394,7 +414,7 @@ export const en: Dictionary = {
             powered_by: "Pick your gif (Giphy).",
             search_placeholder: "Search gif...",
             searching: "Searching...",
-            deploy: "Stick Gif",
+            deploy: "Paste Gif",
             not_found: "No gif found"
         },
         block_manager: {
@@ -417,25 +437,25 @@ export const en: Dictionary = {
                 default: "Content Block"
             },
             feed_title: "Your World",
-            empty: "No elements yet...",
+            empty: "No blocks yet...",
         },
         art: {
             tape_title: "Stickers and tapes",
             weather_title: "Current weather",
             weather_state: "How's the day?",
             weather_location: "From where?",
-            weather_location_placeholder: "Lisbon, NY, Tokyo...",
+            weather_location_placeholder: "London, NY, Tokyo...",
             weather_temp: "Temperature (Optional)",
-            weather_temp_placeholder: "72°F, Freezing, Hot...",
-            weather_deploy: "Stick weather",
-            media_title: "Books & Movies",
+            weather_temp_placeholder: "22°C, Freezing, Hot...",
+            weather_deploy: "Paste weather",
+            media_title: "Books and Movies",
             media_book: "Book",
             media_movie: "Movie",
             media_work_title: "What's the name?",
             media_work_title_placeholder: "Work name...",
             media_critique: "3-word summary",
             media_critique_placeholder: "Amazing, Boring, Surreal...",
-            media_deploy: "Stick Review",
+            media_deploy: "Paste Review",
             tapes: {
                 classic_white: "Classic White",
                 vintage_paper: "Vintage Paper",
@@ -450,7 +470,62 @@ export const en: Dictionary = {
                 snow: "Cold and cozy",
                 cloud: "Cloudy and urban",
                 wind: "Windy and dynamic"
+            },
+        },
+        weather: {
+            title: "Weather Studio",
+            subtitle: "Real-Time Atmosphere",
+            location_label: "City / Location",
+            vibe_label: "Moment Message (Vibe)",
+            update_btn: "Update Weather",
+            deploy_btn: "Launch to Mural",
+            location_placeholder: "Ex: London, Tokyo...",
+            vibe_placeholder: "Ex: Rainy Afternoon...",
+            tabs: {
+                connection: "Connection",
+                esthetics: "Aesthetics"
             }
+        },
+        shape: {
+            title: "Smart Shapes",
+            subtitle: "Artistic Geometry & Blending",
+            geometry_label: "Base Geometry",
+            adjust_sides: "Sides Adjustment",
+            adjust_points: "Points Adjustment",
+            color_label: "Solid Color",
+            opacity_label: "Opacity",
+            blend_label: "Blend Mode",
+            blur_label: "Blur Effect",
+            deploy_btn: "Add to Mural",
+            update_btn: "Update Shape",
+            shapes: {
+                circle: "Circle",
+                rect: "Rectangle",
+                triangle: "Triangle",
+                polygon: "Polygon",
+                star: "Star",
+                blob: "Organic",
+                line: "Line",
+                grid: "Grid",
+                flower: "Flower",
+                mesh: "Web",
+                wave: "Wave",
+                spiral: "Spiral"
+            },
+            tabs: {
+                geometry: "Geometry",
+                style: "Aesthetics",
+                effects: "FX Effects"
+            },
+            glow_label: "Aura Intensity (Glow)",
+            float_label: "Kinetic Fluctuation",
+            float_speed_label: "Movement Speed",
+            float_on: "On",
+            float_off: "Static",
+            gradient_type_label: "Gradient Type",
+            gradient_linear: "Linear",
+            gradient_radial: "Radial",
+            variation_label: "Organic Variation"
         },
         palette: {
             title: "Extract Atmosphere",
@@ -464,14 +539,14 @@ export const en: Dictionary = {
 
         spotify: {
             title: "Soundtrack",
-            search_placeholder: "What song to find?",
+            search_placeholder: "Which song to look for?",
             search_btn: "Search Song",
-            error: "Search Error",
+            error: "Search error",
             results: "Results",
             source: "Source"
         },
         share: {
-            link: "Share Link",
+            link: "Share",
             copied: "Copied",
             qr_code: "QR CODE",
             save_qr: "Save QR"
@@ -489,10 +564,10 @@ export const en: Dictionary = {
         layer_show: "Show",
         layer_lock: "Lock",
         layer_unlock: "Unlock",
-        layer_to_front: "Bring to Front",
-        layer_to_back: "Send to Back",
-        layer_forward: "Bring Forward",
-        layer_backward: "Send Backward",
+        layer_to_front: "Bring to top",
+        layer_to_back: "Send to back",
+        layer_forward: "Bring forward",
+        layer_backward: "Send backward",
         layers_precision: "Precision",
         layers_safe: "Safe Rendering",
         layers_normalize: "Normalize Layers",
@@ -511,7 +586,7 @@ export const en: Dictionary = {
         badge: {
             auth_access: "Verified Access",
             claim: "Create my space",
-            open: "Access Granted",
+            open: "Access Released",
             footer: "01-MS-ACCESS-GRANTED"
         },
         share: {
@@ -523,9 +598,13 @@ export const en: Dictionary = {
         },
         analytics: {
             viral: "Radiant Vibe",
-            high: "High Tuning",
-            stable: "Calm Tuning",
+            high: "High Tune",
+            stable: "Calm Tune",
             views: "Visiting Souls"
+        },
+        overlay: {
+            title: "MoodSpace",
+            click_to_enter: "Click to enter"
         }
     },
     publish: {
@@ -547,5 +626,34 @@ export const en: Dictionary = {
         no_versions: "no versions",
         loading_history: "loading...",
         history_error: "error loading history"
+    },
+    templates: {
+        chooser_title: "What's your vibe today?",
+        chooser_subtitle: "Choose a template to start or create from scratch",
+        empty_state: "Your mural is empty",
+        items: {
+            focus: {
+                title: "Deep Work",
+                vibe: "Aurora • Spotify Lo-fi • Focus",
+                desc: "Immersive workstation: POMODORO timer, Lo-fi soundtrack, and production quick links."
+            },
+            scrapbook: {
+                title: "Scrapbook",
+                vibe: "Paper • Polaroid • Connection",
+                desc: "The memories sanctuary: tactile textures, Polaroid photos, and a collective wall for connections."
+            },
+            cyber: {
+                title: "Cyber Station",
+                vibe: "Grid • YouTube VHS • Neon",
+                desc: "Tech-noir interface: real-time network logs, Glitch video vibes, and neon curation."
+            },
+            zen: {
+                title: "Atmospheric Zen",
+                vibe: "Liquid • Kyoto • Flow",
+                desc: "Ethereal peace: synchronous weather, fluid meditation, and floating phrases to calm the mind."
+            }
+        },
+        applying: "Tuning Vibe...",
+        start_fresh: "Start from Scratch"
     }
 };
