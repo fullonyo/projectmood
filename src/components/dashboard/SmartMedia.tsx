@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { useViewportScale } from "@/lib/canvas-scale"
+import { useStudioBlock } from "@/hooks/use-studio-block"
 
 export type MediaType = 'video' | 'music'
 
@@ -14,6 +14,10 @@ interface SmartMediaProps {
     hasInteracted?: boolean
 }
 
+/**
+ * SmartMedia - Padronizado com Studio FUS 💎
+ * Renderizador de mídia (YouTube/Spotify) com escala fluida e suporte a autoplay seguro.
+ */
 export function SmartMedia({
     mediaType,
     videoId,
@@ -22,8 +26,9 @@ export function SmartMedia({
     scale: manualScale,
     hasInteracted = false
 }: SmartMediaProps) {
-    const autoScale = useViewportScale()
-    const scale = manualScale ?? autoScale
+    // Hook Padronizado Studio
+    const { ref, fluidScale, viewportScale } = useStudioBlock()
+    const scale = manualScale ?? fluidScale
 
     // Common Wrapper for premium look
     const wrapperClasses = cn(
@@ -34,13 +39,11 @@ export function SmartMedia({
 
     // YouTube Logic
     if (mediaType === 'video' && videoId) {
-        // Se já interagiu (overlay clicado), autoplay=1 e mute=0
-        // Se não interagiu, o navegador bloquearia mute=0, então forçamos mute=1 (ou nem damos play)
         const muteParam = hasInteracted ? '0' : '1';
         const autoplayParam = isPublic ? `&autoplay=1&mute=${muteParam}` : '';
 
         return (
-            <div className={wrapperClasses}>
+            <div ref={ref} className={wrapperClasses}>
                 <iframe
                     src={`https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&controls=1&rel=0${autoplayParam}`}
                     width="100%"
@@ -60,12 +63,11 @@ export function SmartMedia({
 
     // Spotify Logic
     if (mediaType === 'music' && trackId) {
-        // Para Spotify, o autoplay via iframe é quase sempre ignorado, 
-        // mas o clique no overlay ajuda na liberação de contexto de áudio.
         const spotifyAutoplay = isPublic && hasInteracted ? '&autoplay=1' : '';
 
         return (
             <div
+                ref={ref}
                 className={cn(wrapperClasses, "bg-white/5 dark:bg-zinc-950/50 backdrop-blur-md items-center justify-center flex")}
                 style={{ padding: Math.round(8 * scale) }}
             >
@@ -89,8 +91,13 @@ export function SmartMedia({
     }
 
     return (
-        <div className="w-full h-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 border border-dashed border-zinc-300 dark:border-zinc-800">
-            <span className="text-[8px] font-black uppercase opacity-20 tracking-widest">Media Missing</span>
+        <div ref={ref} className="w-full h-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 border border-dashed border-zinc-300 dark:border-zinc-800 p-4 text-center">
+            <span
+                className="text-[10px] font-black uppercase opacity-20 tracking-widest leading-tight"
+                style={{ fontSize: Math.max(6, Math.round(10 * scale)) }}
+            >
+                Media Missing
+            </span>
         </div>
     )
 }

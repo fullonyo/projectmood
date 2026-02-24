@@ -21,6 +21,9 @@ export const DESIGN_VIEWPORT_WIDTH = 1920
 /** Tamanho mínimo de scale para prevenir blocos invisíveis */
 const MIN_SCALE = 0.25
 
+/** Unidade de design base para blocos complexos (FUS - Fluid Unit Scaling) */
+export const STUDIO_BASE_UNIT = 200
+
 /**
  * Hook que retorna o fator de escala atual baseado na largura do viewport.
  * Atualiza automaticamente em resize.
@@ -98,4 +101,21 @@ export function scaleBlockSize(
  */
 export function getBlockFallbackSize(type: string): number | 'auto' {
     return DESIGN_BLOCK_CONFIGS[type]?.w || 'auto'
+}
+
+/**
+ * Normalização Studio (FUS - Fluid Unit Scaling)
+ * Calcula um fator de escala baseado na área do container para manter densidade visual.
+ * @param width Largura real do container
+ * @param height Altura real do container
+ * @param referenceUnit Unidade de design ideal (default 200px)
+ */
+export function computeStudioNormalization(
+    width: number,
+    height: number,
+    referenceUnit: number = STUDIO_BASE_UNIT
+): number {
+    if (width === 0 || height === 0) return 1
+    // Raiz quadrada da área normalizada pela unidade de referência
+    return Math.max(0.4, Math.sqrt(width * height) / referenceUnit)
 }

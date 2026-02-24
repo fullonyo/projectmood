@@ -15,6 +15,7 @@ import dynamic from "next/dynamic"
 import { FrameContainer, FrameType } from "./FrameContainer"
 import { SmartText, TextBehavior } from "./SmartText"
 import { SmartMedia, MediaType } from "./SmartMedia"
+import { SmartShape } from "./SmartShape"
 
 // Modularized Public Blocks - Static (Critical for LCP/CLS)
 import { PhotoBlockPublic } from "./photo-block-public"
@@ -130,7 +131,28 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                 )
             }
             // Se for 'media' sem 'mediaType', é o bloco analógico de Livros/Filmes
-            return <MediaBlockPublic content={content} isPublic={isPublic} />
+            return null;
+
+        case 'shape':
+            return (
+                <SmartShape
+                    type={content.shapeType}
+                    color={content.color}
+                    opacity={content.opacity}
+                    blur={content.blur}
+                    sides={content.sides}
+                    points={content.points}
+                    seed={content.seed}
+                    glowIntensity={content.glowIntensity}
+                    isFloating={content.isFloating}
+                    floatSpeed={content.floatSpeed}
+                    gradient={content.gradient}
+                    gradientType={content.gradientType as any}
+                />
+            )
+        // The following line was unreachable and seems like a copy-paste error.
+        // It is removed to maintain syntactical correctness and avoid dead code.
+        // return <MediaBlockPublic content={content} isPublic={isPublic} />
 
         case 'gif':
             return renderWithFrame(

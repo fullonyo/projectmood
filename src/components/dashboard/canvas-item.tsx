@@ -35,7 +35,9 @@ interface CanvasItemProps {
     onMultiMoveEnd?: () => void
 }
 
-export function CanvasItem({
+import React, { memo } from "react"
+
+export const CanvasItem = memo(({
     block,
     canvasRef,
     isSelected,
@@ -50,7 +52,7 @@ export function CanvasItem({
     selectedIds,
     onMultiMove,
     onMultiMoveEnd
-}: CanvasItemProps) {
+}: CanvasItemProps) => {
     const { t } = useTranslation()
     const viewportScale = useViewportScale()
 
@@ -303,8 +305,10 @@ export function CanvasItem({
                 boxShadow: isSelected ? `0 0 0 2px ${themeConfig?.bg || '#000'}, 0 0 0 4px ${profile?.primaryColor || '#3b82f6'}` : 'none',
                 touchAction: 'none', transformOrigin: 'center',
                 display: block.isHidden ? 'none' : 'block',
-                opacity: block.isHidden ? 0 : 1,
-                pointerEvents: block.isHidden ? 'none' : 'auto'
+                opacity: block.isHidden ? 0 : ((block.content as any).opacity ?? 1),
+                pointerEvents: block.isHidden ? 'none' : 'auto',
+                mixBlendMode: (block.content as any).blendMode || 'normal',
+                isolation: 'isolate'
             }}
             onClick={(e) => {
                 if (isInteractiveMode) return;
@@ -443,4 +447,6 @@ export function CanvasItem({
             </div>
         </motion.div>
     )
-}
+})
+
+CanvasItem.displayName = "CanvasItem"

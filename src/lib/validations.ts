@@ -18,7 +18,8 @@ export const MoodBlockTypeSchema = z.enum([
     'quote',
     'photo',
     'moodStatus',
-    'countdown'
+    'countdown',
+    'shape'
 ])
 
 // Validação de conteúdo de bloco (JSON flexível)

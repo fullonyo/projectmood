@@ -24,6 +24,7 @@ export type MoodBlockType =
     | 'photo'
     | 'moodStatus'
     | 'countdown'
+    | 'shape'
     | 'rorschach'; // Future block placeholder
 
 export type MoodBlockContent =
@@ -39,6 +40,7 @@ export type MoodBlockContent =
     | { mediaType: 'video' | 'music' | 'media'; videoId?: string; trackId?: string; frame?: string; caption?: string;[key: string]: any } // Catch-all for unified media
     | { image: string;[key: string]: any } // Doodle
     | { color: string; pattern?: string;[key: string]: any } // Tape
+    | ShapeContent
     | any;
 
 export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content'> {
@@ -178,4 +180,15 @@ export interface WeatherContent {
     state: string;
     location?: string;
     temperature?: string;
+}
+
+export interface ShapeContent {
+    shapeType: 'circle' | 'rect' | 'triangle' | 'polygon' | 'blob' | 'star';
+    color: string;
+    opacity: number;
+    blur: number;
+    sides?: number;
+    points?: number;
+    blendMode?: string;
+    gradient?: boolean;
 }

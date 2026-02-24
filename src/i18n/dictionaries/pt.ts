@@ -68,7 +68,8 @@ export const pt = {
                 gif: { title: "Animação", desc: "Reações em GIF (Giphy)" },
                 weather: { title: "Clima", desc: "Como está o dia lá fora?" },
                 universal_media: { title: "Mídia Universal", desc: "YouTube & Spotify" },
-                media: { title: "Registro Analógico", desc: "Livros e obras" }
+                media: { title: "Registro Analógico", desc: "Livros e obras" },
+                shape: { title: "Formas Artísticas", desc: "Geometria e Mesclagem" }
             },
             inspector_back: "Voltar para Elementos",
             more_coming: "Mais componentes em breve"
@@ -452,6 +453,61 @@ export const pt = {
                 wind: "Ventoso e dinâmico"
             },
         },
+        weather: {
+            title: "Weather Studio",
+            subtitle: "Atmosfera em Tempo Real",
+            location_label: "Cidade / Local",
+            vibe_label: "Mensagem do Momento (Vibe)",
+            update_btn: "Atualizar Clima",
+            deploy_btn: "Lançar ao Mural",
+            location_placeholder: "Ex: Londres, Tóquio...",
+            vibe_placeholder: "Ex: Tarde Chuvosa...",
+            tabs: {
+                connection: "Conexão",
+                esthetics: "Estética"
+            }
+        },
+        shape: {
+            title: "Smart Shapes",
+            subtitle: "Geometria Artística & Mesclagem",
+            geometry_label: "Geometria Base",
+            adjust_sides: "Ajustes de Lados",
+            adjust_points: "Ajustes de Pontas",
+            color_label: "Cor Sólida",
+            opacity_label: "Opacidade",
+            blend_label: "Modo de Mesclagem (Blend Mode)",
+            blur_label: "Efeito de Desfoque (Blur)",
+            deploy_btn: "Adicionar ao Mural",
+            update_btn: "Atualizar Forma",
+            shapes: {
+                circle: "Círculo",
+                rect: "Retângulo",
+                triangle: "Triângulo",
+                polygon: "Polígono",
+                star: "Estrela",
+                blob: "Orgânico",
+                line: "Linha",
+                grid: "Grade",
+                flower: "Flor",
+                mesh: "Teia",
+                wave: "Onda",
+                spiral: "Espiral"
+            },
+            tabs: {
+                geometry: "Geometria",
+                style: "Estética",
+                effects: "Efeitos FX"
+            },
+            glow_label: "Intensidade da Aura (Glow)",
+            float_label: "Flutuação Cinética",
+            float_speed_label: "Velocidade do Movimento",
+            float_on: "Ligado",
+            float_off: "Estático",
+            gradient_type_label: "Tipo de Gradiente",
+            gradient_linear: "Linear",
+            gradient_radial: "Radial",
+            variation_label: "Variação Orgânica"
+        },
         palette: {
             title: "Extrair Atmosfera",
             desc: "Defina cores através de uma imagem",
@@ -526,6 +582,10 @@ export const pt = {
             high: "Sintonia Alta",
             stable: "Sintonia Calma",
             views: "Almas Visitantes"
+        },
+        overlay: {
+            title: "MoodSpace",
+            click_to_enter: "Clique para entrar"
         }
     },
     publish: {

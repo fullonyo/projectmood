@@ -9,13 +9,18 @@ import { getStaticTextureStyle } from "../effects/static-textures"
 interface RoomEnvironmentProps {
     profile: Profile
     backgroundEffect: string
+    weatherSync?: string | null
 }
 
-export function RoomEnvironment({ profile, backgroundEffect }: RoomEnvironmentProps) {
+export function RoomEnvironment({ profile, backgroundEffect, weatherSync }: RoomEnvironmentProps) {
     const themeConfig = themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.light
     const bgColor = profile.backgroundColor || themeConfig.bg || "#ffffff"
     const resolvedPrimaryColor = profile.primaryColor || themeConfig.primary || "#000000"
     const textureStyles = getStaticTextureStyle(profile.staticTexture || 'none', resolvedPrimaryColor)
+
+    // Detecção de clima para atmosfera automática (sutil)
+    const activeAtmosphere = backgroundEffect !== 'none' ? backgroundEffect : (weatherSync === 'rain' ? 'rain' : 'none')
+    const atmosphereOpacity = backgroundEffect === 'none' && weatherSync === 'rain' ? 'opacity-30' : 'opacity-100'
 
     return (
         <div
@@ -27,9 +32,9 @@ export function RoomEnvironment({ profile, backgroundEffect }: RoomEnvironmentPr
             } as React.CSSProperties}
         >
             {/* Layer 1: Animated Effects (The aura) */}
-            <div className="absolute inset-0 opacity-100 z-[1]">
+            <div className={cn("absolute inset-0 z-[1] transition-opacity duration-1000", atmosphereOpacity)}>
                 <BackgroundEffect
-                    type={backgroundEffect as any}
+                    type={activeAtmosphere}
                     primaryColor={resolvedPrimaryColor}
                 />
             </div>

@@ -23,6 +23,9 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
     const [loadingViews, setLoadingViews] = useState(true)
     const [hasInteracted, setHasInteracted] = useState(false)
 
+    // 🌦️ Weather Sync: Detect active atmosphere from blocks
+    const activeWeather = moodBlocks.find(b => b.type === 'weather')?.content?.icon || null
+
     // 📌 Escala proporcional: fidelidade visual cross-resolution
     const viewportScale = useViewportScale()
 
@@ -67,6 +70,7 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                 <RoomEnvironment
                     profile={profile}
                     backgroundEffect={profile.backgroundEffect || 'none'}
+                    weatherSync={activeWeather}
                 />
             </div>
 

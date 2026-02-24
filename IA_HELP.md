@@ -40,6 +40,9 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **Adaptive Toolbar**: Ferramenta de ação que inverte sua posição (top/bottom) automaticamente se o bloco estiver muito próximo da borda superior, garantindo visibilidade total.
 - **WYSIWYG Garantido**: `page-client.tsx` aplica `width`/`height` nos blocos públicos, espelhando o editor.
 - **Persistência**: Hook `useCanvasManager` com epoch system + debounce 800ms. Sync bidirecional server ↔ local com feedback de erro resiliente.
+- **Padrão FUS (Fluid Unit Scaling) 💎📐**: Sistema de escala responsiva por área para blocos complexos (Weather, Countdown, Guestbook). 
+  - Ao invés de usar apenas o zoom do viewport, o sistema detecta as dimensões reais do container via `useStudioBlock`.
+  - Utiliza normalização baseada na raiz quadrada da área (`computeStudioNormalization`) para manter a densidade visual e evitar quebras em proporções extremas (muito largo ou muito fino).
 
 ### Arquitetura Universal de Blocos 🏛️💎
 - **Universal Architecture**: O sistema foi consolidado para eliminar redundâncias.
@@ -55,10 +58,27 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
   - **Unificação de Catálogo**: Botões individuais de YouTube/Spotify foram consolidados no componente `media` unificado no `BlockLibrary`.
 - **Limpeza de Base**: 14 arquivos obsoletos (editores e blocos públicos individuais) foram removidos em favor desta arquitetura modular de texto e mídia.
 
-### Experiência Pública & Autoplay 🎬🔊
-- **Experience Overlay**: A página pública inicia com um overlay de Glassmorphism (`src/components/dashboard/ExperienceOverlay.tsx`).
-- **User Activation**: O clique no botão "Entrar" captura a interação necessária pelo navegador para permitir autoplay com som.
-- **Lógica de Mídia**: O estado `hasInteracted` é propagado do `page-client.tsx` até o `SmartMedia.tsx`, configurando `mute=0` no YouTube e tentando autoplay no Spotify após o desbloqueio.
+### Experiência Pública & Autoplay
+- O `ExperienceOverlay.tsx` captura a interação inicial do usuário para desbloquear o som.
+- Players de YouTube e Spotify reagem ao estado `hasInteracted` para iniciar com áudio.
+
+### 🎨 Ferramentas Artísticas (SmartShapes 2.0 Plus)
+O sistema **SmartShapes** permite a composição de murais complexos e estéticos com alta performance.
+
+### Componentes Chave:
+- **`SmartShape.tsx`**: Renderiza geometrias via SVG (Círculo, Retângulo, Polígono, Blob, Estrela, Linha, Grade, Flor, Teia, Onda, Espiral).
+- **`UniversalShapeEditor.tsx`**: Interface de controle dividida em abas (**Geometria**, **Estética**, **Efeitos FX**).
+- **`UniversalWeatherEditor.tsx`**: Sistema dinâmico que integra clima em tempo real via Server Actions (`getWeatherAction`) e possui interface de abas (**Conexão** | **Estética**) simétrica ao SmartShapes.
+- **Sinergia Studio 2.2**: O sistema Weather agora suporta `opacity` e `blendMode` nativos através do `CanvasItem`, permitindo composições atmosféricas complexas.
+- **Variações Determinísticas**: O sistema de sementes (`seed`) permite até 100 variações únicas para Mood Elements, garantindo que o design seja persistente e idêntico em todas as visualizações.
+- **Blindagem Geométrica**: O motor de SVG possui fallbacks matemáticos para garantir que `sides`, `points` e `gradientColors` nunca causem crash ou renderizações inválidas.
+- **Mix Blend Modes**: Suporte a modos de mesclagem universais no `CanvasItem` para interação visual entre qualquer tipo de bloco sobreposto (Weather, Shape, Text, Media).
+- **Sincronização Atmosférica**: O ambiente (`RoomEnvironment`) reage ao clima detectado nos blocos, ativando efeitos visuais síncronos (ex: chuva sutil) automaticamente se nenhum fundo estiver ativo.
+
+### Melhores Práticas Artísticas:
+1. **Z-Index**: Use polígonos com baixa opacidade e `mix-blend-mode: multiply` atrás de fotos para criar profundidade.
+2. **Blur & Glass**: Formas com desfoque alto atuam como luzes de fundo (Glow effects).
+3. **Blobs**: Use formas orgânicas para quebrar a rigidez da grade.
 
 ### Infraestrutura & Deploy
 - **Docker Standalone**: Configuração otimizada para baixo consumo de recursos em instâncias AWS EC2.
@@ -80,4 +100,4 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **Auditoria**: Todas as ações administrativas são registradas na tabela `AuditLog`.
 
 ---
-*Documentação atualizada por Antigravity em 23/02/2026. Acesso administrativo concedido ao usuário Nyo conforme solicitado.*
+*Documentação atualizada por Antigravity em 24/02/2026. Acesso administrativo concedido ao usuário Nyo conforme solicitado. Sinergia Studio 2.2 implementada.*

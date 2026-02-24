@@ -9,6 +9,8 @@ import { GuestbookEditor } from "./guestbook-editor"
 import { ArtTools } from "./art-tools"
 import { DoodlePad } from "./doodle-pad"
 import { CountdownEditor } from "./countdown-editor"
+import { UniversalShapeEditor } from "./UniversalShapeEditor"
+import { UniversalWeatherEditor } from "./UniversalWeatherEditor"
 import { addMoodBlock } from "@/actions/profile"
 import { MoodBlock } from "@/types/database"
 import { getInitialBlockSize } from "@/lib/canvas-scale"
@@ -92,7 +94,19 @@ export function BlockEditorRegistry({
         return <GuestbookEditor key={selectedBlock?.id || 'draft-guestbook'} />
     }
 
-    if (['tape', 'weather'].includes(activeType)) {
+    if (activeType === 'weather') {
+        return (
+            <UniversalWeatherEditor
+                key={selectedBlock?.id || 'draft-weather'}
+                block={selectedBlock}
+                onUpdate={onUpdateBlock}
+                onAdd={(type, content) => handleAdd('weather', content)}
+                onClose={onClose}
+            />
+        )
+    }
+
+    if (activeType === 'tape') {
         return <ArtTools key={selectedBlock?.id || 'draft-art'} />
     }
 
@@ -107,6 +121,18 @@ export function BlockEditorRegistry({
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
                 onAdd={selectedBlock ? undefined : (content) => handleAdd('countdown', content)}
+                onClose={onClose}
+            />
+        )
+    }
+
+    if (activeType === 'shape') {
+        return (
+            <UniversalShapeEditor
+                key={selectedBlock?.id || 'draft-shape'}
+                block={selectedBlock}
+                onUpdate={onUpdateBlock}
+                onAdd={(type, content) => handleAdd('shape', content)}
                 onClose={onClose}
             />
         )
