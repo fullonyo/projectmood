@@ -91,7 +91,14 @@ export function BlockEditorRegistry({
     }
 
     if (activeType === 'guestbook') {
-        return <GuestbookEditor key={selectedBlock?.id || 'draft-guestbook'} />
+        return (
+            <GuestbookEditor
+                key={selectedBlock?.id || 'draft-guestbook'}
+                block={selectedBlock}
+                onUpdate={onUpdateBlock}
+                onClose={onClose}
+            />
+        )
     }
 
     if (activeType === 'weather') {

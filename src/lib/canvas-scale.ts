@@ -59,7 +59,7 @@ export const DESIGN_BLOCK_CONFIGS: Record<string, { w: number; h: number; minW?:
     video: { w: 320, h: 200, minW: 160, minH: 100 }, // Legacy support
     music: { w: 300, h: 120, minW: 160, minH: 80 },  // Legacy support
     social: { w: 150, h: 45, minW: 40, minH: 40 },
-    guestbook: { w: 300, h: 300, minW: 200, minH: 200 },
+    guestbook: { w: 350, h: 450, minW: 250, minH: 300 },
     countdown: { w: 300, h: 150, minW: 200, minH: 100 },
     moodStatus: { w: 300, h: 100, minW: 150, minH: 60 },
     weather: { w: 300, h: 100, minW: 150, minH: 60 },

@@ -169,6 +169,11 @@ export interface CountdownContent {
 export interface GuestbookContent {
     title: string;
     color?: string;
+    style?: 'glass' | 'vhs' | 'cyber' | 'paper';
+    layoutMode?: 'classic' | 'scattered' | 'cloud';
+    density?: number;
+    opacity?: number;
+    blendMode?: string;
 }
 
 export interface MoodStatusContent {

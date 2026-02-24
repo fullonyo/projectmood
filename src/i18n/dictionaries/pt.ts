@@ -332,11 +332,30 @@ export const pt = {
         },
         guestbook: {
             title: "Mural de recados",
+            subtitle: "Registro de Conexões",
             label: "Qual é a pergunta ou título?",
             placeholder: "Deixe um recadinho...",
-            color_label: "Cor do recado",
+            color_label: "Cor Principal",
             deploy: "Colar no mural",
+            update: "Atualizar Mural",
             visit_active: "As pessoas poderão escrever no seu quarto.",
+            tabs: {
+                connection: "Conexão",
+                esthetics: "Estética"
+            },
+            style_label: "Tema Visual",
+            layout_label: "Modo de Exibição",
+            layouts: {
+                classic: "Clássico (Box)",
+                scattered: "Espalhado (Post-it)",
+                cloud: "Nuvem (Flutuante)"
+            },
+            styles: {
+                glass: "Studio Glass (Premium)",
+                vhs: "VHS / Retro (Analógico)",
+                cyber: "Cyber / Minimal (Cleaner)",
+                paper: "Paper / Post-it (Físico)"
+            }
         },
         mood: {
             title: "Seu estado atual",

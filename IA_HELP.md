@@ -99,5 +99,13 @@ O sistema **SmartShapes** permite a composição de murais complexos e estético
   ```
 - **Auditoria**: Todas as ações administrativas são registradas na tabela `AuditLog`.
 
+### Guestbook Studio 3.0 (Evolução Criativa) 💎🌪️✨
+O Mural de Recados foi elevado para além do container tradicional, permitindo composições orgânicas.
+- **Layout Modes**:
+  - **Classic**: Container padrão com escala FUS otimizada.
+  - **Scattered (Post-it)**: Remove as bordas do bloco. As mensagens são renderizadas como fragmentos independentes com rotação randômica e efeito de **Sticky Tape** (fita adesiva) automático.
+  - **Cloud (Floating)**: Mensagens sem bordas, apenas texto com glow sutil, flutuando organicamente.
+- **Micro-Aesthetics Engine**: O escalonamento FUS foi recalibrado em 15% para uma estética mais minimalista e arquitetural ("Small-tech"). Densidade e escala podem ser ajustadas via slider no editor.
+
 ---
-*Documentação atualizada por Antigravity em 24/02/2026. Acesso administrativo concedido ao usuário Nyo conforme solicitado. Sinergia Studio 2.2 implementada.*
+*Documentação atualizada por Antigravity em 24/02/2026. Acesso administrativo concedido ao usuário Nyo conforme solicitado. Guestbook Studio 3.0 (Além do Container) entregue.*

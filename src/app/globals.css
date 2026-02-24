@@ -86,3 +86,61 @@ body {
     transform: translateY(-3px) scale(1.02);
   }
 }
+
+@keyframes studio-vhs-flicker {
+  0% {
+    opacity: 0.97;
+  }
+
+  5% {
+    opacity: 0.95;
+  }
+
+  10% {
+    opacity: 0.9;
+  }
+
+  15% {
+    opacity: 0.95;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  25% {
+    opacity: 0.95;
+  }
+
+  35% {
+    opacity: 0.9;
+  }
+
+  45% {
+    opacity: 0.95;
+  }
+
+  55% {
+    opacity: 0.9;
+  }
+
+  65% {
+    opacity: 1;
+  }
+
+  75% {
+    opacity: 0.95;
+  }
+
+  85% {
+    opacity: 0.9;
+  }
+
+  95% {
+    opacity: 1;
+  }
+}
+
+.vhs-scanlines {
+  animation: studio-vhs-flicker 0.15s infinite;
+}

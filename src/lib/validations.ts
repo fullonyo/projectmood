@@ -108,6 +108,17 @@ export const CountdownBlockContentSchema = z.object({
     style: z.enum(['minimal', 'bold', 'neon']).default('minimal')
 })
 
+// Validação específica para Guestbook Block
+export const GuestbookBlockContentSchema = z.object({
+    title: z.string().min(1, "Título é obrigatório").max(50, "Máximo 50 caracteres"),
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+    style: z.enum(['glass', 'vhs', 'cyber', 'paper']).default('glass'),
+    layoutMode: z.enum(['classic', 'scattered', 'cloud']).default('classic'),
+    density: z.number().min(0.5).max(2).default(1),
+    opacity: z.number().min(0).max(1).default(1),
+    blendMode: z.string().default('normal')
+})
+
 // Types exportados
 export type MoodBlockType = z.infer<typeof MoodBlockTypeSchema>
 export type CreateMoodBlockInput = z.infer<typeof CreateMoodBlockSchema>
@@ -118,3 +129,4 @@ export type QuoteBlockContent = z.infer<typeof QuoteBlockContentSchema>
 export type PhotoBlockContent = z.infer<typeof PhotoBlockContentSchema>
 export type MoodStatusBlockContent = z.infer<typeof MoodStatusBlockContentSchema>
 export type CountdownBlockContent = z.infer<typeof CountdownBlockContentSchema>
+export type GuestbookBlockContent = z.infer<typeof GuestbookBlockContentSchema>
