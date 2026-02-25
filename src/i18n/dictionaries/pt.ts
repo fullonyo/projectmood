@@ -22,7 +22,7 @@ export const pt = {
         tabs: {
             elements: "Elementos",
             elements_desc: "Adicionar notas, fotos e memórias físicas.",
-            room: "Fragmento",
+            room: "Mood",
             room_desc: "Luzes, cores e efeitos.",
             layers: "Camadas",
             layers_desc: "Gerenciar ordem e visibilidade",
@@ -32,14 +32,14 @@ export const pt = {
         style: {
             atmosphere_title: "Atmosfera base",
             atmosphere_desc: "Luz, sombra e cor do seu espaço",
-            magic_fx_title: "Aura do fragmento",
+            magic_fx_title: "Aura do Mood",
             magic_fx_desc: "Partículas, ruídos e texturas imersivas",
             danger_title: "Desapegar de tudo",
             danger_desc: "Começar de novo, com a tela em branco",
             clear_wall_btn: "Apagar todas as memórias"
         },
         writing: {
-            text_title: "Fragmentos de texto",
+            text_title: "Moods de texto",
             text_desc: "Pensamentos soltos e desabafos",
         },
         media: {
@@ -104,7 +104,7 @@ export const pt = {
         hero_title_your: "Seus",
         hero_title_reality: "Sentimentos.",
         hero_subtitle: "Crie um mural que te abrace. Guarde músicas, fotos e sussurros em um santuário digital feito de memórias e afeto.",
-        btn_create_studio: "Criar meu Fragmento",
+        btn_create_studio: "Criar meu Mood",
         version_deployment: "Sincronizando a realidade...",
         visuals: "01 // ACOLHIMENTO",
         audio: "02 // SENTIMENTO",
@@ -126,12 +126,12 @@ export const pt = {
             auth_protocol: "Reconhecimento",
             identify_presence: "Sinta-se em casa",
             title: "Entrar no meu",
-            title_italic: "Fragmento",
+            title_italic: "Mood",
             identity_url: "Seu Email",
             placeholder_email: "seu@email.com",
             access_key: "Sua chave do coração (Senha)",
             placeholder_password: "••••••••",
-            initiate_access: "Entrar no Fragmento",
+            initiate_access: "Entrar no Mood",
             unauthorized: "Ainda não tem um lugar?",
             establish_identity: "Criar meu cantinho",
             protocol_denied: "Sua essência não foi reconhecida.",
@@ -144,7 +144,7 @@ export const pt = {
             entity_reg: "Manifestação",
             request_alloc: "Um novo começo",
             title: "Criar meu",
-            title_italic: "Fragmento",
+            title_italic: "Mood",
             unique_identifier: "Como quer ser chamado(a)?",
             placeholder_username: "sua_essência",
             communication_node: "Seu Email",
@@ -155,10 +155,18 @@ export const pt = {
             already_registered: "Já tem seu lugar?",
             resume_session: "Entrar agora",
             identity_rejected: "Manifestação interrompida",
-            identity_established: "Seu fragmento foi preparado. Entrando...",
+            identity_established: "Seu Mood foi preparado. Entrando...",
             cancel: "Voltar",
             footer: "Sistema de Alocação // MoodSpace",
-            establishing: "Criando chaves..."
+            establishing: "Criando chaves...",
+        },
+        promotion: {
+            title: "Gostou deste Mood?",
+            subtitle: "Crie seu próprio espaço de sentimentos.",
+            btn_claim: "Registrar meu Mood",
+            viewing_status: "Explorando a essência de",
+            official_registry: "Protocolo de Visitação",
+            dismiss: "[ Esconder Console ]"
         }
     },
     leftSidebar: {
@@ -166,7 +174,7 @@ export const pt = {
         greeting_afternoon: "Boa tarde",
         greeting_night: "Boa noite",
         system_node: "Seu canto online",
-        active_studio: "Fragmento aberto",
+        active_studio: "Mood aberto",
         identity_protocol: "Visitante atual",
         access_level: "Seu plano",
         studio_free: "Livre",
@@ -174,12 +182,12 @@ export const pt = {
         authorized: "Acomodado",
         deployment_area: "Compartilhar a chave",
 
-        external_visibility: "Deixe os outros entrarem no seu fragmento",
+        external_visibility: "Deixe os outros entrarem no seu Mood",
         launch_public_space: "Visitar espaço público",
         system_configuration: "Configurações",
         identity_registry: "Sua conta",
-        system_ux: "Preferências do fragmento",
-        terminate_session: "Deixar o fragmento",
+        system_ux: "Preferências do Mood",
+        terminate_session: "Deixar o Mood",
         exit_hex: "Trancar a porta",
         command_center: "Centro de Comando",
     },
@@ -297,7 +305,7 @@ export const pt = {
         effects: {
             cursor_title: "Seu cursor",
             trails_title: "Rastro do mouse",
-            atmosphere_title: "Atmosfera do fragmento",
+            atmosphere_title: "Atmosfera do Mood",
             active: "Selecionado",
             syncing: "Mudando a atmosfera...",
             deployed: "Tudo pronto.",
@@ -347,7 +355,7 @@ export const pt = {
             color_label: "Cor Principal",
             deploy: "Colar no mural",
             update: "Atualizar Mural",
-            visit_active: "As pessoas poderão escrever no seu fragmento.",
+            visit_active: "As pessoas poderão escrever no seu Mood.",
             tabs: {
                 connection: "Conexão",
                 esthetics: "Estética"
@@ -543,7 +551,7 @@ export const pt = {
             drop: "Pode soltar a imagem",
             hint: "FORMATOS // PNG, JPG, WEBP",
             analyzing: "Analisando aura...",
-            apply: "Aplicar Cores no Fragmento"
+            apply: "Aplicar Cores no Mood"
         },
 
         spotify: {

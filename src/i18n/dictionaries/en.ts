@@ -22,7 +22,7 @@ export const en: Dictionary = {
         tabs: {
             elements: "Elements",
             elements_desc: "Add notes, photos and physical memories.",
-            room: "Fragment",
+            room: "Mood",
             room_desc: "Lights, colors and effects.",
             layers: "Layers",
             layers_desc: "Manage order and visibility",
@@ -31,14 +31,14 @@ export const en: Dictionary = {
         style: {
             atmosphere_title: "Base atmosphere",
             atmosphere_desc: "Light, shadow and color of your space",
-            magic_fx_title: "Fragment aura",
+            magic_fx_title: "Mood aura",
             magic_fx_desc: "Particles, noises and immersive textures",
             danger_title: "Let go of everything",
             danger_desc: "Start over, with a blank canvas",
             clear_wall_btn: "Erase all memories"
         },
         writing: {
-            text_title: "Text fragments",
+            text_title: "Text moods",
             text_desc: "Loose thoughts and outbursts",
         },
         media: {
@@ -103,13 +103,13 @@ export const en: Dictionary = {
         hero_title_your: "What",
         hero_title_reality: "You Feel.",
         hero_subtitle: "Create a space that hugs you back. Keep music, photos, and whispers in a digital sanctuary made of memories and care.",
-        btn_create_studio: "Build my Fragment",
+        btn_create_studio: "Build my Mood",
         version_deployment: "Syncing reality...",
-        visuals: "01 // FRAGMENT",
+        visuals: "01 // MOOD",
         audio: "02 // FEELING",
         curation: "03 // MEMORY",
         showcase: {
-            structure_title: "01 // YOUR SAFE FRAGMENT",
+            structure_title: "01 // YOUR SAFE MOOD",
             structure_desc: "A space that is yours alone, free from judgment. Organize your mind and heart in a layout that breathes with you.",
             atmosphere_title: "02 // THE WARMTH OF NOW",
             atmosphere_desc: "Music that understands your soul and weather that follows your tears or smiles. The atmosphere reacts to your heart.",
@@ -125,12 +125,12 @@ export const en: Dictionary = {
             auth_protocol: "Recognition",
             identify_presence: "Feel at home",
             title: "Enter my",
-            title_italic: "Fragment",
+            title_italic: "Mood",
             identity_url: "Your Email",
             placeholder_email: "your@email.com",
             access_key: "Your heart's key (Password)",
             placeholder_password: "••••••••",
-            initiate_access: "Enter Fragment",
+            initiate_access: "Enter Mood",
             unauthorized: "Don't have a place yet?",
             establish_identity: "Create my hideaway",
             protocol_denied: "Your essence was not recognized.",
@@ -143,7 +143,7 @@ export const en: Dictionary = {
             entity_reg: "Manifestation",
             request_alloc: "A new beginning",
             title: "Create my",
-            title_italic: "Fragment",
+            title_italic: "Mood",
             unique_identifier: "What should we call you?",
             placeholder_username: "your_essence",
             communication_node: "Your Email",
@@ -154,10 +154,18 @@ export const en: Dictionary = {
             already_registered: "Already have your place?",
             resume_session: "Enter now",
             identity_rejected: "Manifestation interrupted",
-            identity_established: "Your fragment has been prepared. Entering...",
+            identity_established: "Your mood has been prepared. Entering...",
             cancel: "Back",
             footer: "Allocation System // MoodSpace",
-            establishing: "Creating keys..."
+            establishing: "Creating keys...",
+        },
+        promotion: {
+            title: "Like this Mood?",
+            subtitle: "Create your own space for feelings.",
+            btn_claim: "Register my Mood",
+            viewing_status: "Exploring the essence of",
+            official_registry: "Visitation Protocol",
+            dismiss: "[ Dismiss Console ]"
         }
     },
     leftSidebar: {
@@ -165,7 +173,7 @@ export const en: Dictionary = {
         greeting_afternoon: "Good afternoon",
         greeting_night: "Good night",
         system_node: "Your online spot",
-        active_studio: "Opened fragment",
+        active_studio: "Opened mood",
         identity_protocol: "Current visitor",
         access_level: "Your plan",
         studio_free: "Free",
@@ -173,12 +181,12 @@ export const en: Dictionary = {
         authorized: "Settled in",
         deployment_area: "Share the key",
 
-        external_visibility: "Let others into your fragment",
+        external_visibility: "Let others into your mood",
         launch_public_space: "Visit public space",
         system_configuration: "Settings",
         identity_registry: "Your account",
-        system_ux: "Fragment preferences",
-        terminate_session: "Leave fragment",
+        system_ux: "Mood preferences",
+        terminate_session: "Leave mood",
         exit_hex: "Lock the door",
         command_center: "Command Center",
     },
@@ -296,7 +304,7 @@ export const en: Dictionary = {
         effects: {
             cursor_title: "Your cursor",
             trails_title: "Mouse trail",
-            atmosphere_title: "Fragment atmosphere",
+            atmosphere_title: "Mood atmosphere",
             active: "Selected",
             syncing: "Changing atmosphere...",
             deployed: "All ready.",
@@ -346,7 +354,7 @@ export const en: Dictionary = {
             color_label: "Main Color",
             deploy: "Paste on mural",
             update: "Update Mural",
-            visit_active: "People will be able to write in your fragment.",
+            visit_active: "People will be able to write in your mood.",
             tabs: {
                 connection: "Connection",
                 esthetics: "Aesthetics"
@@ -542,7 +550,7 @@ export const en: Dictionary = {
             drop: "Drop the image",
             hint: "FORMATS // PNG, JPG, WEBP",
             analyzing: "Analyzing aura...",
-            apply: "Apply Colors to Fragment"
+            apply: "Apply Colors to Mood"
         },
 
         spotify: {

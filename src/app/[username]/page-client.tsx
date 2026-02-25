@@ -92,7 +92,7 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                     views={views}
                     loading={loadingViews}
                 />
-                {isGuest && <GuestPromotion username={publicUser.username} />}
+                {isGuest && hasInteracted && <GuestPromotion username={publicUser.username} />}
                 <SignatureShare username={publicUser.username} />
             </div>
 
