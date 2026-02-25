@@ -93,13 +93,23 @@ O sistema **SmartShapes** permite a composição de murais complexos e estético
 - **Tipagem de Estilos Customizados**: Use a interface `CustomTextureStyle` (estendendo `React.CSSProperties`) para gerenciar variáveis CSS dinâmicas (ex.: `--room-texture-*`) sem recorrer ao tipo `any`.
 - **Sanitização de Actions**: Server Actions devem receber dados limpos (substituindo `null` por `undefined` onde necessário) para evitar conflitos entre as tipagens do Prisma e os schemas de validação Zod.
 
-### Administração & Moderação 🛡️
-- **Gestão de Roles**: O sistema utiliza um enum `Role` (`USER`, `CURATOR`, `MODERATOR`, `ADMIN`).
-- **Comando Manual (Emergência)**: Para conceder acesso administrativo via SSH:
-  ```bash
-  docker exec moodspace_db psql -U mood_admin -d moodspace_prod -c "UPDATE \"User\" SET role = 'ADMIN' WHERE username = 'Nyo';"
-  ```
-- **Auditoria**: Todas as ações administrativas são registradas na tabela `AuditLog`.
+### Design System Admin (Command Center) 🛡️⚡
+As interfaces administrativas seguem o padrão **Premium Hacker UI**, focado em alta densidade de informação e estética técnica de baixo ruído.
+
+- **Filosofia**: O admin deve parecer um "Command Center" ou console de monitoramento de infraestrutura.
+- **Tipografia**:
+    - **Headers**: `text-4xl font-black uppercase tracking-tighter` para títulos principais.
+    - **Subtitles**: `text-sm text-zinc-500 font-mono` para descrições técnicas.
+    - **Labels**: `text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500` para identificadores de categoria.
+    - **Dados**: Use sempre `font-mono` e `tabular-nums` para IDs, timestamps e métricas.
+- **Paleta & UI**:
+    - **Cores de Status**: `Emerald` (Ativo), `Red` (Banido/Risco), `Blue` (Verificado), `Amber` (Ação Necessária).
+    - **Bordas**: Substitua sombras por bordas de `1px` em `zinc-900`. 
+    - **Backdrops**: Use `zinc-950/50` com leve transparência para containers.
+- **UX**:
+    - **Hover-Active**: Ações perigosas ou secundárias devem ter `opacity-0` e transicionar para `opacity-100` apenas no hover da linha ou card.
+    - **Largura**: Telas de admin devem utilizar a largura total disponível (remova `max-w` desnecessários) para permitir monitoramento multitarefa.
+    - **Paginação**: Padrão "Archive Log" usando links `MANIFEST_PREV` / `MANIFEST_NEXT` em mono.
 
 ### Guestbook Studio 3.0 (Evolução Criativa) 💎🌪️✨
 O Mural de Recados foi elevado para além do container tradicional, permitindo composições orgânicas.

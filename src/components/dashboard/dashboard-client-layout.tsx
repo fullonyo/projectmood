@@ -165,27 +165,34 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                     />
 
 
-                    {/* Inner Collapse Button */}
+                    {/* Ghost Trigger: Collapse Left */}
                     <button
                         onClick={() => setIsSidebarOpen(false)}
-                        className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors pointer-events-auto shadow-none group"
+                        className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-24 flex items-center justify-center pointer-events-auto group"
                     >
-                        <ChevronLeft className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
+                        <div className="w-1.5 h-12 bg-zinc-900/10 dark:bg-white/10 group-hover:h-20 group-hover:w-2 bg-zinc-950/50 dark:bg-white/5 backdrop-blur-md border border-black/5 dark:border-white/5 transition-all duration-300 flex items-center justify-center">
+                            <ChevronLeft className="w-3 h-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
                     </button>
                 </div>
             </motion.div>
 
-            {/* Floating Expand Button (Visible when sidebar is closed) */}
-            {!isSidebarOpen && (
-                <motion.button
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    onClick={() => setIsSidebarOpen(true)}
-                    className="absolute top-1/2 left-4 -translate-y-1/2 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-none border border-black dark:border-white flex items-center justify-center shadow-none z-30 hover:scale-110 transition-transform"
-                >
-                    <Menu className="w-5 h-5" />
-                </motion.button>
-            )}
+            {/* Ghost Trigger: Expand Left */}
+            <AnimatePresence>
+                {!isSidebarOpen && (
+                    <motion.button
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -20, opacity: 0 }}
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="absolute top-1/2 left-0 -translate-y-1/2 w-8 h-32 flex items-center justify-start z-30 group"
+                    >
+                        <div className="w-1.5 h-16 bg-zinc-950/50 dark:bg-white/5 backdrop-blur-md border border-r border-black/5 dark:border-white/5 group-hover:h-24 group-hover:w-3 transition-all duration-300 flex items-center justify-center">
+                            <ChevronRight className="w-3 h-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                    </motion.button>
+                )}
+            </AnimatePresence>
 
             {/* Floating Actions Sidebar Container (Right Side - layer 20) */}
             <motion.div
@@ -200,27 +207,34 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                 <div className={`h-full shadow-none relative ${isRightSidebarOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
                     <ActionsSidebar username={username} profile={localProfile} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} />
 
-                    {/* Inner Collapse Button */}
+                    {/* Ghost Trigger: Collapse Right */}
                     <button
                         onClick={() => setIsRightSidebarOpen(false)}
-                        className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-12 bg-white dark:bg-zinc-950 border border-black dark:border-white rounded-none flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors pointer-events-auto shadow-none group"
+                        className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-24 flex items-center justify-center pointer-events-auto group"
                     >
-                        <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
+                        <div className="w-1.5 h-12 bg-zinc-900/10 dark:bg-white/10 group-hover:h-20 group-hover:w-2 bg-zinc-950/50 dark:bg-white/5 backdrop-blur-md border border-black/5 dark:border-white/5 transition-all duration-300 flex items-center justify-center">
+                            <ChevronRight className="w-3 h-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
                     </button>
                 </div>
             </motion.div>
 
-            {/* Floating Expand Button Right (Visible when right sidebar is closed) */}
-            {!isRightSidebarOpen && (
-                <motion.button
-                    initial={{ x: 20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    onClick={() => setIsRightSidebarOpen(true)}
-                    className="absolute top-1/2 right-4 -translate-y-1/2 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-none border border-black dark:border-white flex items-center justify-center shadow-none z-30 hover:scale-110 transition-transform"
-                >
-                    <Menu className="w-5 h-5" />
-                </motion.button>
-            )}
+            {/* Ghost Trigger: Expand Right */}
+            <AnimatePresence>
+                {!isRightSidebarOpen && (
+                    <motion.button
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 20, opacity: 0 }}
+                        onClick={() => setIsRightSidebarOpen(true)}
+                        className="absolute top-1/2 right-0 -translate-y-1/2 w-8 h-32 flex items-center justify-end z-30 group"
+                    >
+                        <div className="w-1.5 h-16 bg-zinc-950/50 dark:bg-white/5 backdrop-blur-md border border-l border-black/5 dark:border-white/5 group-hover:h-24 group-hover:w-3 transition-all duration-300 flex items-center justify-center">
+                            <ChevronLeft className="w-3 h-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                    </motion.button>
+                )}
+            </AnimatePresence>
         </main>
     )
 }

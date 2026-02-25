@@ -26,10 +26,10 @@ export function MetricCard({
 }: MetricCardProps) {
     return (
         <div className={cn(
-            "p-6 border transition-all duration-300 group relative overflow-hidden",
+            "p-6 border transition-all duration-500 group relative overflow-hidden",
             highlight
-                ? "border-zinc-700 bg-zinc-900 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
-                : "border-zinc-900 bg-[#0a0a0a] hover:border-zinc-800",
+                ? "border-zinc-700 bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)]"
+                : "border-zinc-900 bg-zinc-950/20 hover:border-zinc-800 hover:bg-zinc-900/10",
             className
         )}>
             {/* Subtle Gradient background for highlight */}
@@ -51,16 +51,18 @@ export function MetricCard({
                 </div>
 
                 <div className="flex items-baseline gap-2">
-                    <h3 className="text-4xl font-black tracking-tighter text-[#ededed]">
+                    <h3 className="text-4xl font-black tracking-tighter tabular-nums text-[#ededed]">
                         {typeof value === 'number' ? value.toLocaleString() : value}
                     </h3>
 
                     {trend && (
                         <span className={cn(
-                            "text-[10px] font-bold px-1.5 py-0.5",
-                            trend.isUp ? "text-emerald-500" : "text-red-500"
+                            "text-[8px] font-black font-mono px-1.5 py-0.5 border",
+                            trend.isUp
+                                ? "text-emerald-500 border-emerald-500/10 bg-emerald-500/5"
+                                : "text-red-500 border-red-500/10 bg-red-500/5"
                         )}>
-                            {trend.isUp ? "↑" : "↓"} {trend.value}
+                            {trend.isUp ? "+" : "-"} {trend.value}
                         </span>
                     )}
                 </div>

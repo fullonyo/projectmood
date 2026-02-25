@@ -36,17 +36,17 @@ export function UserVerifyToggle({ userId, isVerified: initialVerified, verifica
             onClick={handleToggle}
             disabled={isPending}
             className={cn(
-                "p-2 rounded-md transition-all flex items-center justify-center gap-2",
+                "h-8 w-8 flex items-center justify-center transition-all border border-transparent",
                 isVerified
-                    ? "text-blue-500 bg-blue-500/10 hover:bg-blue-500/20"
-                    : "text-zinc-500 hover:text-white hover:bg-zinc-800"
+                    ? "text-blue-500 border-blue-500/20 bg-blue-500/5 shadow-[0_0_10px_rgba(59,130,246,0.05)]"
+                    : "text-zinc-600 hover:text-white hover:border-zinc-800 hover:bg-zinc-900"
             )}
             title={isVerified ? "Remover Verificação" : "Verificar Usuário"}
         >
             {isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
             ) : (
-                <BadgeCheck className={cn("w-4 h-4", isVerified ? "fill-current" : "")} />
+                <BadgeCheck className={cn("w-3.5 h-3.5", isVerified ? "fill-current" : "")} />
             )}
         </button>
     );

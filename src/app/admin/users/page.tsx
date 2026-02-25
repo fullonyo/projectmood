@@ -3,7 +3,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Shield, Ban, CheckCircle2, Search, Link as LinkIcon } from "lucide-react"
+import { Shield, Ban, CheckCircle2, Search, Link as LinkIcon, Users } from "lucide-react"
 import Link from "next/link"
 import { UserBanToggle } from "./user-ban-toggle"
 import { UserVerifyToggle } from "./user-verify-toggle"
@@ -50,100 +50,114 @@ export default async function AdminUsersPage({
     const totalPages = Math.ceil(totalCount / pageSize)
 
     return (
-        <div className="space-y-6">
-            <header className="flex items-end justify-between mb-8 border-b border-zinc-900 pb-6">
-                <div>
-                    <h1 className="text-2xl font-black uppercase tracking-tighter">Citizens Registry</h1>
-                    <p className="text-sm text-zinc-500 font-mono mt-1">Manage platform population and moderations.</p>
+        <div className="space-y-12 pb-20">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-900 pb-10">
+                <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Users className="w-3 h-3 text-zinc-500" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Demographics & Safety</span>
+                    </div>
+                    <h1 className="text-4xl font-black uppercase tracking-tighter">Citizens Registry</h1>
+                    <p className="text-sm text-zinc-500 font-mono mt-1 max-w-xl">
+                        Central authority for civilian monitoring. Manage permissions, identify anomalies, and enforce community standards.
+                    </p>
                 </div>
-                <div className="text-right">
-                    <div className="text-xs font-mono text-zinc-500 uppercase">Total Population</div>
-                    <div className="text-xl font-black">{totalCount.toLocaleString()}</div>
+                <div className="flex items-center gap-8">
+                    <div className="text-right">
+                        <div className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest leading-none mb-1">Total Population</div>
+                        <div className="text-3xl font-black tabular-nums">{totalCount.toLocaleString()}</div>
+                    </div>
                 </div>
             </header>
 
-            {/* Quick Search (Note: In a pure RSC this would need a client component form, but keeping it simple for now) */}
-            <div className="bg-[#0a0a0a] border border-zinc-900 p-4 flex items-center gap-4">
-                <Search className="w-4 h-4 text-zinc-500" />
+            {/* Quick Search */}
+            <div className="bg-zinc-950/50 border border-zinc-900 p-1 flex items-center gap-4 focus-within:border-zinc-700 transition-colors">
+                <div className="pl-4">
+                    <Search className="w-4 h-4 text-zinc-600" />
+                </div>
                 <form action="/admin/users" className="flex-1">
                     <input
                         name="search"
                         defaultValue={searchTerm}
-                        placeholder="Search username or email..."
-                        className="w-full bg-transparent border-none text-sm text-white focus:outline-none focus:ring-0 placeholder:text-zinc-700"
+                        placeholder="IDENTIFY_BY_USERNAME_OR_EMAIL..."
+                        className="w-full h-12 bg-transparent border-none text-xs font-mono text-white focus:outline-none focus:ring-0 placeholder:text-zinc-800 uppercase tracking-widest"
                     />
                 </form>
             </div>
 
-            <div className="border border-zinc-900 bg-[#0a0a0a] overflow-x-auto">
+            <div className="border border-zinc-900 bg-zinc-950/30 overflow-hidden">
                 <table className="w-full text-left border-collapse whitespace-nowrap">
                     <thead>
-                        <tr className="border-b border-zinc-900 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                            <th className="px-6 py-4">Status & Role</th>
-                            <th className="px-6 py-4">Identity</th>
-                            <th className="px-6 py-4 text-right">Blocks</th>
-                            <th className="px-6 py-4">Joined At</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                        <tr className="border-b border-zinc-900 text-[9px] font-black uppercase tracking-[0.25em] text-zinc-600 bg-zinc-950">
+                            <th className="px-6 py-5">Status & Access</th>
+                            <th className="px-6 py-5">Civilian Identity</th>
+                            <th className="px-6 py-5 text-right">Blocks</th>
+                            <th className="px-6 py-5">Registration Date</th>
+                            <th className="px-6 py-5 text-right">Protocols</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-900/50">
                         {users.map((user) => (
-                            <tr key={user.id} className="hover:bg-zinc-900/40 transition-colors">
+                            <tr key={user.id} className="hover:bg-zinc-900/20 transition-colors group/row">
                                 <td className="px-6 py-4">
                                     <div className="flex flex-wrap items-center gap-2">
                                         {user.isBanned ? (
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-wider">
-                                                <Ban className="w-3 h-3" /> Banned
+                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-red-500/20 bg-red-500/5 text-red-500 text-[8px] font-black uppercase tracking-widest">
+                                                <Ban className="w-2.5 h-2.5" /> Isolated
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-wider">
-                                                <CheckCircle2 className="w-3 h-3" /> Active
+                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 text-[8px] font-black uppercase tracking-widest">
+                                                <CheckCircle2 className="w-2.5 h-2.5" /> Active
                                             </span>
                                         )}
                                         {user.isVerified && (
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-blue-500/10 text-blue-500 text-[10px] font-black uppercase tracking-wider">
-                                                <CheckCircle2 className="w-3 h-3" /> Verified
+                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-blue-500/20 bg-blue-500/5 text-blue-500 text-[8px] font-black uppercase tracking-widest">
+                                                <Shield className="w-2.5 h-2.5" /> Verified
                                             </span>
                                         )}
                                         {user.role === 'ADMIN' && (
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-blue-500/10 text-blue-500 text-[10px] font-black uppercase tracking-wider">
-                                                <Shield className="w-3 h-3" /> Admin
+                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-zinc-500/20 bg-zinc-500/5 text-zinc-400 text-[8px] font-black uppercase tracking-widest">
+                                                System Authority
                                             </span>
                                         )}
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <div className="font-bold text-sm">{user.username}</div>
-                                    <div className="text-xs text-zinc-500 font-mono mt-0.5">{user.email}</div>
+                                    <div className="font-black text-xs uppercase tracking-tight text-zinc-200">@{user.username}</div>
+                                    <div className="text-[10px] text-zinc-600 font-mono mt-0.5 uppercase tracking-tighter">{user.email}</div>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <span className="font-mono text-zinc-400">{user._count.moodBlocks}</span>
+                                    <span className="font-mono text-xs font-black tabular-nums text-zinc-400">{user._count.moodBlocks}</span>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <div className="text-xs text-zinc-400">
+                                    <div className="text-[10px] font-mono uppercase text-zinc-500">
                                         {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true, locale: ptBR })}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-right flex justify-end items-center gap-3">
-                                    <Link
-                                        href={`/${user.username}`}
-                                        target="_blank"
-                                        className="text-zinc-500 hover:text-white transition-colors p-2"
-                                        title="View Room"
-                                    >
-                                        <LinkIcon className="w-4 h-4" />
-                                    </Link>
-                                    <UserVerifyToggle
-                                        userId={user.id}
-                                        isVerified={user.isVerified}
-                                        verificationType={user.verificationType}
-                                    />
-                                    {user.role !== 'ADMIN' && (
-                                        <UserBanToggle userId={user.id} isBanned={user.isBanned} />
-                                    )}
+                                <td className="px-6 py-4 text-right">
+                                    <div className="flex justify-end items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                                        <Link
+                                            href={`/${user.username}`}
+                                            target="_blank"
+                                            className="h-8 w-8 flex items-center justify-center text-zinc-600 hover:text-white transition-colors border border-transparent hover:border-zinc-800 hover:bg-zinc-900"
+                                            title="View Room"
+                                        >
+                                            <LinkIcon className="w-3.5 h-3.5" />
+                                        </Link>
+                                        <div className="w-px h-4 bg-zinc-900 mx-1" />
+                                        <UserVerifyToggle
+                                            userId={user.id}
+                                            isVerified={user.isVerified}
+                                            verificationType={user.verificationType}
+                                        />
+                                        {user.role !== 'ADMIN' && (
+                                            <UserBanToggle userId={user.id} isBanned={user.isBanned} />
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
+
                         {users.length === 0 && (
                             <tr>
                                 <td colSpan={5} className="px-6 py-12 text-center text-zinc-500 font-mono text-sm">
@@ -155,21 +169,21 @@ export default async function AdminUsersPage({
                 </table>
             </div>
 
-            {/* Simple Pagination */}
+            {/* Premium Pagination */}
             {totalPages > 1 && (
-                <div className="flex items-center justify-between border border-zinc-900 bg-[#0a0a0a] p-4 text-xs font-mono uppercase text-zinc-500">
+                <div className="flex items-center justify-between border-t border-zinc-900 pt-8 text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                     <Link
                         href={`/admin/users?page=${currentPage - 1}&search=${searchTerm}`}
-                        className={`hover:text-white ${currentPage === 1 ? 'pointer-events-none opacity-30' : ''}`}
+                        className={`flex items-center gap-3 hover:text-white px-4 py-2 border border-zinc-900 bg-zinc-950 transition-all ${currentPage === 1 ? 'pointer-events-none opacity-20' : ''}`}
                     >
-                        &lt; Prev
+                        &lt; ARCHIVE_PREV
                     </Link>
-                    <span>Page {currentPage} of {totalPages}</span>
+                    <span className="font-black text-zinc-400 tabular-nums tracking-normal">LOG PAGE {currentPage} // {totalPages}</span>
                     <Link
                         href={`/admin/users?page=${currentPage + 1}&search=${searchTerm}`}
-                        className={`hover:text-white ${currentPage === totalPages ? 'pointer-events-none opacity-30' : ''}`}
+                        className={`flex items-center gap-3 hover:text-white px-4 py-2 border border-zinc-900 bg-zinc-950 transition-all ${currentPage === totalPages ? 'pointer-events-none opacity-20' : ''}`}
                     >
-                        Next &gt;
+                        ARCHIVE_NEXT &gt;
                     </Link>
                 </div>
             )}

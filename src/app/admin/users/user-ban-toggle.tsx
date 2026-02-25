@@ -15,25 +15,25 @@ export function UserBanToggle({ userId, isBanned }: { userId: string, isBanned: 
                 startTransition(async () => {
                     const result = await adminBanUser(userId, nextStatus)
                     if (result.success) {
-                        toast.success(nextStatus ? "Usuário banido" : "Usuário reativado")
+                        toast.success(nextStatus ? "Usuário isolado" : "Usuário reintegrado")
                     } else {
-                        toast.error(result.error || "Erro ao atualizar status")
+                        toast.error(result.error || "Erro no protocolo")
                     }
                 })
             }}
             disabled={isPending}
-            className={`p-2 transition-colors flex items-center gap-2 text-xs font-black uppercase tracking-widest ${isBanned
-                ? "text-zinc-500 hover:text-green-500"
-                : "text-zinc-500 hover:text-red-500"
+            className={`h-8 w-8 flex items-center justify-center transition-all border border-transparent ${isBanned
+                ? "text-emerald-500 hover:border-emerald-500/20 hover:bg-emerald-500/5 shadow-[0_0_10px_rgba(16,185,129,0.05)]"
+                : "text-zinc-600 hover:text-red-500 hover:border-red-500/20 hover:bg-red-500/5 shadow-[0_0_10px_rgba(239,68,68,0.05)]"
                 } ${isPending ? "opacity-50 pointer-events-none" : ""}`}
             title={isBanned ? "Unban User" : "Ban User"}
         >
             {isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : isBanned ? (
-                <Unlock className="w-4 h-4" />
+                <Unlock className="w-3.5 h-3.5" />
             ) : (
-                <Ban className="w-4 h-4" />
+                <Ban className="w-3.5 h-3.5" />
             )}
         </button>
     )

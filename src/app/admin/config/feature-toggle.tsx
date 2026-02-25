@@ -14,45 +14,48 @@ export function FeatureToggle({
     const [isPending, startTransition] = useTransition()
 
     return (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border border-zinc-900 bg-[#0a0a0a] hover:bg-zinc-900/50 transition-colors">
-            <div className="flex-1 space-y-1.5">
+        <div className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-zinc-900 bg-zinc-950/50 hover:bg-zinc-900/30 hover:border-zinc-800 transition-all duration-300">
+            <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-3">
-                    <h3 className="text-sm font-bold uppercase tracking-wide">{flag.name}</h3>
-                    <Badge variant="outline" className="text-[9px] font-mono tracking-wider border-zinc-800 text-zinc-500 rounded-none bg-zinc-950 px-1.5 leading-none py-0.5">
+                    <h3 className="text-[12px] font-black uppercase tracking-wider text-zinc-100 group-hover:text-white transition-colors">{flag.name}</h3>
+                    <div className="h-px w-4 bg-zinc-800" />
+                    <code className="text-[9px] font-mono text-zinc-600 group-hover:text-zinc-400 transition-colors uppercase tracking-widest">
                         {flag.key}
-                    </Badge>
+                    </code>
                 </div>
                 {flag.description && (
-                    <p className="text-xs text-zinc-500 font-mono">{flag.description}</p>
+                    <p className="text-[10px] text-zinc-500 font-mono tracking-tight leading-relaxed max-w-md italic">{flag.description}</p>
                 )}
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-8">
                 {/* VIP / Premium Toggle */}
-                <div className="flex items-center gap-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5 cursor-pointer">
-                        <Lock className="w-3 h-3" /> VIP Only
+                <div className="flex flex-col items-end gap-2">
+                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-600 flex items-center gap-1.5 cursor-pointer group-hover:text-zinc-400 transition-colors">
+                        <Lock className="w-2.5 h-2.5" /> VIP Exclusive
                     </label>
-                    <Switch
-                        disabled={isPending}
-                        checked={flag.isPremium}
-                        onCheckedChange={() => startTransition(async () => { await toggleFeatureFlag(flag.key, "isPremium", flag.isPremium) })}
-                        className={`${flag.isPremium ? 'bg-amber-500' : 'bg-zinc-800'}`}
-                    />
+                    <div className="flex items-center gap-3">
+                        <Switch
+                            disabled={isPending}
+                            checked={flag.isPremium}
+                            onCheckedChange={() => startTransition(async () => { await toggleFeatureFlag(flag.key, "isPremium", flag.isPremium) })}
+                            className={`${flag.isPremium ? 'data-[state=checked]:bg-amber-500' : 'data-[state=unchecked]:bg-zinc-900'}`}
+                        />
+                    </div>
                 </div>
 
-                <div className="w-px h-8 bg-zinc-900 hidden sm:block" />
+                <div className="w-px h-10 bg-zinc-900/50 hidden sm:block" />
 
                 {/* Kill Switch (Enabled/Disabled) */}
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 min-w-[70px] justify-end">
+                <div className="flex flex-col items-end gap-2 min-w-[100px]">
+                    <div className="flex items-center gap-1.5">
                         {flag.isEnabled ? (
-                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" /> Live
+                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-500 flex items-center gap-1">
+                                <CheckCircle2 className="w-2.5 h-2.5" /> Status: Live
                             </span>
                         ) : (
-                            <span className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-1">
-                                <Ban className="w-3 h-3" /> Offline
+                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-red-500 flex items-center gap-1">
+                                <Ban className="w-2.5 h-2.5" /> Status: Offline
                             </span>
                         )}
                     </div>
@@ -60,7 +63,7 @@ export function FeatureToggle({
                         disabled={isPending}
                         checked={flag.isEnabled}
                         onCheckedChange={() => startTransition(async () => { await toggleFeatureFlag(flag.key, "isEnabled", flag.isEnabled) })}
-                        className={`${flag.isEnabled ? 'bg-emerald-500' : 'bg-red-500/50'}`}
+                        className={`${flag.isEnabled ? 'data-[state=checked]:bg-emerald-500' : 'data-[state=unchecked]:bg-red-950/30'}`}
                     />
                 </div>
             </div>

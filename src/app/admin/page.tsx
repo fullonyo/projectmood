@@ -25,20 +25,27 @@ export default async function AdminDashboardPage() {
     const activeTrend = calculateTrend(metrics.activeProfiles7d.current, metrics.activeProfiles7d.prev)
 
     return (
-        <div className="space-y-10">
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-900 pb-10">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 bg-emerald-500 animate-pulse rounded-full" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Live Console</span>
+        <div className="space-y-12 pb-20">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-900 pb-10">
+                <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Activity className="w-3 h-3 text-emerald-500" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-500">Live Infrastructure Monitoring</span>
                     </div>
                     <h1 className="text-4xl font-black uppercase tracking-tighter">Command Center</h1>
-                    <p className="text-sm text-zinc-500 font-mono mt-1">Real-time ecosystem intelligence and monitoring.</p>
+                    <p className="text-sm text-zinc-500 font-mono mt-1 max-w-xl">
+                        Real-time ecosystem intelligence. Monitor civilian growth, system health, and enforce global standards from a single authority node.
+                    </p>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs font-mono text-zinc-500">
-                    <span className="uppercase tracking-widest">System Status:</span>
-                    <span className="text-zinc-100 border border-zinc-800 px-2 py-1 bg-zinc-900/50">STABLE</span>
+                <div className="flex items-center gap-6">
+                    <div className="text-right">
+                        <div className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest leading-none mb-1">System Status</div>
+                        <div className="flex items-center gap-2 justify-end">
+                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                            <span className="text-xl font-black tracking-widest uppercase">STABLE</span>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -95,9 +102,9 @@ export default async function AdminDashboardPage() {
 
                     <div className="space-y-4 flex-1">
                         {roleDistribution.map((role: any) => (
-                            <div key={role.role} className="flex items-center justify-between p-3 border border-zinc-900 bg-zinc-950/50">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{role.role}</span>
-                                <span className="text-lg font-black tracking-tighter">{role.count}</span>
+                            <div key={role.role} className="flex items-center justify-between p-3 border border-zinc-900 bg-zinc-950/30 group/item transition-colors hover:border-zinc-800">
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600 group-hover/item:text-zinc-400">{role.role}</span>
+                                <span className="text-xl font-black tracking-tighter tabular-nums">{role.count}</span>
                             </div>
                         ))}
                     </div>
@@ -153,25 +160,25 @@ export default async function AdminDashboardPage() {
 
                     <div className="space-y-6">
                         {recentUsers.map((user: any) => (
-                            <div key={user.id} className="flex flex-col gap-1 border-l border-zinc-800 pl-4 py-1">
+                            <div key={user.id} className="flex flex-col gap-1 border-l border-zinc-900 pl-4 py-1 group/act hover:border-zinc-700 transition-colors">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <span className={cn("text-xs font-black", user.isBanned ? "text-red-500 line-through" : "text-zinc-200")}>
+                                        <span className={cn("text-xs font-black uppercase tracking-tight transition-colors", user.isBanned ? "text-red-500/50 line-through" : "text-zinc-200 group-hover/act:text-white")}>
                                             @{user.username}
                                         </span>
                                         {user.isBanned && (
-                                            <Badge className="h-3 text-[7px] bg-red-900/20 text-red-500 border-red-500/20 px-1 py-0 rounded-none leading-none inline-flex items-center">
-                                                BANNED
-                                            </Badge>
+                                            <span className="text-[7px] font-black bg-red-500/10 text-red-500 border border-red-500/20 px-1 py-0 uppercase tracking-widest">
+                                                Isolated
+                                            </span>
                                         )}
                                     </div>
-                                    <span className="text-[9px] font-mono text-zinc-600 uppercase">
-                                        {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true, locale: ptBR })}
+                                    <span className="text-[8px] font-mono text-zinc-700 uppercase tracking-tighter">
+                                        {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true, locale: ptBR }).toUpperCase()}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-tighter">New Registration</div>
-                                    <span className="px-1 bg-zinc-900 text-[8px] border border-zinc-800 text-zinc-400 font-bold uppercase">{user.role}</span>
+                                    <div className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest">Log: NEW_REGISTRATION</div>
+                                    <span className="px-1 bg-zinc-900 text-[7px] border border-zinc-800 text-zinc-500 font-bold uppercase tracking-widest">{user.role}</span>
                                 </div>
                             </div>
                         ))}
