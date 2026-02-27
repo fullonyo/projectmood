@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { Play } from "lucide-react"
+import { Play, Activity } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
 
 interface ExperienceOverlayProps {
@@ -41,31 +41,34 @@ export function ExperienceOverlay({ isVisible, onEnter, username }: ExperienceOv
                         transition={{ delay: 0.2, duration: 1, ease: [0.16, 1, 0.3, 1] }}
                         className="text-center space-y-12 p-12 relative z-20"
                     >
-                        <div className="space-y-4">
-                            <h1 className="text-white/30 text-[9px] font-black uppercase tracking-[0.6em] leading-none mb-4">
-                                {t('public_page.overlay.title')}
-                            </h1>
-                            <div className="h-[1px] w-12 bg-white/10 mx-auto mb-6" />
-                            <p className="text-white text-5xl font-extralight tracking-tighter leading-tight italic opacity-90">
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-center gap-2 opacity-30 mb-8">
+                                <Activity className="w-4 h-4 text-white" />
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white">
+                                    {t('public_page.overlay.title')}
+                                </h3>
+                            </div>
+
+                            <p className="text-white text-6xl md:text-8xl font-black italic tracking-tighter leading-none opacity-90">
                                 @{username}
                             </p>
+                            <div className="h-[2px] w-24 bg-white/10 mx-auto" />
                         </div>
 
                         <button
                             onClick={onEnter}
-                            className="group relative flex items-center justify-center w-20 h-20 mx-auto transition-all duration-500"
+                            className="group relative flex items-center justify-center w-28 h-28 mx-auto transition-all duration-700 active:scale-95"
                         >
-                            {/* Inner Glow */}
-                            <div className="absolute inset-0 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all duration-500" />
-
-                            {/* Circle Border */}
-                            <div className="absolute inset-0 border border-white/20 rounded-full group-hover:scale-110 group-hover:border-white/40 transition-all duration-500" />
+                            {/* Inner technical marks */}
+                            <div className="absolute inset-0 border border-white/10 rounded-none group-hover:border-white/40 transition-all duration-500" />
+                            <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white opacity-20 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white opacity-20 group-hover:opacity-100 transition-opacity" />
 
                             {/* Icon */}
-                            <Play className="w-6 h-6 text-white fill-white group-hover:scale-110 transition-all duration-500 relative z-10" />
+                            <Play className="w-8 h-8 text-white fill-white group-hover:scale-110 transition-all duration-500 relative z-10" />
                         </button>
 
-                        <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.4em] animate-pulse">
+                        <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.5em] animate-pulse">
                             {t('public_page.overlay.click_to_enter')}
                         </p>
                     </motion.div>

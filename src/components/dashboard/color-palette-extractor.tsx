@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react"
 import { useDropzone } from "react-dropzone"
 import { Button } from "@/components/ui/button"
-import { Palette, Upload, X, Sparkles, Loader2 } from "lucide-react"
+import { Palette, Upload, X, Sparkles, Loader2, Activity } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
@@ -86,23 +86,29 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
+            <header className="flex items-center gap-2 opacity-30 px-1">
+                <Activity className="w-3 h-3 text-black dark:text-white" />
+                <h3 className="text-[9px] font-black uppercase tracking-[0.3em]">{t('editors.palette.title') || "Color Extraction"}</h3>
+            </header>
+
             {!previewUrl ? (
                 <div
                     {...getRootProps()}
                     className={cn(
-                        "border border-dashed rounded-none p-6 text-center transition-all cursor-pointer group relative overflow-hidden",
+                        "border border-dashed p-10 text-center transition-all cursor-pointer group relative overflow-hidden bg-zinc-50/50 dark:bg-zinc-900/10",
                         isDragActive
-                            ? 'border-black dark:border-white bg-black/5 dark:bg-white/5'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-zinc-50/50 dark:bg-black/20'
+                            ? 'border-black dark:border-white bg-zinc-100 dark:bg-zinc-800/20'
+                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
                     )}
                 >
                     <input {...getInputProps()} />
-                    <Upload className="w-5 h-5 mx-auto mb-2 text-zinc-400 group-hover:scale-110 transition-transform" />
-                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white opacity-20 group-hover:opacity-100 transition-opacity" />
+                    <Upload className="w-6 h-6 mx-auto mb-4 text-zinc-400 opacity-40 group-hover:scale-110 transition-transform" />
+                    <p className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-500">
                         {isDragActive ? t('editors.palette.drop') : t('editors.palette.drag')}
                     </p>
-                    <p className="text-[7px] text-zinc-400 mt-1 uppercase tracking-tighter">{t('editors.palette.hint')}</p>
+                    <p className="text-[7px] text-zinc-400 font-mono mt-2 uppercase tracking-widest">{t('editors.palette.hint')}</p>
                 </div>
             ) : (
                 <div className="space-y-4 animate-in fade-in zoom-in duration-500">
@@ -145,8 +151,9 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                             </div>
                             <Button
                                 onClick={() => onApplyPalette(extractedColors)}
-                                className="w-full bg-black text-white hover:bg-zinc-900 dark:bg-white dark:text-black h-12 rounded-none text-[8px] font-black uppercase tracking-[0.3em] border border-black dark:border-white transition-all hover:shadow-xl active:scale-[0.98]"
+                                className="w-full bg-zinc-50 dark:bg-zinc-900 text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-12 rounded-none text-[8px] font-black uppercase tracking-[0.3em] border border-zinc-100 dark:border-zinc-800 transition-all active:scale-[0.98] relative group"
                             >
+                                <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />
                                 {t('editors.palette.apply')}
                             </Button>
                         </div>

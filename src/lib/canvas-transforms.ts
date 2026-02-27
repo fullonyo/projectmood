@@ -421,7 +421,12 @@ export function calculateSnap(
         }
     }
 
-    return { x: finalX, y: finalY, guidelines, distances };
+    return {
+        x: parseFloat(Math.max(0, Math.min(100, finalX)).toFixed(4)),
+        y: parseFloat(Math.max(0, Math.min(100, finalY)).toFixed(4)),
+        guidelines,
+        distances
+    };
 }
 
 function hHPercent(block: any, canvasHeight: number) {

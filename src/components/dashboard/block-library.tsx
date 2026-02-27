@@ -16,7 +16,9 @@ import {
     Share2,
     Book,
     Play,
-    Palette
+    Palette,
+    MoreHorizontal,
+    Activity
 } from "lucide-react"
 
 interface BlockLibraryProps {
@@ -56,15 +58,17 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-left-2 duration-300">
-            <header>
-                <div className="flex items-center gap-2 mb-1">
-                    <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                    <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('sidebar.library.title')}</h3>
+            <header className="relative mb-8 space-y-3 px-1">
+                <div className="flex items-center gap-2 opacity-30">
+                    <Activity className="w-2.5 h-2.5" />
+                    <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('sidebar.library.title')}</h3>
                 </div>
-                <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('sidebar.library.subtitle')}</p>
+                <div className="flex flex-col border-l border-zinc-100 dark:border-zinc-900 pl-4 py-1">
+                    <p className="text-sm font-black italic tracking-tighter uppercase leading-tight">{t('sidebar.library.subtitle')}</p>
+                </div>
             </header>
 
-            <div className="space-y-6">
+            <div className="space-y-12">
                 {categories.map((group, groupIdx) => {
                     // Filter items based on systemFlags. Default is true if flag is missing.
                     const visibleItems = group.items.filter(item => {
@@ -76,27 +80,36 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
                     if (visibleItems.length === 0) return null;
 
                     return (
-                        <div key={groupIdx} className="grid grid-cols-2 gap-3">
-                            {visibleItems.map((item) => {
-                                const Icon = item.icon
-                                return (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => onAddBlock(item.type)}
-                                        className="flex flex-col items-start p-4 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition-all group text-left shadow-none"
-                                    >
-                                        <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50 mb-3 group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all duration-300 group-hover:scale-[1.15] group-hover:-rotate-3">
-                                            <Icon className="w-4 h-4 transition-transform duration-300" />
-                                        </div>
-                                        <h4 className="text-[10px] font-black uppercase tracking-wider mb-1 transition-transform duration-300 group-hover:translate-x-1">
-                                            {t(`sidebar.library.items.${item.tk}.title`)}
-                                        </h4>
-                                        <p className="text-[8px] text-zinc-400 font-medium leading-relaxed opacity-80 decoration-zinc-300 transition-transform duration-300 group-hover:translate-x-1">
-                                            {t(`sidebar.library.items.${item.tk}.desc`)}
-                                        </p>
-                                    </button>
-                                )
-                            })}
+                        <div key={groupIdx} className="space-y-4">
+                            <header className="flex items-center justify-between opacity-30">
+                                <h4 className="text-[7.5px] font-black uppercase tracking-[0.4em]">Group.0{groupIdx + 1}</h4>
+                                <div className="h-[1px] flex-1 mx-4 bg-zinc-200 dark:bg-zinc-800" />
+                                <MoreHorizontal className="w-3 h-3" />
+                            </header>
+
+                            <div className="grid grid-cols-2 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
+                                {visibleItems.map((item) => {
+                                    const Icon = item.icon
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => onAddBlock(item.type)}
+                                            className="flex flex-col items-center justify-center p-6 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-all group relative overflow-hidden"
+                                        >
+                                            <div className="mb-4 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors duration-300">
+                                                <Icon className="w-5 h-5 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3" />
+                                            </div>
+
+                                            <h4 className="text-[7.5px] font-black uppercase tracking-[0.4em] text-center">
+                                                {t(`sidebar.library.items.${item.tk}.title`)}
+                                            </h4>
+
+                                            {/* HUD decorative corner markers */}
+                                            <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white opacity-0 group-hover:opacity-20 transition-opacity" />
+                                        </button>
+                                    )
+                                })}
+                            </div>
                         </div>
                     );
                 })}

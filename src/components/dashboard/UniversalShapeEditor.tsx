@@ -10,7 +10,7 @@ import {
     Circle, Square, Triangle, Hexagon, Star, Github,
     Palette, Layers, Sparkles, Box, Droplets,
     ChevronLeft, ChevronRight, Wind, Zap, MousePointer2,
-    Minus, Grid, Flower, Share2, Waves, RefreshCw
+    Minus, Grid, Flower, Share2, Waves, RefreshCw, Activity
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
@@ -116,33 +116,33 @@ export function UniversalShapeEditor({
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 pb-20">
             {/* Header with Navigation */}
             <header className="space-y-6">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-                        <Palette className="w-4 h-4 text-black dark:text-white" />
-                    </div>
-                    <div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.shape.title')}</h3>
-                        <p className="text-[8px] text-zinc-400 uppercase tracking-widest leading-none mt-1">{t('editors.shape.subtitle')}</p>
-                    </div>
-                </div>
+                <header className="flex items-center gap-2 opacity-30 px-1 mb-2">
+                    <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
+                    <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.shape.title')}</h3>
+                </header>
 
-                <nav className="flex gap-1 border-b border-zinc-100 dark:border-zinc-900 pb-px">
+                <nav className="grid grid-cols-3 border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10">
                     {(['geometry', 'style', 'effects'] as TabType[]).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={cn(
-                                "flex-1 px-2 py-3 text-[8px] font-black uppercase tracking-widest transition-all relative",
+                                "flex flex-col items-center justify-center py-4 gap-1.5 transition-all relative group",
                                 activeTab === tab
-                                    ? "text-black dark:text-white"
-                                    : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                                    ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                    : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                             )}
                         >
-                            {t(`editors.shape.tabs.${tab}`)}
+                            {activeTab === tab && (
+                                <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                            )}
+                            <div className={cn("text-[6px] font-black uppercase tracking-[0.2em] transition-opacity", activeTab === tab ? "opacity-100" : "opacity-40")}>
+                                {t(`editors.shape.tabs.${tab}`)}
+                            </div>
                             {activeTab === tab && (
                                 <motion.div
                                     layoutId="shape-tab-active"
-                                    className="absolute bottom-[-1px] left-0 right-0 h-[1.5px] bg-black dark:bg-white"
+                                    className="absolute bottom-0 left-2 right-2 h-0.5 bg-black dark:bg-white"
                                 />
                             )}
                         </button>
@@ -157,20 +157,25 @@ export function UniversalShapeEditor({
                         <Label className="text-[9px] font-black uppercase tracking-widest opacity-50 flex items-center gap-2">
                             <Box className="w-3 h-3" /> {t('editors.shape.geometry_label')}
                         </Label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
                             {SHAPE_OPTIONS.map((s) => (
                                 <button
                                     key={s.id}
                                     onClick={() => setShapeType(s.id)}
                                     className={cn(
-                                        "flex flex-col items-center justify-center p-3 gap-2 border transition-all",
+                                        "flex flex-col items-center justify-center py-5 gap-2 transition-all relative group",
                                         shapeType === s.id
-                                            ? "bg-black text-white border-black dark:bg-white dark:text-black dark:border-white shadow-xl scale-[1.02]"
-                                            : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:border-black dark:hover:border-white"
+                                            ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                            : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                     )}
                                 >
-                                    <s.icon className="w-4 h-4" />
-                                    <span className="text-[7px] font-bold uppercase tracking-tighter">{t(`editors.shape.shapes.${s.tk}`)}</span>
+                                    {shapeType === s.id && (
+                                        <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                                    )}
+                                    <s.icon className={cn("w-3.5 h-3.5 transition-transform", shapeType === s.id && "scale-110")} />
+                                    <span className="text-[5.5px] font-black uppercase tracking-tighter opacity-70">
+                                        {t(`editors.shape.shapes.${s.tk}`)}
+                                    </span>
                                 </button>
                             ))}
                         </div>
@@ -253,15 +258,29 @@ export function UniversalShapeEditor({
                             <Label className="text-[9px] font-black uppercase tracking-widest opacity-50 flex items-center gap-2">
                                 <Layers className="w-3 h-3" /> {t('editors.shape.blend_label')}
                             </Label>
-                            <select
-                                value={blendMode}
-                                onChange={(e) => setBlendMode(e.target.value)}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-none h-10 text-[9px] font-black uppercase tracking-widest px-3 outline-none focus:ring-1 ring-black dark:ring-white"
-                            >
+                            <div className="grid grid-cols-2 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800 max-h-32 overflow-y-auto custom-scrollbar">
                                 {BLEND_MODES.map(mode => (
-                                    <option key={mode} value={mode}>{mode.replace('-', ' ')}</option>
+                                    <button
+                                        key={mode}
+                                        onClick={() => setBlendMode(mode)}
+                                        className={cn(
+                                            "flex items-center gap-2 px-3 py-2 text-[8px] font-black uppercase tracking-widest transition-all relative group",
+                                            blendMode === mode
+                                                ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                                : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                                        )}
+                                    >
+                                        {blendMode === mode && (
+                                            <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                                        )}
+                                        <div className={cn(
+                                            "w-1.5 h-1.5 rounded-full",
+                                            blendMode === mode ? "bg-black dark:bg-white" : "bg-transparent border border-zinc-300 dark:border-zinc-700"
+                                        )} />
+                                        {mode.replace('-', ' ')}
+                                    </button>
                                 ))}
-                            </select>
+                            </div>
                         </div>
 
                         <div className="space-y-4 p-4 border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/50">
@@ -380,8 +399,10 @@ export function UniversalShapeEditor({
             {/* Action */}
             <Button
                 onClick={handleSave}
-                className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-16 font-black uppercase tracking-[0.5em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl mt-4"
+                className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-16 font-black uppercase tracking-[0.4em] text-[10px] transition-all border border-black dark:border-white relative group mt-4"
             >
+                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-current opacity-30 group-hover:opacity-100 transition-opacity" />
                 {block?.id ? t('editors.shape.update_btn') : t('editors.shape.deploy_btn')}
             </Button>
         </div>

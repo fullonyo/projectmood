@@ -169,6 +169,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                         removeBlocks={removeBlocks}
                         onUpdateProfile={handleUpdateLocalProfile}
                         systemFlags={systemFlags}
+                        publishedAt={publishedAt}
                         onNormalize={normalizeZIndexes}
                     />
 
@@ -176,10 +177,12 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                     {/* Ghost Trigger: Collapse Left */}
                     <button
                         onClick={() => setIsSidebarOpen(false)}
-                        className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-24 flex items-center justify-center pointer-events-auto group"
+                        className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-32 flex items-center justify-center pointer-events-auto group z-50"
                     >
-                        <div className="w-1.5 h-12 bg-zinc-900/10 dark:bg-white/10 group-hover:h-20 group-hover:w-2 bg-zinc-950/50 dark:bg-white/5 backdrop-blur-md border border-black/5 dark:border-white/5 transition-all duration-300 flex items-center justify-center">
-                            <ChevronLeft className="w-3 h-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="w-1 h-16 bg-zinc-950/20 dark:bg-white/5 backdrop-blur-md border border-black/5 dark:border-white/5 group-hover:h-24 group-hover:w-1.5 transition-all duration-500 flex flex-col items-center justify-between py-2">
+                            <div className="w-0.5 h-0.5 bg-zinc-400 opacity-20" />
+                            <ChevronLeft className="w-2.5 h-2.5 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="w-0.5 h-0.5 bg-zinc-400 opacity-20" />
                         </div>
                     </button>
                 </div>
@@ -195,8 +198,10 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                         onClick={() => setIsSidebarOpen(true)}
                         className="absolute top-1/2 left-0 -translate-y-1/2 w-8 h-32 flex items-center justify-start z-30 group"
                     >
-                        <div className="w-1.5 h-16 bg-zinc-950/50 dark:bg-white/5 backdrop-blur-md border border-r border-black/5 dark:border-white/5 group-hover:h-24 group-hover:w-3 transition-all duration-300 flex items-center justify-center">
-                            <ChevronRight className="w-3 h-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="w-1 h-16 bg-zinc-950/20 dark:bg-white/5 backdrop-blur-md border border-r border-black/5 dark:border-white/5 group-hover:h-24 group-hover:w-1.5 transition-all duration-500 flex flex-col items-center justify-between py-2">
+                            <div className="w-0.5 h-0.5 bg-zinc-400 opacity-20" />
+                            <ChevronRight className="w-2.5 h-2.5 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="w-0.5 h-0.5 bg-zinc-400 opacity-20" />
                         </div>
                     </motion.button>
                 )}
@@ -218,10 +223,12 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                     {/* Ghost Trigger: Collapse Right */}
                     <button
                         onClick={() => setIsRightSidebarOpen(false)}
-                        className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-24 flex items-center justify-center pointer-events-auto group"
+                        className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-32 flex items-center justify-center pointer-events-auto group z-50"
                     >
-                        <div className="w-1.5 h-12 bg-zinc-900/10 dark:bg-white/10 group-hover:h-20 group-hover:w-2 bg-zinc-950/50 dark:bg-white/5 backdrop-blur-md border border-black/5 dark:border-white/5 transition-all duration-300 flex items-center justify-center">
-                            <ChevronRight className="w-3 h-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="w-1 h-16 bg-zinc-950/20 dark:bg-white/5 backdrop-blur-md border border-black/5 dark:border-white/5 group-hover:h-24 group-hover:w-1.5 transition-all duration-500 flex flex-col items-center justify-between py-2">
+                            <div className="w-0.5 h-0.5 bg-zinc-400 opacity-20" />
+                            <ChevronRight className="w-2.5 h-2.5 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="w-0.5 h-0.5 bg-zinc-400 opacity-20" />
                         </div>
                     </button>
                 </div>
@@ -237,8 +244,10 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                         onClick={() => setIsRightSidebarOpen(true)}
                         className="absolute top-1/2 right-0 -translate-y-1/2 w-8 h-32 flex items-center justify-end z-30 group"
                     >
-                        <div className="w-1.5 h-16 bg-zinc-950/50 dark:bg-white/5 backdrop-blur-md border border-l border-black/5 dark:border-white/5 group-hover:h-24 group-hover:w-3 transition-all duration-300 flex items-center justify-center">
-                            <ChevronLeft className="w-3 h-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="w-1 h-16 bg-zinc-950/20 dark:bg-white/5 backdrop-blur-md border border-l border-black/5 dark:border-white/5 group-hover:h-24 group-hover:w-1.5 transition-all duration-500 flex flex-col items-center justify-between py-2">
+                            <div className="w-0.5 h-0.5 bg-zinc-400 opacity-20" />
+                            <ChevronLeft className="w-2.5 h-2.5 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="w-0.5 h-0.5 bg-zinc-400 opacity-20" />
                         </div>
                     </motion.button>
                 )}

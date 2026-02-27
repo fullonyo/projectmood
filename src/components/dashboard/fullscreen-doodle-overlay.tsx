@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react"
 import { motion } from "framer-motion"
 import { useCanvasInteraction } from "./canvas-interaction-context"
 import { Button } from "@/components/ui/button"
-import { X, Check, Eraser, Loader2, Paintbrush } from "lucide-react"
+import { X, Check, Eraser, Loader2, Paintbrush, Activity } from "lucide-react"
 import { addMoodBlock } from "@/actions/profile"
 import imageCompression from "browser-image-compression"
 import { cn } from "@/lib/utils"
@@ -219,86 +219,99 @@ export function FullscreenDoodleOverlay() {
 
                 {/* Floating Tools Palette */}
                 <motion.div
-                    className="flex flex-col md:flex-row items-center gap-4 p-3 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border border-black/10 dark:border-white/10 shadow-2xl rounded-2xl"
+                    className="bg-white/95 dark:bg-black/95 backdrop-blur-2xl border border-zinc-200 dark:border-zinc-800 shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-0 rounded-none overflow-hidden relative group"
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.1 }}
                 >
-                    {/* Colors */}
-                    <div className="flex gap-1.5 p-1 px-2 border-r border-zinc-200 dark:border-zinc-800">
-                        {PRESET_COLORS.map(c => (
-                            <button
-                                key={c}
-                                onClick={() => setBrushColor(c)}
-                                className={cn(
-                                    "w-8 h-8 rounded-full transition-transform hover:scale-110 shadow-sm border border-black/5 dark:border-white/10",
-                                    brushColor === c && "ring-2 ring-offset-2 ring-black dark:ring-white scale-110"
-                                )}
-                                style={{ backgroundColor: c }}
-                                title={c}
-                            />
-                        ))}
-                    </div>
+                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white opacity-20 group-hover:opacity-100 transition-opacity" />
 
-                    {/* Sizes */}
-                    <div className="flex gap-2 p-1 px-2 border-r border-zinc-200 dark:border-zinc-800">
-                        {[2, 4, 8, 12, 16].map(size => (
-                            <button
-                                key={size}
-                                onClick={() => setBrushSize(size)}
-                                className={cn(
-                                    "w-8 h-8 flex items-center justify-center rounded-full transition-all hover:bg-black/5 dark:hover:bg-white/5",
-                                    brushSize === size && "bg-black/5 dark:bg-white/10 ring-1 ring-black/20 dark:ring-white/20"
-                                )}
-                            >
-                                <div
-                                    className="bg-black dark:bg-white rounded-full transition-all"
-                                    style={{ width: Math.min(size, 16), height: Math.min(size, 16) }}
+                    <header className="flex items-center gap-2 opacity-30 px-4 py-2 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/50">
+                        <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
+                        <h3 className="text-[7px] font-black uppercase tracking-[0.3em]">{t('editors.doodle.title')}</h3>
+                    </header>
+
+                    <div className="flex flex-col md:flex-row items-center p-2 gap-4">
+                        {/* Colors */}
+                        <div className="flex gap-1.5 p-1 px-2 md:border-r border-zinc-100 dark:border-zinc-900">
+                            {PRESET_COLORS.map(c => (
+                                <button
+                                    key={c}
+                                    onClick={() => setBrushColor(c)}
+                                    className={cn(
+                                        "w-7 h-7 rounded-none transition-all hover:scale-110 border border-black/5 dark:border-white/10",
+                                        brushColor === c && "ring-1 ring-offset-2 ring-black dark:ring-white scale-110"
+                                    )}
+                                    style={{ backgroundColor: c }}
+                                    title={c}
                                 />
-                            </button>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-2 p-1 px-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={clearCanvas}
-                            disabled={isPending || !hasDrawn}
-                            className="hover:bg-red-50 hover:text-red-500 rounded-xl h-10 w-10 text-zinc-500 transition-colors"
-                            title={t('doodle.clear_screen')}
-                        >
-                            <Eraser className="w-5 h-5" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsDrawingMode(false)}
-                            disabled={isPending}
-                            className="hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl h-10 w-10 text-zinc-500 transition-colors"
-                            title="Cancelar"
-                        >
-                            <X className="w-5 h-5" />
-                        </Button>
+                        {/* Sizes */}
+                        <div className="flex gap-2 p-1 px-2 md:border-r border-zinc-100 dark:border-zinc-900">
+                            {[2, 4, 8, 12, 16].map(size => (
+                                <button
+                                    key={size}
+                                    onClick={() => setBrushSize(size)}
+                                    className={cn(
+                                        "w-8 h-8 flex items-center justify-center rounded-none transition-all hover:bg-black/5 dark:hover:bg-white/5",
+                                        brushSize === size && "bg-black text-white dark:bg-white dark:text-black"
+                                    )}
+                                >
+                                    <div
+                                        className={cn(
+                                            "rounded-full transition-all",
+                                            brushSize === size ? "bg-white dark:bg-black" : "bg-black dark:bg-white"
+                                        )}
+                                        style={{ width: Math.min(size, 16), height: Math.min(size, 16) }}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-1 p-1 px-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={clearCanvas}
+                                disabled={isPending || !hasDrawn}
+                                className="hover:bg-red-500 hover:text-white dark:hover:bg-red-500 rounded-none h-10 w-10 text-zinc-500 transition-all"
+                                title={t('doodle.clear_screen')}
+                            >
+                                <Eraser className="w-4 h-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsDrawingMode(false)}
+                                disabled={isPending}
+                                className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black rounded-none h-10 w-10 text-zinc-500 transition-all"
+                                title="Cancelar"
+                            >
+                                <X className="w-4 h-4" />
+                            </Button>
+                        </div>
                     </div>
                 </motion.div>
 
-                {/* Primary Action Button */}
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.2 }}
+                    className="w-full max-w-[200px]"
                 >
                     <Button
                         onClick={saveManifest}
                         disabled={isPending || !hasDrawn}
                         className={cn(
-                            "bg-black dark:bg-white text-white dark:text-black rounded-full h-12 px-8 font-black uppercase tracking-widest text-[11px] hover:scale-105 active:scale-95 transition-all shadow-xl",
+                            "w-full bg-zinc-50 dark:bg-zinc-900 text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-16 rounded-none text-[10px] font-black uppercase tracking-[0.4em] border border-zinc-100 dark:border-zinc-800 transition-all relative group overflow-hidden",
                             (!hasDrawn || isPending) && "opacity-50 grayscale"
                         )}
-                        title={t('doodle.confirm_save')}
                     >
+                        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white" />
+                        <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-black dark:border-white opacity-0 group-hover:opacity-100 transition-opacity" />
                         {isPending ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         ) : (
@@ -310,9 +323,15 @@ export function FullscreenDoodleOverlay() {
             </div>
 
             {/* Guide Text */}
-            <p className="absolute top-10 left-1/2 -translate-x-1/2 text-center text-[10px] font-black uppercase tracking-[0.4em] text-black/50 dark:text-white/50 bg-white/50 dark:bg-black/50 px-4 py-2 backdrop-blur-sm pointer-events-none">
-                {t('doodle.kinetic_active')}
-            </p>
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30 pointer-events-none">
+                <div className="flex items-center gap-2">
+                    <Activity className="w-3.5 h-3.5 text-black dark:text-white" />
+                    <p className="text-[9px] font-black uppercase tracking-[0.5em] text-black dark:text-white">
+                        {t('doodle.kinetic_active')}
+                    </p>
+                </div>
+                <div className="h-[1px] w-12 bg-black/10 dark:bg-white/10" />
+            </div>
         </motion.div>
     )
 }

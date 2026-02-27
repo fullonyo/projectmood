@@ -57,10 +57,13 @@ export function ConfirmModal({
                         exit={{ opacity: 0, scale: 0.98, y: 8 }}
                         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                         className={cn(
-                            "relative w-full max-w-[340px] bg-zinc-950/90 backdrop-blur-2xl border rounded-none overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]",
+                            "relative w-full max-w-[340px] bg-zinc-950/90 backdrop-blur-2xl border rounded-none overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] group",
                             type === 'danger' ? "border-red-500/20" : "border-white/10"
                         )}
                     >
+                        {/* HUD Decoration */}
+                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-white/20" />
+                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-white/20" />
                         {/* Background Texture */}
                         <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay">
                             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">

@@ -25,7 +25,7 @@ export type MoodBlockType =
     | 'moodStatus'
     | 'countdown'
     | 'shape'
-    | 'rorschach'; // Future block placeholder
+    | 'rorschach';
 
 export type MoodBlockContent =
     | TextContent
@@ -37,14 +37,15 @@ export type MoodBlockContent =
     | GuestbookContent
     | MoodStatusContent
     | WeatherContent
-    | { mediaType: 'video' | 'music' | 'media'; videoId?: string; trackId?: string; frame?: string; caption?: string;[key: string]: any } // Catch-all for unified media
-    | { image: string;[key: string]: any } // Doodle
-    | { color: string; pattern?: string;[key: string]: any } // Tape
+    | { mediaType: 'video' | 'music' | 'media'; videoId?: string; trackId?: string; frame?: string; caption?: string;[key: string]: any }
     | ShapeContent
+    | RorschachContent
+    | DoodleContent
+    | TapeContent
     | any;
 
 export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content'> {
-    type: string; // Prisma stores as string, but we can narrow it down in UI
+    type: string;
     zIndex: number;
     rotation: number;
     isLocked: boolean;
@@ -53,8 +54,7 @@ export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content
     content: MoodBlockContent;
 }
 
-
-// Specific Content Interfaces for stricter typing where possible
+// Specific Content Interfaces
 export interface TextContent {
     text: string;
     style?: string;
@@ -86,7 +86,6 @@ export interface MusicContent {
     displayMode?: 'compact' | 'card';
 }
 
-// Theme Configuration Interface
 export interface ThemeConfig {
     bg: string;
     primary: string;
@@ -95,9 +94,6 @@ export interface ThemeConfig {
     gridOpacity: string;
 }
 
-// ─── Draft/Publish System Types ──────────────────────────────────────────────
-
-/** Configurações visuais do perfil (snapshot imutável no ProfileVersion) */
 export interface ProfileVisualConfig {
     theme: string;
     backgroundColor: string | null;
@@ -111,7 +107,6 @@ export interface ProfileVisualConfig {
     avatarUrl: string | null;
 }
 
-/** Versão publicada de um perfil (snapshot imutável) */
 export interface ProfileVersion {
     id: string;
     profileId: string;
@@ -122,14 +117,10 @@ export interface ProfileVersion {
     createdAt: Date | string;
 }
 
-/** Profile com versões incluídas (resultado do include do Prisma) */
 export interface ProfileWithVersions extends Profile {
     versions?: ProfileVersion[];
 }
 
-// ─── Public Page Types ───────────────────────────────────────────────────────
-
-/** DTO sanitizado do User para envio ao client (sem password/email/id) */
 export interface PublicUser {
     username: string;
     name: string | null;
@@ -137,7 +128,6 @@ export interface PublicUser {
     verificationType: string | null;
 }
 
-/** Props tipadas do componente PublicMoodPageClient */
 export interface PublicMoodPageProps {
     publicUser: PublicUser;
     profileId: string;
@@ -147,8 +137,6 @@ export interface PublicMoodPageProps {
     theme: string;
     isGuest: boolean;
 }
-
-// ─── Content Types ───────────────────────────────────────────────────────────
 
 export interface SocialContent {
     platform: string;
@@ -197,4 +185,26 @@ export interface ShapeContent {
     points?: number;
     blendMode?: string;
     gradient?: boolean;
+}
+
+export interface RorschachContent {
+    seed: string;
+    axes: number;
+    density: number;
+    smoothness: number;
+    color: string;
+    blendMode: string;
+    opacity: number;
+}
+
+export interface DoodleContent {
+    image: string;
+    color?: string;
+    opacity?: number;
+}
+
+export interface TapeContent {
+    color: string;
+    pattern?: string;
+    opacity?: number;
 }

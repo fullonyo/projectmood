@@ -18,9 +18,14 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 
 ### Dashboard Studio
 - **Layout Simétrico**: O dashboard não possui mais header superior. Agora utiliza duas sidebars flutuantes:
-  - **Sidebar Esquerda (Ferramentas)**: Criar e editar blocos (Estilo, Escrita, Mídia, Criativo).
-  - **Actions Sidebar (Direita)**: Gestão de perfil, visualização pública, Share e Logout. Contém o **User Card** com saudações dinâmicas.
-- **Avatar Personalizado**: Sistema de upload no cliente com compressão automática (`browser-image-compression`) e armazenamento em Base64 no banco de dados. Clique no avatar na sidebar direita para trocar.
+21.   - **Sidebar Esquerda (Ferramentas)**: Criar e editar blocos (Estilo, Escrita, Mídia, Criativo).
+22.   - **Actions Sidebar (Direita)**: Gestão de perfil, visualização pública, Share e Logout. Contém o **User Card** com saudações dinâmicas.
+- **Command Sidebar HUD 🕹️💎**: A sidebar evoluiu para um sistema HUD dinâmico:
+    - **Contextual Intelligence**: O cabeçalho alterna entre "Diorama Title" e "Multi-Selection Actions" (Alinhamento, Delete e métricas HUD de precisão) ao selecionar múltiplos blocos.
+    - **Room Insight**: Quando ociosos, exibe estatísticas atmosféricas como Dominância Cromática (Luminance Spectrum) e tempo desde a última publicação (Release Stats).
+    - **Estética HUD (Studio 2.0)**: Uso de grades ultra-finas (0.5px), tipografia mono-espaçada para metadados e animações de layout fluido (`layoutId`).
+    - **Standardization**: Todos os seletores nativos (`select`) foram removidos em favor de grades técnicas HUD com marcadores de canto e estados reativos de alta precisão.
+27. - **Avatar Personalizado**: Sistema de upload no cliente com compressão automática (`browser-image-compression`) e armazenamento em Base64 no banco de dados. Clique no avatar na sidebar direita para trocar.
 
 ## Core Tecnológico
 
@@ -100,8 +105,12 @@ O sistema **SmartShapes** permite a composição de murais complexos e estético
 
 ### Melhores Práticas Artísticas:
 1. **Z-Index**: Use polígonos com baixa opacidade e `mix-blend-mode: multiply` atrás de fotos para criar profundidade.
-2. **Blur & Glass**: Formas com desfoque alto atuam como luzes de fundo (Glow effects).
-3. **Blobs**: Use formas orgânicas para quebrar a rigidez da grade.
+### 🌪️ Motor Generativo: Smart Rorschach
+O bloco **Rorschach** (`SmartRorschach.tsx`) é um motor de arte abstrata procedural:
+- **Simetria Dinâmica**: Suporta eixos `Vertical`, `Horizontal` e `Quad` (espelhamento quádruplo).
+- **Ink Bleeding Effect**: Usa filtros SVG combinados (`feGaussianBlur` + `feColorMatrix`) para simular a capilaridade da tinta no papel.
+- **Micro-animações**: Os caminhos SVG possuem transições de escala e opacidade via `framer-motion` para um efeito de "respiração".
+- **Seed Determinística**: A mesma semente gera exatamente a mesma mancha artística, permitindo persistência total no mural público.
 
 ### Infraestrutura & Deploy
 - **Docker Standalone**: Configuração otimizada para baixo consumo de recursos em instâncias AWS EC2.
@@ -135,6 +144,14 @@ As interfaces administrativas seguem o padrão **Premium Hacker UI**, focado em 
     - **Hover-Active**: Ações perigosas ou secundárias devem ter `opacity-0` e transicionar para `opacity-100` apenas no hover da linha ou card.
     - **Largura**: Telas de admin devem utilizar a largura total disponível (remova `max-w` desnecessários) para permitir monitoramento multitarefa.
     - **Paginação**: Padrão "Archive Log" usando links `MANIFEST_PREV` / `MANIFEST_NEXT` em mono.
+
+### Studio 2.1 / HUD Core Design Standards 🕹️✨
+Para manter a blindagem estética e técnica:
+1. **HUD Headers**: Use sempre o ícone `Activity` com `opacity-30`. Tipografia: `text-[7.5px] font-black uppercase tracking-[0.4em]`. Margem: `mb-2`.
+2. **Corner Markers**: Usar `absolute top-0 right-0 w-2 h-2 border-t border-r border-current` para indicar foco ou interatividade técnica.
+3. **Abas & Grades**: Devem usar `grid` técnico com `gap-[1px]` e marcadores de canto quando ativos.
+4. **Glassmorphism**: Fundos `bg-white/95` ou `bg-black/95` com `backdrop-blur-2xl`.
+5. **Comandos HUD**: Modais devem usar `rounded-none`.
 
 ### Guestbook Studio 3.0 (Evolução Criativa) 💎🌪️✨
 O Mural de Recados foi elevado para além do container tradicional, permitindo composições orgânicas.

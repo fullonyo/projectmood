@@ -280,8 +280,8 @@ export function MoodCanvas({
         onUpdateBlocks(selectedIds, (block) => {
             if (block.isLocked) return {};
             return {
-                x: block.x + dx,
-                y: block.y + dy
+                x: Math.max(0, Math.min(100, block.x + dx)),
+                y: Math.max(0, Math.min(100, block.y + dy))
             };
         });
     }, [selectedIds, onUpdateBlocks]);

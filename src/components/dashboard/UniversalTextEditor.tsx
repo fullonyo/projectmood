@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
     Type, Play, Quote, Plus, AlignLeft, AlignCenter, AlignRight, User,
-    Smile, Meh, Frown, Sparkles, Flame, Coffee, PartyPopper, Moon, Heart, Ghost
+    Smile, Meh, Frown, Sparkles, Flame, Coffee, PartyPopper, Moon, Heart, Ghost, Activity
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
@@ -165,12 +165,10 @@ export function UniversalTextEditor({
             "space-y-6 transition-all duration-500",
             highlight ? "border-2 border-black dark:border-white p-6 -m-6 bg-zinc-50 dark:bg-zinc-900/50" : ""
         )}>
-            <div className="flex items-center gap-3">
-                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-                    <Type className="w-3.5 h-3.5 text-black dark:text-white" />
-                </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Universal Text Editor</h3>
-            </div>
+            <header className="flex items-center gap-2 opacity-30 px-1 mb-2">
+                <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
+                <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.text.universal_title') || 'Universal Text Editor'}</h3>
+            </header>
 
             <div className="border border-zinc-200 dark:border-zinc-800 space-y-0 bg-white dark:bg-zinc-950">
                 {/* Behavior Selector */}
@@ -180,19 +178,21 @@ export function UniversalTextEditor({
                             key={b.id}
                             onClick={() => {
                                 setBehavior(b.id)
-                                // Adjust defaults based on behavior
                                 if (b.id === 'ticker') setFontSize('3xl')
                                 if (b.id === 'status' && frame === 'none') setFrame('minimal')
                             }}
                             className={cn(
-                                "flex flex-col items-center justify-center py-4 gap-2 transition-all",
+                                "flex flex-col items-center justify-center py-4 gap-2 transition-all relative group",
                                 behavior === b.id
                                     ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
                                     : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                             )}
                         >
-                            <b.icon className={cn("w-4 h-4", behavior === b.id && "scale-110")} />
-                            <span className="text-[6px] font-black uppercase tracking-tight">{b.label}</span>
+                            {behavior === b.id && (
+                                <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                            )}
+                            <b.icon className={cn("w-3.5 h-3.5 transition-transform", behavior === b.id && "scale-110")} />
+                            <span className="text-[5.5px] font-black uppercase tracking-tighter">{b.label}</span>
                         </button>
                     ))}
                 </div>
@@ -208,18 +208,21 @@ export function UniversalTextEditor({
                     {/* Frame Selector */}
                     <div className="space-y-3">
                         <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Moldura / Estilo</Label>
-                        <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar snap-x">
+                        <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar snap-x px-1">
                             {FRAMES.map((f) => (
                                 <button
                                     key={f.id}
                                     onClick={() => setFrame(f.id)}
                                     className={cn(
-                                        "px-4 py-2 border text-[8px] font-black uppercase tracking-widest snap-start shrink-0 transition-all",
+                                        "px-4 py-2 border text-[8px] font-black uppercase tracking-widest snap-start shrink-0 transition-all relative",
                                         frame === f.id
-                                            ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black"
-                                            : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-400"
+                                            ? "border-black dark:border-white bg-zinc-50 dark:bg-zinc-900 text-black dark:text-white"
+                                            : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-400 opacity-60 hover:opacity-100"
                                     )}
                                 >
+                                    {frame === f.id && (
+                                        <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                                    )}
                                     {f.label}
                                 </button>
                             ))}
@@ -350,18 +353,25 @@ export function UniversalTextEditor({
                     {/* Color Selector */}
                     <div className="space-y-3">
                         <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Cor do Texto</Label>
-                        <div className="flex flex-wrap gap-2 p-4 bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-900">
+                        <div className="grid grid-cols-7 gap-px bg-zinc-100 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-900">
                             {COLORS.map(c => (
                                 <button
                                     key={c.value}
                                     onClick={() => setTextColor(c.value)}
                                     className={cn(
-                                        "w-8 h-8 border border-zinc-200 dark:border-zinc-800 transition-all relative overflow-hidden",
-                                        textColor === c.value ? "ring-2 ring-black dark:ring-white scale-110" : "opacity-80"
+                                        "aspect-square flex items-center justify-center transition-all relative overflow-hidden bg-white dark:bg-zinc-950",
+                                        textColor === c.value ? "ring-inset ring-1 ring-black dark:ring-white z-10" : "opacity-80 hover:opacity-100"
                                     )}
-                                    style={{ backgroundColor: c.value || 'transparent' }}
                                 >
-                                    {!c.value && <div className="absolute inset-0 bg-transparent border-t border-red-500 rotate-45 transform origin-center scale-150" />}
+                                    <div
+                                        className="w-4 h-4 shadow-sm border border-black/5"
+                                        style={{ backgroundColor: c.value || 'transparent' }}
+                                    >
+                                        {!c.value && <div className="absolute inset-0 bg-transparent border-t border-red-500/50 rotate-45 transform origin-center scale-150" />}
+                                    </div>
+                                    {textColor === c.value && (
+                                        <div className="absolute bottom-0 right-0 w-1 h-1 bg-black dark:bg-white" />
+                                    )}
                                 </button>
                             ))}
                         </div>
@@ -370,8 +380,10 @@ export function UniversalTextEditor({
                     <Button
                         onClick={handleSave}
                         disabled={isPending || (!text.trim() && !block?.id)}
-                        className="w-full h-14 bg-black dark:bg-white text-white dark:text-black rounded-none font-black uppercase tracking-[0.3em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
+                        className="w-full h-14 bg-black dark:bg-white text-white dark:text-black rounded-none font-black uppercase tracking-[0.4em] text-[10px] transition-all border border-black dark:border-white relative group"
                     >
+                        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-current opacity-30 group-hover:opacity-100 transition-opacity" />
                         {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.text.deploy'))}
                     </Button>
                 </div>

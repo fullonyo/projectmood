@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Image as ImageIcon, Upload, X } from "lucide-react"
+import { Image as ImageIcon, Upload, X, Activity } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { toast } from "sonner"
@@ -134,26 +134,25 @@ export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProp
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-3">
-                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-                    <ImageIcon className="w-3.5 h-3.5 text-black dark:text-white" />
-                </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.photo.title')}</h3>
-            </div>
+            <header className="flex items-center gap-2 opacity-30 px-1">
+                <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
+                <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.photo.title')}</h3>
+            </header>
 
             <div className="space-y-4">
                 {!imageUrl ? (
                     <div
                         {...getRootProps()}
                         className={cn(
-                            "border border-dashed p-10 text-center transition-all cursor-pointer bg-zinc-50/50 dark:bg-zinc-900/20",
+                            "border border-dashed p-10 text-center transition-all cursor-pointer bg-zinc-50/50 dark:bg-zinc-900/10 relative group overflow-hidden",
                             isDragActive
-                                ? 'border-black dark:border-white bg-zinc-100 dark:bg-zinc-800/50'
+                                ? 'border-black dark:border-white bg-zinc-100 dark:bg-zinc-800/10'
                                 : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
                         )}
                     >
                         <input {...getInputProps()} />
-                        <Upload className="w-8 h-8 mx-auto mb-4 text-zinc-400 opacity-40" />
+                        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white opacity-20 group-hover:opacity-100 transition-opacity" />
+                        <Upload className="w-8 h-8 mx-auto mb-4 text-zinc-400 opacity-40 group-hover:scale-110 transition-transform" />
                         <p className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-500">
                             {isDragActive ? t('editors.photo.drop_link') : t('editors.photo.inject_visual')}
                         </p>
@@ -191,7 +190,7 @@ export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProp
 
                         <div className="grid grid-cols-1 gap-5">
                             <div className="space-y-3">
-                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.photo.caption')}</Label>
+                                <Label className="text-[7.5px] font-black uppercase tracking-[0.4em] text-zinc-400">{t('editors.photo.caption')}</Label>
                                 <Input
                                     value={caption}
                                     onChange={(e) => setCaption(e.target.value)}
@@ -202,7 +201,7 @@ export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProp
                             </div>
 
                             <div className="space-y-3">
-                                <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.photo.alt_text')}</Label>
+                                <Label className="text-[7.5px] font-black uppercase tracking-[0.4em] text-zinc-400">{t('editors.photo.alt_text')}</Label>
                                 <Input
                                     value={alt}
                                     onChange={(e) => setAlt(e.target.value)}
@@ -214,21 +213,24 @@ export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProp
                         </div>
 
                         <div className="space-y-3">
-                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.photo.filter')}</Label>
-                            <div className="grid grid-cols-5 border border-zinc-200 dark:border-zinc-800">
+                            <Label className="text-[7.5px] font-black uppercase tracking-[0.4em] text-zinc-400">{t('editors.photo.filter')}</Label>
+                            <div className="grid grid-cols-5 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
                                 {(['none', 'vintage', 'bw', 'warm', 'cool'] as const).map((f) => (
                                     <button
                                         key={f}
                                         onClick={() => setFilter(f)}
                                         className={cn(
-                                            "flex flex-col items-center gap-3 p-3 border-r last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all",
+                                            "flex flex-col items-center gap-3 p-3 transition-all relative group",
                                             filter === f
-                                                ? "bg-black text-white dark:bg-white dark:text-black"
-                                                : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
+                                                ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                                : "bg-white dark:bg-zinc-950 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                         )}
                                     >
+                                        {filter === f && (
+                                            <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />
+                                        )}
                                         <div
-                                            className="w-full aspect-square border border-current opacity-20"
+                                            className="w-full aspect-square border border-black/10 transition-all group-hover:scale-105"
                                             style={{
                                                 backgroundImage: `url(${imageUrl})`,
                                                 backgroundSize: 'cover',
@@ -245,21 +247,24 @@ export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProp
                         </div>
 
                         <div className="space-y-3">
-                            <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{t('editors.photo.geometry')}</Label>
-                            <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800">
+                            <Label className="text-[7.5px] font-black uppercase tracking-[0.4em] text-zinc-400">{t('editors.photo.geometry')}</Label>
+                            <div className="grid grid-cols-4 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
                                 {(['none', 'polaroid', 'border', 'shadow', 'frame', 'minimal', 'round', 'glass'] as const).map((frm) => (
                                     <button
                                         key={frm}
                                         onClick={() => setFrame(frm)}
                                         className={cn(
-                                            "flex flex-col items-center gap-3 p-3 border-r last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all",
+                                            "flex flex-col items-center gap-3 p-3 transition-all relative group",
                                             frame === frm
-                                                ? "bg-black text-white dark:bg-white dark:text-black"
-                                                : "bg-white dark:bg-zinc-950 opacity-60 hover:opacity-100"
+                                                ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                                : "bg-white dark:bg-zinc-950 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                         )}
                                     >
+                                        {frame === frm && (
+                                            <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />
+                                        )}
                                         <div className={cn(
-                                            "w-6 h-6 border flex items-center justify-center border-current opacity-30",
+                                            "w-6 h-6 border flex items-center justify-center border-current opacity-30 group-hover:opacity-100 transition-all",
                                             frm === 'polaroid' && "border-b-4",
                                             frm === 'border' && "border-2",
                                         )}>
@@ -276,8 +281,10 @@ export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProp
                         <Button
                             onClick={handleAdd}
                             disabled={isPending || isUploading || (!imageUrl && !block?.id)}
-                            className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white"
+                            className="w-full bg-zinc-50 dark:bg-zinc-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black dark:text-white rounded-none h-14 font-black uppercase tracking-[0.4em] text-[7.5px] border border-zinc-100 dark:border-zinc-800 transition-all relative group overflow-hidden"
                         >
+                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white" />
+                            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-black dark:border-white opacity-0 group-hover:opacity-100 transition-opacity" />
                             {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.photo.deploy'))}
                         </Button>
                     </div>

@@ -15,7 +15,8 @@ import {
     Wind,
     Palette,
     Sparkles,
-    Upload
+    Upload,
+    Activity
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
@@ -92,30 +93,29 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
         )}>
             {/* Material Substrates Section */}
             <section className="space-y-6">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-                        <StickyNote className="w-3.5 h-3.5 text-black dark:text-white" />
-                    </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.art.tape_title')}</h3>
-                </div>
+                <header className="flex items-center gap-2 opacity-30 px-1">
+                    <Activity className="w-3 h-3 text-black dark:text-white" />
+                    <h3 className="text-[9px] font-black uppercase tracking-[0.3em]">{t('editors.art.tape_title')}</h3>
+                </header>
 
-                <div className="grid grid-cols-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                <div className="grid grid-cols-6 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
                     {TAPE_DATA.map((tape) => (
                         <button
                             key={tape.id}
                             onClick={() => addTape(tape.id, tape.color, tape.pattern)}
                             disabled={isPending}
                             title={t(`editors.art.tapes.${tape.id as any}`)}
-                            className="aspect-square border-r last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all hover:bg-black group relative"
+                            className="aspect-square flex items-center justify-center bg-white dark:bg-zinc-950 transition-all group relative overflow-hidden"
                         >
                             <div
-                                className="absolute inset-2 border border-black/10 transition-all group-hover:inset-1"
+                                className="absolute inset-2 border border-black/5 dark:border-white/5 transition-all group-hover:inset-1"
                                 style={{
                                     backgroundColor: tape.color,
                                     backgroundImage: tape.pattern === 'dots' ? 'radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)' : 'none',
                                     backgroundSize: '4px 4px'
                                 }}
                             />
+                            <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                     ))}
                 </div>
@@ -124,29 +124,33 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
 
             {/* Curation Manifesto Section */}
             <section className="space-y-6">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-                        {mediaCategory === 'book' ? <Book className="w-3.5 h-3.5 text-black dark:text-white" /> : <Film className="w-3.5 h-3.5 text-black dark:text-white" />}
-                    </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.art.media_title')}</h3>
-                </div>
+                <header className="flex items-center gap-2 opacity-30 px-1">
+                    <Activity className="w-3 h-3 text-black dark:text-white" />
+                    <h3 className="text-[9px] font-black uppercase tracking-[0.3em]">{t('editors.art.media_title')}</h3>
+                </header>
 
-                <div className="border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
-                    <div className="grid grid-cols-2 border-b border-zinc-100 dark:border-zinc-900">
+                <div className="border border-zinc-200 dark:border-zinc-800 p-0 bg-transparent">
+                    <div className="grid grid-cols-2 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border-b border-zinc-200 dark:border-zinc-800">
                         <button
                             onClick={() => setMediaCategory('book')}
                             className={cn(
-                                "py-4 text-[8px] font-black uppercase tracking-widest border-r border-zinc-100 dark:border-zinc-900 transition-all",
-                                mediaCategory === 'book' ? "bg-black text-white dark:bg-white dark:text-black" : "bg-zinc-50/50 dark:bg-zinc-900/30 text-zinc-400 hover:text-black dark:hover:text-white"
+                                "py-4 text-[7px] font-black uppercase tracking-[0.3em] transition-all relative group",
+                                mediaCategory === 'book' ? "bg-white dark:bg-zinc-950 text-black dark:text-white font-black" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                             )}
-                        >{t('editors.art.media_book')}</button>
+                        >
+                            {mediaCategory === 'book' && <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />}
+                            {t('editors.art.media_book')}
+                        </button>
                         <button
                             onClick={() => setMediaCategory('movie')}
                             className={cn(
-                                "py-4 text-[8px] font-black uppercase tracking-widest transition-all",
-                                mediaCategory === 'movie' ? "bg-black text-white dark:bg-white dark:text-black" : "bg-zinc-50/50 dark:bg-zinc-900/30 text-zinc-400 hover:text-black dark:hover:text-white"
+                                "py-4 text-[7px] font-black uppercase tracking-[0.3em] transition-all relative group",
+                                mediaCategory === 'movie' ? "bg-white dark:bg-zinc-950 text-black dark:text-white font-black" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                             )}
-                        >{t('editors.art.media_movie')}</button>
+                        >
+                            {mediaCategory === 'movie' && <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />}
+                            {t('editors.art.media_movie')}
+                        </button>
                     </div>
 
                     <div className="p-5 space-y-4">
@@ -172,8 +176,10 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
                         <Button
                             onClick={handleAddMedia}
                             disabled={isPending || !mediaTitle || !mediaReview}
-                            className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
+                            className="w-full bg-zinc-50 dark:bg-zinc-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black dark:text-white rounded-none h-14 font-black uppercase tracking-[0.3em] text-[9px] border border-zinc-100 dark:border-zinc-800 transition-all relative group overflow-hidden"
                         >
+                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white" />
+                            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-black dark:border-white opacity-0 group-hover:opacity-100 transition-opacity" />
                             {t('editors.art.media_deploy')}
                         </Button>
                     </div>

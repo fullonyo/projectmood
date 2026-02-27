@@ -82,6 +82,13 @@ export const pt = {
             more_coming: "Mais componentes em breve"
         },
 
+        insight: {
+            atmosphere: "Atmosfera.v1",
+            luminance: "Luminance.Spectrum",
+            memories: "Memórias",
+            released: "Publicado",
+            dynamic_weight: "Peso cromático dinâmico dos nós ativos"
+        },
         bottom_tip: "Clique nos blocos do mural para girar ou deletar",
     },
     modals: {
@@ -308,6 +315,23 @@ export const pt = {
             error: "Não conseguimos conectar a este link.",
             supported: "Suportamos links como: youtu.be, youtube.com/watch",
         },
+        rorschach: {
+            title: "Smart Rorschach",
+            subtitle: "Arte generativa simétrica",
+            tabs: {
+                geometry: "Geometria",
+                style: "Estilo"
+            },
+            seed: "Semente",
+            symmetry: "Simetria",
+            complexity: "Complexidade",
+            color: "Cor da Tinta",
+            symmetries: {
+                vertical: "Vertical",
+                horizontal: "Horizontal",
+                quad: "Quad"
+            }
+        },
         effects: {
             cursor_title: "Seu cursor",
             trails_title: "Rastro do mouse",
@@ -439,23 +463,6 @@ export const pt = {
             searching: "Procurando...",
             deploy: "Colar Gif",
             not_found: "Nenhum gif encontrado"
-        },
-        rorschach: {
-            title: "Espelho de Rorschach",
-            subtitle: "Arte generativa simétrica e abstrata.",
-            seed: "Semente Geométrica",
-            complexity: "Caoticidade",
-            symmetry: "Tipo de Simetria",
-            color: "Pigmento",
-            symmetries: {
-                vertical: "Vertical",
-                horizontal: "Horizontal",
-                quad: "Caleidoscópio"
-            },
-            tabs: {
-                geometry: "Geometria",
-                style: "Estética"
-            }
         },
         block_manager: {
             delete_confirm: "Tem certeza que deseja remover esta memória?",

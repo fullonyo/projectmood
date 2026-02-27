@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, ExternalLink, User, Settings, Camera, Loader2, Upload, Clock, History, ChevronDown, RotateCcw, Sparkles } from "lucide-react"
+import { LogOut, ExternalLink, User, Settings, Camera, Loader2, Upload, Clock, History, ChevronDown, RotateCcw, Sparkles, Activity } from "lucide-react"
 import { Button } from "../ui/button"
 import { ShareProfileButton } from "./share-profile-button"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -145,9 +145,9 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                             </button>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-400 leading-none mb-1.5">{t('leftSidebar.identity_protocol')}</span>
-                            <h4 className="text-base font-black tracking-tighter dark:text-white uppercase italic">{firstName}</h4>
-                            <span className="text-[7px] font-mono text-zinc-300 dark:text-zinc-600 mt-1">Tag // {username.toUpperCase()}</span>
+                            <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-30 leading-none mb-1.5">{t('leftSidebar.identity_protocol')}</span>
+                            <h4 className="text-xl font-black italic tracking-tighter dark:text-white uppercase">{firstName}</h4>
+                            <span className="text-[7px] font-mono text-zinc-400 mt-1 uppercase">Node // studio://{username.toLowerCase()}</span>
                         </div>
                     </div>
 
@@ -180,26 +180,29 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
 
                 {/* Publicação */}
                 <div className="space-y-6">
-                    <header className="flex flex-col gap-1">
+                    <header className="flex flex-col gap-2 opacity-30 px-1">
                         <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-black dark:bg-white" />
-                            <h3 className="text-[10px] font-black tracking-[0.3em] uppercase">{t('leftSidebar.deployment_area')}</h3>
+                            <Activity className="w-2.5 h-2.5" />
+                            <h3 className="text-[7.5px] font-black tracking-[0.4em] uppercase">{t('leftSidebar.deployment_area')}</h3>
                         </div>
-                        <p className="text-[9px] text-zinc-400 uppercase tracking-widest">{t('leftSidebar.external_visibility')}</p>
                     </header>
+                    <div className="flex flex-col border-l border-zinc-100 dark:border-zinc-900 pl-4 py-1 mb-6">
+                        <p className="text-[10px] font-black italic tracking-tighter uppercase">{t('leftSidebar.external_visibility')}</p>
+                    </div>
 
                     <div className="grid gap-4">
                         {/* Botão Publicar Diorama */}
                         <Button
                             onClick={() => setShowPublishModal(true)}
                             disabled={isPending}
-                            className="w-full justify-between h-14 rounded-none text-[10px] font-black uppercase tracking-[0.3em] bg-black dark:bg-white text-white dark:text-black hover:scale-[1.02] active:scale-95 transition-all group shadow-none border-2 border-black dark:border-white"
+                            className="w-full justify-between h-14 rounded-none text-[7.5px] font-black uppercase tracking-[0.4em] bg-black dark:bg-white text-white dark:text-black transition-all group shadow-none border-2 border-black dark:border-white relative overflow-hidden"
                         >
+                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
                             <div className="flex items-center gap-3">
                                 {isPending ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
-                                    <Upload className="w-4 h-4 group-hover:translate-y-[-2px] transition-transform" />
+                                    <Upload className="w-4 h-4 transition-transform" />
                                 )}
                                 {t('publish.button')}
                             </div>
@@ -220,10 +223,11 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                         <Link href={`/${username}`} target="_blank" className="w-full">
                             <Button
                                 variant="outline"
-                                className="w-full justify-between h-14 rounded-none text-[10px] font-black uppercase tracking-[0.3em] bg-transparent text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:scale-[1.02] active:scale-95 transition-all group shadow-none border border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white"
+                                className="w-full justify-between h-14 rounded-none text-[7.5px] font-black uppercase tracking-[0.4em] bg-transparent text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all group shadow-none border border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white relative overflow-hidden"
                             >
+                                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
                                 <div className="flex items-center gap-3">
-                                    <ExternalLink className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                    <ExternalLink className="w-4 h-4 transition-transform" />
                                     {t('leftSidebar.launch_public_space')}
                                 </div>
                                 <div className="flex gap-1.5 opacity-30">
@@ -242,8 +246,9 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                             <Link href="/admin" className="w-full mt-2">
                                 <Button
                                     variant="outline"
-                                    className="w-full justify-between h-14 rounded-none text-[10px] font-black uppercase tracking-[0.3em] bg-[#1a0505] text-red-500 hover:bg-red-500 hover:text-white transition-all group shadow-none border border-red-900/50 hover:border-red-500"
+                                    className="w-full justify-between h-14 rounded-none text-[7.5px] font-black uppercase tracking-[0.4em] bg-[#1a0505] text-red-500 hover:bg-red-500 hover:text-white transition-all group shadow-none border border-red-900/50 hover:border-red-500 relative overflow-hidden"
                                 >
+                                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
                                     <div className="flex items-center gap-3">
                                         <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                                         {t('leftSidebar.command_center')}
@@ -261,11 +266,9 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
 
                 {/* Futuras Funcionalidades */}
                 <div className="space-y-4">
-                    <header className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-zinc-200 dark:bg-zinc-800" />
-                            <h3 className="text-[9px] font-black tracking-[0.3em] uppercase text-zinc-400">{t('leftSidebar.system_configuration')}</h3>
-                        </div>
+                    <header className="flex items-center gap-2 opacity-30 px-1 mb-2">
+                        <Activity className="w-2.5 h-2.5" />
+                        <h3 className="text-[7.5px] font-black tracking-[0.4em] uppercase">{t('leftSidebar.system_configuration')}</h3>
                     </header>
                     <div className="grid gap-2 opacity-30 grayscale cursor-not-allowed">
                         <Button variant="outline" className="justify-start gap-4 h-12 rounded-none text-[9px] font-black uppercase tracking-widest border border-dashed border-zinc-200 dark:border-zinc-800 bg-transparent">
@@ -289,8 +292,9 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                 <Button
                     variant="ghost"
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="w-full justify-between h-14 rounded-none text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all group border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-red-500"
+                    className="w-full justify-between h-14 rounded-none text-[7.5px] font-black uppercase tracking-[0.4em] text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all group border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-red-500 relative overflow-hidden"
                 >
+                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
                     <div className="flex items-center gap-3">
                         <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         {t('leftSidebar.terminate_session')}

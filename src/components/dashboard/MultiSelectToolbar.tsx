@@ -35,121 +35,109 @@ export function MultiSelectToolbar({ visible, onAlign, onDistribute, onGroup, on
                     initial={{ y: 20, opacity: 0, x: "-50%" }}
                     animate={{ y: 0, opacity: 1, x: "-50%" }}
                     exit={{ y: 20, opacity: 0, x: "-50%" }}
-                    className="fixed bottom-24 left-1/2 z-[100] flex items-center gap-1.5 p-1.5 bg-zinc-950/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full"
+                    className="fixed bottom-24 left-1/2 z-[100] flex items-center gap-1.5 p-1 bg-zinc-950/90 backdrop-blur-2xl border border-white/10 shadow-3xl rounded-none ring-1 ring-white/5"
                 >
-                    <div className="flex items-center gap-2 px-3 py-1 border-r border-white/10 mr-1">
-                        <GripVertical className="w-3 h-3 text-zinc-600" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                            {count} Selected
+                    {/* HUD Corners */}
+                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-white/40" />
+                    <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-white/40" />
+                    <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-b border-l border-white/40" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-white/40" />
+
+                    <div className="flex items-center gap-2 px-4 py-2 border-r border-white/10 mr-1 bg-white/5">
+                        <GripVertical className="w-3 h-3 text-zinc-500 opacity-50" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white">
+                            {count} <span className="opacity-40">Nodes</span>
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5 px-2">
                         {/* Horizontal Alignment */}
                         <div className="flex items-center gap-0.5">
-                            <button
-                                onClick={() => onAlign('left')}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
-                                title="Align Left"
-                            >
-                                <AlignLeft className="w-4 h-4" />
-                            </button>
-
-                            <button
-                                onClick={() => onAlign('centerX')}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
-                                title="Align Center X"
-                            >
-                                <AlignCenterHorizontal className="w-4 h-4" />
-                            </button>
-
-                            <button
-                                onClick={() => onAlign('right')}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
-                                title="Align Right"
-                            >
-                                <AlignRight className="w-4 h-4" />
-                            </button>
+                            {[
+                                { id: 'left', icon: AlignLeft, title: 'Align Left' },
+                                { id: 'centerX', icon: AlignCenterHorizontal, title: 'Align Center X' },
+                                { id: 'right', icon: AlignRight, title: 'Align Right' }
+                            ].map((btn) => (
+                                <button
+                                    key={btn.id}
+                                    onClick={() => onAlign(btn.id as any)}
+                                    className="p-2.5 hover:bg-white/10 transition-all text-white/30 hover:text-white group relative"
+                                    title={btn.title}
+                                >
+                                    <btn.icon className="w-3.5 h-3.5" />
+                                </button>
+                            ))}
                         </div>
 
-                        <div className="w-px h-4 bg-white/5 mx-1" />
+                        <div className="w-px h-6 bg-white/10 mx-2" />
 
                         {/* Vertical Alignment */}
                         <div className="flex items-center gap-0.5">
-                            <button
-                                onClick={() => onAlign('top')}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
-                                title="Align Top"
-                            >
-                                <AlignStartVertical className="w-4 h-4" />
-                            </button>
-
-                            <button
-                                onClick={() => onAlign('centerY')}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
-                                title="Align Center Y"
-                            >
-                                <AlignCenterVertical className="w-4 h-4" />
-                            </button>
-
-                            <button
-                                onClick={() => onAlign('bottom')}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
-                                title="Align Bottom"
-                            >
-                                <AlignEndVertical className="w-4 h-4" />
-                            </button>
+                            {[
+                                { id: 'top', icon: AlignStartVertical, title: 'Align Top' },
+                                { id: 'centerY', icon: AlignCenterVertical, title: 'Align Center Y' },
+                                { id: 'bottom', icon: AlignEndVertical, title: 'Align Bottom' }
+                            ].map((btn) => (
+                                <button
+                                    key={btn.id}
+                                    onClick={() => onAlign(btn.id as any)}
+                                    className="p-2.5 hover:bg-white/10 transition-all text-white/30 hover:text-white"
+                                    title={btn.title}
+                                >
+                                    <btn.icon className="w-3.5 h-3.5" />
+                                </button>
+                            ))}
                         </div>
 
-                        <div className="w-px h-4 bg-white/5 mx-1" />
+                        <div className="w-px h-6 bg-white/10 mx-2" />
 
                         {/* Distribution */}
                         <div className="flex items-center gap-0.5">
                             <button
                                 onClick={() => isDistributionAllowed && onDistribute('horizontal')}
                                 className={cn(
-                                    "p-2 rounded-full transition-colors",
+                                    "p-2.5 transition-all",
                                     isDistributionAllowed
-                                        ? "hover:bg-white/10 text-white/50 hover:text-white"
-                                        : "opacity-20 cursor-not-allowed text-white/20"
+                                        ? "hover:bg-white/10 text-white/30 hover:text-white"
+                                        : "opacity-20 cursor-not-allowed text-white/10"
                                 )}
                                 title={isDistributionAllowed ? "Distribute Horizontally" : "Need at least 3 items to distribute"}
                             >
-                                <LayoutPanelLeft className="w-4 h-4" />
+                                <LayoutPanelLeft className="w-3.5 h-3.5" />
                             </button>
 
                             <button
                                 onClick={() => isDistributionAllowed && onDistribute('vertical')}
                                 className={cn(
-                                    "p-2 rounded-full transition-colors",
+                                    "p-2.5 transition-all",
                                     isDistributionAllowed
-                                        ? "hover:bg-white/10 text-white/50 hover:text-white"
-                                        : "opacity-20 cursor-not-allowed text-white/20"
+                                        ? "hover:bg-white/10 text-white/30 hover:text-white"
+                                        : "opacity-20 cursor-not-allowed text-white/10"
                                 )}
                                 title={isDistributionAllowed ? "Distribute Vertically" : "Need at least 3 items to distribute"}
                             >
-                                <LayoutPanelTop className="w-4 h-4" />
+                                <LayoutPanelTop className="w-3.5 h-3.5" />
                             </button>
                         </div>
 
-                        <div className="w-px h-4 bg-white/5 mx-1" />
+                        <div className="w-px h-6 bg-white/10 mx-2" />
 
                         {/* Grouping */}
                         <div className="flex items-center gap-0.5">
                             <button
                                 onClick={onGroup}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
+                                className="p-2.5 hover:bg-white/10 transition-all text-white/30 hover:text-white"
                                 title="Group (Ctrl+G)"
                             >
-                                <Boxes className="w-4 h-4" />
+                                <Boxes className="w-3.5 h-3.5" />
                             </button>
 
                             <button
                                 onClick={onUngroup}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
+                                className="p-2.5 hover:bg-white/10 transition-all text-white/30 hover:text-white"
                                 title="Ungroup (Ctrl+Shift+G)"
                             >
-                                <Ungroup className="w-4 h-4" />
+                                <Ungroup className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>

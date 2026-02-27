@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Cloud, Search, MapPin, Loader2, Sparkles, Wind, Sun, CloudRain, Snowflake, Droplets, Layers, Globe } from "lucide-react"
+import { Cloud, Search, MapPin, Loader2, Sparkles, Wind, Sun, CloudRain, Snowflake, Droplets, Layers, Globe, Activity } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { MoodBlock } from "@/types/database"
@@ -109,17 +109,12 @@ export function UniversalWeatherEditor({
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 pb-20">
             {/* Header with Navigation Synergy */}
             <header className="space-y-6">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-                        <Cloud className="w-4 h-4 text-black dark:text-white" />
-                    </div>
-                    <div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.weather.title') || 'Weather Studio'}</h3>
-                        <p className="text-[8px] text-zinc-400 uppercase tracking-widest leading-none mt-1">{t('editors.weather.subtitle') || 'Atmosfera em Tempo Real'}</p>
-                    </div>
-                </div>
+                <header className="flex items-center gap-2 opacity-30 px-1 mb-2">
+                    <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
+                    <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.weather.title') || 'Weather Studio'}</h3>
+                </header>
 
-                <nav className="flex gap-1 border-b border-zinc-100 dark:border-zinc-900 pb-px">
+                <nav className="grid grid-cols-2 border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10">
                     {[
                         { id: 'connection', label: t('editors.weather.tabs.connection') || 'Conexão', icon: Globe },
                         { id: 'esthetics', label: t('editors.weather.tabs.esthetics') || 'Estética', icon: Sparkles }
@@ -128,18 +123,22 @@ export function UniversalWeatherEditor({
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as TabType)}
                             className={cn(
-                                "flex-1 px-2 py-3 text-[8px] font-black uppercase tracking-widest transition-all relative flex items-center justify-center gap-2",
+                                "flex flex-col items-center justify-center py-4 gap-1.5 transition-all relative group",
                                 activeTab === tab.id
-                                    ? "text-black dark:text-white"
-                                    : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                                    ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                    : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                             )}
                         >
-                            <tab.icon className="w-3 h-3" />
-                            {tab.label}
+                            {activeTab === tab.id && (
+                                <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                            )}
+                            <div className={cn("text-[6px] font-black uppercase tracking-[0.2em] transition-opacity", activeTab === tab.id ? "opacity-100" : "opacity-40")}>
+                                {tab.label}
+                            </div>
                             {activeTab === tab.id && (
                                 <motion.div
                                     layoutId="weather-tab-active"
-                                    className="absolute bottom-[-1px] left-0 right-0 h-[1.5px] bg-black dark:bg-white"
+                                    className="absolute bottom-0 left-2 right-2 h-0.5 bg-black dark:bg-white"
                                 />
                             )}
                         </button>
@@ -150,7 +149,7 @@ export function UniversalWeatherEditor({
             {/* Connection Tab */}
             {activeTab === 'connection' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div className="flex border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 p-1">
+                    <div className="grid grid-cols-2 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
                         {[
                             { id: 'auto', label: 'AUTO-DETECT', icon: MapPin },
                             { id: 'manual', label: 'BUSCA MANUAL', icon: Search }
@@ -159,12 +158,15 @@ export function UniversalWeatherEditor({
                                 key={btn.id}
                                 onClick={() => setMode(btn.id as any)}
                                 className={cn(
-                                    "flex-1 flex items-center justify-center gap-2 py-3 text-[8px] font-black tracking-[0.2em] transition-all",
+                                    "flex items-center justify-center gap-2 py-3 text-[7px] font-black tracking-[0.2em] transition-all relative group",
                                     mode === btn.id
-                                        ? "bg-black text-white dark:bg-white dark:text-black shadow-lg"
-                                        : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                                        ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                        : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                 )}
                             >
+                                {mode === btn.id && (
+                                    <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                                )}
                                 <btn.icon className="w-3 h-3" />
                                 {btn.label}
                             </button>
@@ -200,8 +202,12 @@ export function UniversalWeatherEditor({
 
                     {/* Status Preview Card */}
                     <div className="p-6 border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/50 relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-1 h-1 border-t border-l border-black dark:border-white opacity-20" />
+                        <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white opacity-20" />
+
                         <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                            <div className="w-16 h-16 bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-900 flex items-center justify-center">
+                            <div className="w-16 h-16 bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-900 flex items-center justify-center relative">
+                                <div className="absolute top-0 right-0 w-1 h-1 bg-black/5 dark:bg-white/5" />
                                 {isFetching ? (
                                     <Loader2 className="w-8 h-8 animate-spin opacity-20" />
                                 ) : (
@@ -213,17 +219,16 @@ export function UniversalWeatherEditor({
                             </div>
 
                             <div className="space-y-1">
-                                <h4 className="text-4xl font-serif italic">{temp}°C</h4>
+                                <h4 className="text-4xl font-black italic tracking-tighter">{temp}°C</h4>
                                 <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{vibe || '...'}</p>
                             </div>
 
                             <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
 
-                            <p className="text-[9px] font-black uppercase tracking-widest opacity-50">
+                            <p className="text-[9px] font-black uppercase tracking-widest opacity-30 font-mono">
                                 {location || 'Detectando...'}
                             </p>
                         </div>
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 blur-3xl -mr-16 -mt-16 rounded-full" />
                     </div>
                 </div>
             )}
@@ -263,15 +268,29 @@ export function UniversalWeatherEditor({
                             <Label className="text-[9px] font-black uppercase tracking-widest opacity-50 flex items-center gap-2">
                                 <Layers className="w-3 h-3" /> {t('editors.shape.blend_label') || 'Blend Mode'}
                             </Label>
-                            <select
-                                value={blendMode}
-                                onChange={(e) => setBlendMode(e.target.value)}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-none h-10 text-[9px] font-black uppercase tracking-widest px-3 outline-none focus:ring-1 ring-black dark:ring-white"
-                            >
+                            <div className="grid grid-cols-2 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800 max-h-32 overflow-y-auto custom-scrollbar">
                                 {BLEND_MODES.map(m => (
-                                    <option key={m} value={m}>{m.replace('-', ' ')}</option>
+                                    <button
+                                        key={m}
+                                        onClick={() => setBlendMode(m)}
+                                        className={cn(
+                                            "flex items-center gap-2 px-3 py-2 text-[8px] font-black uppercase tracking-widest transition-all relative group",
+                                            blendMode === m
+                                                ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                                : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                                        )}
+                                    >
+                                        {blendMode === m && (
+                                            <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                                        )}
+                                        <div className={cn(
+                                            "w-1.5 h-1.5 rounded-full",
+                                            blendMode === m ? "bg-black dark:bg-white" : "bg-transparent border border-zinc-300 dark:border-zinc-700"
+                                        )} />
+                                        {m.replace('-', ' ')}
+                                    </button>
                                 ))}
-                            </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -280,8 +299,10 @@ export function UniversalWeatherEditor({
             <Button
                 onClick={handleSave}
                 disabled={isFetching || !location}
-                className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-16 font-black uppercase tracking-[0.5em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl mt-4"
+                className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-16 font-black uppercase tracking-[0.4em] text-[10px] transition-all border border-black dark:border-white relative group mt-4"
             >
+                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-current opacity-30 group-hover:opacity-100 transition-opacity" />
                 {block?.id ? t('editors.weather.update_btn') || 'Atualizar Clima' : t('editors.weather.deploy_btn') || 'Adicionar ao Mural'}
             </Button>
         </div>

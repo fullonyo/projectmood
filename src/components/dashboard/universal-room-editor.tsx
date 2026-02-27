@@ -20,21 +20,21 @@ export function UniversalRoomEditor({ profile, onUpdateProfile, onClearWall }: U
     const [activeTab, setActiveTab] = useState<'vibe' | 'kinetics' | 'danger'>('vibe')
 
     const sectionHeader = (title: string, desc: string, Icon: any) => (
-        <header className="relative mb-8 animate-in fade-in slide-in-from-left-4 duration-500">
-            <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 backdrop-blur-sm">
-                    <Icon className="w-3.5 h-3.5 text-black dark:text-white" />
-                </div>
-                <h3 className="text-[11px] font-black tracking-[0.4em] uppercase text-black dark:text-white">{title}</h3>
+        <header className="relative mb-8 space-y-3">
+            <div className="flex items-center gap-2 opacity-30">
+                <Icon className="w-3 h-3" />
+                <h3 className="text-[9px] font-black uppercase tracking-[0.3em]">{title}</h3>
             </div>
-            <p className="text-[8px] text-zinc-400 uppercase tracking-[0.2em] font-medium pl-4">{desc}</p>
+            <div className="flex flex-col border-l border-zinc-100 dark:border-zinc-900 pl-4 py-1">
+                <p className="text-sm font-black italic tracking-tighter uppercase">{desc}</p>
+            </div>
         </header>
     )
 
     return (
         <div className="space-y-12 animate-in fade-in duration-500 pb-20">
-            {/* Tab Selector - Symmetric with other Universal Editors */}
-            <div className="flex border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 p-1">
+            {/* Tab Selector - Studio 3.0 Aesthetic */}
+            <div className="grid grid-cols-3 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
                 {[
                     { id: 'vibe', label: 'VIBE', icon: Palette },
                     { id: 'kinetics', label: 'MOTION', icon: Activity },
@@ -44,14 +44,19 @@ export function UniversalRoomEditor({ profile, onUpdateProfile, onClearWall }: U
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
                         className={cn(
-                            "flex-1 flex items-center justify-center gap-2 py-3 text-[8px] font-black tracking-[0.2em] transition-all",
+                            "flex flex-col items-center justify-center py-4 gap-1.5 transition-all relative group",
                             activeTab === tab.id
-                                ? "bg-black text-white dark:bg-white dark:text-black shadow-lg"
-                                : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                                ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                         )}
                     >
-                        <tab.icon className="w-3 h-3" />
-                        {tab.label}
+                        {activeTab === tab.id && (
+                            <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />
+                        )}
+                        <tab.icon className={cn("w-3.5 h-3.5 transition-transform", activeTab === tab.id && "scale-110")} />
+                        <span className={cn("text-[7px] font-black uppercase tracking-[0.2em]", activeTab === tab.id ? "opacity-100" : "opacity-40")}>
+                            {tab.label}
+                        </span>
                     </button>
                 ))}
             </div>

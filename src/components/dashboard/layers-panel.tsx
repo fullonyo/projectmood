@@ -7,7 +7,7 @@ import {
     ChevronUp, ChevronDown, GripVertical,
     Trash2, Type, Image as ImageIcon, Music, Video,
     MessageSquare, Cloud, Clock, ShieldCheck, Heart,
-    Minus, Pencil, Wand2
+    Minus, Pencil, Wand2, Activity
 } from "lucide-react"
 import { useMemo, memo } from "react"
 
@@ -73,21 +73,33 @@ export function LayersPanel({
 
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-900 overflow-hidden">
-            <header className="p-4 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-zinc-400" />
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">{t('canvas.layers')}</h3>
+        <div className="flex flex-col h-full bg-white dark:bg-zinc-950 overflow-hidden">
+            <header className="p-6 border-b border-zinc-100 dark:border-zinc-900 space-y-4">
+                <div className="flex items-center gap-2 opacity-30">
+                    <Activity className="w-2.5 h-2.5" />
+                    <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('sidebar.insight.atmosphere')} // {t('canvas.layers')}</h3>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-mono text-zinc-500 mr-2">{blocks.length} {t('common.items')}</span>
+
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                        <div className="flex flex-col">
+                            <span className="text-[7px] font-black uppercase tracking-widest opacity-40 leading-none mb-1">{t('sidebar.insight.memories')}</span>
+                            <span className="text-xl font-black italic tracking-tighter">{blocks.length.toString().padStart(2, '0')}</span>
+                        </div>
+                        <div className="h-8 w-[1px] bg-zinc-100 dark:bg-zinc-900" />
+                        <div className="flex flex-col">
+                            <span className="text-[7px] font-black uppercase tracking-widest opacity-40 leading-none mb-1">Status</span>
+                            <span className="text-[9px] font-black uppercase italic text-emerald-500">Active</span>
+                        </div>
+                    </div>
+
                     {onNormalize && (
                         <button
                             onClick={onNormalize}
-                            className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                            className="h-8 w-8 flex items-center justify-center border border-zinc-100 dark:border-zinc-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                             title={t('canvas.layers_normalize') || "Normalizar Camadas"}
                         >
-                            <Wand2 className="w-3 h-3" />
+                            <Wand2 className="w-3.5 h-3.5" />
                         </button>
                     )}
                 </div>
@@ -119,12 +131,14 @@ export function LayersPanel({
                 )}
             </div>
 
-            <footer className="p-4 border-t border-zinc-200 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-950/50">
-                <div className="flex items-center justify-between text-[8px] font-mono text-zinc-500 uppercase tracking-widest">
-                    <span>{t('canvas.layers_precision')}: 0.1%</span>
+            <footer className="p-4 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/20">
+                <div className="flex items-center justify-between text-[7px] font-mono text-zinc-400 uppercase tracking-[0.2em]">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1 h-1 bg-current animate-pulse" />
+                        <span>Precision: 0.1%</span>
+                    </div>
                     <span>{t('canvas.layers_safe')}</span>
                 </div>
-
             </footer>
         </div>
     )
@@ -174,38 +188,49 @@ const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t }: 
         <div
             onClick={() => onSelect(block.id)}
             className={cn(
-                "flex items-center gap-3 p-2 group transition-all cursor-pointer border relative overflow-hidden",
+                "flex items-center gap-4 p-4 group transition-all cursor-pointer border-b border-zinc-100 dark:border-zinc-900 relative overflow-hidden",
                 isSelected
-                    ? "bg-zinc-100 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-800"
-                    : "bg-transparent border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900/50",
-                block.isHidden && "opacity-60 grayscale-[0.5]",
-                block.isLocked && "border-amber-500/10"
+                    ? "bg-zinc-50 dark:bg-zinc-900/40"
+                    : "bg-transparent hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20",
+                block.isHidden && "opacity-40 grayscale",
             )}
         >
-            {/* Visual indicator for locked status */}
-            {block.isLocked && (
-                <div className="absolute top-0 right-0 w-1 h-full bg-amber-500/20" />
+            {/* Selection HUD Indicator */}
+            {isSelected && (
+                <>
+                    <div className="absolute top-0 left-0 w-1 h-full bg-black dark:bg-white" />
+                    <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-black dark:border-white" />
+                </>
             )}
 
             <div className={cn(
-                "shrink-0 transition-colors",
-                isSelected ? "text-black dark:text-white" : "text-zinc-400"
+                "w-8 h-8 flex items-center justify-center border transition-all",
+                isSelected
+                    ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black"
+                    : "border-zinc-100 dark:border-zinc-800 text-zinc-400 group-hover:border-zinc-300 dark:group-hover:border-zinc-600"
             )}>
                 {getBlockIcon(block.type)}
             </div>
 
             <div className="flex-1 min-w-0">
-                <p className={cn(
-                    "text-[10px] truncate font-bold uppercase tracking-wider",
-                    isSelected ? "text-black dark:text-white" : "text-zinc-500",
-                    block.isHidden && "italic"
-                )}>
-                    {getBlockLabel(block)}
-                </p>
-                <div className="flex items-center gap-2">
-                    <span className="text-[7.5px] font-mono text-zinc-400">#{(block.zIndex || 1).toString().padStart(3, '0')}</span>
-                    {block.isHidden && <span className="text-[6px] px-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-500 font-black uppercase tracking-tighter">HIDDEN</span>}
-                    {block.isLocked && <span className="text-[6px] px-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 font-black uppercase tracking-tighter">LOCKED</span>}
+                <div className="flex items-center gap-2 mb-0.5">
+                    <p className={cn(
+                        "text-[7.5px] truncate font-black uppercase tracking-[0.4em]",
+                        isSelected ? "text-black dark:text-white" : "text-zinc-500",
+                    )}>
+                        {getBlockLabel(block)}
+                    </p>
+                    {block.isLocked && <Lock className="w-2 h-2 text-amber-500" />}
+                </div>
+                <div className="flex items-center gap-3">
+                    <span className="text-[7px] font-mono text-zinc-400 tracking-tighter uppercase whitespace-nowrap">
+                        Node // {(block.zIndex || 1).toString().padStart(3, '0')}
+                    </span>
+                    <div className="h-[2px] w-[2px] rounded-full bg-zinc-200 dark:bg-zinc-800" />
+                    <span className="text-[7px] font-mono text-zinc-400 tracking-tighter uppercase">
+                        {block.type}
+                    </span>
                 </div>
             </div>
 

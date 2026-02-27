@@ -81,6 +81,14 @@ export const en: Dictionary = {
             more_coming: "More components soon"
         },
 
+        insight: {
+            atmosphere: "Atmosphere.v1",
+            luminance: "Luminance.Spectrum",
+            memories: "Memories",
+            released: "Published",
+            dynamic_weight: "Dynamic chromatic weight from active nodes"
+        },
+
         bottom_tip: "Click on blocks to rotate or delete them",
     },
     modals: {
@@ -307,6 +315,23 @@ export const en: Dictionary = {
             error: "Could not connect to this link.",
             supported: "We support links like: youtu.be, youtube.com/watch",
         },
+        rorschach: {
+            title: "Smart Rorschach",
+            subtitle: "Symmetrical generative art",
+            tabs: {
+                geometry: "Geometry",
+                style: "Style"
+            },
+            seed: "Seed",
+            symmetry: "Symmetry",
+            complexity: "Complexity",
+            color: "Ink Color",
+            symmetries: {
+                vertical: "Vertical",
+                horizontal: "Horizontal",
+                quad: "Quad"
+            }
+        },
         effects: {
             cursor_title: "Your cursor",
             trails_title: "Mouse trail",
@@ -438,23 +463,6 @@ export const en: Dictionary = {
             searching: "Searching...",
             deploy: "Paste Gif",
             not_found: "No gif found"
-        },
-        rorschach: {
-            title: "Rorschach Mirror",
-            subtitle: "Generative, symmetrical, and abstract art.",
-            seed: "Geometric Seed",
-            complexity: "Chaos Level",
-            symmetry: "Symmetry Type",
-            color: "Pigment",
-            symmetries: {
-                vertical: "Vertical",
-                horizontal: "Horizontal",
-                quad: "Kaleidoscope"
-            },
-            tabs: {
-                geometry: "Geometry",
-                style: "Aesthetics"
-            }
         },
         block_manager: {
             delete_confirm: "Are you sure you want to remove this memory?",

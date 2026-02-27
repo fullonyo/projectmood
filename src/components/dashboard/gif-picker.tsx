@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition } from "react"
 import { searchGifs, getTrendingGifs } from "@/actions/giphy"
 import { addMoodBlock } from "@/actions/profile"
 import { Input } from "@/components/ui/input"
-import { Search, Loader2 } from "lucide-react"
+import { Search, Loader2, Activity } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
@@ -47,28 +47,26 @@ export function GifPicker({ highlight }: { highlight?: boolean }) {
 
     return (
         <div className={cn(
-            "space-y-6 transition-all duration-500",
+            "space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 pb-20",
             highlight ? "border-2 border-black dark:border-white p-6 -m-6 bg-zinc-50 dark:bg-zinc-900/50" : ""
         )}>
-            <div className="flex items-center gap-3">
-                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-                    <Search className="w-3.5 h-3.5 text-black dark:text-white" />
-                </div>
-                <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.gif.title')}</h3>
-                    <p className="text-[7px] text-zinc-400 uppercase tracking-[0.2em] opacity-50">{t('editors.gif.powered_by')}</p>
-                </div>
-            </div>
+            {/* Header */}
+            <header className="flex items-center gap-2 opacity-30 px-1">
+                <Activity className="w-3 h-3 text-black dark:text-white" />
+                <h3 className="text-[9px] font-black uppercase tracking-[0.3em]">{t('editors.gif.title')}</h3>
+                <p className="text-[6px] text-zinc-400 uppercase tracking-[0.2em] ml-auto">GIFS BY GIPHY</p>
+            </header>
 
-            <form onSubmit={handleSearch} className="relative group border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-2">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 border-r border-zinc-100 dark:border-zinc-900 pr-3 mr-3">
+            <form onSubmit={handleSearch} className="relative group border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10 p-2">
+                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white opacity-20 group-focus-within:opacity-100 transition-opacity" />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 border-r border-zinc-200 dark:border-zinc-800 pr-3 mr-3">
                     <Search className="w-3.5 h-3.5 text-zinc-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" />
                 </div>
                 <Input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={t('editors.gif.search_placeholder')}
-                    className="pl-14 rounded-none bg-transparent border-none h-11 text-[10px] font-mono uppercase tracking-tight focus-visible:ring-0"
+                    className="pl-14 rounded-none bg-transparent border-none h-11 text-[9px] font-mono uppercase tracking-widest focus-visible:ring-0"
                 />
                 {query && (
                     <button

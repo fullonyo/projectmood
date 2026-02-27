@@ -7,7 +7,7 @@ import { applyTemplateAction } from "@/actions/templates"
 import { addMoodBlock } from "@/actions/profile"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
-import { Sparkles, Loader2, ArrowRight } from "lucide-react"
+import { Sparkles, Loader2, ArrowRight, Activity } from "lucide-react"
 import { toast } from "sonner"
 
 export function TemplateChooser() {
@@ -54,16 +54,11 @@ export function TemplateChooser() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className="w-full max-w-5xl space-y-12 text-center my-auto relative z-10"
             >
-                <header className="space-y-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 bg-white text-black text-[8px] font-black uppercase tracking-[0.3em] mb-4"
-                    >
-                        <Sparkles className="w-3 h-3" />
-                        {t('templates.empty_state')}
-                    </motion.div>
+                <header className="flex flex-col items-center gap-6">
+                    <div className="flex items-center gap-2 opacity-30">
+                        <Activity className="w-2.5 h-2.5 text-white" />
+                        <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em] text-white">{t('templates.empty_state')}</h3>
+                    </div>
                     <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none italic text-white">
                         {t('templates.chooser_title')}
                     </h1>
@@ -88,14 +83,12 @@ export function TemplateChooser() {
                                 onClick={() => handleApply(template.id)}
                                 disabled={isPending}
                                 className={cn(
-                                    "group relative flex flex-col items-start p-8 transition-all duration-500 text-left border overflow-hidden shadow-2xl active:scale-95",
+                                    "group relative flex flex-col items-start p-8 transition-all duration-500 text-left border rounded-none overflow-hidden active:scale-[0.98]",
                                     template.profile.theme === 'dark' ? "bg-black border-zinc-800" : "bg-white border-zinc-200",
-                                    isHovered ? "ring-2 ring-blue-500 border-transparent -translate-y-2" : ""
+                                    isHovered ? "border-blue-500" : ""
                                 )}
                             >
-                                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                    <Icon className="w-24 h-24 rotate-12" />
-                                </div>
+                                <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-current opacity-10 group-hover:opacity-100 transition-opacity" />
 
                                 <div className={cn(
                                     "p-3 border mb-6 transition-all duration-500",
@@ -148,7 +141,7 @@ export function TemplateChooser() {
                     <button
                         onClick={handleStartFresh}
                         disabled={isPending}
-                        className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-400 hover:text-black dark:hover:text-white transition-colors py-4 px-8 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
+                        className="text-[7.5px] font-black uppercase tracking-[0.5em] text-zinc-400 hover:text-black dark:hover:text-white transition-colors py-4 px-8 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
                     >
                         {t('templates.start_fresh')}
                     </button>

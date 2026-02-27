@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Calendar, Gift, Cake, Rocket, Heart, Hourglass, Sparkles, PartyPopper, Check } from "lucide-react"
+import { Calendar, Gift, Cake, Rocket, Heart, Hourglass, Sparkles, PartyPopper, Check, Activity } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
@@ -77,13 +77,12 @@ export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEd
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-3">
-                <div className="p-2 border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-                    <Calendar className="w-3.5 h-3.5 text-black dark:text-white" />
-                </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('editors.countdown.title')}</h3>
-            </div>
+        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 pb-20">
+            {/* Header */}
+            <header className="flex items-center gap-2 opacity-30 px-1">
+                <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
+                <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.countdown.title')}</h3>
+            </header>
 
             <div className="space-y-6 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
                 <div className="p-5 space-y-4">
@@ -112,30 +111,33 @@ export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEd
                     </div>
                 </div>
 
-                <div className="p-5 border-y border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
-                    <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-4 block text-center">{t('editors.countdown.registry')}</Label>
-                    <div className="grid grid-cols-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                <div className="p-5 border-y border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10">
+                    <Label className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30 mb-4 block text-center italic">{t('editors.countdown.registry')}</Label>
+                    <div className="grid grid-cols-4 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
                         {ICONS.map(({ name, icon: Icon }) => (
                             <button
                                 key={name}
                                 onClick={() => setSelectedIcon(name)}
                                 className={cn(
-                                    "aspect-square flex items-center justify-center border-r border-b last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all",
+                                    "aspect-square flex items-center justify-center transition-all relative group",
                                     selectedIcon === name
-                                        ? "bg-black text-white dark:bg-white dark:text-black"
-                                        : "opacity-40 hover:opacity-100"
+                                        ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                        : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                 )}
                             >
-                                <Icon className="w-4 h-4" />
+                                {selectedIcon === name && (
+                                    <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                                )}
+                                <Icon className={cn("w-4 h-4 transition-transform", selectedIcon === name && "scale-110")} />
                             </button>
                         ))}
                     </div>
                 </div>
 
                 <div className="p-5 space-y-6">
-                    <div className="space-y-3">
-                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400 text-center block">{t('editors.countdown.substrate')}</Label>
-                        <div className="grid grid-cols-3 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                    <div className="space-y-4">
+                        <Label className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30 text-center block italic">{t('editors.countdown.substrate')}</Label>
+                        <div className="grid grid-cols-3 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
                             {[
                                 { id: 'minimal', label: 'Minimal' },
                                 { id: 'bold', label: 'Bold' },
@@ -145,12 +147,15 @@ export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEd
                                     key={s.id}
                                     onClick={() => setStyle(s.id as any)}
                                     className={cn(
-                                        "h-12 text-[8px] font-black uppercase tracking-widest border-r last:border-r-0 border-zinc-100 dark:border-zinc-900 transition-all",
+                                        "h-12 text-[8px] font-black uppercase tracking-widest transition-all relative group",
                                         style === s.id
-                                            ? "bg-black text-white dark:bg-white dark:text-black"
-                                            : "text-zinc-400 opacity-60 hover:opacity-100"
+                                            ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
+                                            : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                     )}
                                 >
+                                    {style === s.id && (
+                                        <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
+                                    )}
                                     {s.label}
                                 </button>
                             ))}
@@ -160,8 +165,10 @@ export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEd
                     <Button
                         onClick={handleAdd}
                         disabled={isPending || ((!label.trim() || !targetDate) && !block?.id)}
-                        className="w-full bg-black dark:bg-white text-white dark:text-black rounded-none h-14 font-black uppercase tracking-[0.4em] text-[10px] hover:scale-[1.02] active:scale-95 transition-all border border-black dark:border-white shadow-none"
+                        className="w-full bg-zinc-50 dark:bg-zinc-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black dark:text-white rounded-none h-14 font-black uppercase tracking-[0.4em] text-[7.5px] border border-zinc-100 dark:border-zinc-800 transition-all relative group overflow-hidden"
                     >
+                        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white" />
+                        <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-black dark:border-white opacity-0 group-hover:opacity-100 transition-opacity" />
                         {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.countdown.deploy'))}
                     </Button>
                 </div>

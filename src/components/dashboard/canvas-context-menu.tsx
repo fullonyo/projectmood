@@ -9,7 +9,8 @@ import {
     Lock,
     Unlock,
     BringToFront,
-    SendToBack
+    SendToBack,
+    Activity
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -52,52 +53,61 @@ export function CanvasContextMenu({ x, y, block, onClose, onAction }: ContextMen
     return (
         <div
             ref={menuRef}
-            className="fixed z-[2000] w-48 bg-zinc-950/95 backdrop-blur-2xl border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.5)] p-1 animate-in fade-in zoom-in duration-150 rounded-none overflow-hidden"
+            className="fixed z-[2000] w-48 bg-white/95 dark:bg-black/95 backdrop-blur-2xl border border-zinc-200 dark:border-zinc-800 shadow-[0_10px_40px_rgba(0,0,0,0.1)] p-0 animate-in fade-in zoom-in duration-150 rounded-none overflow-hidden"
             style={{ left: x, top: y }}
         >
-            {/* Subtle Scanning Detail */}
-            <div className="absolute left-0 right-0 h-[1px] bg-white/5 top-0 animate-[studio-scan_4s_linear_infinite] pointer-events-none" />
+            <header className="flex items-center gap-2 opacity-30 px-3 py-2 border-b border-zinc-100 dark:border-zinc-900">
+                <Activity className="w-2 h-2 text-black dark:text-white" />
+                <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('canvas.layers')}</h3>
+            </header>
 
-            {items.map((item, index) => {
-                if (item.type === 'divider') {
-                    return <div key={`divider-${index}`} className="my-1 border-t border-white/5 mx-2" />
-                }
+            <div className="p-1">
+                {items.map((item, index) => {
+                    if (item.type === 'divider') {
+                        return <div key={`divider-${index}`} className="my-1 border-t border-zinc-100 dark:border-zinc-900 mx-1" />
+                    }
 
-                const Icon = item.icon
+                    const Icon = item.icon
 
-                return (
-                    <button
-                        key={item.id}
-                        disabled={item.disabled}
-                        onClick={() => {
-                            if (item.disabled) return
-                            onAction(item.id!)
-                            onClose()
-                        }}
-                        className={cn(
-                            "w-full flex items-center gap-3 px-3 py-2 text-[8px] font-black uppercase tracking-[0.2em] transition-all font-mono",
-                            item.disabled
-                                ? "opacity-20 cursor-not-allowed text-white"
-                                : item.variant === 'danger'
-                                    ? "text-red-400 hover:bg-red-500/10 hover:text-red-500"
-                                    : "text-white/60 hover:bg-white/5 hover:text-white"
-                        )}
-                    >
-                        {Icon && (
-                            <Icon className={cn(
-                                "w-3 h-3 transition-transform duration-300 group-hover:scale-110",
-                                item.variant === 'danger' ? "text-red-400/60" : "text-white/40"
-                            )} />
-                        )}
-                        <span className="flex-1 text-left">{item.label}</span>
-                        {item.shortcut && (
-                            <span className="opacity-30 text-[7px] font-mono tracking-tighter">
-                                {item.shortcut}
-                            </span>
-                        )}
-                    </button>
-                )
-            })}
+                    return (
+                        <button
+                            key={item.id}
+                            disabled={item.disabled}
+                            onClick={() => {
+                                if (item.disabled) return
+                                onAction(item.id!)
+                                onClose()
+                            }}
+                            className={cn(
+                                "w-full flex items-center gap-3 px-3 py-2 text-[7.5px] font-black uppercase tracking-[0.4em] transition-all font-mono group relative",
+                                item.disabled
+                                    ? "opacity-20 cursor-not-allowed"
+                                    : item.variant === 'danger'
+                                        ? "text-red-500 hover:bg-red-500/5"
+                                        : "text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-black dark:hover:text-white"
+                            )}
+                        >
+                            {/* HUD corner mark on hover */}
+                            {!item.disabled && (
+                                <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                            )}
+
+                            {Icon && (
+                                <Icon className={cn(
+                                    "w-3 h-3 transition-transform duration-300 group-hover:scale-110",
+                                    item.variant === 'danger' ? "text-red-500" : "text-zinc-400 group-hover:text-current"
+                                )} />
+                            )}
+                            <span className="flex-1 text-left">{item.label}</span>
+                            {item.shortcut && (
+                                <span className="opacity-30 text-[7px] font-mono tracking-tighter">
+                                    {item.shortcut}
+                                </span>
+                            )}
+                        </button>
+                    )
+                })}
+            </div>
         </div>
     )
 }
