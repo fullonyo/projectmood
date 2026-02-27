@@ -2,7 +2,8 @@
 
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
+import { CACHE_TAGS } from "@/lib/cache-tags"
 
 /**
  * Sistema de Publicação — Vercel Deployments Pattern
@@ -99,6 +100,7 @@ export async function publishProfile() {
 
         // 6. Invalidar cache APENAS da página pública
         if (username) {
+            revalidateTag(CACHE_TAGS.profile(username), 'default')
             revalidatePath(`/${username}`)
         }
 
@@ -142,6 +144,7 @@ export async function rollbackToVersion(versionId: string) {
 
         // 3. Invalidar cache da página pública
         if (username) {
+            revalidateTag(CACHE_TAGS.profile(username), 'default')
             revalidatePath(`/${username}`)
         }
 
@@ -258,8 +261,17 @@ export async function computeHasUnpublishedChanges() {
 
         if (!activeVersion) return true // Nunca publicou → tem mudanças
 
-        // Serializar e comparar
-        const draftProfileData = JSON.stringify({
+        // Serializar e comparar de forma determinística
+        const sortKeys = (obj: any): any => {
+            if (obj === null || typeof obj !== 'object') return obj;
+            if (Array.isArray(obj)) return obj.map(sortKeys);
+            return Object.keys(obj).sort().reduce((acc: any, key) => {
+                acc[key] = sortKeys(obj[key]);
+                return acc;
+            }, {});
+        };
+
+        const draftProfileDataStr = JSON.stringify(sortKeys({
             theme: profile.theme,
             backgroundColor: profile.backgroundColor,
             primaryColor: profile.primaryColor,
@@ -270,21 +282,20 @@ export async function computeHasUnpublishedChanges() {
             customFont: profile.customFont,
             staticTexture: profile.staticTexture,
             avatarUrl: profile.avatarUrl,
-        })
+        }));
 
-        const publishedProfileData = JSON.stringify(activeVersion.profileData)
-        const draftBlocksStr = JSON.stringify(draftBlocks)
+        const publishedProfileDataStr = JSON.stringify(sortKeys(activeVersion.profileData));
+        const draftBlocksStr = JSON.stringify(sortKeys(draftBlocks));
 
         // IMPORTANTE: normalizar blocos publicados para os MESMOS campos do draft
-        // O snapshot inclui 'id' que não existe no select do draft — precisamos excluí-lo
         const publishedBlocks = (activeVersion.blocks as any[])?.map((b: any) => ({
             type: b.type, content: b.content,
             x: b.x, y: b.y, width: b.width, height: b.height,
             zIndex: b.zIndex, rotation: b.rotation, order: b.order,
-        })) ?? []
-        const publishedBlocksStr = JSON.stringify(publishedBlocks)
+        })) ?? [];
+        const publishedBlocksStr = JSON.stringify(sortKeys(publishedBlocks));
 
-        return draftProfileData !== publishedProfileData || draftBlocksStr !== publishedBlocksStr
+        return draftProfileDataStr !== publishedProfileDataStr || draftBlocksStr !== publishedBlocksStr;
     } catch (error) {
         console.error('[computeHasUnpublishedChanges]', error)
         return false

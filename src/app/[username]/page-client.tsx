@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { useViewportScale, scaleBlockSize, getBlockFallbackSize } from "@/lib/canvas-scale"
 import { ProfileSignature } from "@/components/dashboard/profile-signature"
@@ -124,7 +124,9 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                                 zIndex: block.zIndex || 1,
                             }}
                         >
-                            <BlockRenderer block={block} isPublic={true} hasInteracted={hasInteracted} />
+                            <React.Suspense fallback={<div className="w-full h-full animate-pulse bg-white/5 rounded-xl border border-white/10" />}>
+                                <BlockRenderer block={block} isPublic={true} hasInteracted={hasInteracted} />
+                            </React.Suspense>
                         </div>
                     ))}
                 </BoardStage>

@@ -2,12 +2,13 @@
 
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 import {
     ProfileUpdateSchema,
     CreateMoodBlockSchema,
     UpdateMoodBlockLayoutSchema
 } from "@/lib/validations";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function updateProfile(data: {
     theme?: string;
@@ -29,10 +30,19 @@ export async function updateProfile(data: {
     }
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { username: true }
+        });
+
         await prisma.profile.update({
             where: { userId: session.user.id },
             data: validation.data,
         });
+
+        if (user?.username) {
+            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
+        }
         revalidatePath("/dashboard");
         return { success: true };
     } catch (error) {
@@ -71,6 +81,11 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
     const { x = 50, y = 50, width, height } = validation.data.options || {};
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { username: true }
+        });
+
         const block = await prisma.moodBlock.create({
             data: {
                 userId: session.user.id,
@@ -83,6 +98,9 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
             },
         });
 
+        if (user?.username) {
+            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
+        }
         revalidatePath("/dashboard");
         return { success: true, block };
     } catch (error) {
@@ -109,11 +127,19 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
     if (typeof validatedData.height === 'number') validatedData.height = Math.round(Math.max(40, Math.min(2000, validatedData.height)));
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { username: true }
+        });
+
         await prisma.moodBlock.update({
             where: { id: blockId, userId: session.user.id },
             data: validatedData,
         });
 
+        if (user?.username) {
+            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
+        }
         revalidatePath("/dashboard");
 
         return { success: true };
@@ -128,10 +154,19 @@ export async function deleteMoodBlock(blockId: string) {
     if (!session?.user?.id) return { error: "Não autorizado" };
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { username: true }
+        });
+
         await prisma.moodBlock.update({
             where: { id: blockId, userId: session.user.id },
             data: { deletedAt: new Date() }
         });
+
+        if (user?.username) {
+            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
+        }
         revalidatePath("/dashboard");
         return { success: true };
     } catch (error) {
@@ -145,11 +180,20 @@ export async function restoreMoodBlock(blockId: string) {
     if (!session?.user?.id) return { error: "Não autorizado" };
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { username: true }
+        });
+
         await prisma.moodBlock.update({
             where: { id: blockId, userId: session.user.id },
             data: { deletedAt: null }
         });
-        // We don't revalidate immediately to avoid blocking optimistic UI
+
+        if (user?.username) {
+            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
+        }
+        revalidatePath("/dashboard");
         return { success: true };
     } catch (error) {
         console.error('[restoreMoodBlock]', error);
@@ -170,6 +214,11 @@ export async function duplicateMoodBlock(blockId: string) {
 
         const { id, createdAt, updatedAt, deletedAt, ...rest } = source;
 
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { username: true }
+        });
+
         const newBlock = await prisma.moodBlock.create({
             data: {
                 ...rest,
@@ -180,7 +229,9 @@ export async function duplicateMoodBlock(blockId: string) {
             }
         });
 
-
+        if (user?.username) {
+            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
+        }
         revalidatePath("/dashboard");
         return { success: true, block: newBlock };
     } catch (error) {
@@ -195,11 +246,19 @@ export async function clearMoodBlocks() {
     if (!session?.user?.id) return { error: "Não autorizado" };
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { username: true }
+        });
+
         await prisma.moodBlock.updateMany({
             where: { userId: session.user.id, deletedAt: null },
             data: { deletedAt: new Date() }
         });
 
+        if (user?.username) {
+            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
+        }
         revalidatePath("/dashboard");
 
         return { success: true };
@@ -216,6 +275,11 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
     const userId = session.user.id;
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { username: true }
+        });
+
         await prisma.$transaction(
             blocks.map((block) =>
                 prisma.moodBlock.update({
@@ -224,6 +288,10 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
                 })
             )
         );
+
+        if (user?.username) {
+            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
+        }
         revalidatePath("/dashboard");
         return { success: true };
     } catch (error) {
@@ -239,6 +307,11 @@ export async function updateMoodBlocksZIndex(updates: { id: string, zIndex: numb
     const userId = session.user.id;
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { username: true }
+        });
+
         await prisma.$transaction(
             updates.map((update) =>
                 prisma.moodBlock.update({
@@ -247,6 +320,10 @@ export async function updateMoodBlocksZIndex(updates: { id: string, zIndex: numb
                 })
             )
         );
+
+        if (user?.username) {
+            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
+        }
         revalidatePath("/dashboard");
         return { success: true };
     } catch (error) {

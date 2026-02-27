@@ -106,9 +106,10 @@ export default async function PublicMoodPage({
         backgroundColor: visualConfig?.backgroundColor ?? profile.backgroundColor,
         primaryColor: visualConfig?.primaryColor ?? profile.primaryColor,
         fontStyle: visualConfig?.fontStyle ?? profile.fontStyle,
-        customCursor: visualConfig?.customCursor ?? profile.customCursor,
-        mouseTrails: visualConfig?.mouseTrails ?? profile.mouseTrails,
-        backgroundEffect: visualConfig?.backgroundEffect ?? profile.backgroundEffect,
+        // Aplica o Fallback de Segurança caso os Efeitos Visuais tenham sido globalmente desativados pelo Admin
+        customCursor: systemFlags['feature_custom_cursor'] === false ? 'auto' : (visualConfig?.customCursor ?? profile.customCursor),
+        mouseTrails: systemFlags['feature_mouse_trails'] === false ? 'none' : (visualConfig?.mouseTrails ?? profile.mouseTrails),
+        backgroundEffect: systemFlags['feature_background_effects'] === false ? 'none' : (visualConfig?.backgroundEffect ?? profile.backgroundEffect),
         customFont: visualConfig?.customFont ?? profile.customFont,
         staticTexture: visualConfig?.staticTexture ?? profile.staticTexture,
         avatarUrl: visualConfig?.avatarUrl ?? profile.avatarUrl,
@@ -123,7 +124,7 @@ export default async function PublicMoodPage({
     return (
         <div
             className={cn(
-                "h-screen w-full relative overflow-hidden transition-all duration-1000",
+                "h-screen w-full relative overflow-hidden",
                 effectiveProfile.fontStyle === 'serif' ? 'font-serif' : effectiveProfile.fontStyle === 'mono' ? 'font-mono' : 'font-sans'
             )}
             style={{

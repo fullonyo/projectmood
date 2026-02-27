@@ -2,7 +2,8 @@
 
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
+import { CACHE_TAGS } from "@/lib/cache-tags"
 
 async function requireAdmin() {
     const session = await auth()
@@ -80,6 +81,7 @@ export async function adminDeleteBlock(blockId: string) {
         revalidatePath("/admin/audit")
         revalidatePath("/dashboard")
         if (block?.user?.username) {
+            revalidateTag(CACHE_TAGS.profile(block.user.username), 'default')
             revalidatePath(`/${block.user.username}`)
         }
         return { success: true }
@@ -118,7 +120,10 @@ export async function adminBanUser(userId: string, isBanned: boolean) {
         revalidatePath("/admin/audit")
         revalidatePath("/admin/users")
         revalidatePath("/dashboard")
-        if (targetUser) revalidatePath(`/${targetUser.username}`)
+        if (targetUser) {
+            revalidateTag(CACHE_TAGS.profile(targetUser.username), 'default')
+            revalidatePath(`/${targetUser.username}`)
+        }
 
         return { success: true }
     } catch (error) {
@@ -161,7 +166,10 @@ export async function adminVerifyUser(userId: string, isVerified: boolean, type:
 
         revalidatePath("/admin/users")
         revalidatePath("/dashboard")
-        if (targetUser) revalidatePath(`/${targetUser.username}`)
+        if (targetUser) {
+            revalidateTag(CACHE_TAGS.profile(targetUser.username), 'default')
+            revalidatePath(`/${targetUser.username}`)
+        }
         return { success: true }
     } catch (error) {
         console.error("[adminVerifyUser] Error:", error)

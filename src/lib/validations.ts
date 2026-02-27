@@ -44,8 +44,8 @@ export const CreateMoodBlockSchema = z.object({
 export const UpdateMoodBlockLayoutSchema = z.object({
     x: z.number().min(0).max(100).optional(),
     y: z.number().min(0).max(100).optional(),
-    width: z.number().positive().int().max(2000).optional(),
-    height: z.number().positive().int().max(2000).optional(),
+    width: z.number().positive().max(2000).transform(v => Math.round(v)).optional(),
+    height: z.number().positive().max(2000).transform(v => Math.round(v)).optional(),
     zIndex: z.number().int().optional(),
     rotation: z.number().optional(),
     isLocked: z.boolean().optional(),

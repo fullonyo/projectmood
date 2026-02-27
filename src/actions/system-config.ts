@@ -2,7 +2,9 @@
 
 import prisma from "@/lib/prisma"
 import { auth } from "@/auth"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
+import { unstable_cache } from "next/cache"
+import { CACHE_TAGS, CACHE_KEYS } from "@/lib/cache-tags"
 
 // Core blocks definition to map
 // Core resources definition with categories
@@ -18,6 +20,12 @@ const CORE_BLOCKS = [
     { key: "block_weather", name: "Weather Status", description: "Display current location weather.", isEnabled: true, isPremium: false },
     { key: "block_media", name: "Media Collection", description: "Books, movies, and games collection.", isEnabled: true, isPremium: false },
     { key: "block_tape", name: "Washi Tape", description: "Decorative decorative tape elements.", isEnabled: true, isPremium: false },
+    { key: "block_music", name: "Music Player", description: "General music player block.", isEnabled: true, isPremium: false },
+    { key: "block_quote", name: "Quotes", description: "Stylized quotes block.", isEnabled: true, isPremium: false },
+    { key: "block_moodStatus", name: "Mood Status", description: "Status updates with emojis.", isEnabled: true, isPremium: false },
+    { key: "block_shape", name: "Geometric Shapes", description: "Vector shapes and blobs.", isEnabled: true, isPremium: false },
+    { key: "block_ticker", name: "Marquee Ticker", description: "Scrolling text marquee.", isEnabled: true, isPremium: false },
+    { key: "block_gif", name: "GIF Stickers", description: "Animated GIF stickers.", isEnabled: true, isPremium: false },
 
     // --- BEHAVIORS (SMART TEXT) ---
     { key: "behavior_ticker", name: "Marquee Ticker", description: "Scrolling text behavior.", isEnabled: true, isPremium: false },
@@ -68,6 +76,7 @@ export async function seedFeatureFlags() {
             })
             count++
         }
+        revalidateTag(CACHE_TAGS.systemConfig, 'default')
         revalidatePath("/admin/config")
 
         // Log the action
@@ -90,15 +99,23 @@ export async function seedFeatureFlags() {
 
 // 2. Fetcher (Optimized for frontend cache)
 export async function getFeatureFlags() {
-    try {
-        const flags = await prisma.featureFlag.findMany()
-        return flags
-    } catch (error) {
-        // Se a tabela não existir ainda ou erro de BD, assumimos que tudo funciona
-        // para não quebrar a plataforma inteira num bug de rede.
-        console.error("[getFeatureFlags]", error)
-        return []
-    }
+    const getFlags = unstable_cache(
+        async () => {
+            try {
+                return await prisma.featureFlag.findMany()
+            } catch (error) {
+                console.error("[getFeatureFlags]", error)
+                return []
+            }
+        },
+        [CACHE_KEYS.systemConfig],
+        {
+            tags: [CACHE_TAGS.systemConfig],
+            revalidate: 3600 // 1 hour secondary TTL
+        }
+    )
+
+    return getFlags()
 }
 
 // 3. Toggles (Admin Only)
@@ -111,6 +128,7 @@ export async function toggleFeatureFlag(key: string, field: "isEnabled" | "isPre
             where: { key },
             data: { [field]: !currentValue }
         })
+        revalidateTag(CACHE_TAGS.systemConfig, 'default')
         revalidatePath("/admin/config")
         revalidatePath("/dashboard")
 

@@ -20,7 +20,7 @@ export function ExperienceOverlay({ isVisible, onEnter, username }: ExperienceOv
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/90 backdrop-blur-3xl overflow-hidden"
+                    className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-950/90 backdrop-blur-3xl overflow-hidden"
                 >
                     {/* Analog Noise Texture */}
                     <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay">
