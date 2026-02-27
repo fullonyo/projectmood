@@ -486,3 +486,156 @@ export function calculateRotation(
 
     return Math.round(angle);
 }
+
+// ─── Alinhamento e Distribuição ─────────────────────────────────────────────
+
+export type AlignmentType = 'left' | 'centerX' | 'right' | 'top' | 'centerY' | 'bottom';
+export type DistributionType = 'horizontal' | 'vertical';
+
+/**
+ * Calcula as novas posições baseadas em um tipo de alinhamento.
+ */
+export function calculateAlignment(
+    blocks: Array<{ id: string, x: number, y: number, width: number, height: number, isLocked?: boolean }>,
+    type: AlignmentType,
+    canvasWidth: number,
+    canvasHeight: number
+): Array<{ id: string, x?: number, y?: number }> {
+    if (blocks.length < 2) return [];
+
+    const blocksWithPercent = blocks.map(b => ({
+        ...b,
+        wP: ((b.width || 120) / canvasWidth) * 100,
+        hP: ((b.height || 120) / canvasHeight) * 100
+    }));
+
+    let targetValue: number;
+
+    switch (type) {
+        case 'left':
+            targetValue = Math.min(...blocksWithPercent.map(b => b.x));
+            return blocksWithPercent
+                .filter(b => !b.isLocked && b.x !== targetValue)
+                .map(b => ({ id: b.id, x: Number(Math.max(0, targetValue).toFixed(4)) }));
+
+        case 'centerX':
+            // Alinha pelo centro da bounding box da seleção
+            const minX = Math.min(...blocksWithPercent.map(b => b.x));
+            const maxX = Math.max(...blocksWithPercent.map(b => b.x + b.wP));
+            targetValue = minX + (maxX - minX) / 2;
+            return blocksWithPercent
+                .filter(b => !b.isLocked)
+                .map(b => ({
+                    id: b.id,
+                    x: Number(Math.max(0, Math.min(100, targetValue - b.wP / 2)).toFixed(4))
+                }));
+
+        case 'right':
+            targetValue = Math.max(...blocksWithPercent.map(b => b.x + b.wP));
+            return blocksWithPercent
+                .filter(b => !b.isLocked)
+                .map(b => ({
+                    id: b.id,
+                    x: Number(Math.max(0, Math.min(100, targetValue - b.wP)).toFixed(4))
+                }));
+
+        case 'top':
+            targetValue = Math.min(...blocksWithPercent.map(b => b.y));
+            return blocksWithPercent
+                .filter(b => !b.isLocked && b.y !== targetValue)
+                .map(b => ({ id: b.id, y: Number(Math.max(0, targetValue).toFixed(4)) }));
+
+        case 'centerY':
+            const minY = Math.min(...blocksWithPercent.map(b => b.y));
+            const maxY = Math.max(...blocksWithPercent.map(b => b.y + b.hP));
+            targetValue = minY + (maxY - minY) / 2;
+            return blocksWithPercent
+                .filter(b => !b.isLocked)
+                .map(b => ({
+                    id: b.id,
+                    y: Number(Math.max(0, Math.min(100, targetValue - b.hP / 2)).toFixed(4))
+                }));
+
+        case 'bottom':
+            targetValue = Math.max(...blocksWithPercent.map(b => b.y + b.hP));
+            return blocksWithPercent
+                .filter(b => !b.isLocked)
+                .map(b => ({
+                    id: b.id,
+                    y: Number(Math.max(0, Math.min(100, targetValue - b.hP)).toFixed(4))
+                }));
+
+        default:
+            return [];
+    }
+}
+
+/**
+ * Calcula as novas posições para distribuir o espaço uniformemente entre blocos.
+ */
+export function calculateDistribution(
+    blocks: Array<{ id: string, x: number, y: number, width: number, height: number, isLocked?: boolean }>,
+    axis: DistributionType,
+    canvasWidth: number,
+    canvasHeight: number
+): Array<{ id: string, x?: number, y?: number }> {
+    if (blocks.length < 3) return []; // Distribuição precisa de pelo menos 3 blocos
+
+    const blocksWithPercent = blocks.map(b => ({
+        ...b,
+        wP: ((b.width || 120) / canvasWidth) * 100,
+        hP: ((b.height || 120) / canvasHeight) * 100
+    }));
+
+    const updates: Array<{ id: string, x?: number, y?: number }> = [];
+
+    if (axis === 'horizontal') {
+        // Ordena por X para garantir ordem lógica
+        const sorted = [...blocksWithPercent].sort((a, b) => a.x - b.x);
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+
+        // Total de largura ocupada pelos blocos (exceto o primeiro e último fixos)
+        const totalContentWidth = sorted.reduce((acc, b) => acc + b.wP, 0);
+        const totalSpan = (last.x + last.wP) - first.x;
+
+        // Espaço livre para dividir entre os blocos (gaps)
+        const totalGap = totalSpan - totalContentWidth;
+        const gapSize = totalGap / (sorted.length - 1);
+
+        let currentPos = first.x + first.wP + gapSize;
+
+        for (let i = 1; i < sorted.length - 1; i++) {
+            const b = sorted[i];
+            if (!b.isLocked) {
+                const clampedX = Math.max(0, Math.min(100, currentPos));
+                updates.push({ id: b.id, x: Number(clampedX.toFixed(4)) });
+            }
+            currentPos += b.wP + gapSize;
+        }
+    } else {
+        // Ordena por Y
+        const sorted = [...blocksWithPercent].sort((a, b) => a.y - b.y);
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+
+        const totalContentHeight = sorted.reduce((acc, b) => acc + b.hP, 0);
+        const totalSpan = (last.y + last.hP) - first.y;
+
+        const totalGap = totalSpan - totalContentHeight;
+        const gapSize = totalGap / (sorted.length - 1);
+
+        let currentPos = first.y + first.hP + gapSize;
+
+        for (let i = 1; i < sorted.length - 1; i++) {
+            const b = sorted[i];
+            if (!b.isLocked) {
+                const clampedY = Math.max(0, Math.min(100, currentPos));
+                updates.push({ id: b.id, y: Number(clampedY.toFixed(4)) });
+            }
+            currentPos += b.hP + gapSize;
+        }
+    }
+
+    return updates;
+}

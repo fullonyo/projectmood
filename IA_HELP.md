@@ -45,6 +45,10 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
   - **Staggered Blur (Fast)**: Entrada sequencial (stagger: 0.03s) com foco dinâmico (blur: 10px -> 0px) e escala (0.96 -> 1).
   - **AnimatePresence & Layout**: Uso de `popLayout` e prop `layout` no `CanvasItem` para garantir que adições/remoções e mudanças de posição sejam fluidas e não re-trigguem a animação de entrada.
   - **GPU Optimized**: Uso de `will-change: transform, opacity, filter` para preparar a GPU e manter 60fps estáveis.
+- **Histórico & State Machine (Studio 4.0) ⏪🚀**:
+  - **Undo/Redo**: Sistema de stack centralizado em `src/lib/canvas-history.ts`. Suporta Ctrl+Z/Ctrl+Y e sincroniza automaticamente com o backend em lote.
+  - **State Machine**: O hook `useCanvasManager` expõe `canvasState` (`IDLE`, `DRAGGING`, `RESIZING`, `SELECTING`), permitindo que a UI reaja dinamicamente às interações.
+  - **Persistência Debounced**: Sincronização automática com debounce de 800ms e sistema de Epoch para evitar race-conditions entre o cliente e o servidor.
 
 ### Arquitetura Universal de Blocos 🏛️💎
 - **Universal Architecture**: O sistema foi consolidado para eliminar redundâncias.
@@ -92,6 +96,10 @@ O sistema **SmartShapes** permite a composição de murais complexos e estético
 - **Derivação de Estado (maxZ)**: O índice `maxZ` para ordenação de blocos deve ser derivado via `useMemo` a partir da lista de blocos, evitando estados sincronizados em `useEffect` que causam renderizações em cascata.
 - **Tipagem de Estilos Customizados**: Use a interface `CustomTextureStyle` (estendendo `React.CSSProperties`) para gerenciar variáveis CSS dinâmicas (ex.: `--room-texture-*`) sem recorrer ao tipo `any`.
 - **Sanitização de Actions**: Server Actions devem receber dados limpos (substituindo `null` por `undefined` onde necessário) para evitar conflitos entre as tipagens do Prisma e os schemas de validação Zod.
+- **Central de Cache (Performance & Consistência) ⚡**:
+  - **Tags Centralizadas**: `src/lib/cache-tags.ts` define todas as chaves de revalidação. NUNCA use strings soltas para `revalidateTag`.
+  - **Prisão de Tipos**: Use o perfil `'default'` em `revalidateTag(tag, 'default')` conforme exigido pelo Next.js 16.
+  - **Detecção de Mudanças (Draft vs. Published)**: Algoritmo de normalização recursiva em `publish.ts` garante que a detecção de "mudanças não publicadas" seja determinística (ordena chaves de objetos e arrays) para evitar falsos positivos.
 
 ### Design System Admin (Command Center) 🛡️⚡
 As interfaces administrativas seguem o padrão **Premium Hacker UI**, focado em alta densidade de informação e estética técnica de baixo ruído.
@@ -134,4 +142,4 @@ Sistema para reduzir a paralisia do canvas vazio e inspirar novos usuários atra
 - **Template Chooser**: UI automática renderizada no `MoodCanvas` quando `blocks.length === 0`. Inclui opção de "Start Fresh" para pular o onboarding.
 
 ---
-*Documentação atualizada por Antigravity em 24/02/2026. Acesso administrativo concedido ao usuário Nyo conforme solicitado. Mood Templates 1.0 (Onboarding Criativo) entregue.*
+*Documentação atualizada por Antigravity em 27/02/2026. Melhorias de infraestrutura (Cache, Histórico e Robustez de Draft) entregues.*

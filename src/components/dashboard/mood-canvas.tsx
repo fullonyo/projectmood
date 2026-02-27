@@ -12,6 +12,7 @@ import { BoardStage } from "./board-stage"
 import { useTranslation } from "@/i18n/context"
 import { duplicateMoodBlock } from "@/actions/profile"
 import { CanvasContextMenu } from "./canvas-context-menu"
+import { MultiSelectToolbar } from "./MultiSelectToolbar"
 import { useCanvasKeyboard } from "@/hooks/use-canvas-keyboard"
 import {
     calculateRotation,
@@ -34,6 +35,8 @@ interface MoodCanvasProps {
     removeBlocks: (ids: string[]) => void
     undo: () => void
     redo: () => void
+    alignSelected: (type: 'left' | 'centerX' | 'right' | 'top' | 'centerY' | 'bottom') => void
+    distributeSelected: (axis: 'horizontal' | 'vertical') => void
 }
 
 export function MoodCanvas({
@@ -46,7 +49,9 @@ export function MoodCanvas({
     onUpdateBlocks,
     removeBlocks,
     undo,
-    redo
+    redo,
+    alignSelected,
+    distributeSelected
 }: MoodCanvasProps) {
 
     const { t } = useTranslation()
@@ -321,7 +326,7 @@ export function MoodCanvas({
                         }
                     }}
                 >
-                    <BoardStage>
+                    <BoardStage className="mood-canvas-stage">
                         <AnimatePresence mode="popLayout">
                             {blocks.map((block) => (
                                 <CanvasItem
@@ -420,6 +425,13 @@ export function MoodCanvas({
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-none bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm border border-black/10 dark:border-white/10 text-[9px] font-black tracking-[0.5em] uppercase text-zinc-400">
                 {t('canvas.creativity_domain')}
             </div>
+
+            <MultiSelectToolbar
+                visible={selectedIds.length > 1}
+                count={selectedIds.length}
+                onAlign={alignSelected}
+                onDistribute={distributeSelected}
+            />
         </div>
     )
 }

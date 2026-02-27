@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { updateMoodBlockLayout, deleteMoodBlock, restoreMoodBlock } from '@/actions/profile';
 import { toast } from 'sonner';
 import { createHistory, pushHistory, undoHistory, redoHistory, HistoryState } from '@/lib/canvas-history';
+import { calculateAlignment, calculateDistribution, AlignmentType, DistributionType } from '@/lib/canvas-transforms';
 
 import { MoodBlock } from '@/types/database';
 
@@ -29,6 +30,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
 
     // 6. INTERACTION STATE MACHINE
     const [canvasState, setCanvasState] = useState<'IDLE' | 'DRAGGING' | 'RESIZING' | 'SELECTING'>('IDLE');
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     const scheduleBackendSave = useCallback((id: string) => {
         if (saveTimers.current[id]) clearTimeout(saveTimers.current[id]);
@@ -240,6 +242,110 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         });
     }, [captureHistory, undo]);
 
+    // ─── ALIGNMENT & DISTRIBUTION ───────────────────────────────────────────
+
+    // Helper to get current canvas dimensions safely
+    const getCanvasDimensions = useCallback(() => {
+        if (typeof document === 'undefined') return { width: 2000, height: 2000 };
+        const canvas = document.querySelector('.mood-canvas-stage');
+        return {
+            width: canvas?.clientWidth || 2000,
+            height: canvas?.clientHeight || 2000
+        };
+    }, []);
+
+    const alignSelected = useCallback((type: AlignmentType) => {
+        const selectedIdArray = Array.isArray(selectedIds) ? selectedIds : [];
+        if (selectedIdArray.length < 2) return;
+
+        const selectedBlocks = blocks.filter(b => selectedIdArray.includes(b.id));
+        const { width, height } = getCanvasDimensions();
+        const updates = calculateAlignment(
+            selectedBlocks as any,
+            type,
+            width,
+            height
+        );
+
+        if (updates.length === 0) return;
+
+        // 1. Filter for ACTUAL changes to avoid redundant captures and saves
+        const actualUpdates = updates.filter(update => {
+            const block = blocks.find(b => b.id === update.id);
+            if (!block) return false;
+            const xDelta = update.x !== undefined ? Math.abs(update.x - block.x) : 0;
+            const yDelta = update.y !== undefined ? Math.abs(update.y - block.y) : 0;
+            return xDelta > 0.0001 || yDelta > 0.0001;
+        });
+
+        if (actualUpdates.length === 0) return;
+
+        // 2. Snapshot for History (Optimistic UI)
+        setBlocks(prev => {
+            captureHistory(prev);
+            return prev.map(block => {
+                const update = actualUpdates.find(u => u.id === block.id);
+                if (!update) return block;
+                const { id: _, ...cleanUpdates } = update;
+                return { ...block, ...cleanUpdates };
+            });
+        });
+
+        // 3. Side-Effects (Persistence) - Outside of state logic
+        actualUpdates.forEach(update => {
+            const { id, ...cleanUpdates } = update;
+            pendingUpdates.current[id] = { ...pendingUpdates.current[id], ...cleanUpdates };
+            epochRef.current[id] = (epochRef.current[id] || 0) + 1;
+            scheduleBackendSave(id);
+        });
+    }, [selectedIds, blocks, getCanvasDimensions, captureHistory, scheduleBackendSave]);
+
+    const distributeSelected = useCallback((axis: DistributionType) => {
+        const selectedIdArray = Array.isArray(selectedIds) ? selectedIds : [];
+        if (selectedIdArray.length < 3) return;
+
+        const selectedBlocks = blocks.filter(b => selectedIdArray.includes(b.id));
+        const { width, height } = getCanvasDimensions();
+        const updates = calculateDistribution(
+            selectedBlocks as any,
+            axis,
+            width,
+            height
+        );
+
+        if (updates.length === 0) return;
+
+        // 1. Filter actual changes
+        const actualUpdates = updates.filter(update => {
+            const block = blocks.find(b => b.id === update.id);
+            if (!block) return false;
+            const xDelta = update.x !== undefined ? Math.abs(update.x - block.x) : 0;
+            const yDelta = update.y !== undefined ? Math.abs(update.y - block.y) : 0;
+            return xDelta > 0.0001 || yDelta > 0.0001;
+        });
+
+        if (actualUpdates.length === 0) return;
+
+        // 2. Snapshot for History
+        setBlocks(prev => {
+            captureHistory(prev);
+            return prev.map(block => {
+                const update = actualUpdates.find(u => u.id === block.id);
+                if (!update) return block;
+                const { id: _, ...cleanUpdates } = update;
+                return { ...block, ...cleanUpdates };
+            });
+        });
+
+        // 3. Side-Effects (Persistence)
+        actualUpdates.forEach(update => {
+            const { id, ...cleanUpdates } = update;
+            pendingUpdates.current[id] = { ...pendingUpdates.current[id], ...cleanUpdates };
+            epochRef.current[id] = (epochRef.current[id] || 0) + 1;
+            scheduleBackendSave(id);
+        });
+    }, [selectedIds, blocks, getCanvasDimensions, captureHistory, scheduleBackendSave]);
+
     return {
         blocks,
         setBlocks,
@@ -253,6 +359,10 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         canUndo: history.past.length > 0,
         canRedo: history.future.length > 0,
         canvasState,
-        setCanvasState
+        setCanvasState,
+        selectedIds,
+        setSelectedIds,
+        alignSelected,
+        distributeSelected
     };
 }
