@@ -10,7 +10,9 @@ import {
     AlignEndVertical,
     LayoutPanelLeft,
     LayoutPanelTop,
-    GripVertical
+    GripVertical,
+    Boxes,
+    Ungroup
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -18,10 +20,12 @@ interface MultiSelectToolbarProps {
     visible: boolean
     onAlign: (type: 'left' | 'centerX' | 'right' | 'top' | 'centerY' | 'bottom') => void
     onDistribute: (axis: 'horizontal' | 'vertical') => void
+    onGroup: () => void
+    onUngroup: () => void
     count: number
 }
 
-export function MultiSelectToolbar({ visible, onAlign, onDistribute, count }: MultiSelectToolbarProps) {
+export function MultiSelectToolbar({ visible, onAlign, onDistribute, onGroup, onUngroup, count }: MultiSelectToolbarProps) {
     const isDistributionAllowed = count >= 3;
 
     return (
@@ -125,6 +129,27 @@ export function MultiSelectToolbar({ visible, onAlign, onDistribute, count }: Mu
                                 title={isDistributionAllowed ? "Distribute Vertically" : "Need at least 3 items to distribute"}
                             >
                                 <LayoutPanelTop className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="w-px h-4 bg-white/5 mx-1" />
+
+                        {/* Grouping */}
+                        <div className="flex items-center gap-0.5">
+                            <button
+                                onClick={onGroup}
+                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
+                                title="Group (Ctrl+G)"
+                            >
+                                <Boxes className="w-4 h-4" />
+                            </button>
+
+                            <button
+                                onClick={onUngroup}
+                                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
+                                title="Ungroup (Ctrl+Shift+G)"
+                            >
+                                <Ungroup className="w-4 h-4" />
                             </button>
                         </div>
                     </div>

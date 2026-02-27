@@ -346,6 +346,57 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         });
     }, [selectedIds, blocks, getCanvasDimensions, captureHistory, scheduleBackendSave]);
 
+    // ─── GROUPING ───────────────────────────────────────────────────────────
+
+    const groupSelected = useCallback(() => {
+        const selectedIdArray = Array.isArray(selectedIds) ? selectedIds : [];
+        if (selectedIdArray.length < 2) return;
+        const newGroupId = `group_${Date.now()}`;
+        updateBlocks(selectedIdArray, { groupId: newGroupId });
+        toast('Blocos agrupados');
+    }, [selectedIds, updateBlocks]);
+
+    const ungroupSelected = useCallback(() => {
+        const selectedIdArray = Array.isArray(selectedIds) ? selectedIds : [];
+        if (selectedIdArray.length === 0) return;
+
+        // Find all unique groups in selection
+        const groupsToDissolve = new Set(
+            blocks.filter(b => selectedIdArray.includes(b.id) && b.groupId).map(b => b.groupId)
+        );
+
+        if (groupsToDissolve.size === 0) return;
+
+        // Find ALL blocks belonging to these groups
+        const blockIdsToUpdate = blocks
+            .filter(b => b.groupId && groupsToDissolve.has(b.groupId))
+            .map(b => b.id);
+
+        updateBlocks(blockIdsToUpdate, { groupId: null });
+        toast('Grupos desfeitos');
+    }, [selectedIds, blocks, updateBlocks]);
+
+    // Helper to wrap setSelectedIds and always include group members
+    const setSmartSelectedIds = useCallback((newIdsOrFn: string[] | ((prev: string[]) => string[])) => {
+        setSelectedIds(prev => {
+            const next = typeof newIdsOrFn === 'function' ? newIdsOrFn(prev) : newIdsOrFn;
+            if (next.length === 0) return [];
+
+            // Expand selection to include all members of all groups touched by selection
+            const groupsTouched = new Set(
+                blocks.filter(b => next.includes(b.id) && b.groupId).map(b => b.groupId)
+            );
+
+            if (groupsTouched.size === 0) return next;
+
+            const allMemberIds = blocks
+                .filter(b => b.groupId && groupsTouched.has(b.groupId))
+                .map(b => b.id);
+
+            return [...new Set([...next, ...allMemberIds])];
+        });
+    }, [blocks]);
+
     return {
         blocks,
         setBlocks,
@@ -361,8 +412,10 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         canvasState,
         setCanvasState,
         selectedIds,
-        setSelectedIds,
+        setSelectedIds: setSmartSelectedIds,
         alignSelected,
-        distributeSelected
+        distributeSelected,
+        groupSelected,
+        ungroupSelected
     };
 }

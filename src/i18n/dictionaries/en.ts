@@ -671,5 +671,34 @@ export const en: Dictionary = {
         },
         applying: "Tuning Vibe...",
         start_fresh: "Start from Scratch"
+    },
+    hotkeys: {
+        title: "Commands & Shortcuts",
+        subtitle: "Access the power of MoodSpace",
+        sections: {
+            basics: "Basics",
+            organize: "Organization",
+            layers: "Layers & Flow"
+        },
+        keys: {
+            move: "Move blocks",
+            nudge: "Nudge (1px)",
+            nudgeshift: "Big Nudge (10px)",
+            delete: "Delete selection",
+            duplicate: "Duplicate block",
+            group: "Group blocks",
+            ungroup: "Ungroup",
+            undo: "Undo",
+            redo: "Redo",
+            escape: "Deselect all",
+            bring_front: "Bring to front",
+            send_back: "Send to back",
+            proportional: "Proportional resize",
+            snapping: "Axis snapping",
+            copy: "Copy blocks",
+            paste: "Paste blocks",
+            zoom: "Zoom in/out",
+            pan: "Pan Canvas"
+        }
     }
 };

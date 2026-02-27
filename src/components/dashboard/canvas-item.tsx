@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { useViewportScale, scaleBlockSize } from "@/lib/canvas-scale"
 import { BlockRenderer } from "./block-renderer"
+import { addMoodBlock } from "@/actions/profile"
 import {
     calculateResize,
     getResizeCursor,
@@ -81,6 +82,7 @@ export const CanvasItem = memo(({
     const styleTop = useTransform(mvY, (v: number) => `${v}%`)
 
     const [shiftHeld, setShiftHeld] = useState(false)
+    const [altHeld, setAltHeld] = useState(false)
     const [isDragging, setIsDragging] = useState(false)
     const [isResizing, setIsResizing] = useState(false)
     const [isRotating, setIsRotating] = useState(false)
@@ -90,8 +92,14 @@ export const CanvasItem = memo(({
     const isMultiSelect = selectedIds.length > 1;
 
     useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(true) }
-        const onKeyUp = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(false) }
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') setShiftHeld(true)
+            if (e.key === 'Alt') setAltHeld(true)
+        }
+        const onKeyUp = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') setShiftHeld(false)
+            if (e.key === 'Alt') setAltHeld(false)
+        }
         window.addEventListener('keydown', onKeyDown)
         window.addEventListener('keyup', onKeyUp)
         return () => {
@@ -199,13 +207,30 @@ export const CanvasItem = memo(({
         if (isMultiSelect && isSelected && onMultiMoveEnd) {
             onMultiMoveEnd();
         } else {
-            onUpdate({
-                x: parseFloat(stateRef.current.x.toFixed(4)),
-                y: parseFloat(stateRef.current.y.toFixed(4))
-            });
+            if (altHeld) {
+                // Duplicate at new position and reset original
+                const wRaw = unscaleValue(stateRef.current.width);
+                const hRaw = unscaleValue(stateRef.current.height);
+                addMoodBlock(block.type, block.content, {
+                    x: parseFloat(stateRef.current.x.toFixed(4)),
+                    y: parseFloat(stateRef.current.y.toFixed(4)),
+                    width: typeof wRaw === 'number' ? wRaw : undefined,
+                    height: typeof hRaw === 'number' ? hRaw : undefined
+                });
+                // Reset original
+                mvX.set(stateRef.current.startX);
+                mvY.set(stateRef.current.startY);
+                stateRef.current.x = stateRef.current.startX;
+                stateRef.current.y = stateRef.current.startY;
+            } else {
+                onUpdate({
+                    x: parseFloat(stateRef.current.x.toFixed(4)),
+                    y: parseFloat(stateRef.current.y.toFixed(4))
+                });
+            }
         }
         setGuidelines({ guidelines: [], distances: [] })
-    }, [onUpdate, setGuidelines, isMultiSelect, isSelected, onMultiMoveEnd])
+    }, [onUpdate, setGuidelines, isMultiSelect, isSelected, onMultiMoveEnd, altHeld, block.type, block.content])
 
     const handleResizePan = useCallback((handle: ResizeHandle, e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         if (block.isLocked) return;

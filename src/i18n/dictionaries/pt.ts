@@ -672,5 +672,34 @@ export const pt = {
         },
         applying: "Sintonizando Vibe...",
         start_fresh: "Começar do Zero"
+    },
+    hotkeys: {
+        title: "Comandos & Atalhos",
+        subtitle: "Acesse o poder do MoodSpace",
+        sections: {
+            basics: "Essenciais",
+            organize: "Organização",
+            layers: "Camadas & Fluxo"
+        },
+        keys: {
+            move: "Mover blocos",
+            nudge: "Ajuste fino (1px)",
+            nudgeshift: "Impulso (10px)",
+            delete: "Deletar seleção",
+            duplicate: "Duplicar bloco",
+            group: "Agrupar blocos",
+            ungroup: "Desagrupar",
+            undo: "Desfazer",
+            redo: "Refazer",
+            escape: "Deselecionar tudo",
+            bring_front: "Trazer para frente",
+            send_back: "Enviar para trás",
+            proportional: "Redimensionar proporcional",
+            snapping: "Snap de eixo",
+            copy: "Copiar blocos",
+            paste: "Colar blocos",
+            zoom: "Zoom in/out",
+            pan: "Mover câmera (Pan)"
+        }
     }
 };

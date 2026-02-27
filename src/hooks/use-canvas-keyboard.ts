@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
 import { MoodBlock } from '@/types/database';
 
 interface UseCanvasKeyboardProps {
@@ -12,6 +13,12 @@ interface UseCanvasKeyboardProps {
     blocks: MoodBlock[];
     undo: () => void;
     redo: () => void;
+    onGroup: () => void;
+    onUngroup: () => void;
+    zoomIn?: () => void;
+    zoomOut?: () => void;
+    resetZoom?: () => void;
+    addMoodBlock: (type: string, content: any, options?: any) => void;
 }
 
 export function useCanvasKeyboard({
@@ -24,7 +31,13 @@ export function useCanvasKeyboard({
     sendToBack,
     blocks,
     undo,
-    redo
+    redo,
+    onGroup,
+    onUngroup,
+    zoomIn,
+    zoomOut,
+    resetZoom,
+    addMoodBlock
 }: UseCanvasKeyboardProps) {
     const blocksRef = useRef(blocks);
 
@@ -121,9 +134,79 @@ export function useCanvasKeyboard({
                     redo();
                 }
                 break;
+            case 'g':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (e.shiftKey) onUngroup();
+                    else onGroup();
+                }
+                break;
+            case 'c':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (selectedIds.length > 0) {
+                        const blocksToCopy = blocksRef.current
+                            .filter(b => selectedIds.includes(b.id))
+                            .map(b => ({ ...b, id: undefined, _isCopy: true }));
+                        localStorage.setItem('mood_clipboard', JSON.stringify(blocksToCopy));
+                        toast(`${selectedIds.length} bloco(s) copiado(s)`);
+                    }
+                }
+                break;
+            case 'v':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const rawData = localStorage.getItem('mood_clipboard');
+                    if (rawData) {
+                        try {
+                            const copiedBlocks = JSON.parse(rawData);
+                            copiedBlocks.forEach((b: any) => {
+                                // Use the content directly
+                                addMoodBlock(b.type, b.content, {
+                                    x: Math.min(98, b.x + 5),
+                                    y: Math.min(98, b.y + 5),
+                                    width: b.width,
+                                    height: b.height
+                                });
+                            });
+                            toast(`${copiedBlocks.length} bloco(s) colado(s)`);
+                        } catch (err) {
+                            console.error("Paste failed", err);
+                        }
+                    }
+                }
+                break;
+            case 'k':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    // Open help/command center? It already opens with '?'
+                    // Maybe we can trigger a custom event that CommandCenter listens to
+                    window.dispatchEvent(new CustomEvent('open-command-center'));
+                }
+                break;
+            case '=':
+            case '+':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    zoomIn?.();
+                }
+                break;
+            case '-':
+            case '_':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    zoomOut?.();
+                }
+                break;
+            case '0':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    resetZoom?.();
+                }
+                break;
         }
 
-    }, [selectedIds, onUpdateBlock, removeBlocks, duplicateMoodBlock, bringToFront, sendToBack, setSelectedIds, undo, redo]);
+    }, [selectedIds, onUpdateBlock, removeBlocks, duplicateMoodBlock, bringToFront, sendToBack, setSelectedIds, undo, redo, onGroup, onUngroup, zoomIn, zoomOut, resetZoom]);
 
 
     useEffect(() => {

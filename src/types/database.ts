@@ -49,6 +49,7 @@ export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content
     rotation: number;
     isLocked: boolean;
     isHidden: boolean;
+    groupId?: string | null;
     content: MoodBlockContent;
 }
 

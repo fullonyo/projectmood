@@ -102,6 +102,7 @@ model MoodBlock {
   rotation  Float    @default(0)
   isLocked  Boolean  @default(false)
   isHidden  Boolean  @default(false)
+  groupId   String?
 
   
   messages  GuestbookMessage[]
@@ -112,6 +113,7 @@ model MoodBlock {
   
   @@index([userId])
   @@index([userId, type])
+  @@index([groupId])
 }
 
 model GuestbookMessage {

@@ -43,7 +43,8 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
     const {
         blocks, setBlocks, updateBlock, updateBlocks, removeBlocks,
         isSaving, undo, redo, canUndo, canRedo,
-        selectedIds, setSelectedIds, alignSelected, distributeSelected
+        selectedIds, setSelectedIds, alignSelected, distributeSelected,
+        groupSelected, ungroupSelected
     } = useCanvasManager(moodBlocks);
 
     const normalizeZIndexes = useCallback(async () => {
@@ -126,6 +127,8 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                     redo={redo}
                     alignSelected={alignSelected}
                     distributeSelected={distributeSelected}
+                    onGroup={groupSelected}
+                    onUngroup={ungroupSelected}
                 />
 
             </div>

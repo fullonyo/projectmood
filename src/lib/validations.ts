@@ -50,6 +50,7 @@ export const UpdateMoodBlockLayoutSchema = z.object({
     rotation: z.number().optional(),
     isLocked: z.boolean().optional(),
     isHidden: z.boolean().optional(),
+    groupId: z.string().nullable().optional(),
     content: MoodBlockContentSchema.optional()
 })
 

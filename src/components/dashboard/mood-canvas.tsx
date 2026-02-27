@@ -10,9 +10,10 @@ import { themeConfigs } from "@/lib/themes"
 import { BlockRenderer } from "./block-renderer"
 import { BoardStage } from "./board-stage"
 import { useTranslation } from "@/i18n/context"
-import { duplicateMoodBlock } from "@/actions/profile"
+import { duplicateMoodBlock, addMoodBlock } from "@/actions/profile"
 import { CanvasContextMenu } from "./canvas-context-menu"
 import { MultiSelectToolbar } from "./MultiSelectToolbar"
+import { CommandCenter } from "./command-center"
 import { useCanvasKeyboard } from "@/hooks/use-canvas-keyboard"
 import {
     calculateRotation,
@@ -37,6 +38,8 @@ interface MoodCanvasProps {
     redo: () => void
     alignSelected: (type: 'left' | 'centerX' | 'right' | 'top' | 'centerY' | 'bottom') => void
     distributeSelected: (axis: 'horizontal' | 'vertical') => void
+    onGroup: () => void
+    onUngroup: () => void
 }
 
 export function MoodCanvas({
@@ -51,7 +54,9 @@ export function MoodCanvas({
     undo,
     redo,
     alignSelected,
-    distributeSelected
+    distributeSelected,
+    onGroup,
+    onUngroup
 }: MoodCanvasProps) {
 
     const { t } = useTranslation()
@@ -72,8 +77,39 @@ export function MoodCanvas({
     const lastPinchDist = useRef<number | null>(null)
 
     const [selectionRect, setSelectionRect] = useState<{ x1: number, y1: number, x2: number, y2: number } | null>(null);
+    const [isSpacePressed, setIsSpacePressed] = useState(false);
+    const [isPanning, setIsPanning] = useState(false);
+    const panOffset = useRef({ x: 0, y: 0 });
+    const mvPanX = useMotionValue(0);
+    const mvPanY = useMotionValue(0);
+
+    // Pan & Space detection
+    useEffect(() => {
+        const hKeyDown = (e: KeyboardEvent) => {
+            if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
+                setIsSpacePressed(true);
+            }
+        };
+        const hKeyUp = (e: KeyboardEvent) => {
+            if (e.code === 'Space') {
+                setIsSpacePressed(false);
+                setIsPanning(false);
+            }
+        };
+        window.addEventListener('keydown', hKeyDown);
+        window.addEventListener('keyup', hKeyUp);
+        return () => {
+            window.removeEventListener('keydown', hKeyDown);
+            window.removeEventListener('keyup', hKeyUp);
+        };
+    }, []);
 
     const handleMouseDown = (e: React.MouseEvent) => {
+        if (isSpacePressed) {
+            setIsPanning(true);
+            panOffset.current = { x: e.clientX - mvPanX.get(), y: e.clientY - mvPanY.get() };
+            return;
+        }
         // Only trigger on left click
         if (e.button !== 0 || e.ctrlKey || e.metaKey) return;
 
@@ -93,11 +129,17 @@ export function MoodCanvas({
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
+        if (isPanning) {
+            mvPanX.set(e.clientX - panOffset.current.x);
+            mvPanY.set(e.clientY - panOffset.current.y);
+            return;
+        }
         if (!selectionRect) return;
         setSelectionRect(prev => prev ? ({ ...prev, x2: e.clientX, y2: e.clientY }) : null);
     };
 
     const handleMouseUp = (e: React.MouseEvent) => {
+        setIsPanning(false);
         if (!selectionRect) return;
 
         const rect = {
@@ -258,13 +300,24 @@ export function MoodCanvas({
         sendToBack,
         blocks,
         undo,
-        redo
+        redo,
+        onGroup,
+        onUngroup,
+        zoomIn: () => setZoom(prev => Math.min(3, prev + 0.1)),
+        zoomOut: () => setZoom(prev => Math.max(0.2, prev - 0.1)),
+        resetZoom: () => {
+            setZoom(1);
+            mvPanX.set(0);
+            mvPanY.set(0);
+        },
+        addMoodBlock
     })
 
     return (
         <div
             className={cn(
-                "w-full h-full relative cursor-crosshair overflow-hidden select-none touch-none",
+                "w-full h-full relative overflow-hidden select-none touch-none",
+                isSpacePressed ? "cursor-grab active:cursor-grabbing" : "cursor-crosshair",
                 profile.theme === 'dark' ? "bg-zinc-950" : "bg-white"
             )}
             onMouseDown={handleMouseDown}
@@ -304,8 +357,11 @@ export function MoodCanvas({
             <motion.div
                 ref={canvasRef}
                 className="w-full h-full p-4 relative z-10"
-                animate={{ scale: zoom }}
-                transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+                style={{
+                    scale: zoom,
+                    x: mvPanX,
+                    y: mvPanY,
+                }}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -431,7 +487,11 @@ export function MoodCanvas({
                 count={selectedIds.length}
                 onAlign={alignSelected}
                 onDistribute={distributeSelected}
+                onGroup={onGroup}
+                onUngroup={onUngroup}
             />
+
+            <CommandCenter />
         </div>
     )
 }
