@@ -14,15 +14,11 @@ interface CountdownBlockPublicProps {
     content: CountdownBlockContent
 }
 
-/**
- * CountdownBlockPublic - Padronizado com Studio FUS 💎
- */
 export function CountdownBlockPublic({ content }: CountdownBlockPublicProps) {
     const { title, targetDate, emoji: iconName, style = 'minimal' } = content
     const [timeLeft, setTimeLeft] = useState(calculateTimeLeft())
     const Icon = iconName ? ICON_MAP[iconName as keyof typeof ICON_MAP] : null
 
-    // Hook Padronizado Studio
     const { ref, fluidScale } = useStudioBlock()
 
     function calculateTimeLeft() {

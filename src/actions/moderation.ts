@@ -67,7 +67,6 @@ export async function adminDeleteBlock(blockId: string) {
             data: { deletedAt: new Date() }
         })
 
-        // Log the action
         await prisma.auditLog.create({
             data: {
                 adminId: session.user.id,
@@ -95,7 +94,6 @@ export async function adminBanUser(userId: string, isBanned: boolean) {
     const session = await requireAdmin()
 
     try {
-        // Pre-fetch user for metadata and revalidation
         const targetUser = await prisma.user.findUnique({
             where: { id: userId },
             select: { username: true }
@@ -106,7 +104,6 @@ export async function adminBanUser(userId: string, isBanned: boolean) {
             data: { isBanned }
         })
 
-        // Log the action
         await prisma.auditLog.create({
             data: {
                 adminId: session.user.id,
@@ -136,7 +133,6 @@ export async function adminVerifyUser(userId: string, isVerified: boolean, type:
     const session = await requireAdmin()
 
     try {
-        // Pre-fetch user for metadata and revalidation
         const targetUser = await prisma.user.findUnique({
             where: { id: userId },
             select: { username: true }
@@ -150,7 +146,6 @@ export async function adminVerifyUser(userId: string, isVerified: boolean, type:
             }
         })
 
-        // Log the action
         await prisma.auditLog.create({
             data: {
                 adminId: session.user.id,

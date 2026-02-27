@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
-// Incrementar visualização
 export async function POST(req: NextRequest) {
     try {
         const { profileId } = await req.json()
@@ -10,7 +9,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Profile ID required' }, { status: 400 })
         }
 
-        // Buscar ou criar analytics para este profile
         const analytics = await prisma.profileAnalytics.upsert({
             where: { profileId },
             update: {
@@ -31,7 +29,6 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// Buscar visualizações
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url)

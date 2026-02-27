@@ -59,7 +59,6 @@ export const CanvasItem = memo(({
 
     const unscaleValue = (v: number | 'auto') => typeof v === 'number' ? Math.round(v / viewportScale) : v
 
-    // --- State & Motion Values ---
     const stateRef = useRef({
         x: block.x,
         y: block.y,
@@ -132,7 +131,6 @@ export const CanvasItem = memo(({
         }
     }, [isSelected])
 
-    // --- Interaction Handlers ---
     const handleDragPan = useCallback((e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         if (stateRef.current.isInteractiveMode || block.isLocked) return;
         if (!canvasRef.current) return;
@@ -141,11 +139,9 @@ export const CanvasItem = memo(({
         const dxPercent = (info.delta.x / canvas.width) * 100;
         const dyPercent = (info.delta.y / canvas.height) * 100;
 
-        // Multi-select drag logic
         if (isMultiSelect && isSelected && onMultiMove) {
             onMultiMove(dxPercent, dyPercent);
 
-            // Must also move ourselves visually since we are the source of the interaction
             stateRef.current.x += dxPercent;
             stateRef.current.y += dyPercent;
             mvX.set(stateRef.current.x);
@@ -193,7 +189,6 @@ export const CanvasItem = memo(({
         stateRef.current.startX = stateRef.current.x;
         stateRef.current.startY = stateRef.current.y;
 
-        // If not selected yet, select it (unless shift is held, which is handled in onClick)
         if (!isSelected) {
             onSelect(false);
         }
@@ -208,7 +203,6 @@ export const CanvasItem = memo(({
             onMultiMoveEnd();
         } else {
             if (altHeld) {
-                // Duplicate at new position and reset original
                 const wRaw = unscaleValue(stateRef.current.width);
                 const hRaw = unscaleValue(stateRef.current.height);
                 addMoodBlock(block.type, block.content, {
@@ -217,7 +211,6 @@ export const CanvasItem = memo(({
                     width: typeof wRaw === 'number' ? wRaw : undefined,
                     height: typeof hRaw === 'number' ? hRaw : undefined
                 });
-                // Reset original
                 mvX.set(stateRef.current.startX);
                 mvY.set(stateRef.current.startY);
                 stateRef.current.x = stateRef.current.startX;
@@ -294,9 +287,8 @@ export const CanvasItem = memo(({
         stateRef.current.isInteractiveMode = nextState;
     }, [isInteractiveMode])
 
-    // --- Sub-Renders ---
     const renderHandle = (handle: ResizeHandle) => {
-        if (isMultiSelect) return null; // Hide handles in multi-select
+        if (isMultiSelect) return null;
         const isCorner = ['br', 'bl', 'tr', 'tl'].includes(handle)
         const handleSize = isCorner ? 'w-2.5 h-2.5' : (handle === 'top' || handle === 'bottom' ? 'w-6 h-1' : 'w-1 h-6')
         const positionClasses: Record<ResizeHandle, string> = {
@@ -321,7 +313,7 @@ export const CanvasItem = memo(({
 
     return (
         <motion.div
-            layout // Suaviza mudanças de posição 
+            layout
             variants={{
                 hidden: {
                     opacity: 0,

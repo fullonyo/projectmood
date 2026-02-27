@@ -8,21 +8,17 @@ import {
     SpotifyIcon, TwitchIcon, PinterestIcon
 } from "../icons"
 
-// Modularized Public Blocks
 import dynamic from "next/dynamic"
 
-// Universal Components
 import { FrameContainer, FrameType } from "./FrameContainer"
 import { SmartText, TextBehavior } from "./SmartText"
 import { SmartMedia, MediaType } from "./SmartMedia"
 import { SmartShape } from "./SmartShape"
 import { SmartRorschach } from "./SmartRorschach"
 
-// Modularized Public Blocks - Static (Critical for LCP/CLS)
 import { PhotoBlockPublic } from "./photo-block-public"
 import { CountdownBlockPublic } from "./countdown-block-public"
 
-// Video and Music are now handled by SmartMedia
 const GuestbookBlock = dynamic(() => import("./guestbook-block").then(mod => mod.GuestbookBlock), {
     loading: () => <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
 })
@@ -51,7 +47,6 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
     const { content } = block
     const scale = useViewportScale()
 
-    // Helper to wrap content in a Frame
     const renderWithFrame = (children: React.ReactNode, frame: FrameType = 'none', caption?: string) => (
         <FrameContainer frame={frame} caption={caption}>
             {children}
@@ -103,7 +98,6 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         case 'video':
         case 'music':
         case 'media':
-            // Se tiver 'mediaType', é o novo bloco SmartMedia
             if (content.mediaType) {
                 return (
                     <FrameContainer frame={content.frame || (content.mediaType === 'music' ? 'minimal' : 'none')}>
@@ -117,7 +111,6 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                     </FrameContainer>
                 )
             }
-            // Caso contrário, é um bloco legado ou o bloco de Curadoria (Analog)
             if (block.type === 'video' || block.type === 'music') {
                 return (
                     <FrameContainer frame={content.frame || (block.type === 'music' ? 'minimal' : 'none')}>
@@ -131,7 +124,6 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                     </FrameContainer>
                 )
             }
-            // Se for 'media' sem 'mediaType', é o bloco analógico de Livros/Filmes
             return null;
 
         case 'shape':
@@ -163,10 +155,6 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                     complexity={content.complexity}
                 />
             )
-        // The following line was unreachable and seems like a copy-paste error.
-        // It is removed to maintain syntactical correctness and avoid dead code.
-        // return <MediaBlockPublic content={content} isPublic={isPublic} />
-
         case 'gif':
             return renderWithFrame(
                 <img src={content.url} alt="gif" className="w-full h-full object-cover" />,

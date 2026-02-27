@@ -27,19 +27,14 @@ function generateAnonymousName() {
 export async function addGuestbookMessage(blockId: string, content: string) {
     const session = await auth()
 
-    // Validação de entrada
     const validation = GuestbookMessageSchema.safeParse({ blockId, content })
     if (!validation.success) {
         return { error: validation.error.issues[0].message }
     }
-
-    // Sanitizar conteúdo (prevenir XSS)
     const sanitizedContent = DOMPurify.sanitize(validation.data.content, {
-        ALLOWED_TAGS: [], // Apenas texto
+        ALLOWED_TAGS: [],
         ALLOWED_ATTR: []
     })
-
-    // Buscar o dono do bloco para marcar se é admin
     const block = await prisma.moodBlock.findUnique({
         where: { id: validation.data.blockId },
         select: { userId: true }

@@ -1,7 +1,7 @@
 "use server"
 
 export async function searchGifs(query: string) {
-    const GIPHY_API_KEY = process.env.GIPHY_API_KEY || 'dc6zaTOxFJmzC'; // API Key pública limitada para dev
+    const GIPHY_API_KEY = process.env.GIPHY_API_KEY || 'dc6zaTOxFJmzC';
 
     try {
         const response = await fetch(

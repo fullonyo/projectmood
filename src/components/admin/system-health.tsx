@@ -11,7 +11,6 @@ export function SystemHealth() {
         schema: { version: "2024.02.21", migration: "ok" }
     })
 
-    // In a real app, this could be a server action call
     useEffect(() => {
         const interval = setInterval(() => {
             setHealth(prev => ({

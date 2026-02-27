@@ -19,7 +19,7 @@ export default async function DashboardPage() {
     });
 
     if (!user) {
-        redirect("/auth/register"); // Se o user sumiu do banco mas tem sessão, forçamos re-registro ou login
+        redirect("/auth/register");
     }
 
     if (user.isBanned) {
@@ -28,8 +28,6 @@ export default async function DashboardPage() {
 
     let currentProfile = user.profile;
 
-    // Auto-reparo: Se o usuário existe mas não tem perfil, criamos um padrão agora.
-    // Transação atômica: se a criação da versão falhar, o perfil também é revertido.
     if (!currentProfile) {
         const [newProfile] = await prisma.$transaction(async (tx) => {
             const profile = await tx.profile.create({
@@ -39,7 +37,6 @@ export default async function DashboardPage() {
                 }
             });
 
-            // Auto-publish v1: garante que perfil novo já tenha versão pública
             await tx.profileVersion.create({
                 data: {
                     profileId: profile.id,
@@ -74,19 +71,15 @@ export default async function DashboardPage() {
         orderBy: { order: 'asc' },
     })) as MoodBlock[];
 
-    // Buscar última publicação ativa
     const activeVersion = await prisma.profileVersion.findFirst({
         where: { profileId: profile.id, isActive: true },
         select: { createdAt: true }
     });
     const publishedAt = activeVersion?.createdAt?.toISOString() || null;
 
-    // Detectar se há mudanças não publicadas
     const hasUnpublishedChanges = await computeHasUnpublishedChanges();
 
     const isAdmin = (session.user as any)?.role === "ADMIN";
-
-    // Buscar as feature flags do sistema
     const rawFlags = await getFeatureFlags();
     const systemFlags = rawFlags.reduce((acc: Record<string, boolean>, flag: { key: string, isEnabled: boolean }) => {
         acc[flag.key] = flag.isEnabled;
@@ -95,7 +88,6 @@ export default async function DashboardPage() {
 
     return (
         <div className="h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden">
-            {/* Client Layout with Sidebars and Canvas - Header was merged into Right Sidebar */}
             <DashboardClientLayout
                 profile={profile}
                 moodBlocks={moodBlocks}

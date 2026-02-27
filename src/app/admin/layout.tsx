@@ -12,7 +12,6 @@ export default async function AdminLayout({
 }) {
     const session = await auth()
 
-    // Double-check protection (Middleware handles edge, this handles internal routing)
     if (session?.user?.role !== "ADMIN") {
         redirect("/dashboard")
     }

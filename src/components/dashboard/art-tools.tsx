@@ -35,11 +35,9 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
     const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
 
-    // Form states for Weather
     const [weatherLoc, setWeatherLoc] = useState("")
     const [weatherVibe, setWeatherVibe] = useState("")
 
-    // Form states for Media
     const [mediaTitle, setMediaTitle] = useState("")
     const [mediaReview, setMediaReview] = useState("")
     const [mediaCategory, setMediaCategory] = useState<'book' | 'movie'>('book')
@@ -91,7 +89,6 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
             "space-y-12 transition-all duration-500",
             highlight ? "border-2 border-black dark:border-white p-6 -m-6 bg-zinc-50 dark:bg-zinc-900/50" : ""
         )}>
-            {/* Material Substrates Section */}
             <section className="space-y-6">
                 <header className="flex items-center gap-2 opacity-30 px-1">
                     <Activity className="w-3 h-3 text-black dark:text-white" />
@@ -122,7 +119,6 @@ export function ArtTools({ highlight }: { highlight?: boolean }) {
             </section>
 
 
-            {/* Curation Manifesto Section */}
             <section className="space-y-6">
                 <header className="flex items-center gap-2 opacity-30 px-1">
                     <Activity className="w-3 h-3 text-black dark:text-white" />

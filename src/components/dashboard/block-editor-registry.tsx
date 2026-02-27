@@ -33,7 +33,6 @@ export function BlockEditorRegistry({
 }: BlockEditorRegistryProps) {
     const activeType = selectedBlock?.type || draftBlockType || '';
 
-    // Helper to add block with centralized defaults
     const handleAdd = async (type: string, content: any, typeOverride?: string) => {
         const { width, height } = getInitialBlockSize(type);
         const result = await addMoodBlock(typeOverride || type, content, { x: 40, y: 40, width, height });

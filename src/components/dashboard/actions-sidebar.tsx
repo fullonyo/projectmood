@@ -75,7 +75,6 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                 toast.error(result.error)
             } else {
                 toast.success(t('publish.success'))
-                // Refresh server data para atualizar hasUnpublishedChanges
                 router.refresh()
             }
             setShowPublishModal(false)
@@ -84,14 +83,12 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
 
     const firstName = username
     const avatarSrc = profile.avatarUrl || `https://avatar.vercel.sh/${username}`
-    // isDraft: true se há mudanças não publicadas OU se nunca publicou
     const isDraft = hasUnpublishedChanges ?? !publishedAt
 
     return (
         <aside className="relative w-80 h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-none z-50 overflow-hidden">
             <LanguageSwitcher className="absolute top-3 right-6" />
 
-            {/* Hidden File Input */}
             <input
                 type="file"
                 ref={fileInputRef}
@@ -114,10 +111,8 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                 </div>
             </div>
 
-            {/* Profile Context Card */}
             <div className="px-6 py-10">
                 <div className="p-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 relative group transition-all duration-500">
-                    {/* Technical corner accents */}
                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-zinc-300 dark:border-zinc-700" />
                     <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-zinc-300 dark:border-zinc-700" />
 
@@ -175,10 +170,8 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                 </div>
             </div>
 
-            {/* Main Action Area */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 pb-6 custom-scrollbar space-y-10 animate-in fade-in slide-in-from-right-2 duration-500">
 
-                {/* Publicação */}
                 <div className="space-y-6">
                     <header className="flex flex-col gap-2 opacity-30 px-1">
                         <div className="flex items-center gap-2">
@@ -191,7 +184,6 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                     </div>
 
                     <div className="grid gap-4">
-                        {/* Botão Publicar Diorama */}
                         <Button
                             onClick={() => setShowPublishModal(true)}
                             disabled={isPending}
@@ -259,12 +251,9 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                             </Link>
                         )}
 
-                        {/* Histórico de Versões */}
                         <VersionHistoryPanel onRollbackComplete={() => router.refresh()} />
                     </div>
                 </div>
-
-                {/* Futuras Funcionalidades */}
                 <div className="space-y-4">
                     <header className="flex items-center gap-2 opacity-30 px-1 mb-2">
                         <Activity className="w-2.5 h-2.5" />
@@ -287,7 +276,6 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                 </div>
             </div>
 
-            {/* Bottom Section - Session Closure */}
             <div className="p-8 border-t border-zinc-100 dark:border-zinc-900 shrink-0">
                 <Button
                     variant="ghost"
@@ -303,7 +291,6 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                 </Button>
             </div>
 
-            {/* Confirm Publish Modal */}
             <ConfirmModal
                 isOpen={showPublishModal}
                 onClose={() => setShowPublishModal(false)}

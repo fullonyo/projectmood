@@ -17,7 +17,6 @@ export async function getAdminAnalytics() {
         const last48h = new Date(now.getTime() - 48 * 60 * 60 * 1000)
         const last14d = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
 
-        // 1. User Metrics
         const [totalUsers, newUsers24h, prevNewUsers24h, activeProfiles7d, prevActiveProfiles7d, bannedCount] = await Promise.all([
             prisma.user.count({ where: { deletedAt: null } }),
             prisma.user.count({ where: { createdAt: { gte: last24h }, deletedAt: null } }),
@@ -27,14 +26,12 @@ export async function getAdminAnalytics() {
             prisma.user.count({ where: { isBanned: true, deletedAt: null } })
         ])
 
-        // 2. View Metrics
         const viewStats = await prisma.profileAnalytics.aggregate({
             _sum: { views: true },
             _max: { views: true },
             where: { profile: { deletedAt: null } }
         })
 
-        // 3. Block Distribution
         const blockUsage = await prisma.moodBlock.groupBy({
             where: { deletedAt: null },
             by: ['type'],
@@ -43,7 +40,6 @@ export async function getAdminAnalytics() {
             take: 10
         })
 
-        // 4. Growth Data (Last 30 days)
         const registrations = await prisma.user.findMany({
             where: { createdAt: { gte: thirtyDaysAgo }, deletedAt: null },
             select: { createdAt: true }
@@ -66,14 +62,12 @@ export async function getAdminAnalytics() {
             }
         })
 
-        // 5. Role Distribution
         const usersByRole = await prisma.user.groupBy({
             by: ['role'],
             where: { deletedAt: null },
             _count: { _all: true }
         })
 
-        // 6. Recent Activity
         const recentUsers = await prisma.user.findMany({
             where: { deletedAt: null },
             take: 8,

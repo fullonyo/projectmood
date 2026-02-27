@@ -13,11 +13,6 @@ interface BlockErrorBoundaryState {
     error: Error | null
 }
 
-/**
- * Error Boundary para blocos individuais.
- * Isola falhas de renderização — um bloco corrompido não derruba a página inteira.
- * Implementado como class component porque React hooks não suportam componentDidCatch.
- */
 export class BlockErrorBoundary extends Component<BlockErrorBoundaryProps, BlockErrorBoundaryState> {
     constructor(props: BlockErrorBoundaryProps) {
         super(props)

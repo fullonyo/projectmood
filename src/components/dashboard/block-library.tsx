@@ -70,7 +70,6 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
 
             <div className="space-y-12">
                 {categories.map((group, groupIdx) => {
-                    // Filter items based on systemFlags. Default is true if flag is missing.
                     const visibleItems = group.items.filter(item => {
                         const flagKey = `block_${item.id}`;
                         if (systemFlags[flagKey] === false) return false;
@@ -104,7 +103,6 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
                                                 {t(`sidebar.library.items.${item.tk}.title`)}
                                             </h4>
 
-                                            {/* HUD decorative corner markers */}
                                             <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white opacity-0 group-hover:opacity-20 transition-opacity" />
                                         </button>
                                     )
