@@ -49,6 +49,7 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
                 { id: 'social', type: 'social', icon: Share2, tk: 'social' },
                 { id: 'media', type: 'media', icon: Book, tk: 'media' },
                 { id: 'shape', type: 'shape', icon: Palette, tk: 'shape' },
+                { id: 'rorschach', type: 'rorschach', icon: Sparkles, tk: 'rorschach' },
             ]
         }
     ]

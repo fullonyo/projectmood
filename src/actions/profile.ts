@@ -86,7 +86,7 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
             data: {
                 userId: session.user.id,
                 type: validation.data.type,
-                content: validation.data.content,
+                content: validation.data.content as any,
                 x: x,
                 y: y,
                 width: width ? Math.round(width) : null,
@@ -137,9 +137,9 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
         revalidatePath("/dashboard");
 
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error('[updateMoodBlockLayout]', error);
-        return { error: "Erro ao salvar posição" };
+        return { error: `Erro ao salvar alterações: ${error.message || 'Erro interno'}` };
     }
 }
 

@@ -16,6 +16,7 @@ import { FrameContainer, FrameType } from "./FrameContainer"
 import { SmartText, TextBehavior } from "./SmartText"
 import { SmartMedia, MediaType } from "./SmartMedia"
 import { SmartShape } from "./SmartShape"
+import { SmartRorschach } from "./SmartRorschach"
 
 // Modularized Public Blocks - Static (Critical for LCP/CLS)
 import { PhotoBlockPublic } from "./photo-block-public"
@@ -148,6 +149,18 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                     floatSpeed={content.floatSpeed}
                     gradient={content.gradient}
                     gradientType={content.gradientType as any}
+                />
+            )
+
+        case 'rorschach':
+            return (
+                <SmartRorschach
+                    seed={content.seed}
+                    color={content.color}
+                    opacity={content.opacity}
+                    blur={content.blur}
+                    symmetry={content.symmetry}
+                    complexity={content.complexity}
                 />
             )
         // The following line was unreachable and seems like a copy-paste error.

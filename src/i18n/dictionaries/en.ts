@@ -12,7 +12,12 @@ export const en: Dictionary = {
         duplicate: "Duplicate",
         enable_interaction: "Enable Interaction",
         disable_interaction: "Disable Interaction",
-        select: "Select"
+        select: "Select",
+        regenerate: "Regenerate",
+        opacity: "Opacity",
+        blur: "Blur",
+        update: "Update",
+        deploy: "Place on Mural",
     },
 
     sidebar: {
@@ -64,12 +69,13 @@ export const en: Dictionary = {
                 countdown: { title: "Countdown", desc: "Mark a date" },
                 guestbook: { title: "Guestbook", desc: "Let others sign" },
                 moodStatus: { title: "Current State", desc: "How are you right now?" },
-                social: { title: "Jump Link", desc: "Take elsewhere" },
+                social: { title: "Connections", desc: "Links and social media" },
                 gif: { title: "Animation", desc: "GIF reactions (Giphy)" },
                 weather: { title: "Weather", desc: "How's the day outside?" },
                 universal_media: { title: "Universal Media", desc: "YouTube & Spotify" },
                 media: { title: "Analog Record", desc: "Books and works" },
-                shape: { title: "Artistic Shapes", desc: "Geometry and Blending" }
+                shape: { title: "Shapes", desc: "Geometry and aesthetics" },
+                rorschach: { title: "Rorschach", desc: "Generative art" },
             },
             inspector_back: "Back to Elements",
             more_coming: "More components soon"
@@ -432,6 +438,23 @@ export const en: Dictionary = {
             searching: "Searching...",
             deploy: "Paste Gif",
             not_found: "No gif found"
+        },
+        rorschach: {
+            title: "Rorschach Mirror",
+            subtitle: "Generative, symmetrical, and abstract art.",
+            seed: "Geometric Seed",
+            complexity: "Chaos Level",
+            symmetry: "Symmetry Type",
+            color: "Pigment",
+            symmetries: {
+                vertical: "Vertical",
+                horizontal: "Horizontal",
+                quad: "Kaleidoscope"
+            },
+            tabs: {
+                geometry: "Geometry",
+                style: "Aesthetics"
+            }
         },
         block_manager: {
             delete_confirm: "Are you sure you want to remove this memory?",

@@ -65,6 +65,7 @@ export const DESIGN_BLOCK_CONFIGS: Record<string, { w: number; h: number; minW?:
     weather: { w: 300, h: 100, minW: 150, minH: 60 },
     doodle: { w: 250, h: 250, minW: 50, minH: 50 },
     tape: { w: 100, h: 40, minW: 20, minH: 20 },
+    rorschach: { w: 300, h: 300, minW: 50, minH: 50 },
 }
 
 /**

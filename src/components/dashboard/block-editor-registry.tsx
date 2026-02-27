@@ -11,6 +11,7 @@ import { DoodlePad } from "./doodle-pad"
 import { CountdownEditor } from "./countdown-editor"
 import { UniversalShapeEditor } from "./UniversalShapeEditor"
 import { UniversalWeatherEditor } from "./UniversalWeatherEditor"
+import { RorschachEditor } from "./RorschachEditor"
 import { addMoodBlock } from "@/actions/profile"
 import { MoodBlock } from "@/types/database"
 import { getInitialBlockSize } from "@/lib/canvas-scale"
@@ -140,6 +141,18 @@ export function BlockEditorRegistry({
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
                 onAdd={(type, content) => handleAdd('shape', content)}
+                onClose={onClose}
+            />
+        )
+    }
+
+    if (activeType === 'rorschach') {
+        return (
+            <RorschachEditor
+                key={selectedBlock?.id || 'draft-rorschach'}
+                block={selectedBlock}
+                onUpdate={onUpdateBlock}
+                onAdd={(type, content) => handleAdd('rorschach', content)}
                 onClose={onClose}
             />
         )

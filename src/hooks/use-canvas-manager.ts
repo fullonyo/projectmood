@@ -41,16 +41,32 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
 
             try {
                 // Sanitize: Prisma returns null for width/height, but Action expects number | undefined
+                // Also protect against NaN/Infinity which can crash Zod/Prisma
                 const sanitizedUpdates = Object.fromEntries(
-                    Object.entries(mergedUpdates).map(([k, v]) => [k, v === null ? undefined : v])
+                    Object.entries(mergedUpdates)
+                        .filter(([k, v]) => {
+                            // Filter out fields updateMoodBlockLayout doesn't handle or that are invalid
+                            if (['id', 'userId', 'createdAt', 'updatedAt', 'deletedAt', 'type'].includes(k)) return false;
+                            if (typeof v === 'number' && (isNaN(v) || !isFinite(v))) return false;
+                            return true;
+                        })
+                        .map(([k, v]) => [k, v === null ? undefined : v])
                 ) as Parameters<typeof updateMoodBlockLayout>[1];
+
+                if (Object.keys(sanitizedUpdates).length === 0) {
+                    epochRef.current[id] = Math.max(0, (epochRef.current[id] || 0) - 1);
+                    return;
+                }
+
                 const result = await updateMoodBlockLayout(id, sanitizedUpdates);
                 if (result?.error) throw new Error(result.error);
+
                 setTimeout(() => {
                     epochRef.current[id] = Math.max(0, (epochRef.current[id] || 0) - 1);
                 }, 1500);
             } catch (error) {
                 console.error("Batch sync failed for", id, error);
+                // toast.error(`Falha ao sincronizar bloco: ${id}`);
             } finally {
                 setIsSaving(false);
             }
@@ -125,8 +141,15 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
 
                 // Lock Epoch
                 epochRef.current[block.id] = (epochRef.current[block.id] || 0) + 1;
-                // Accumulate
-                pendingUpdates.current[block.id] = { ...pendingUpdates.current[block.id], ...blockUpdates };
+                // Accumulate updates, deep merging content if necessary
+                const currentPending = pendingUpdates.current[block.id] || {};
+                const newPending = { ...currentPending, ...blockUpdates };
+
+                if (blockUpdates.content && currentPending.content) {
+                    newPending.content = { ...(currentPending.content as any), ...(blockUpdates.content as any) };
+                }
+
+                pendingUpdates.current[block.id] = newPending;
 
                 return updatedBlock;
             });

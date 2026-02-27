@@ -48,7 +48,24 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **Histórico & State Machine (Studio 4.0) ⏪🚀**:
   - **Undo/Redo**: Sistema de stack centralizado em `src/lib/canvas-history.ts`. Suporta Ctrl+Z/Ctrl+Y e sincroniza automaticamente com o backend em lote.
   - **State Machine**: O hook `useCanvasManager` expõe `canvasState` (`IDLE`, `DRAGGING`, `RESIZING`, `SELECTING`), permitindo que a UI reaja dinamicamente às interações.
-  - **Persistência Debounced**: Sincronização automática com debounce de 800ms e sistema de Epoch para evitar race-conditions entre o cliente e o servidor.
+  - **Persistência Debounced**: Sincronização automática com debounce de 800ms e sistema de Epoch para evitar race-conditions entre o cliente e o servidor. Blindagem contra `NaN` e mesclagem profunda de `content` implementada em `use-canvas-manager.ts`.
+- **Command Center (Central de Atalhos)**: Componente flutuante (`CommandCenter.tsx`) que serve como cheatsheet viva. Acessível via `?` ou `Ctrl+K`.
+
+### Comandos & Atalhos de Teclado (Precision Engine) ⌨️🚀
+O MoodSpace utiliza um motor de precisão para manipulação de blocos:
+- **Navegação**: 
+    - `Space + Drag`: Pan (mover câmera).
+    - `Ctrl + / - / 0`: Zoom in, out e reset (100%).
+- **Criação Ágil**:
+    - `Alt + Drag`: Duplica o bloco instantaneamente na nova posição.
+    - `Ctrl+C / Ctrl+V`: Copia e cola o conteúdo via `localStorage` (suporta múltiplos blocos).
+- **Precisão (Shift Held)**:
+    - **Drag**: Snap de eixo (trava horizontal/vertical).
+    - **Resize**: Mantém proporção (Aspect Ratio).
+    - **Rotation**: Snap incremental de 15°.
+- **Seleção Inteligente**: 
+    - `Shift + Click`: Toggle de seleção individual.
+    - `Smart Groups`: Selecionar qualquer membro de um grupo seleciona o grupo inteiro automaticamente.
 
 ### Arquitetura Universal de Blocos 🏛️💎
 - **Universal Architecture**: O sistema foi consolidado para eliminar redundâncias.
@@ -142,4 +159,4 @@ Sistema para reduzir a paralisia do canvas vazio e inspirar novos usuários atra
 - **Template Chooser**: UI automática renderizada no `MoodCanvas` quando `blocks.length === 0`. Inclui opção de "Start Fresh" para pular o onboarding.
 
 ---
-*Documentação atualizada por Antigravity em 27/02/2026. Melhorias de infraestrutura (Cache, Histórico e Robustez de Draft) entregues.*
+*Documentação atualizada por Antigravity em 27/02/2026. Command Center e Precision Engine integrados.*

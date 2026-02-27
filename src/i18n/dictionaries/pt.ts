@@ -13,6 +13,11 @@ export const pt = {
         enable_interaction: "Habilitar Interação",
         disable_interaction: "Desabilitar Interação",
         select: "Selecionar",
+        regenerate: "Regenerar",
+        opacity: "Opacidade",
+        blur: "Desfoque",
+        update: "Atualizar",
+        deploy: "Colocar no Mural",
     },
 
     sidebar: {
@@ -65,12 +70,13 @@ export const pt = {
                 countdown: { title: "Contagem", desc: "Marque uma data" },
                 guestbook: { title: "Recados", desc: "Deixe os outros assinarem" },
                 moodStatus: { title: "Estado Atual", desc: "Como você está agora?" },
-                social: { title: "Link Salto", desc: "Leve para outro lugar" },
+                social: { title: "Conexões", desc: "Links e redes sociais" },
                 gif: { title: "Animação", desc: "Reações em GIF (Giphy)" },
                 weather: { title: "Clima", desc: "Como está o dia lá fora?" },
                 universal_media: { title: "Mídia Universal", desc: "YouTube & Spotify" },
                 media: { title: "Registro Analógico", desc: "Livros e obras" },
-                shape: { title: "Formas Artísticas", desc: "Geometria e Mesclagem" }
+                shape: { title: "Formas", desc: "Geometria e estética" },
+                rorschach: { title: "Rorschach", desc: "Arte generativa" }
             },
             inspector_back: "Voltar para Elementos",
             more_coming: "Mais componentes em breve"
@@ -433,6 +439,23 @@ export const pt = {
             searching: "Procurando...",
             deploy: "Colar Gif",
             not_found: "Nenhum gif encontrado"
+        },
+        rorschach: {
+            title: "Espelho de Rorschach",
+            subtitle: "Arte generativa simétrica e abstrata.",
+            seed: "Semente Geométrica",
+            complexity: "Caoticidade",
+            symmetry: "Tipo de Simetria",
+            color: "Pigmento",
+            symmetries: {
+                vertical: "Vertical",
+                horizontal: "Horizontal",
+                quad: "Caleidoscópio"
+            },
+            tabs: {
+                geometry: "Geometria",
+                style: "Estética"
+            }
         },
         block_manager: {
             delete_confirm: "Tem certeza que deseja remover esta memória?",
