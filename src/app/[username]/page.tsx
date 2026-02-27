@@ -54,7 +54,7 @@ export async function generateMetadata({
             description,
             images: [`/${user.username}/opengraph-image`],
         },
-        themeColor: "#000000", // Pode ser extendido para usar as cores do perfil se desejar
+        themeColor: "#000000",
     };
 }
 
@@ -70,18 +70,16 @@ export default async function PublicMoodPage({
 
     if (!user || !(user as any).profile) notFound();
 
-    if ((user as any).isBanned) notFound(); // Mask banned users as not found
+    if ((user as any).isBanned) notFound();
 
     const { profile, moodBlocks: liveBlocks } = user as any;
 
-    // Draft/Publish: ler da versão ativa, com fallback para blocos live
     const profileWithVersions = profile as ProfileWithVersions;
     const activeVersion = profileWithVersions.versions?.[0];
     const moodBlocksRaw = activeVersion
         ? (activeVersion.blocks as typeof liveBlocks)
         : liveBlocks;
 
-    // Filter blocks based on global Feature Flags (Kill-Switch)
     const rawFlags = await getFeatureFlags();
     const systemFlags = rawFlags.reduce((acc: Record<string, boolean>, flag: { key: string, isEnabled: boolean }) => {
         acc[flag.key] = flag.isEnabled;
@@ -90,14 +88,10 @@ export default async function PublicMoodPage({
 
     const moodBlocks = moodBlocksRaw.filter((block: any) => {
         const flagKey = `block_${block.type}`;
-        // If flag exists and is explicitly disabled, hide it.
-        // If flag doesn't exist, assume it's a core/always-on block.
         if (systemFlags[flagKey] === false) return false;
         return true;
     });
 
-    // Construir profileData efetivo: snapshot publicado > profile live
-    // Usa ?? (nullish coalescing) ao invés de || para respeitar valores falsy como "" ou 0
     const visualConfig = activeVersion?.profileData as ProfileVisualConfig | null;
 
     const effectiveProfile = {
@@ -106,7 +100,6 @@ export default async function PublicMoodPage({
         backgroundColor: visualConfig?.backgroundColor ?? profile.backgroundColor,
         primaryColor: visualConfig?.primaryColor ?? profile.primaryColor,
         fontStyle: visualConfig?.fontStyle ?? profile.fontStyle,
-        // Aplica o Fallback de Segurança caso os Efeitos Visuais tenham sido globalmente desativados pelo Admin
         customCursor: systemFlags['feature_custom_cursor'] === false ? 'auto' : (visualConfig?.customCursor ?? profile.customCursor),
         mouseTrails: systemFlags['feature_mouse_trails'] === false ? 'none' : (visualConfig?.mouseTrails ?? profile.mouseTrails),
         backgroundEffect: systemFlags['feature_background_effects'] === false ? 'none' : (visualConfig?.backgroundEffect ?? profile.backgroundEffect),

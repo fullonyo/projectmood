@@ -23,10 +23,8 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
     const [loadingViews, setLoadingViews] = useState(true)
     const [hasInteracted, setHasInteracted] = useState(false)
 
-    // 🌦️ Weather Sync: Detect active atmosphere from blocks
     const activeWeather = moodBlocks.find(b => b.type === 'weather')?.content?.icon || null
 
-    // 📌 Escala proporcional: fidelidade visual cross-resolution
     const viewportScale = useViewportScale()
 
     useEffect(() => {
@@ -34,7 +32,6 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
         const lastView = localStorage.getItem(storageKey)
         const now = Date.now()
 
-        // Track view (24h deduplication already implemented)
         if (!lastView || (now - parseInt(lastView) > 24 * 60 * 60 * 1000)) {
             fetch(`/api/analytics/view`, {
                 method: 'POST',
@@ -44,7 +41,6 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
             localStorage.setItem(storageKey, now.toString())
         }
 
-        // Fetch views
         fetch(`/api/analytics/views?profileId=${profileId}`)
             .then(res => res.json())
             .then(data => {
@@ -65,7 +61,6 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                 username={publicUser.username}
             />
 
-            {/* 🏰 CONSOLIDATED ENVIRONMENT FOR PUBLIC PAGE */}
             <div className="fixed inset-0 z-0">
                 <RoomEnvironment
                     profile={profile}
@@ -74,7 +69,6 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                 />
             </div>
 
-            {/* UI Overlay - Controlled by Focus Mode */}
             <div className={cn("transition-all duration-700", isFocusMode ? "opacity-0 pointer-events-none translate-y-4" : "opacity-100")}>
                 <ProfileSignature
                     username={publicUser.username}
@@ -96,7 +90,6 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                 <SignatureShare username={publicUser.username} />
             </div>
 
-            {/* Focus Mode Toggle */}
             <button
                 onClick={() => setIsFocusMode(!isFocusMode)}
                 className={cn(
@@ -108,7 +101,6 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                 {isFocusMode ? <Lightbulb className="w-4 h-4" /> : <LightbulbOff className="w-4 h-4 opacity-40 hover:opacity-100" />}
             </button>
 
-            {/* The Canvas Reality - Scrollable on mobile, fixed on desktop */}
             <main className="relative w-full h-full overflow-y-auto sm:overflow-hidden">
                 <BoardStage>
                     {moodBlocks.map((block: MoodBlock) => (

@@ -1,10 +1,5 @@
 "use server"
 
-/**
- * Weather Server Actions — Studio MoodSpace
- * Handles external weather requests safely from the server with high resilience.
- */
-
 const CONDITION_MAP: Record<string, 'sun' | 'rain' | 'snow' | 'wind' | 'cloud'> = {
     'Clear': 'sun',
     'Sunny': 'sun',
@@ -37,13 +32,10 @@ function mapConditionToIcon(desc: string): 'sun' | 'rain' | 'snow' | 'wind' | 'c
     return 'cloud';
 }
 
-/**
- * Fetch com Retry e Timeout para máxima resiliência contra instabilidades do wttr.in
- */
 async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 3, backoff = 500) {
     for (let i = 0; i < retries; i++) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
+        const timeout = setTimeout(() => controller.abort(), 5000);
 
         try {
             const res = await fetch(url, {
@@ -56,7 +48,6 @@ async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 
             clearTimeout(timeout);
             const isLastRetry = i === retries - 1;
 
-            // Logar erro de rede (como ECONNRESET)
             if (err.name === 'AbortError') {
                 console.warn(`Weather Fetch Timeout (Tentativa ${i + 1}/${retries})`);
             } else {
@@ -65,7 +56,6 @@ async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 
 
             if (isLastRetry) throw err;
 
-            // Esperar antes de tentar novamente (Exponential Backoff)
             await new Promise(resolve => setTimeout(resolve, backoff * Math.pow(2, i)));
         }
     }
@@ -78,11 +68,10 @@ export async function getWeatherAction(location: string = "") {
         const url = `https://wttr.in/${query}?format=j1`;
 
         const res = await fetchWithRetry(url, {
-            next: { revalidate: 3600 } // Cache for 1 hour
+            next: { revalidate: 3600 }
         });
 
         if (!res.ok) {
-            // Se o wttr.in retornar 404, 500, etc.
             throw new Error(`Weather service returned status ${res.status}`);
         }
 

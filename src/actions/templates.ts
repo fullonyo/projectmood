@@ -14,7 +14,6 @@ export async function applyTemplateAction(templateId: string) {
 
     try {
         await prisma.$transaction(async (tx) => {
-            // 1. Atualizar Profile
             await tx.profile.update({
                 where: { userId: session.user.id },
                 data: {
@@ -28,13 +27,10 @@ export async function applyTemplateAction(templateId: string) {
                 }
             });
 
-            // 2. Limpar blocos atuais (opcional, mas recomendado para templates iniciais)
             await tx.moodBlock.updateMany({
                 where: { userId: session.user.id, deletedAt: null },
                 data: { deletedAt: new Date() }
             });
-
-            // 3. Criar novos blocos do template
             if (template.blocks.length > 0) {
                 await tx.moodBlock.createMany({
                     data: template.blocks.map((b, idx) => ({
@@ -53,7 +49,7 @@ export async function applyTemplateAction(templateId: string) {
         });
 
         revalidatePath("/dashboard");
-        revalidatePath(`/${session.user.username}`); // Forçar revalidação da página pública
+        revalidatePath(`/${session.user.username}`);
 
         return { success: true };
     } catch (error) {

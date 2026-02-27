@@ -14,17 +14,13 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-zinc-950 text-white selection:bg-white selection:text-black overflow-x-hidden relative font-sans">
 
-      {/* SECTION 1: HERO (STUDIO DARK) */}
       <section className="relative min-h-[90vh] flex flex-col border-b border-white/5">
-        {/* Background Atmosphere */}
         <div className="absolute inset-0 z-0">
           <BackgroundEffect type="aurora" primaryColor="#18181b" />
         </div>
         <div className="absolute inset-0 z-[1] opacity-30">
           <StaticTextures type="cross" />
         </div>
-
-        {/* Global Navigation */}
         <nav className="relative z-50 flex items-center justify-between px-6 py-8 md:px-12">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -52,7 +48,6 @@ export default function Home() {
           </motion.div>
         </nav>
 
-        {/* Hero Content */}
         <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-12 py-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -86,23 +81,19 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* MURAL PREVIEW SHOWCASE */}
           <div className="mt-24 relative w-full max-w-6xl aspect-[16/9] hidden lg:block">
-            {/* Architectural Grid Underlay */}
             <div className="absolute inset-0 border border-white/10 grid grid-cols-12 grid-rows-6 opacity-20 pointer-events-none">
               {Array.from({ length: 72 }).map((_, i) => (
                 <div key={i} className="border-[0.5px] border-white/5" />
               ))}
             </div>
 
-            {/* Block Mockups (Architectural Style) */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, rotateX: 20 }}
               whileInView={{ opacity: 1, scale: 1, rotateX: 0 }}
               transition={{ duration: 1 }}
               className="absolute inset-0 flex items-center justify-center perspective-[1000px]"
             >
-              {/* Photo Block Mockup */}
               <div className="absolute top-[10%] left-[20%] w-72 h-80 bg-zinc-900 border border-white/20 p-2 shadow-2xl rotate-2">
                 <div className="w-full h-[85%] bg-zinc-800 grayscale" />
                 <div className="h-[15%] flex items-center px-2">
@@ -110,7 +101,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Spotify Block Mockup */}
               <div className="absolute top-[40%] right-[15%] w-80 h-32 bg-zinc-900/80 backdrop-blur-xl border border-white/20 p-4 flex items-center gap-4 -rotate-3">
                 <div className="w-20 h-20 bg-zinc-800 flex items-center justify-center">
                   <Play className="w-8 h-8 opacity-20" />
@@ -121,7 +111,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Text Block Mockup */}
               <div className="absolute bottom-[15%] left-[30%] w-64 h-64 bg-zinc-100 p-6 flex flex-col justify-between -rotate-6">
                 <div className="space-y-3">
                   <div className="w-full h-[1px] bg-black/10" />
@@ -135,7 +124,6 @@ export default function Home() {
         </main>
       </section>
 
-      {/* SECTION 2: SHOWCASE (STUDIO LIGHT) */}
       <section className="relative bg-white text-black py-32 overflow-hidden border-t border-black/5">
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <StaticTextures type="cross" />
@@ -143,7 +131,6 @@ export default function Home() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8">
-            {/* Feature 01 */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -162,7 +149,6 @@ export default function Home() {
               <div className="h-[1px] w-12 bg-black/10 transition-all group-hover:w-full" />
             </motion.div>
 
-            {/* Feature 02 */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -182,7 +168,6 @@ export default function Home() {
               <div className="h-[1px] w-12 bg-black/10 transition-all group-hover:w-full" />
             </motion.div>
 
-            {/* Feature 03 */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -205,7 +190,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 3: FOOTER */}
       <footer className="relative z-10 py-12 px-6 sm:px-12 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6 bg-zinc-950 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 border-t border-white/5">
         <div className="flex flex-col items-center sm:items-start gap-2">
           <span className="opacity-20 flex items-center gap-2">

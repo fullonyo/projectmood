@@ -6,10 +6,7 @@ import { revalidatePath, revalidateTag } from "next/cache"
 import { unstable_cache } from "next/cache"
 import { CACHE_TAGS, CACHE_KEYS } from "@/lib/cache-tags"
 
-// Core blocks definition to map
-// Core resources definition with categories
 const CORE_BLOCKS = [
-    // --- BLOCKS ---
     { key: "block_text", name: "Text Notes", description: "Basic text notes block.", isEnabled: true, isPremium: false },
     { key: "block_photo", name: "Photo Polaroids", description: "Image upload and display block.", isEnabled: true, isPremium: false },
     { key: "block_youtube", name: "YouTube Player", description: "Embed YouTube videos.", isEnabled: true, isPremium: false },
@@ -27,21 +24,18 @@ const CORE_BLOCKS = [
     { key: "block_ticker", name: "Marquee Ticker", description: "Scrolling text marquee.", isEnabled: true, isPremium: false },
     { key: "block_gif", name: "GIF Stickers", description: "Animated GIF stickers.", isEnabled: true, isPremium: false },
 
-    // --- BEHAVIORS (SMART TEXT) ---
     { key: "behavior_ticker", name: "Marquee Ticker", description: "Scrolling text behavior.", isEnabled: true, isPremium: false },
     { key: "behavior_typewriter", name: "Typewriter", description: "Character-by-character animation.", isEnabled: true, isPremium: false },
     { key: "behavior_floating", name: "Floating Text", description: "Gentle floating animation.", isEnabled: true, isPremium: false },
     { key: "behavior_quote", name: "Serif Quote", description: "Stylized quote behavior.", isEnabled: true, isPremium: false },
     { key: "behavior_status", name: "Mood Status", description: "Icon + Status behavior.", isEnabled: true, isPremium: false },
 
-    // --- FRAMES (SMART FRAMES) ---
     { key: "frame_polaroid", name: "Classic Polaroid", description: "White polaroid with caption.", isEnabled: true, isPremium: false },
     { key: "frame_polaroid_dark", name: "Dark Polaroid", description: "Midnight edition polaroid.", isEnabled: true, isPremium: true },
     { key: "frame_glass", name: "Glassmorphism", description: "Frosted glass effect.", isEnabled: true, isPremium: true },
     { key: "frame_round", name: "Circular Frame", description: "Perfectly round clipping.", isEnabled: true, isPremium: false },
     { key: "frame_minimal", name: "Minimal Border", description: "Thin subtle border.", isEnabled: true, isPremium: false },
 
-    // --- SHAPES (SMART SHAPES) ---
     { key: "shape_blob", name: "Organic Blobs", description: "Fluid geometric shapes.", isEnabled: true, isPremium: false },
     { key: "shape_flower", name: "Studio Flowers", description: "Artistic floral patterns.", isEnabled: true, isPremium: true },
     { key: "shape_spiral", name: "Mathematical Spirals", description: "Recursive spiral lines.", isEnabled: true, isPremium: true },
@@ -49,14 +43,12 @@ const CORE_BLOCKS = [
     { key: "shape_wave", name: "Flowing Waves", description: "Oscillating vector lines.", isEnabled: true, isPremium: false },
 ]
 
-// 1. Safe Seeder (Run on demand by Admin)
 export async function seedFeatureFlags() {
     const session = await auth()
     if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" }
 
     try {
         let count = 0
-        // 1a. Cleanup orphan flags (old keys that no longer exist in CORE_BLOCKS)
         const validKeys = CORE_BLOCKS.map(b => b.key)
         await prisma.featureFlag.deleteMany({
             where: {
@@ -79,7 +71,6 @@ export async function seedFeatureFlags() {
         revalidateTag(CACHE_TAGS.systemConfig, 'default')
         revalidatePath("/admin/config")
 
-        // Log the action
         await prisma.auditLog.create({
             data: {
                 adminId: session.user.id,
@@ -97,7 +88,6 @@ export async function seedFeatureFlags() {
     }
 }
 
-// 2. Fetcher (Optimized for frontend cache)
 export async function getFeatureFlags() {
     const getFlags = unstable_cache(
         async () => {
@@ -111,14 +101,12 @@ export async function getFeatureFlags() {
         [CACHE_KEYS.systemConfig],
         {
             tags: [CACHE_TAGS.systemConfig],
-            revalidate: 3600 // 1 hour secondary TTL
+            revalidate: 3600
         }
     )
 
     return getFlags()
 }
-
-// 3. Toggles (Admin Only)
 export async function toggleFeatureFlag(key: string, field: "isEnabled" | "isPremium", currentValue: boolean) {
     const session = await auth()
     if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" }
@@ -132,7 +120,6 @@ export async function toggleFeatureFlag(key: string, field: "isEnabled" | "isPre
         revalidatePath("/admin/config")
         revalidatePath("/dashboard")
 
-        // Log the action
         await prisma.auditLog.create({
             data: {
                 adminId: session.user.id,

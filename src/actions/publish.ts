@@ -23,13 +23,10 @@ export async function publishProfile() {
     const username = (session.user as any).username
 
     try {
-        // 1. Ler todos os blocos (draft state)
         const blocks = await prisma.moodBlock.findMany({
             where: { userId, deletedAt: null },
             orderBy: { order: 'asc' },
         })
-
-        // 2. Serializar snapshot (strip de campos internos do Prisma)
         const snapshot = blocks.map((b: any) => ({
             id: b.id,
             type: b.type,
@@ -43,7 +40,6 @@ export async function publishProfile() {
             order: b.order
         }))
 
-        // 3. Ler configurações visuais atuais do perfil
         const profile = await prisma.profile.findUnique({
             where: { userId },
             select: {
@@ -63,19 +59,14 @@ export async function publishProfile() {
 
         if (!profile) return { error: "Perfil não encontrado" }
 
-        // 4. Contar versões existentes para gerar label automática
         const versionCount = await prisma.profileVersion.count({
             where: { profileId: profile.id }
         })
-
-        // 5. Transaction atômica: desativa todas → cria nova ativa
         await prisma.$transaction([
-            // Desativar todas as versões anteriores
             prisma.profileVersion.updateMany({
                 where: { profileId: profile.id, isActive: true },
                 data: { isActive: false }
             }),
-            // Criar nova versão ativa
             prisma.profileVersion.create({
                 data: {
                     profileId: profile.id,
@@ -98,7 +89,6 @@ export async function publishProfile() {
             })
         ])
 
-        // 6. Invalidar cache APENAS da página pública
         if (username) {
             revalidateTag(CACHE_TAGS.profile(username), 'default')
             revalidatePath(`/${username}`)
@@ -111,8 +101,6 @@ export async function publishProfile() {
     }
 }
 
-// ─── ROLLBACK ────────────────────────────────────────────────────────────────
-
 export async function rollbackToVersion(versionId: string) {
     const session = await auth()
     if (!session?.user?.id) return { error: "Não autorizado" }
@@ -120,7 +108,6 @@ export async function rollbackToVersion(versionId: string) {
     const username = (session.user as any).username
 
     try {
-        // 1. Validar que a versão pertence ao usuário
         const version = await prisma.profileVersion.findUnique({
             where: { id: versionId },
             include: { profile: true }
@@ -130,7 +117,6 @@ export async function rollbackToVersion(versionId: string) {
             return { error: "Versão não encontrada" }
         }
 
-        // 2. Transaction: desativa todas → ativa a escolhida
         await prisma.$transaction([
             prisma.profileVersion.updateMany({
                 where: { profileId: version.profileId, isActive: true },
@@ -142,7 +128,6 @@ export async function rollbackToVersion(versionId: string) {
             })
         ])
 
-        // 3. Invalidar cache da página pública
         if (username) {
             revalidateTag(CACHE_TAGS.profile(username), 'default')
             revalidatePath(`/${username}`)
@@ -154,8 +139,6 @@ export async function rollbackToVersion(versionId: string) {
         return { error: "Erro ao reverter versão" }
     }
 }
-
-// ─── VERSION HISTORY ─────────────────────────────────────────────────────────
 
 export async function getVersionHistory(limit: number = 10) {
     const session = await auth()
@@ -188,8 +171,6 @@ export async function getVersionHistory(limit: number = 10) {
     }
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-
 export async function getActiveVersion() {
     const session = await auth()
     if (!session?.user?.id) return null
@@ -207,15 +188,6 @@ export async function getActiveVersion() {
     })
 }
 
-// ─── DRAFT CHANGE DETECTION ─────────────────────────────────────────────────
-
-/**
- * Compara o estado atual (draft) com o último snapshot publicado.
- * Retorna true se existem mudanças não publicadas.
- * 
- * Estratégia: serializa blocos + profileData e compara strings.
- * Simples e determinístico — sem necessidade de hash criptográfico.
- */
 export async function computeHasUnpublishedChanges() {
     const session = await auth()
     if (!session?.user?.id) return false
@@ -242,7 +214,6 @@ export async function computeHasUnpublishedChanges() {
 
         if (!profile) return false
 
-        // Buscar estado draft atual (excluir id — o snapshot publicado inclui id que não tem na query draft)
         const draftBlocks = await prisma.moodBlock.findMany({
             where: { userId },
             orderBy: { order: 'asc' },
@@ -253,15 +224,13 @@ export async function computeHasUnpublishedChanges() {
             }
         })
 
-        // Buscar último snapshot publicado
         const activeVersion = await prisma.profileVersion.findFirst({
             where: { profileId: profile.id, isActive: true },
             select: { blocks: true, profileData: true }
         })
 
-        if (!activeVersion) return true // Nunca publicou → tem mudanças
+        if (!activeVersion) return true
 
-        // Serializar e comparar de forma determinística
         const sortKeys = (obj: any): any => {
             if (obj === null || typeof obj !== 'object') return obj;
             if (Array.isArray(obj)) return obj.map(sortKeys);
@@ -287,7 +256,6 @@ export async function computeHasUnpublishedChanges() {
         const publishedProfileDataStr = JSON.stringify(sortKeys(activeVersion.profileData));
         const draftBlocksStr = JSON.stringify(sortKeys(draftBlocks));
 
-        // IMPORTANTE: normalizar blocos publicados para os MESMOS campos do draft
         const publishedBlocks = (activeVersion.blocks as any[])?.map((b: any) => ({
             type: b.type, content: b.content,
             x: b.x, y: b.y, width: b.width, height: b.height,
