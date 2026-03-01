@@ -33,7 +33,6 @@ export function CommandCenter() {
     const [isOpen, setIsOpen] = useState(false)
     const { t } = useTranslation()
 
-    // Shortcut to open with "?"
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {

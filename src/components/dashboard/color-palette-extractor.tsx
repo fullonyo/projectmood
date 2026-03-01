@@ -24,7 +24,6 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                 const canvas = document.createElement('canvas')
                 const ctx = canvas.getContext('2d')!
 
-                // Resize for performance
                 const scale = Math.min(1, 200 / Math.max(img.width, img.height))
                 canvas.width = img.width * scale
                 canvas.height = img.height * scale
@@ -34,12 +33,10 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                 const pixels = imageData.data
                 const colorMap = new Map<string, number>()
 
-                // Sample pixels for performance
                 for (let i = 0; i < pixels.length; i += 16) {
                     const r = pixels[i]
                     const g = pixels[i + 1]
                     const b = pixels[i + 2]
-                    // Quantize colors slightly to group similar ones
                     const qr = Math.round(r / 10) * 10
                     const qg = Math.round(g / 10) * 10
                     const qb = Math.round(b / 10) * 10
