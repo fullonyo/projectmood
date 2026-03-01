@@ -313,7 +313,6 @@ export const CanvasItem = memo(({
 
     return (
         <motion.div
-            layout
             variants={{
                 hidden: {
                     opacity: 0,

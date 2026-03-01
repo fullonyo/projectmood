@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { useViewportScale } from "@/lib/canvas-scale"
 import React from "react"
 import {
     Smile, Meh, Frown, Sparkles, Flame, Coffee, PartyPopper, Moon, Heart, Ghost,
@@ -46,17 +45,15 @@ export function SmartText({
     icon,
     className
 }: SmartTextProps) {
-    const scale = useViewportScale()
-
-    // Map named sizes to pixels
+    // Map named sizes to pixels - REMOVED viewport scale to avoid double scaling
     const getFontSize = () => {
-        if (typeof fontSize === 'number') return fontSize * scale
+        if (typeof fontSize === 'number') return fontSize
         switch (fontSize) {
-            case 'sm': return 14 * scale
-            case 'base': return 18 * scale
-            case 'xl': return 30 * scale
-            case '3xl': return 48 * scale
-            default: return 18 * scale
+            case 'sm': return 14
+            case 'base': return 18
+            case 'xl': return 30
+            case '3xl': return 48
+            default: return 18
         }
     }
 
@@ -75,6 +72,8 @@ export function SmartText({
     }
 
     if (behavior === 'ticker') {
+        // Guard: If speed is too low (likely from typewriter behavior), use a sane default
+        const tickerDuration = speed < 1 ? 20 : speed
         return (
             <div className="w-full h-full flex flex-col justify-center overflow-hidden">
                 <motion.div
@@ -82,7 +81,7 @@ export function SmartText({
                         x: direction === 'right' ? ["-50%", "0%"] : ["0%", "-50%"]
                     }}
                     transition={{
-                        duration: speed || 20,
+                        duration: tickerDuration,
                         repeat: Infinity,
                         ease: "linear"
                     }}
@@ -144,6 +143,8 @@ export function SmartText({
     }
 
     if (behavior === 'floating') {
+        // Guard: If speed is too low (likely from typewriter behavior), use a sane default
+        const floatingDuration = speed < 0.5 ? 4 : speed
         return (
             <motion.div
                 animate={{
@@ -151,7 +152,7 @@ export function SmartText({
                     rotate: [0, 1, -1, 0]
                 }}
                 transition={{
-                    duration: speed || 4,
+                    duration: floatingDuration,
                     repeat: Infinity,
                     ease: "easeInOut"
                 }}
@@ -197,10 +198,10 @@ export function SmartText({
             <div className="w-full h-full flex items-center justify-center p-4">
                 <div className="bg-white/5 dark:bg-zinc-900/10 backdrop-blur-xl border border-white/10 flex items-center transition-all hover:scale-105 group p-6 gap-6 rounded-2xl">
                     <div className="text-zinc-900 dark:text-white animate-bounce group-hover:animate-none group-hover:scale-125 transition-transform">
-                        <StatusIcon strokeWidth={2.5} style={{ width: 32 * scale, height: 32 * scale, color: textColor }} />
+                        <StatusIcon strokeWidth={2.5} style={{ width: 32, height: 32, color: textColor }} />
                     </div>
-                    <div className="bg-zinc-400/20 w-[1px]" style={{ height: 32 * scale }} />
-                    <p className={cn(baseClasses, "font-black tracking-tight uppercase italic")} style={{ fontSize: 16 * scale, color: textColor }}>
+                    <div className="bg-zinc-400/20 w-[1px]" style={{ height: 32 }} />
+                    <p className={cn(baseClasses, "font-black tracking-tight uppercase italic")} style={{ fontSize: 16, color: textColor }}>
                         {text}
                     </p>
                 </div>

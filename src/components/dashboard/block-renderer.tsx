@@ -105,8 +105,15 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                             mediaType={content.mediaType}
                             videoId={content.videoId}
                             trackId={content.trackId}
+                            audioUrl={content.audioUrl}
+                            audioMetadata={{
+                                name: content.name,
+                                artist: content.artist
+                            }}
                             isPublic={isPublic}
                             hasInteracted={hasInteracted}
+                            lyrics={content.lyrics}
+                            lyricsDisplay={content.lyricsDisplay}
                         />
                     </FrameContainer>
                 )
@@ -120,6 +127,8 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                             trackId={content.trackId}
                             isPublic={isPublic}
                             hasInteracted={hasInteracted}
+                            lyrics={content.lyrics}
+                            lyricsDisplay={content.lyricsDisplay}
                         />
                     </FrameContainer>
                 )

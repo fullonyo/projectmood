@@ -178,7 +178,16 @@ export function UniversalTextEditor({
                             key={b.id}
                             onClick={() => {
                                 setBehavior(b.id)
-                                if (b.id === 'ticker') setFontSize('3xl')
+                                if (b.id === 'ticker') {
+                                    setFontSize('3xl')
+                                    if (speed < 1) setSpeed(20)
+                                }
+                                if (b.id === 'floating') {
+                                    if (speed < 0.5) setSpeed(4)
+                                }
+                                if (b.id === 'typewriter') {
+                                    if (speed > 1) setSpeed(0.05)
+                                }
                                 if (b.id === 'status' && frame === 'none') setFrame('minimal')
                             }}
                             className={cn(

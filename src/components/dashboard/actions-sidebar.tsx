@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, ExternalLink, User, Settings, Camera, Loader2, Upload, Clock, History, ChevronDown, RotateCcw, Sparkles, Activity } from "lucide-react"
+import { LogOut, ExternalLink, User, Settings, Camera, Loader2, Upload, Clock, History, ChevronDown, RotateCcw, Sparkles, Activity, Volume2, VolumeX } from "lucide-react"
 import { Button } from "../ui/button"
 import { ShareProfileButton } from "./share-profile-button"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -14,6 +14,7 @@ import { publishProfile } from "@/actions/publish"
 import imageCompression from 'browser-image-compression'
 import { useTranslation } from "@/i18n/context"
 import { LanguageSwitcher } from "./language-switcher"
+import { useAudio } from "./audio-context"
 import { toast } from "sonner"
 import { getRelativeTime } from "@/lib/utils"
 import { VersionHistoryPanel } from "./version-history-panel"
@@ -34,6 +35,7 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
     const [showPublishModal, setShowPublishModal] = useState(false)
     const [isPending, startTransition] = useTransition()
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const { isGlobalMuted, toggleGlobalMute, globalVolume, setGlobalVolume } = useAudio()
     const router = useRouter()
 
     const handleAvatarClick = () => {
@@ -171,7 +173,6 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
             </div>
 
             <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 pb-6 custom-scrollbar space-y-10 animate-in fade-in slide-in-from-right-2 duration-500">
-
                 <div className="space-y-6">
                     <header className="flex flex-col gap-2 opacity-30 px-1">
                         <div className="flex items-center gap-2">
@@ -254,6 +255,54 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                         <VersionHistoryPanel onRollbackComplete={() => router.refresh()} />
                     </div>
                 </div>
+
+                <div className="space-y-4">
+                    <header className="flex items-center gap-2 opacity-30 px-1 mb-2">
+                        <Volume2 className="w-2.5 h-2.5" />
+                        <h3 className="text-[7.5px] font-black tracking-[0.4em] uppercase">{t('leftSidebar.system_ux')}</h3>
+                    </header>
+                    <div className="flex flex-col gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={toggleGlobalMute}
+                            className={cn(
+                                "w-full justify-start gap-4 h-12 rounded-none text-[9px] font-black uppercase tracking-widest border transition-all duration-500 relative overflow-hidden",
+                                isGlobalMuted
+                                    ? "border-red-500/50 bg-red-500/5 text-red-500 hover:bg-red-500/10"
+                                    : "border-zinc-200 dark:border-zinc-800 bg-transparent hover:border-black dark:hover:border-white"
+                            )}
+                        >
+                            <div className={cn(
+                                "p-1.5 border transition-colors",
+                                isGlobalMuted ? "border-red-500/20 bg-red-500/10" : "border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950"
+                            )}>
+                                {isGlobalMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                            </div>
+                            {isGlobalMuted ? t('common.unmute_audio') : t('common.mute_audio')}
+
+                            {isGlobalMuted && (
+                                <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-red-500 animate-pulse" />
+                            )}
+                        </Button>
+
+                        {!isGlobalMuted && (
+                            <div className="flex items-center gap-3 px-1 animate-in fade-in slide-in-from-top-1">
+                                <span className="text-[7px] font-black uppercase tracking-widest opacity-30">Vol</span>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.01"
+                                    value={globalVolume}
+                                    onChange={(e) => setGlobalVolume(parseFloat(e.target.value))}
+                                    className="flex-1 h-[2px] appearance-none bg-zinc-100 dark:bg-zinc-800 accent-black dark:accent-white cursor-pointer"
+                                />
+                                <span className="text-[7px] font-mono opacity-40 w-6">{Math.round(globalVolume * 100)}%</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 <div className="space-y-4">
                     <header className="flex items-center gap-2 opacity-30 px-1 mb-2">
                         <Activity className="w-2.5 h-2.5" />

@@ -12,7 +12,9 @@ import { MoodBlock, Profile } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
 import { updateMoodBlocksZIndex } from "@/actions/profile";
 import { CanvasInteractionProvider, useCanvasInteraction } from "./canvas-interaction-context";
+import { AudioProvider } from "./audio-context";
 import { FullscreenDoodleOverlay } from "./fullscreen-doodle-overlay";
+import { GlobalLyricsOverlay } from "./GlobalLyricsOverlay";
 
 interface DashboardClientLayoutProps {
     profile: Profile;
@@ -26,9 +28,11 @@ interface DashboardClientLayoutProps {
 
 export function DashboardClientLayout({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
     return (
-        <CanvasInteractionProvider>
-            <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
-        </CanvasInteractionProvider>
+        <AudioProvider>
+            <CanvasInteractionProvider>
+                <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
+            </CanvasInteractionProvider>
+        </AudioProvider>
     )
 }
 
@@ -252,6 +256,9 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                     </motion.button>
                 )}
             </AnimatePresence>
+
+            {/* Global Lyrics // Studio Mode */}
+            <GlobalLyricsOverlay />
         </main>
     )
 }

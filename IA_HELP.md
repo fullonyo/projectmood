@@ -80,10 +80,19 @@ O MoodSpace utiliza um motor de precisão para manipulação de blocos:
 - **Migração Ghost**: Blocos legados (`ticker`, `subtitle`, `floating`, `phrase`, `quote`, `moodStatus`) são automaticamente convertidos para o tipo `text` com comportamento (`behavior`) específico ao serem editados, garantindo retrocompatibilidade sem arquivos duplicados.
 - **Limpeza de Base**: 10 arquivos obsoletos (editores e blocos públicos individuais) foram removidos em favor desta arquitetura modular.
 
-- **Mídia Ultra-Universal 📺🎵**:
-  - **SmartMedia (`src/components/dashboard/SmartMedia.tsx`)**: Renderizador único que processa iframes de YouTube e Spotify com lógica de escala responsiva e parâmetros de mute/autoplay.
-  - **UniversalMediaEditor (`src/components/dashboard/UniversalMediaEditor.tsx`)**: Interface modular que substitui os antigos buscadores individuais. Inclui suporte a todas as molduras (`FrameContainer`).
-  - **Unificação de Catálogo**: Botões individuais de YouTube/Spotify foram consolidados no componente `media` unificado no `BlockLibrary`.
+  - **Mídia Ultra-Universal 📺🎵**:
+    - **SmartMedia (`src/components/dashboard/SmartMedia.tsx`)**: Renderizador único que processa YouTube, Spotify e **Upload de Áudio Local**.
+      - **Legendas Inteligentes (Smart Lyrics)**: Suporta dois modos de exibição:
+        - **Integrated**: Legendas dentro do bloco (estilo cinema no vídeo ou HUD no áudio).
+        - **Fullscreen (Global)**: Envia a legenda para o `GlobalLyricsOverlay`, exibindo-a na base da tela sem moldura, consumindo o estado centralizado via `AudioContext`.
+      - **Autoplay Inteligente**: Depende do estado global `hasInteracted` (capturado pelo `ExperienceOverlay.tsx`) para iniciar com áudio (em loop).
+      - **YouTube Loop**: Utiliza o parâmetro `playlist` do iFrame para forçar o loop infinito.
+    - **UniversalMediaEditor (`src/components/dashboard/UniversalMediaEditor.tsx`)**: Interface modular com abas.
+      - **Upload Local**: Suporta arquivos MP3/WAV até **5MB** via Base64.
+      - **Metadados Manuais**: Permite editar Título e Artista para áudios locais.
+      - **Ghost Migration**: Blocos legados são convertidos para o tipo `media` ao serem editados.
+    - **Unificação de Catálogo**: Botões individuais consolidados no componente `media` unificado.
+    - **Distinção Crítica**: Não confundir `Mídia Universal` com `Coleção de Mídia`.
 - **Limpeza de Base**: 14 arquivos obsoletos (editores e blocos públicos individuais) foram removidos em favor desta arquitetura modular de texto e mídia.
 
 ### Experiência Pública & Autoplay

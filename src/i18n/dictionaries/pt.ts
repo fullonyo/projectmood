@@ -18,6 +18,8 @@ export const pt = {
         blur: "Desfoque",
         update: "Atualizar",
         deploy: "Colocar no Mural",
+        mute_audio: "Silenciar Tudo",
+        unmute_audio: "Ativar Som Global"
     },
 
     sidebar: {
@@ -73,8 +75,8 @@ export const pt = {
                 social: { title: "Conexões", desc: "Links e redes sociais" },
                 gif: { title: "Animação", desc: "Reações em GIF (Giphy)" },
                 weather: { title: "Clima", desc: "Como está o dia lá fora?" },
-                universal_media: { title: "Mídia Universal", desc: "YouTube & Spotify" },
-                media: { title: "Registro Analógico", desc: "Livros e obras" },
+                universal_media: { title: "Mídia Universal", desc: "YouTube, Spotify & Áudio" },
+                media: { title: "Mídia Universal", desc: "YouTube, Spotify & Áudio" },
                 shape: { title: "Formas", desc: "Geometria e estética" },
                 rorschach: { title: "Rorschach", desc: "Arte generativa" }
             },
@@ -211,11 +213,21 @@ export const pt = {
             subtitle: "Sincronize sua vibe",
             video_tab: "YouTube",
             music_tab: "Spotify",
+            audio_tab: "Arquivo Local",
             youtube_placeholder: "COLE O LINK DO YOUTUBE...",
             youtube_btn: "Conectar Vídeo",
             spotify_placeholder: "BUSQUE MÚSICA OU ARTISTA...",
             spotify_btn: "Buscar no Spotify",
+            audio_placeholder: "ARRASTE OU CLIQUE PARA ÁUDIO...",
+            audio_btn: "Carregar Faixa",
+            audio_title_label: "Título da Memória",
+            audio_artist_label: "Autor / Artista",
+            error_size: "Muito pesado (Limite 10MB)",
+            error_type: "Formato inválido (Use MP3/WAV)",
             aesthetic_label: "Estética do Bloco",
+            lyrics_label: "Legendas Sincronizadas",
+            lyrics_placeholder: "[00:00] Início da música\n[00:12] Primeira frase...",
+            lyrics_hint: "Use o formato [mm:ss] para cada linha.",
             update_btn: "Atualizar Mídia",
             deploy_btn: "Pendurar Mídia"
         },

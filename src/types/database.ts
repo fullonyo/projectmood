@@ -37,7 +37,7 @@ export type MoodBlockContent =
     | GuestbookContent
     | MoodStatusContent
     | WeatherContent
-    | { mediaType: 'video' | 'music' | 'media'; videoId?: string; trackId?: string; frame?: string; caption?: string;[key: string]: any }
+    | { mediaType: 'video' | 'music' | 'audio' | 'media'; videoId?: string; trackId?: string; audioUrl?: string; name?: string; artist?: string; albumArt?: string; frame?: string; caption?: string;[key: string]: any }
     | ShapeContent
     | RorschachContent
     | DoodleContent

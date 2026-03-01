@@ -38,7 +38,7 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
         },
         {
             items: [
-                { id: 'universal_media', type: 'media', icon: Play, tk: 'universal_media' },
+                { id: 'media', type: 'media', icon: Play, tk: 'universal_media' },
                 { id: 'gif', type: 'gif', icon: Youtube, tk: 'gif' },
                 { id: 'weather', type: 'weather', icon: Cloud, tk: 'weather' },
             ]
@@ -49,7 +49,6 @@ export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps
                 { id: 'guestbook', type: 'guestbook', icon: MessageSquare, tk: 'guestbook' },
                 { id: 'countdown', type: 'countdown', icon: Clock, tk: 'countdown' },
                 { id: 'social', type: 'social', icon: Share2, tk: 'social' },
-                { id: 'media', type: 'media', icon: Book, tk: 'media' },
                 { id: 'shape', type: 'shape', icon: Palette, tk: 'shape' },
                 { id: 'rorschach', type: 'rorschach', icon: Sparkles, tk: 'rorschach' },
             ]

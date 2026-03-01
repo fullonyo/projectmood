@@ -13,11 +13,21 @@ import { SignatureShare } from "@/components/dashboard/signature-share"
 import { RoomEnvironment } from "@/components/dashboard/room-environment"
 import { CustomCursor } from "@/components/effects/custom-cursor"
 import { MouseTrails } from "@/components/effects/mouse-trails"
-import { Lightbulb, LightbulbOff } from "lucide-react"
 import type { PublicMoodPageProps, MoodBlock } from "@/types/database"
 import { ExperienceOverlay } from "@/components/dashboard/ExperienceOverlay"
+import { AudioProvider, useAudio } from "@/components/dashboard/audio-context"
+import { GlobalLyricsOverlay } from "@/components/dashboard/GlobalLyricsOverlay"
 
-export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlocks, config, theme, isGuest }: PublicMoodPageProps) {
+export function PublicMoodPageClient(props: PublicMoodPageProps) {
+    return (
+        <AudioProvider>
+            <PublicMoodPageClientInner {...props} />
+        </AudioProvider>
+    )
+}
+
+function PublicMoodPageClientInner({ publicUser, profileId, profile, moodBlocks, config, theme, isGuest }: PublicMoodPageProps) {
+    const { isGlobalMuted, toggleGlobalMute } = useAudio()
     const [isFocusMode, setIsFocusMode] = useState(false)
     const [views, setViews] = useState<number>(0)
     const [loadingViews, setLoadingViews] = useState(true)
@@ -69,37 +79,32 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                 />
             </div>
 
-            <div className={cn("transition-all duration-700", isFocusMode ? "opacity-0 pointer-events-none translate-y-4" : "opacity-100")}>
+            <div className={cn("transition-all duration-700", isFocusMode && "focus-active")}>
                 <ProfileSignature
                     username={publicUser.username}
                     name={publicUser.name || undefined}
                     avatarUrl={profile.avatarUrl || undefined}
                     isVerified={publicUser.isVerified}
                     verificationType={publicUser.verificationType}
+                    isFocusMode={isFocusMode}
+                    setIsFocusMode={setIsFocusMode}
                 />
-                <StudioCatalogID
-                    profileId={profile.id}
-                    createdAt={profile.updatedAt}
-                    views={views}
-                />
-                <AnalyticsDisplay
-                    views={views}
-                    loading={loadingViews}
-                />
-                {isGuest && hasInteracted && <GuestPromotion username={publicUser.username} />}
-                <SignatureShare username={publicUser.username} />
-            </div>
-
-            <button
-                onClick={() => setIsFocusMode(!isFocusMode)}
-                className={cn(
-                    "fixed top-12 right-4 sm:right-1/2 sm:translate-x-[200px] z-[70] p-3 rounded-full transition-all duration-500",
-                    "bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10",
-                    isFocusMode && "sm:translate-x-0 top-10 bg-white/20"
+                {!isFocusMode && (
+                    <>
+                        <StudioCatalogID
+                            profileId={profile.id}
+                            createdAt={profile.updatedAt}
+                            views={views}
+                        />
+                        <AnalyticsDisplay
+                            views={views}
+                            loading={loadingViews}
+                        />
+                        {isGuest && hasInteracted && <GuestPromotion username={publicUser.username} />}
+                        <SignatureShare username={publicUser.username} />
+                    </>
                 )}
-            >
-                {isFocusMode ? <Lightbulb className="w-4 h-4" /> : <LightbulbOff className="w-4 h-4 opacity-40 hover:opacity-100" />}
-            </button>
+            </div>
 
             <main className="relative w-full h-full overflow-y-auto sm:overflow-hidden">
                 <BoardStage>
@@ -123,6 +128,9 @@ export function PublicMoodPageClient({ publicUser, profileId, profile, moodBlock
                     ))}
                 </BoardStage>
             </main>
+
+            {/* Global Lyrics // Studio Mode */}
+            <GlobalLyricsOverlay />
         </>
     )
 }
