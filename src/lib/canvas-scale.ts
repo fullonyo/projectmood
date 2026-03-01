@@ -24,25 +24,14 @@ const MIN_SCALE = 0.25
 /** Unidade de design base para blocos complexos (FUS - Fluid Unit Scaling) */
 export const STUDIO_BASE_UNIT = 200
 
+import { useGlobalScale } from "./contexts/ScaleProvider"
+
 /**
  * Hook que retorna o fator de escala atual baseado na largura do viewport.
- * Atualiza automaticamente em resize.
- * SSR-safe: retorna 1 durante hydration.
+ * Agora consome o ScaleProvider centralizado para máxima performance.
  */
 export function useViewportScale(): number {
-    const [scale, setScale] = useState(1)
-
-    useEffect(() => {
-        const compute = () => {
-            const raw = window.innerWidth / DESIGN_VIEWPORT_WIDTH
-            setScale(Math.max(MIN_SCALE, raw))
-        }
-        compute()
-        window.addEventListener('resize', compute)
-        return () => window.removeEventListener('resize', compute)
-    }, [])
-
-    return scale
+    return useGlobalScale()
 }
 
 /** 

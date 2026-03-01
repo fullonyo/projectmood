@@ -9,7 +9,7 @@ interface SidebarBackButtonProps {
     labelKey?: string;
 }
 
-export function SidebarBackButton({ onClick, labelKey = 'sidebar.library.inspector_back' }: SidebarBackButtonProps) {
+export function UniversalBackButton({ onClick, labelKey = 'sidebar.library.inspector_back' }: SidebarBackButtonProps) {
     const { t } = useTranslation()
 
     return (

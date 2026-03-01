@@ -9,7 +9,7 @@ interface PhotoBlockPublicProps {
     content: PhotoBlockContent
 }
 
-export function PhotoBlockPublic({ content }: PhotoBlockPublicProps) {
+export function SmartPhoto({ content }: PhotoBlockPublicProps) {
     const {
         imageUrl,
         alt = '',

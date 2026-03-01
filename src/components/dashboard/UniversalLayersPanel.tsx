@@ -22,7 +22,7 @@ interface LayersPanelProps {
     onNormalize?: () => void
 }
 
-export function LayersPanel({
+export function UniversalLayersPanel({
     blocks,
     selectedIds,
     setSelectedIds,

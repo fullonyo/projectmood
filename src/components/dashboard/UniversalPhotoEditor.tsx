@@ -20,7 +20,7 @@ interface PhotoEditorProps {
     onClose?: () => void
 }
 
-export function PhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProps) {
+export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [imageUrl, setImageUrl] = useState<string>(defaultContent.imageUrl || "")

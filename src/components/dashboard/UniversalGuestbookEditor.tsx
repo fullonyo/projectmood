@@ -39,7 +39,7 @@ interface GuestbookEditorProps {
     onClose?: () => void
 }
 
-export function GuestbookEditor({ block, onUpdate, onClose }: GuestbookEditorProps) {
+export function UniversalGuestbookEditor({ block, onUpdate, onClose }: GuestbookEditorProps) {
     const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
     const [activeTab, setActiveTab] = useState<TabType>('connection')

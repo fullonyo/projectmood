@@ -26,7 +26,7 @@ interface BlockLibraryProps {
     systemFlags?: Record<string, boolean>
 }
 
-export function BlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps) {
+export function UniversalBlockLibrary({ onAddBlock, systemFlags = {} }: BlockLibraryProps) {
     const { t } = useTranslation()
 
     const categories = [

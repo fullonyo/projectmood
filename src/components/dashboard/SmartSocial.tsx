@@ -56,7 +56,7 @@ interface SocialBlockPublicProps {
     isPublic?: boolean
 }
 
-export function SocialBlockPublic({ content, isPublic = false }: SocialBlockPublicProps) {
+export function SmartSocial({ content, isPublic = false }: SocialBlockPublicProps) {
     const Icon = ICONS[content.platform] || LinkIcon
     const scale = useViewportScale()
     const platformColor = PLATFORM_COLORS[content.platform] || '#ffffff'

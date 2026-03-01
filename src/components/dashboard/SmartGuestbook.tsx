@@ -23,7 +23,7 @@ interface GuestbookTheme {
  * GuestbookBlock - Studio 3.0 💎🌪️✨
  * Evolução "Além do Container" com suporte a layouts Scattered e Cloud.
  */
-export function GuestbookBlock({ block, isPublic = false }: { block: any, isPublic?: boolean }) {
+export function SmartGuestbook({ block, isPublic = false }: { block: any, isPublic?: boolean }) {
     const [messages, setMessages] = useState<any[]>([])
     const [newMessage, setNewMessage] = useState("")
     const [isSending, setIsSending] = useState(false)

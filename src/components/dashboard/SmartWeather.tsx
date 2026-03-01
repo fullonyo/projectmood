@@ -29,7 +29,7 @@ interface WeatherBlockPublicProps {
  * WeatherBlockPublic - Padronizado com Studio FUS 💎
  * Utiliza o hook universal useStudioBlock para redimensionamento fluido.
  */
-export const WeatherBlockPublic = memo(({ content }: WeatherBlockPublicProps) => {
+export const SmartWeather = memo(({ content }: WeatherBlockPublicProps) => {
     const { t } = useTranslation()
     const { ref, isHorizontal, isSmall, fluidScale, viewportScale } = useStudioBlock()
 
@@ -123,4 +123,4 @@ export const WeatherBlockPublic = memo(({ content }: WeatherBlockPublicProps) =>
     )
 })
 
-WeatherBlockPublic.displayName = "WeatherBlockPublic"
+SmartWeather.displayName = "SmartWeather"

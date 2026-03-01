@@ -34,7 +34,7 @@ interface EffectsEditorProps {
 }
 import { useTranslation } from "@/i18n/context"
 
-export function EffectsEditor({ profile }: EffectsEditorProps) {
+export function UniversalEffectsEditor({ profile }: EffectsEditorProps) {
     const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
     const [showSuccess, setShowSuccess] = useState(false)

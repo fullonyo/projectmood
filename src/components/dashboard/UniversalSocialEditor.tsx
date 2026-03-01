@@ -49,7 +49,7 @@ const STYLES = [
 
 import { MoodBlock, SocialContent } from "@/types/database"
 
-export function SocialLinksEditor({
+export function UniversalSocialEditor({
     block,
     onUpdate,
     onAdd,

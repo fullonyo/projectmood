@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { MoodBlock } from "@/types/database"
 
-interface RorschachEditorProps {
+interface UniversalRorschachEditorProps {
     block?: MoodBlock | null
     onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
     onAdd?: (type: string, content: any) => Promise<void>
@@ -23,12 +23,12 @@ interface RorschachEditorProps {
 
 type TabType = 'geometry' | 'style'
 
-export function RorschachEditor({
+export function UniversalRorschachEditor({
     block,
     onUpdate,
     onAdd,
     onClose
-}: RorschachEditorProps) {
+}: UniversalRorschachEditorProps) {
     const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
 

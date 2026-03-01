@@ -30,7 +30,7 @@ interface CountdownEditorProps {
     onClose?: () => void
 }
 
-export function CountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEditorProps) {
+export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
     const [label, setLabel] = useState(defaultContent.label || "")

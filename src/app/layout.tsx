@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { I18nProvider } from "@/i18n/context";
+import { ScaleProvider } from "@/lib/contexts/ScaleProvider";
 
 import ReactDOM from "react-dom";
 
@@ -68,7 +69,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <I18nProvider>
-          {children}
+          <ScaleProvider>
+            {children}
+          </ScaleProvider>
           <Toaster
             position="bottom-right"
             theme="dark"

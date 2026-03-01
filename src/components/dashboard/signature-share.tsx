@@ -25,7 +25,7 @@ export function SignatureShare({ username }: SignatureShareProps) {
     }
 
     return (
-        <div className="fixed bottom-4 sm:bottom-10 left-1/2 -translate-x-1/2 z-[60] mix-blend-difference pointer-events-auto group">
+        <div className="fixed bottom-4 sm:bottom-10 right-4 sm:right-10 z-[60] mix-blend-difference pointer-events-auto group">
             <button
                 onClick={handleCopy}
                 className="flex items-center gap-4 group/btn outline-none"
@@ -33,35 +33,35 @@ export function SignatureShare({ username }: SignatureShareProps) {
                 {/* Visual Connector Line */}
                 <div className="h-[1px] w-6 bg-current opacity-20 group-hover:w-10 transition-all duration-700" />
 
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-end">
                     <div className="flex items-center gap-2 mb-1">
-                        <Fingerprint className={cn(
-                            "w-3 h-3 transition-all duration-500",
-                            status === 'copied' ? "text-green-500 scale-125" : "opacity-40 group-hover:rotate-12"
-                        )} />
                         <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-40">
                             {t('public_page.share.title')}
                         </span>
+                        <Fingerprint className={cn(
+                            "w-3 h-3 transition-all duration-500",
+                            status === 'copied' ? "text-green-500 scale-125" : "opacity-40 group-hover:-rotate-12"
+                        )} />
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <span className={cn(
-                            "text-[10px] font-mono tracking-[0.2em] uppercase transition-all duration-500",
-                            status === 'copied' ? "text-green-500 font-black italic" : "opacity-60 group-hover:opacity-100"
-                        )}>
-                            {status === 'copied' ? t('public_page.share.copied') : `moodspace.me/${username}`}
-                        </span>
-
                         <div className={cn(
                             "w-4 h-4 rounded-none border border-current flex items-center justify-center transition-all duration-500",
                             status === 'copied' ? "bg-current shadow-none" : "opacity-20 group-hover:opacity-100"
                         )}>
                             {status === 'copied' ? <Check className="w-2 h-2 mix-blend-difference invert" /> : <LinkIcon className="w-2 h-2" />}
                         </div>
+
+                        <span className={cn(
+                            "text-[10px] font-mono tracking-[0.2em] uppercase transition-all duration-500",
+                            status === 'copied' ? "text-green-500 font-black italic" : "opacity-60 group-hover:opacity-100"
+                        )}>
+                            {status === 'copied' ? t('public_page.share.copied') : `moodspace.me/${username}`}
+                        </span>
                     </div>
 
                     {/* Technical Barcode Decoration */}
-                    <div className="mt-2 flex gap-0.5 opacity-10 group-hover:opacity-30 transition-opacity">
+                    <div className="mt-2 flex gap-0.5 opacity-10 group-hover:opacity-30 transition-opacity justify-end">
                         {[...Array(12)].map((_, i) => (
                             <div
                                 key={i}
@@ -74,7 +74,6 @@ export function SignatureShare({ username }: SignatureShareProps) {
                     </div>
                 </div>
 
-                <div className="h-[1px] w-6 bg-current opacity-20 group-hover:w-10 transition-all duration-700" />
             </button>
         </div>
     )

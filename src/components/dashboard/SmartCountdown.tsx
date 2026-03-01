@@ -14,7 +14,7 @@ interface CountdownBlockPublicProps {
     content: CountdownBlockContent
 }
 
-export function CountdownBlockPublic({ content }: CountdownBlockPublicProps) {
+export function SmartCountdown({ content }: CountdownBlockPublicProps) {
     const { title, targetDate, emoji: iconName, style = 'minimal' } = content
     const [timeLeft, setTimeLeft] = useState(calculateTimeLeft())
     const Icon = iconName ? ICON_MAP[iconName as keyof typeof ICON_MAP] : null

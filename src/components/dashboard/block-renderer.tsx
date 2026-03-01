@@ -16,15 +16,12 @@ import { SmartMedia, MediaType } from "./SmartMedia"
 import { SmartShape } from "./SmartShape"
 import { SmartRorschach } from "./SmartRorschach"
 
-import { PhotoBlockPublic } from "./photo-block-public"
-import { CountdownBlockPublic } from "./countdown-block-public"
-
-const GuestbookBlock = dynamic(() => import("./guestbook-block").then(mod => mod.GuestbookBlock), {
-    loading: () => <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
-})
-const WeatherBlockPublic = dynamic(() => import("./weather-block-public").then(mod => mod.WeatherBlockPublic))
-const MediaBlockPublic = dynamic(() => import("./media-block-public").then(mod => mod.MediaBlockPublic))
-const SocialBlockPublic = dynamic(() => import("./social-block-public").then(mod => mod.SocialBlockPublic))
+import { SmartPhoto } from "./SmartPhoto"
+import { SmartCountdown } from "./SmartCountdown"
+import { SmartReview } from "./SmartReview"
+import { SmartSocial } from "./SmartSocial"
+import { SmartWeather } from "./SmartWeather"
+import { SmartGuestbook } from "./SmartGuestbook"
 
 import { MoodBlock } from "@/types/database"
 import { BlockErrorBoundary } from "./block-error-boundary"
@@ -91,7 +88,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         case 'photo':
             return (
                 <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
-                    <PhotoBlockPublic content={content} />
+                    <SmartPhoto content={content} />
                 </FrameContainer>
             )
 
@@ -185,7 +182,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
             )
 
         case 'weather':
-            return <WeatherBlockPublic content={content} />
+            return <SmartWeather content={content} />
 
 
         case 'doodle':
@@ -198,18 +195,18 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
             )
 
         case 'social':
-            return <SocialBlockPublic content={content} isPublic={isPublic} />
+            return <SmartSocial content={content} isPublic={isPublic} />
 
 
         case 'guestbook':
             return (
                 <div className="w-full h-full min-h-0 flex flex-col">
-                    <GuestbookBlock block={block} isPublic={isPublic} />
+                    <SmartGuestbook block={block} isPublic={isPublic} />
                 </div>
             )
 
         case 'countdown':
-            return <CountdownBlockPublic content={content} />
+            return <SmartCountdown content={content} />
 
         default:
             return <div className="p-4 bg-red-500/10 text-red-500 text-[10px] uppercase font-black">Unknown Block Type: {block.type}</div>

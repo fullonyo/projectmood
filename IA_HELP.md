@@ -27,6 +27,22 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
     - **Standardization**: Todos os seletores nativos (`select`) foram removidos em favor de grades técnicas HUD com marcadores de canto e estados reativos de alta precisão.
 27. - **Avatar Personalizado**: Sistema de upload no cliente com compressão automática (`browser-image-compression`) e armazenamento em Base64 no banco de dados. Clique no avatar na sidebar direita para trocar.
 
+## Smart Architecture & Universal Editors 🏗️✨
+
+O sistema de componentes é dividido em dois pilares fundamentais para garantir escalabilidade e performance:
+
+### 🎮 Smart Blocks (Public/Renderer Mode)
+Localizados em `src/components/dashboard/`, estes componentes são responsáveis pela renderização ultra-otimizada no Mural e na Página Pública:
+- **Padrão de Nome**: `Smart[Type].tsx` (ex: `SmartPhoto.tsx`, `SmartText.tsx`).
+- **Escala Inteligente**: Consomem o `ScaleProvider` centralizado via `useViewportScale` para garantir que o aspect-ratio seja perfeito em qualquer dispositivo sem redundância de listeners.
+- **Isolamento**: Não contêm lógica de edição ou mutations, focando apenas em visual e interatividade fluida.
+
+### 🛠️ Universal Editors (Admin/Edit Mode)
+Localizados em `src/components/dashboard/`, os editores centralizam toda a lógica de configuração e persistência:
+- **Padrão de Nome**: `Universal[Type]Editor.tsx` (ex: `UniversalPhotoEditor.tsx`, `UniversalRorschachEditor.tsx`).
+- **Fluxo Único**: Gerenciam tanto a criação de novos blocos (`onAdd`) quanto a atualização em tempo real de blocos existentes (`onUpdate`).
+- **Registro Central**: Todas as rotas de edição são mapeadas no `block-editor-registry.tsx`.
+
 ## Core Tecnológico
 
 ### Mood Canvas & WYSIWYG
@@ -55,6 +71,10 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
   - **State Machine**: O hook `useCanvasManager` expõe `canvasState` (`IDLE`, `DRAGGING`, `RESIZING`, `SELECTING`), permitindo que a UI reaja dinamicamente às interações.
   - **Persistência Debounced**: Sincronização automática com debounce de 800ms e sistema de Epoch para evitar race-conditions entre o cliente e o servidor. Blindagem contra `NaN` e mesclagem profunda de `content` implementada em `use-canvas-manager.ts`.
 - **Command Center (Central de Atalhos)**: Componente flutuante (`CommandCenter.tsx`) que serve como cheatsheet viva. Acessível via `?` ou `Ctrl+K`.
+
+### Performance & Viewport Scaling 📏🚀
+- **ScaleProvider (`src/lib/contexts/ScaleProvider.tsx`)**: Centraliza o cálculo de proporção do Canvas. Utiliza um único listener de `resize` para toda a aplicação, injetado no layout raiz.
+- **useViewportScale**: Hook legado mantido para retrocompatibilidade, mas agora otimizado para consumir o `ScaleProvider` global, eliminando gargalos de CPU no redimensionamento.
 
 ### Comandos & Atalhos de Teclado (Precision Engine) ⌨️🚀
 O MoodSpace utiliza um motor de precisão para manipulação de blocos:
@@ -99,13 +119,15 @@ O MoodSpace utiliza um motor de precisão para manipulação de blocos:
 - O `ExperienceOverlay.tsx` captura a interação inicial do usuário para desbloquear o som.
 - Players de YouTube e Spotify reagem ao estado `hasInteracted` para iniciar com áudio.
 
-### 🎨 Ferramentas Artísticas (SmartShapes 2.0 Plus)
-O sistema **SmartShapes** permite a composição de murais complexos e estéticos com alta performance.
+### 🎨 Ferramentas Artísticas (Smart Architecture)
+O sistema **Smart Architecture** permite a composição de murais complexos e estéticos com alta performance.
 
 ### Componentes Chave:
-- **`SmartShape.tsx`**: Renderiza geometrias via SVG (Círculo, Retângulo, Polígono, Blob, Estrela, Linha, Grade, Flor, Teia, Onda, Espiral).
+- **`SmartShape.tsx`**: Renderiza geometrias via SVG.
 - **`UniversalShapeEditor.tsx`**: Interface de controle dividida em abas (**Geometria**, **Estética**, **Efeitos FX**).
-- **`UniversalWeatherEditor.tsx`**: Sistema dinâmico que integra clima em tempo real via Server Actions (`getWeatherAction`) e possui interface de abas (**Conexão** | **Estética**) simétrica ao SmartShapes.
+- **`UniversalWeatherEditor.tsx`**: Sistema dinâmico que integra clima em tempo real via Server Actions.
+- **`SmartWeather.tsx`**: Renderizador atmosférico de elite.
+- **`SmartPhoto.tsx` / `SmartReview.tsx`**: Renderizadores padronizados para imagens e críticas.
 - **Sinergia Studio 2.2**: O sistema Weather agora suporta `opacity` e `blendMode` nativos através do `CanvasItem`, permitindo composições atmosféricas complexas.
 - **Variações Determinísticas**: O sistema de sementes (`seed`) permite até 100 variações únicas para Mood Elements, garantindo que o design seja persistente e idêntico em todas as visualizações.
 - **Blindagem Geométrica**: O motor de SVG possui fallbacks matemáticos para garantir que `sides`, `points` e `gradientColors` nunca causem crash ou renderizações inválidas.
@@ -135,6 +157,15 @@ O bloco **Rorschach** (`SmartRorschach.tsx`) é um motor de arte abstrata proced
   - **Tags Centralizadas**: `src/lib/cache-tags.ts` define todas as chaves de revalidação. NUNCA use strings soltas para `revalidateTag`.
   - **Prisão de Tipos**: Use o perfil `'default'` em `revalidateTag(tag, 'default')` conforme exigido pelo Next.js 16.
   - **Detecção de Mudanças (Draft vs. Published)**: Algoritmo de normalização recursiva em `publish.ts` garante que a detecção de "mudanças não publicadas" seja determinística (ordena chaves de objetos e arrays) para evitar falsos positivos.
+
+### HUD System: Public Slots (Studio 2.1) 🎛️
+Para evitar sobreposição e manter uma leitura limpa das obras, os overlays da página pública são estritamente alinhados em um grid técnico imersivo:
+- **Top-Left**: `ProfileSignature` (Avatar, Nome, Role e HUD Volume/Focus Controls).
+- **Top-Center**: `GuestPromotion` (Desliza dinamicamente como notificação *in-app* para incentivar inscrições sem bloquear a visão inferor).
+- **Top-Right**: `StudioCatalogID` (Número de catálogo único e estilizado, exclusivo para identificação da sala).
+- **Bottom-Left**: `AnalyticsDisplay` (Métricas Live, Pisca dinâmico baseado em volume de views).
+- **Bottom-Center**: `GlobalLyricsOverlay` (Reservado estritamente para reprodução de letras *fullscreen* com amplo *padding*, garantindo respiração tipográfica).
+- **Bottom-Right**: `SignatureShare` (Código de barras técnico e botão de cópia de link, invertido para expandir à esquerda).
 
 ### Design System Admin (Command Center) 🛡️⚡
 As interfaces administrativas seguem o padrão **Premium Hacker UI**, focado em alta densidade de informação e estética técnica de baixo ruído.
@@ -184,5 +215,13 @@ Sistema para reduzir a paralisia do canvas vazio e inspirar novos usuários atra
     - **Atmospheric Zen**: Lavanda, Liquid, Clima de Kyoto, Movimento Ethereal.
 - **Template Chooser**: UI automática renderizada no `MoodCanvas` quando `blocks.length === 0`. Inclui opção de "Start Fresh" para pular o onboarding.
 
+### Arquitetura Smart & Escala Global (Studio 2.1) 💎⚡
+O sistema foi elevado para um novo padrão de performance e organização:
+- **Smart Architecture**: Todos os renderizadores de blocos seguem o padrão `Smart*` (ex: `SmartPhoto`, `SmartReview`, `SmartWeather`).
+    - **SmartReview**: Nome exclusivo para resenhas de mídia, separando a semântica de "Play" (SmartMedia) de "Review".
+- **ScaleProvider (`src/lib/contexts/ScaleProvider.tsx`)**: Sistema centralizado que calcula a escala do viewport (`useGlobalScale`).
+    - **Performance**: Elimina centenas de listeners redundantes de resize, centralizando o controle em um único Context.
+    - **FUS (Fluid Unit Scaling)**: Garante que o canvas seja idêntico em qualquer resolução (1080p, 4K, Mobile).
+
 ---
-*Documentação atualizada por Antigravity em 27/02/2026. Command Center e Precision Engine integrados.*
+*Documentação atualizada por Antigravity em 28/02/2026. Smart Architecture e ScaleProvider integrados.*

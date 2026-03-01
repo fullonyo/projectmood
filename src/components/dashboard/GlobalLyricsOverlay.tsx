@@ -14,7 +14,7 @@ export function GlobalLyricsOverlay() {
     if (!activeLyrics) return null
 
     return (
-        <div className="fixed inset-x-0 bottom-12 z-[9999] pointer-events-none flex flex-col items-center justify-center px-10 text-center">
+        <div className="fixed inset-x-0 bottom-16 sm:bottom-20 z-[9999] pointer-events-none flex flex-col items-center justify-center px-10 text-center">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={activeLyrics}

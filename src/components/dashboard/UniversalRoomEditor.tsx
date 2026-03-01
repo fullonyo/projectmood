@@ -1,9 +1,9 @@
 "use client"
 
 import { useTranslation } from "@/i18n/context"
-import { ThemeEditor } from "./theme-editor"
+import { UniversalThemeEditor } from "./UniversalThemeEditor"
 import { ColorPaletteExtractor } from "./color-palette-extractor"
-import { EffectsEditor } from "./effects-editor"
+import { UniversalEffectsEditor } from "./UniversalEffectsEditor"
 import { Button } from "../ui/button"
 import { Bomb, Trash2, Palette, Sparkles, Type, Activity } from "lucide-react"
 import { useState } from "react"
@@ -66,7 +66,7 @@ export function UniversalRoomEditor({ profile, onUpdateProfile, onClearWall }: U
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
                         <section>
                             {sectionHeader(t('sidebar.style.atmosphere_title'), t('sidebar.style.atmosphere_desc'), Palette)}
-                            <ThemeEditor
+                            <UniversalThemeEditor
                                 currentTheme={profile.theme}
                                 currentPrimaryColor={profile.primaryColor || '#000'}
                                 currentStaticTexture={profile.staticTexture || 'none'}
@@ -82,7 +82,7 @@ export function UniversalRoomEditor({ profile, onUpdateProfile, onClearWall }: U
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
                         <section>
                             {sectionHeader(t('sidebar.style.magic_fx_title'), t('sidebar.style.magic_fx_desc'), Activity)}
-                            <EffectsEditor profile={profile} />
+                            <UniversalEffectsEditor profile={profile} />
                         </section>
                     </div>
                 )}

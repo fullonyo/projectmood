@@ -14,7 +14,7 @@ interface ThemeEditorProps {
     onUpdate?: (data: any) => void
 }
 
-export function ThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTexture, onUpdate }: ThemeEditorProps) {
+export function UniversalThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTexture, onUpdate }: ThemeEditorProps) {
     const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
     const [showExtractor, setShowExtractor] = useState(false)

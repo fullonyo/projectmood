@@ -14,7 +14,7 @@ interface MediaBlockPublicProps {
     isPublic?: boolean
 }
 
-export function MediaBlockPublic({ content, isPublic = false }: MediaBlockPublicProps) {
+export function SmartReview({ content, isPublic = false }: MediaBlockPublicProps) {
     const isBook = content.category === 'book'
     const scale = useViewportScale()
 

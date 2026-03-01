@@ -20,7 +20,7 @@ interface SidebarRoomInsightProps {
     publishedAt?: string | null
 }
 
-export function SidebarRoomInsight({ blocks, profile, publishedAt }: SidebarRoomInsightProps) {
+export function UniversalRoomInsight({ blocks, profile, publishedAt }: SidebarRoomInsightProps) {
     const { t, locale } = useTranslation()
 
     const stats = useMemo(() => {

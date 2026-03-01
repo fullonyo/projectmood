@@ -1,17 +1,17 @@
 "use client"
 
 import { UniversalTextEditor } from "./UniversalTextEditor"
-import { SocialLinksEditor } from "./social-links-editor"
+import { UniversalSocialEditor } from "./UniversalSocialEditor"
 import { UniversalMediaEditor } from "./UniversalMediaEditor"
-import { PhotoEditor } from "./photo-editor"
+import { UniversalPhotoEditor } from "./UniversalPhotoEditor"
 import { GifPicker } from "./gif-picker"
-import { GuestbookEditor } from "./guestbook-editor"
+import { UniversalGuestbookEditor } from "./UniversalGuestbookEditor"
 import { ArtTools } from "./art-tools"
 import { DoodlePad } from "./doodle-pad"
-import { CountdownEditor } from "./countdown-editor"
+import { UniversalCountdownEditor } from "./UniversalCountdownEditor"
 import { UniversalShapeEditor } from "./UniversalShapeEditor"
 import { UniversalWeatherEditor } from "./UniversalWeatherEditor"
-import { RorschachEditor } from "./RorschachEditor"
+import { UniversalRorschachEditor } from "./UniversalRorschachEditor"
 import { addMoodBlock } from "@/actions/profile"
 import { MoodBlock } from "@/types/database"
 import { getInitialBlockSize } from "@/lib/canvas-scale"
@@ -54,7 +54,7 @@ export function BlockEditorRegistry({
     if (activeType === 'social') {
         const socialBlock = selectedBlock || { content: {} } as MoodBlock;
         return (
-            <SocialLinksEditor
+            <UniversalSocialEditor
                 block={socialBlock}
                 onUpdate={selectedBlock ? onUpdateBlock : (_, content) => handleAdd('social', content)}
                 onClose={onClose}
@@ -76,7 +76,7 @@ export function BlockEditorRegistry({
 
     if (activeType === 'photo') {
         return (
-            <PhotoEditor
+            <UniversalPhotoEditor
                 key={selectedBlock?.id || 'draft-photo'}
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
@@ -92,7 +92,7 @@ export function BlockEditorRegistry({
 
     if (activeType === 'guestbook') {
         return (
-            <GuestbookEditor
+            <UniversalGuestbookEditor
                 key={selectedBlock?.id || 'draft-guestbook'}
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
@@ -123,7 +123,7 @@ export function BlockEditorRegistry({
 
     if (activeType === 'countdown') {
         return (
-            <CountdownEditor
+            <UniversalCountdownEditor
                 key={selectedBlock?.id || 'draft-countdown'}
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
@@ -147,11 +147,11 @@ export function BlockEditorRegistry({
 
     if (activeType === 'rorschach') {
         return (
-            <RorschachEditor
+            <UniversalRorschachEditor
                 key={selectedBlock?.id || 'draft-rorschach'}
                 block={selectedBlock}
                 onUpdate={onUpdateBlock}
-                onAdd={(type, content) => handleAdd('rorschach', content)}
+                onAdd={(type: string, content: any) => handleAdd('rorschach', content)}
                 onClose={onClose}
             />
         )

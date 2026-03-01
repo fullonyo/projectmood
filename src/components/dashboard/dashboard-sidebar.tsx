@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { cn } from "@/lib/utils"
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { LayersPanel } from "./layers-panel"
+import { UniversalLayersPanel } from "./UniversalLayersPanel"
 
 import {
     Layout,
@@ -15,11 +15,11 @@ import {
     Trash2
 } from "lucide-react"
 
-import { BlockLibrary } from "./block-library"
-import { UniversalRoomEditor } from "./universal-room-editor"
+import { UniversalBlockLibrary } from "./UniversalBlockLibrary"
+import { UniversalRoomEditor } from "./UniversalRoomEditor"
 import { BlockEditorRegistry } from "./block-editor-registry"
-import { SidebarBackButton } from "./sidebar-back-button"
-import { SidebarRoomInsight } from "./sidebar-room-insight"
+import { UniversalBackButton } from "./UniversalBackButton"
+import { UniversalRoomInsight } from "./UniversalRoomInsight"
 import { clearMoodBlocks, addMoodBlock } from "@/actions/profile"
 import { Button } from "../ui/button"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -239,7 +239,7 @@ export function DashboardSidebar({
                 )}
 
                 {activeTab === 'layers' && (
-                    <LayersPanel
+                    <UniversalLayersPanel
                         blocks={blocks}
                         selectedIds={selectedBlocks.map(b => b.id)}
                         setSelectedIds={setSelectedIds}
@@ -252,13 +252,13 @@ export function DashboardSidebar({
                     <>
                         {selectedBlocks.length === 0 && !draftBlockType ? (
                             <div className="space-y-12 pb-10">
-                                <SidebarRoomInsight blocks={blocks} profile={profile} publishedAt={publishedAt} />
+                                <UniversalRoomInsight blocks={blocks} profile={profile} publishedAt={publishedAt} />
                                 <div className="h-[1px] w-full bg-zinc-100 dark:bg-zinc-900/50" />
-                                <BlockLibrary onAddBlock={handleAddBlock} systemFlags={systemFlags} />
+                                <UniversalBlockLibrary onAddBlock={handleAddBlock} systemFlags={systemFlags} />
                             </div>
                         ) : (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
-                                <SidebarBackButton
+                                <UniversalBackButton
                                     onClick={() => {
                                         setSelectedIds([])
                                         setDraftBlockType(null)
