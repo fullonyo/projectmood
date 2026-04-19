@@ -196,7 +196,7 @@ export function SmartText({
         const StatusIcon = STATUS_ICONS[icon as keyof typeof STATUS_ICONS] || Smile
         return (
             <div className="w-full h-full flex items-center justify-center p-4">
-                <div className="bg-white/5 dark:bg-zinc-900/10 backdrop-blur-xl border border-white/10 flex items-center transition-all hover:scale-105 group p-6 gap-6 rounded-2xl">
+                <div className="bg-white/5 dark:bg-zinc-900/10 backdrop-blur-xl border border-white/10 flex items-center transition-all group p-6 gap-6 rounded-2xl">
                     <div className="text-zinc-900 dark:text-white animate-bounce group-hover:animate-none group-hover:scale-125 transition-transform">
                         <StatusIcon strokeWidth={2.5} style={{ width: 32, height: 32, color: textColor }} />
                     </div>

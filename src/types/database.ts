@@ -149,9 +149,9 @@ export interface SocialContent {
 }
 
 export interface CountdownContent {
-    label: string;
+    title: string;
     targetDate: string;
-    icon?: string;
+    emoji?: string;
     style?: string;
 }
 

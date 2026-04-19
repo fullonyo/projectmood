@@ -79,9 +79,13 @@ export function UniversalTextEditor({
 
     const [text, setText] = useState(content.text || "")
     const [behavior, setBehavior] = useState<TextBehavior>(initialBehavior)
-    const [frame, setFrame] = useState<FrameType>(content.frame || (content.style === 'simple' ? 'none' : content.style as any) || 'none')
+    const [frame, setFrame] = useState<FrameType>(
+        content.frame || 
+        (content.style === 'simple' ? 'none' : content.style as any) || 
+        (['ticker', 'subtitle', 'floating'].includes(block?.type || '') ? 'minimal' : 'none')
+    )
     const [textColor, setTextColor] = useState(content.textColor || '')
-    const [fontSize, setFontSize] = useState(content.fontSize || 'xl')
+    const [fontSize, setFontSize] = useState(content.fontSize || 'base')
     const [align, setAlign] = useState(content.align || 'center')
     const [speed, setSpeed] = useState(content.speed || (initialBehavior === 'ticker' ? 20 : 0.05))
     const [direction, setDirection] = useState<'left' | 'right'>(content.direction || 'left')
@@ -212,7 +216,7 @@ export function UniversalTextEditor({
                             <>
                                 <EditorSection title={t('editors.text.font_scale')}>
                                     <div className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl">
-                                        {['sm', 'xl', '3xl'].map((s) => (
+                                        {['sm', 'base', 'xl', '3xl'].map((s) => (
                                             <button
                                                 key={s}
                                                 onClick={() => setFontSize(s as any)}
@@ -221,7 +225,7 @@ export function UniversalTextEditor({
                                                     fontSize === s ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm" : "text-zinc-400 hover:text-zinc-600"
                                                 )}
                                             >
-                                                {s === 'sm' ? 'P' : s === 'xl' ? 'M' : 'G'}
+                                                {s === 'sm' ? 'P' : s === 'base' ? 'M' : s === 'xl' ? 'G' : 'GG'}
                                             </button>
                                         ))}
                                     </div>
@@ -261,8 +265,8 @@ export function UniversalTextEditor({
                                     <input
                                         value={author}
                                         onChange={(e) => setAuthor(e.target.value)}
-                                        placeholder="Autor da citação"
-                                        className="w-full h-12 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl pl-12 text-[11px] font-bold uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 outline-none shadow-sm"
+                                        placeholder={t('editors.text.author_placeholder')}
+                                        className="w-full h-12 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl pl-12 text-base font-medium focus:ring-2 focus:ring-blue-500/20 outline-none shadow-sm"
                                     />
                                 </div>
                             </div>

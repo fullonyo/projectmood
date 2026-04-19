@@ -9,6 +9,8 @@ interface CanvasInteractionState {
     setBrushColor: (val: string) => void
     brushSize: number
     setBrushSize: (val: number) => void
+    hoveredBlockIds: string[]
+    setHoveredBlockIds: (val: string[]) => void
 }
 
 const CanvasInteractionContext = createContext<CanvasInteractionState | undefined>(undefined)
@@ -17,6 +19,7 @@ export function CanvasInteractionProvider({ children }: { children: ReactNode })
     const [isDrawingMode, setIsDrawingMode] = useState(false)
     const [brushColor, setBrushColor] = useState("#000000")
     const [brushSize, setBrushSize] = useState(4)
+    const [hoveredBlockIds, setHoveredBlockIds] = useState<string[]>([])
 
     return (
         <CanvasInteractionContext.Provider
@@ -26,7 +29,9 @@ export function CanvasInteractionProvider({ children }: { children: ReactNode })
                 brushColor,
                 setBrushColor,
                 brushSize,
-                setBrushSize
+                setBrushSize,
+                hoveredBlockIds,
+                setHoveredBlockIds
             }}
         >
             {children}

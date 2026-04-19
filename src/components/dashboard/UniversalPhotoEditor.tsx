@@ -177,21 +177,21 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2 px-1">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Legenda</Label>
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('editors.photo.caption')}</Label>
                                 <Input
                                     value={caption}
                                     onChange={(e) => setCaption(e.target.value)}
-                                    placeholder="Ex: Momentos felizes"
-                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl text-[11px] h-11 focus-visible:ring-blue-500/20"
+                                    placeholder={t('editors.photo.caption_placeholder')}
+                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl text-base h-11 focus-visible:ring-blue-500/20"
                                 />
                             </div>
                             <div className="space-y-2 px-1">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Alt Text</Label>
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('editors.photo.alt_text')}</Label>
                                 <Input
                                     value={alt}
                                     onChange={(e) => setAlt(e.target.value)}
-                                    placeholder="Descrição para acessibilidade"
-                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl text-[11px] h-11 focus-visible:ring-blue-500/20"
+                                    placeholder={t('editors.photo.alt_placeholder')}
+                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl text-base h-11 focus-visible:ring-blue-500/20"
                                 />
                             </div>
                         </div>

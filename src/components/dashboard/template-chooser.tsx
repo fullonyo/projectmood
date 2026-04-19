@@ -38,7 +38,7 @@ export function TemplateChooser() {
     }
 
     return (
-        <div className="absolute inset-0 flex items-center justify-center z-50 p-6 overflow-y-auto bg-zinc-950 backdrop-blur-3xl">
+        <div className="absolute inset-0 flex items-center justify-center z-50 p-6 overflow-y-auto bg-zinc-900/90 backdrop-blur-3xl">
             {/* Background Texture for consistency */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay">
                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -55,14 +55,14 @@ export function TemplateChooser() {
                 className="w-full max-w-5xl space-y-12 text-center my-auto relative z-10"
             >
                 <header className="flex flex-col items-center gap-6">
-                    <div className="flex items-center gap-2 opacity-30">
-                        <Activity className="w-2.5 h-2.5 text-white" />
-                        <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em] text-white">{t('templates.empty_state')}</h3>
+                    <div className="flex items-center gap-2 opacity-50 bg-white/5 px-3 py-1 rounded-full">
+                        <Activity className="w-2.5 h-2.5 text-blue-400" />
+                        <h3 className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400">{t('templates.empty_state')}</h3>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none italic text-white">
                         {t('templates.chooser_title')}
                     </h1>
-                    <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] max-w-lg mx-auto leading-relaxed">
+                    <p className="text-zinc-500 text-[10px] md:text-xs font-medium uppercase tracking-[0.3em] max-w-lg mx-auto leading-relaxed">
                         {t('templates.chooser_subtitle')}
                     </p>
                 </header>
@@ -83,19 +83,19 @@ export function TemplateChooser() {
                                 onClick={() => handleApply(template.id)}
                                 disabled={isPending}
                                 className={cn(
-                                    "group relative flex flex-col items-start p-8 transition-all duration-500 text-left border rounded-none overflow-hidden active:scale-[0.98]",
-                                    template.profile.theme === 'dark' ? "bg-black border-zinc-800" : "bg-white border-zinc-200",
-                                    isHovered ? "border-blue-500" : ""
+                                    "group relative flex flex-col items-start p-8 transition-all duration-500 text-left border rounded-[2rem] overflow-hidden active:scale-[0.98]",
+                                    template.profile.theme === 'dark' ? "bg-zinc-900/50 border-zinc-800/50" : "bg-white border-zinc-200",
+                                    isHovered ? "border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.1)] -translate-y-2" : ""
                                 )}
                             >
-                                <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-current opacity-10 group-hover:opacity-100 transition-opacity" />
+                                <div className="absolute top-0 right-0 w-8 h-8 bg-blue-500/10 rounded-bl-[1.5rem] opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                 <div className={cn(
-                                    "p-3 border mb-6 transition-all duration-500",
-                                    template.profile.theme === 'dark' ? "bg-zinc-900 border-zinc-800 text-white" : "bg-zinc-50 border-zinc-100 text-black",
-                                    isHovered ? "rotate-[-4deg] scale-110" : ""
+                                    "p-4 rounded-2xl border mb-6 transition-all duration-700 shadow-sm",
+                                    template.profile.theme === 'dark' ? "bg-zinc-800/50 border-zinc-700/50 text-white" : "bg-zinc-50 border-zinc-100 text-black",
+                                    isHovered ? "rotate-[-8deg] scale-110 bg-blue-600 text-white border-blue-500 shadow-[0_10px_20px_rgba(37,99,235,0.2)]" : ""
                                 )}>
-                                    <Icon className="w-5 h-5" />
+                                    <Icon className="w-6 h-6" />
                                 </div>
 
                                 <h3 className={cn(
@@ -141,7 +141,7 @@ export function TemplateChooser() {
                     <button
                         onClick={handleStartFresh}
                         disabled={isPending}
-                        className="text-[7.5px] font-black uppercase tracking-[0.5em] text-zinc-400 hover:text-black dark:hover:text-white transition-colors py-4 px-8 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
+                        className="text-[9px] font-bold uppercase tracking-[0.4em] text-zinc-500 hover:text-white transition-all py-4 px-10 rounded-full border border-white/5 hover:bg-white/5 hover:border-white/10 active:scale-95"
                     >
                         {t('templates.start_fresh')}
                     </button>

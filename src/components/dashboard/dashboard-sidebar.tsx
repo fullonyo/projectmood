@@ -42,17 +42,24 @@ export function DashboardSidebar({
     selectedBlocks,
     setSelectedIds,
     onUpdateBlock,
+    onUpdateBlocks,
     removeBlocks, // Added removeBlocks prop
+    onGroup,
+    onUngroup,
     onUpdateProfile,
     blocks,
     systemFlags,
-    publishedAt
+    publishedAt,
+    onNormalize
 }: {
     profile: Profile;
     selectedBlocks: MoodBlock[];
     setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void;
     onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void;
+    onUpdateBlocks: (ids: string[], updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => void;
     removeBlocks: (ids: string[]) => void;
+    onGroup: () => void;
+    onUngroup: () => void;
     onUpdateProfile: (data: Partial<Profile>) => void;
     blocks: MoodBlock[];
     systemFlags?: Record<string, boolean>;
@@ -197,7 +204,11 @@ export function DashboardSidebar({
                         selectedIds={selectedBlocks.map(b => b.id)}
                         setSelectedIds={setSelectedIds}
                         onUpdateBlock={onUpdateBlock}
-                        onDeleteRequest={(id) => removeBlocks([id])}
+                        onUpdateBlocks={onUpdateBlocks}
+                        onDeleteRequest={(ids) => removeBlocks(ids)}
+                        onGroup={onGroup}
+                        onUngroup={onUngroup}
+                        onNormalize={onNormalize}
                     />
                 )}
 

@@ -170,7 +170,10 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                         selectedBlocks={selectedBlocks}
                         setSelectedIds={setSelectedIds}
                         onUpdateBlock={updateBlock}
+                        onUpdateBlocks={updateBlocks}
                         removeBlocks={removeBlocks}
+                        onGroup={groupSelected}
+                        onUngroup={ungroupSelected}
                         onUpdateProfile={handleUpdateLocalProfile}
                         systemFlags={systemFlags}
                         publishedAt={publishedAt}

@@ -33,7 +33,7 @@ export const MOOD_TEMPLATES: Record<string, MoodTemplate> = {
         icon: Sparkles,
         profile: {
             backgroundEffect: 'aurora',
-            backgroundColor: '#050505',
+            backgroundColor: '#121214',
             primaryColor: '#ffffff',
             theme: 'dark',
             staticTexture: 'none',
@@ -119,7 +119,7 @@ export const MOOD_TEMPLATES: Record<string, MoodTemplate> = {
         icon: Terminal,
         profile: {
             backgroundEffect: 'grid-move',
-            backgroundColor: '#000000',
+            backgroundColor: '#121214',
             primaryColor: '#00ffff',
             theme: 'dark',
             staticTexture: 'noise',
@@ -189,7 +189,7 @@ export const MOOD_TEMPLATES: Record<string, MoodTemplate> = {
             },
             {
                 type: 'text',
-                content: { behavior: 'floating', text: 'Breathe in... Breathe out...', color: '#6366f1', fontScale: 1.5 },
+                content: { behavior: 'floating', text: 'Breathe in... Breathe out...', color: '#6366f1', fontSize: 'xl' },
                 x: 58, y: 35, width: 350, height: 80, zIndex: 100
             },
             {

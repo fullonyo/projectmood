@@ -31,9 +31,9 @@ interface CountdownEditorProps {
 export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEditorProps) {
     const { t } = useTranslation()
     const defaultContent = block?.content || {}
-    const [label, setLabel] = useState(defaultContent.label || "")
+    const [title, setTitle] = useState(defaultContent.title || "")
     const [targetDate, setTargetDate] = useState(defaultContent.targetDate || "")
-    const [selectedIcon, setSelectedIcon] = useState(defaultContent.icon || "PartyPopper")
+    const [emoji, setEmoji] = useState(defaultContent.emoji || "PartyPopper")
     const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>(defaultContent.style || 'minimal')
     const [isPending, setIsPending] = useState(false)
 
@@ -41,23 +41,23 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
         if (!block?.id || !onUpdate) return
 
         const content: CountdownContent = {
-            label: label.trim(),
+            title: title.trim(),
             targetDate,
-            icon: selectedIcon,
+            emoji,
             style
         }
 
         onUpdate(block.id, { content })
-    }, [label, targetDate, selectedIcon, style, block?.id, onUpdate])
+    }, [title, targetDate, emoji, style, block?.id, onUpdate])
 
     const handleAction = async () => {
-        if ((!label.trim() || !targetDate) && !block?.id) return
+        if ((!title.trim() || !targetDate) && !block?.id) return
 
         setIsPending(true)
         const content: CountdownContent = {
-            label: label.trim(),
+            title: title.trim(),
             targetDate,
-            icon: selectedIcon,
+            emoji,
             style
         }
 
@@ -65,9 +65,9 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
             if (onClose) onClose()
         } else if (onAdd) {
             await onAdd(content)
-            setLabel("")
+            setTitle("")
             setTargetDate("")
-            setSelectedIcon("PartyPopper")
+            setEmoji("PartyPopper")
             setStyle('minimal')
         }
         setIsPending(false)
@@ -87,11 +87,11 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                         <div className="relative">
                             <Timer className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                             <Input
-                                value={label}
-                                onChange={(e) => setLabel(e.target.value)}
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
                                 placeholder={t('editors.countdown.placeholder')}
                                 maxLength={50}
-                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium"
+                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-base font-medium"
                             />
                         </div>
                     </div>
@@ -103,7 +103,7 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                                 type="datetime-local"
                                 value={targetDate}
                                 onChange={(e) => setTargetDate(e.target.value)}
-                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium uppercase"
+                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-base font-medium uppercase"
                             />
                         </div>
                     </div>
@@ -113,8 +113,8 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
             <EditorSection title="Ícone">
                 <GridSelector
                     options={ICONS.map(i => ({ id: i.name as any, label: i.name, icon: i.icon }))}
-                    activeId={selectedIcon as any}
-                    onChange={(id) => setSelectedIcon(id as string)}
+                    activeId={emoji as any}
+                    onChange={(id) => setEmoji(id as string)}
                     columns={4}
                 />
             </EditorSection>
@@ -135,7 +135,7 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
             <EditorActionButton 
                 onClick={handleAction} 
                 isLoading={isPending} 
-                disabled={(!label.trim() || !targetDate) && !block?.id}
+                disabled={(!title.trim() || !targetDate) && !block?.id}
                 label={block?.id ? t('common.close') : t('editors.countdown.deploy')}
             />
         </div>

@@ -18,6 +18,7 @@ import {
     DistanceGuide
 } from "@/lib/canvas-transforms"
 import { MoodBlock, Profile, ThemeConfig } from "@/types/database"
+import { useCanvasInteraction } from "./canvas-interaction-context"
 
 interface CanvasItemProps {
     block: MoodBlock
@@ -56,6 +57,7 @@ export const CanvasItem = memo(({
 }: CanvasItemProps) => {
     const { t } = useTranslation()
     const viewportScale = useViewportScale()
+    const { hoveredBlockIds } = useCanvasInteraction()
 
     const unscaleValue = (v: number | 'auto') => typeof v === 'number' ? Math.round(v / viewportScale) : v
 
@@ -491,6 +493,44 @@ export const CanvasItem = memo(({
             <div className={cn("w-full h-full transition-transform duration-200", isDragging && "scale-[1.02] rotate-1", (isDragging || isResizing) && "pointer-events-none")}>
                 <BlockRenderer block={block} isPublic={isInteractiveMode} />
             </div>
+
+            {/* Hover Highlight from Sidebar - Designer Edition */}
+            {hoveredBlockIds.includes(block.id) && !isSelected && (
+                <div className="absolute -inset-6 pointer-events-none z-[1000]">
+                    {/* Atmospheric Glow */}
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute inset-4 bg-blue-500/10 blur-2xl rounded-[3rem]" 
+                    />
+                    
+                    {/* Elegant Corner Brackets */}
+                    <div className="absolute inset-0">
+                        {/* Top Left */}
+                        <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-blue-500/50 rounded-tl-2xl" />
+                        {/* Top Right */}
+                        <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-blue-500/50 rounded-tr-2xl" />
+                        {/* Bottom Left */}
+                        <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-blue-500/50 rounded-bl-2xl" />
+                        {/* Bottom Right */}
+                        <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-blue-500/50 rounded-br-2xl" />
+                    </div>
+
+                    {/* Subtle Inner Border */}
+                    <div className="absolute inset-4 border border-blue-500/20 rounded-[2rem] ring-4 ring-blue-500/5" />
+                    
+                    {/* Floating Label */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-blue-600 rounded-full shadow-xl shadow-blue-600/20"
+                    >
+                        <span className="text-[9px] font-black text-white uppercase tracking-[0.2em] whitespace-nowrap">
+                            {t('canvas.focusing_layer')}
+                        </span>
+                    </motion.div>
+                </div>
+            )}
         </motion.div>
     )
 })
