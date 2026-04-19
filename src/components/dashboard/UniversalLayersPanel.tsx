@@ -498,11 +498,13 @@ const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, se
                         )}
                         {block.isLocked && <Lock className="w-2.5 h-2.5 text-amber-500" />}
                     </div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase opacity-60">
-                            NODE // {(block.zIndex || 1).toString().padStart(3, '0')}
-                        </span>
-                    </div>
+                    {(block.content as any).customName && (
+                        <div className="flex items-center gap-3">
+                            <span className="text-[8px] font-black text-zinc-400/60 tracking-[0.1em] uppercase">
+                                {t(`block_manager.labels.${block.type as any}`) || block.type}
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
