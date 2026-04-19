@@ -161,79 +161,69 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         });
     }, [captureHistory, scheduleBackendSave]);
 
-    const undo = useCallback(() => {
-        if (history.past.length === 0) return;
+    const applyHistoryAction = useCallback(async (action: 'undo' | 'redo') => {
+        const isUndo = action === 'undo';
+        if (isUndo && history.past.length === 0) return;
+        if (!isUndo && history.future.length === 0) return;
+
+        const safeRestore = async (id: string) => {
+            for (let i = 0; i < 2; i++) {
+                try {
+                    const res = await restoreMoodBlock(id);
+                    if (!res?.error) return true;
+                } catch (e) { }
+                await new Promise(r => setTimeout(r, 500 * (i + 1)));
+            }
+            return false;
+        };
+
+        const safeDelete = async (id: string) => {
+            for (let i = 0; i < 2; i++) {
+                try {
+                    const res = await deleteMoodBlock(id);
+                    if (!res?.error) return true;
+                } catch (e) { }
+                await new Promise(r => setTimeout(r, 500 * (i + 1)));
+            }
+            return false;
+        };
 
         isUndoRedoAction.current = true;
-        setHistory(curr => {
-            const newHistory = undoHistory(curr);
-            const previousState = newHistory.present;
-            const currentBlocks = curr.present;
+        const curr = history;
+        const newHistory = isUndo ? undoHistory(curr) : redoHistory(curr);
+        const nextState = newHistory.present;
+        const currentBlocks = curr.present;
 
-            setBlocks(previousState);
+        setBlocks(nextState);
+        setHistory(newHistory);
 
-            // Sync with backend
-            previousState.forEach(prevBlock => {
-                const currBlock = currentBlocks.find(b => b.id === prevBlock.id);
-                if (!currBlock) {
-                    restoreMoodBlock(prevBlock.id).catch(e => console.error(e));
-                } else if (JSON.stringify(prevBlock) !== JSON.stringify(currBlock)) {
-                    // Strip internal Prisma fields
-                    const { id, userId, createdAt, updatedAt, deletedAt, ...updates } = prevBlock;
-                    pendingUpdates.current[prevBlock.id] = updates;
-                    epochRef.current[prevBlock.id] = (epochRef.current[prevBlock.id] || 0) + 1;
-                    scheduleBackendSave(prevBlock.id);
-                }
-            });
-
-            currentBlocks.forEach(currBlock => {
-                if (!previousState.find(b => b.id === currBlock.id)) {
-                    deleteMoodBlock(currBlock.id).catch(e => console.error(e));
-                }
-            });
-
-            return newHistory;
+        // Sync with backend
+        const syncPromises = nextState.map(async (nextBlock) => {
+            const currBlock = currentBlocks.find(b => b.id === nextBlock.id);
+            if (!currBlock) {
+                const ok = await safeRestore(nextBlock.id);
+                if (!ok) toast.error(`Erro ao restaurar bloco ${nextBlock.id.slice(0, 4)}...`);
+            } else if (JSON.stringify(nextBlock) !== JSON.stringify(currBlock)) {
+                const { id, userId, createdAt, updatedAt, deletedAt, ...updates } = nextBlock;
+                pendingUpdates.current[nextBlock.id] = updates;
+                epochRef.current[nextBlock.id] = (epochRef.current[nextBlock.id] || 0) + 1;
+                scheduleBackendSave(nextBlock.id);
+            }
         });
 
+        const deletePromises = currentBlocks
+            .filter(currBlock => !nextState.find(b => b.id === currBlock.id))
+            .map(async (currBlock) => {
+                const ok = await safeDelete(currBlock.id);
+                if (!ok) toast.error(`Erro ao remover bloco ${currBlock.id.slice(0, 4)}...`);
+            });
+
+        await Promise.all([...syncPromises, ...deletePromises]);
         setTimeout(() => { isUndoRedoAction.current = false; }, 100);
     }, [history, scheduleBackendSave]);
 
-    const redo = useCallback(() => {
-        if (history.future.length === 0) return;
-
-        isUndoRedoAction.current = true;
-        setHistory(curr => {
-            const newHistory = redoHistory(curr);
-            const nextState = newHistory.present;
-            const currentBlocks = curr.present;
-
-            setBlocks(nextState);
-
-            // Sync with backend
-            nextState.forEach(nextBlock => {
-                const currBlock = currentBlocks.find(b => b.id === nextBlock.id);
-                if (!currBlock) {
-                    restoreMoodBlock(nextBlock.id).catch(e => console.error(e));
-                } else if (JSON.stringify(nextBlock) !== JSON.stringify(currBlock)) {
-                    // Strip internal Prisma fields
-                    const { id, userId, createdAt, updatedAt, deletedAt, ...updates } = nextBlock;
-                    pendingUpdates.current[nextBlock.id] = updates;
-                    epochRef.current[nextBlock.id] = (epochRef.current[nextBlock.id] || 0) + 1;
-                    scheduleBackendSave(nextBlock.id);
-                }
-            });
-
-            currentBlocks.forEach(currBlock => {
-                if (!nextState.find(b => b.id === currBlock.id)) {
-                    deleteMoodBlock(currBlock.id).catch(e => console.error(e));
-                }
-            });
-
-            return newHistory;
-        });
-
-        setTimeout(() => { isUndoRedoAction.current = false; }, 100);
-    }, [history, scheduleBackendSave]);
+    const undo = useCallback(() => applyHistoryAction('undo'), [applyHistoryAction]);
+    const redo = useCallback(() => applyHistoryAction('redo'), [applyHistoryAction]);
 
     const updateBlock = useCallback((id: string, updates: Partial<MoodBlock>) => {
         updateBlocks([id], updates);
@@ -277,22 +267,20 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         };
     }, []);
 
-    const alignSelected = useCallback((type: AlignmentType) => {
+    const applyTransform = useCallback((
+        minRequired: number,
+        transformFn: (blocks: MoodBlock[], w: number, h: number) => { id: string, x?: number, y?: number }[]
+    ) => {
         const selectedIdArray = Array.isArray(selectedIds) ? selectedIds : [];
-        if (selectedIdArray.length < 2) return;
+        if (selectedIdArray.length < minRequired) return;
 
         const selectedBlocks = blocks.filter(b => selectedIdArray.includes(b.id));
         const { width, height } = getCanvasDimensions();
-        const updates = calculateAlignment(
-            selectedBlocks as any,
-            type,
-            width,
-            height
-        );
+        const updates = transformFn(selectedBlocks, width, height);
 
         if (updates.length === 0) return;
 
-        // 1. Filter for ACTUAL changes to avoid redundant captures and saves
+        // 1. Filter for ACTUAL changes
         const actualUpdates = updates.filter(update => {
             const block = blocks.find(b => b.id === update.id);
             if (!block) return false;
@@ -314,52 +302,6 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
             });
         });
 
-        // 3. Side-Effects (Persistence) - Outside of state logic
-        actualUpdates.forEach(update => {
-            const { id, ...cleanUpdates } = update;
-            pendingUpdates.current[id] = { ...pendingUpdates.current[id], ...cleanUpdates };
-            epochRef.current[id] = (epochRef.current[id] || 0) + 1;
-            scheduleBackendSave(id);
-        });
-    }, [selectedIds, blocks, getCanvasDimensions, captureHistory, scheduleBackendSave]);
-
-    const distributeSelected = useCallback((axis: DistributionType) => {
-        const selectedIdArray = Array.isArray(selectedIds) ? selectedIds : [];
-        if (selectedIdArray.length < 3) return;
-
-        const selectedBlocks = blocks.filter(b => selectedIdArray.includes(b.id));
-        const { width, height } = getCanvasDimensions();
-        const updates = calculateDistribution(
-            selectedBlocks as any,
-            axis,
-            width,
-            height
-        );
-
-        if (updates.length === 0) return;
-
-        // 1. Filter actual changes
-        const actualUpdates = updates.filter(update => {
-            const block = blocks.find(b => b.id === update.id);
-            if (!block) return false;
-            const xDelta = update.x !== undefined ? Math.abs(update.x - block.x) : 0;
-            const yDelta = update.y !== undefined ? Math.abs(update.y - block.y) : 0;
-            return xDelta > 0.0001 || yDelta > 0.0001;
-        });
-
-        if (actualUpdates.length === 0) return;
-
-        // 2. Snapshot for History
-        setBlocks(prev => {
-            captureHistory(prev);
-            return prev.map(block => {
-                const update = actualUpdates.find(u => u.id === block.id);
-                if (!update) return block;
-                const { id: _, ...cleanUpdates } = update;
-                return { ...block, ...cleanUpdates };
-            });
-        });
-
         // 3. Side-Effects (Persistence)
         actualUpdates.forEach(update => {
             const { id, ...cleanUpdates } = update;
@@ -368,6 +310,14 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
             scheduleBackendSave(id);
         });
     }, [selectedIds, blocks, getCanvasDimensions, captureHistory, scheduleBackendSave]);
+
+    const alignSelected = useCallback((type: AlignmentType) => {
+        applyTransform(2, (selected, w, h) => calculateAlignment(selected as any, type, w, h));
+    }, [applyTransform]);
+
+    const distributeSelected = useCallback((axis: DistributionType) => {
+        applyTransform(3, (selected, w, h) => calculateDistribution(selected as any, axis, w, h));
+    }, [applyTransform]);
 
     // ─── GROUPING ───────────────────────────────────────────────────────────
 

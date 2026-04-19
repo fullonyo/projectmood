@@ -11,12 +11,7 @@ import { useTranslation } from "@/i18n/context"
 import { MoodBlock } from "@/types/database"
 import { getWeatherAction } from "@/actions/weather"
 import { Slider } from "@/components/ui/slider"
-
-const BLEND_MODES = [
-    'normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten',
-    'color-dodge', 'color-burn', 'hard-light', 'soft-light',
-    'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'
-]
+import { BLEND_MODES } from "@/lib/editor-constants"
 
 const WEATHER_ICONS: Record<string, any> = {
     sun: Sun,

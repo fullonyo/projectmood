@@ -1,14 +1,14 @@
 "use server"
 
-import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import {
     ProfileUpdateSchema,
     CreateMoodBlockSchema,
     UpdateMoodBlockLayoutSchema
 } from "@/lib/validations";
-import { revalidatePath, revalidateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache-tags";
+import { requireAuth, getUsernameById, revalidateProfile } from "@/lib/action-helpers";
+
+// ─── Profile ──────────────────────────────────────────────────────────────────
 
 export async function updateProfile(data: {
     theme?: string;
@@ -20,41 +20,37 @@ export async function updateProfile(data: {
     backgroundEffect?: string;
     avatarUrl?: string;
 }) {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
-
-    const validation = ProfileUpdateSchema.safeParse(data);
-    if (!validation.success) {
-        return { error: "Dados inválidos: " + validation.error.issues[0].message };
-    }
-
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { username: true }
-        });
+        const session = await requireAuth();
+
+        const validation = ProfileUpdateSchema.safeParse(data);
+        if (!validation.success) {
+            return { error: "Dados inválidos: " + validation.error.issues[0].message };
+        }
+
+        const username = await getUsernameById(session.user.id);
 
         await prisma.profile.update({
             where: { userId: session.user.id },
             data: validation.data,
         });
 
-        if (user?.username) {
-            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
-        }
-        revalidatePath("/dashboard");
+        revalidateProfile(username);
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
         console.error('[updateProfile]', error);
         return { error: "Erro ao atualizar perfil" };
     }
 }
 
-export async function addMoodBlock(type: string, content: any, options: { x?: number, y?: number, width?: number, height?: number } = {}) {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
+// ─── Blocks CRUD ──────────────────────────────────────────────────────────────
 
+export async function addMoodBlock(type: string, content: any, options: { x?: number, y?: number, width?: number, height?: number } = {}) {
     try {
+        const session = await requireAuth();
+
+        // Feature flag check
         const flagKey = `block_${type}`;
         const flag = await prisma.featureFlag.findUnique({ where: { key: flagKey } });
 
@@ -65,22 +61,14 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
         if (flag && flag.isPremium && (session.user as any)?.role !== 'ADMIN') {
             return { error: `O bloco "${flag.name || type}" é exclusivo para usuários VIP.` };
         }
-    } catch (e) {
-        console.warn("[addMoodBlock] Feature flag check failed, proceeding anyway", e);
-    }
 
-    const validation = CreateMoodBlockSchema.safeParse({ type, content, options });
-    if (!validation.success) {
-        return { error: "Dados inválidos: " + validation.error.issues[0].message };
-    }
+        const validation = CreateMoodBlockSchema.safeParse({ type, content, options });
+        if (!validation.success) {
+            return { error: "Dados inválidos: " + validation.error.issues[0].message };
+        }
 
-    const { x = 50, y = 50, width, height } = validation.data.options || {};
-
-    try {
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { username: true }
-        });
+        const { x = 50, y = 50, width, height } = validation.data.options || {};
+        const username = await getUsernameById(session.user.id);
 
         const block = await prisma.moodBlock.create({
             data: {
@@ -94,112 +82,88 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
             },
         });
 
-        if (user?.username) {
-            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
-        }
-        revalidatePath("/dashboard");
+        revalidateProfile(username);
         return { success: true, block };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
         console.error('[addMoodBlock]', error);
         return { error: "Erro ao adicionar bloco" };
     }
 }
 
 export async function updateMoodBlockLayout(blockId: string, data: { x?: number, y?: number, width?: number, height?: number, zIndex?: number, rotation?: number, isLocked?: boolean, isHidden?: boolean, content?: any }) {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
-
-    const validation = UpdateMoodBlockLayoutSchema.safeParse(data);
-    if (!validation.success) {
-        return { error: "Dados inválidos: " + validation.error.issues[0].message };
-    }
-    const validatedData: any = { ...validation.data };
-    if (typeof validatedData.x === 'number') validatedData.x = Math.max(0, Math.min(100, validatedData.x));
-    if (typeof validatedData.y === 'number') validatedData.y = Math.max(0, Math.min(100, validatedData.y));
-    if (validatedData.groupId === null) validatedData.groupId = null;
-    if (typeof validatedData.width === 'number') validatedData.width = Math.round(Math.max(40, Math.min(2000, validatedData.width)));
-    if (typeof validatedData.height === 'number') validatedData.height = Math.round(Math.max(40, Math.min(2000, validatedData.height)));
-
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { username: true }
-        });
+        const session = await requireAuth();
+
+        const validation = UpdateMoodBlockLayoutSchema.safeParse(data);
+        if (!validation.success) {
+            return { error: "Dados inválidos: " + validation.error.issues[0].message };
+        }
+
+        const validatedData: any = { ...validation.data };
+        if (typeof validatedData.x === 'number') validatedData.x = Math.max(0, Math.min(100, validatedData.x));
+        if (typeof validatedData.y === 'number') validatedData.y = Math.max(0, Math.min(100, validatedData.y));
+        if (typeof validatedData.width === 'number') validatedData.width = Math.round(Math.max(40, Math.min(2000, validatedData.width)));
+        if (typeof validatedData.height === 'number') validatedData.height = Math.round(Math.max(40, Math.min(2000, validatedData.height)));
+
+        const username = await getUsernameById(session.user.id);
 
         await prisma.moodBlock.update({
             where: { id: blockId, userId: session.user.id },
             data: validatedData,
         });
 
-        if (user?.username) {
-            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
-        }
-        revalidatePath("/dashboard");
-
+        revalidateProfile(username);
         return { success: true };
     } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
         console.error('[updateMoodBlockLayout]', error);
         return { error: `Erro ao salvar alterações: ${error.message || 'Erro interno'}` };
     }
 }
 
 export async function deleteMoodBlock(blockId: string) {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
-
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { username: true }
-        });
+        const session = await requireAuth();
+        const username = await getUsernameById(session.user.id);
 
         await prisma.moodBlock.update({
             where: { id: blockId, userId: session.user.id },
             data: { deletedAt: new Date() }
         });
 
-        if (user?.username) {
-            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
-        }
-        revalidatePath("/dashboard");
+        revalidateProfile(username);
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
         console.error('[deleteMoodBlock]', error);
         return { error: "Erro ao excluir bloco" };
     }
 }
 
 export async function restoreMoodBlock(blockId: string) {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
-
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { username: true }
-        });
+        const session = await requireAuth();
+        const username = await getUsernameById(session.user.id);
 
         await prisma.moodBlock.update({
             where: { id: blockId, userId: session.user.id },
             data: { deletedAt: null }
         });
 
-        if (user?.username) {
-            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
-        }
-        revalidatePath("/dashboard");
+        revalidateProfile(username);
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
         console.error('[restoreMoodBlock]', error);
         return { error: "Erro ao restaurar bloco" };
     }
 }
 
 export async function duplicateMoodBlock(blockId: string) {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
-
     try {
+        const session = await requireAuth();
+
         const source = await prisma.moodBlock.findUnique({
             where: { id: blockId, userId: session.user.id }
         });
@@ -207,11 +171,7 @@ export async function duplicateMoodBlock(blockId: string) {
         if (!source) return { error: "Bloco não encontrado" };
 
         const { id, createdAt, updatedAt, deletedAt, ...rest } = source;
-
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { username: true }
-        });
+        const username = await getUsernameById(session.user.id);
 
         const newBlock = await prisma.moodBlock.create({
             data: {
@@ -223,56 +183,41 @@ export async function duplicateMoodBlock(blockId: string) {
             }
         });
 
-        if (user?.username) {
-            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
-        }
-        revalidatePath("/dashboard");
+        revalidateProfile(username);
         return { success: true, block: newBlock };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
         console.error('[duplicateMoodBlock]', error);
         return { error: "Erro ao duplicar bloco" };
     }
 }
 
+// ─── Bulk Operations ──────────────────────────────────────────────────────────
 
 export async function clearMoodBlocks() {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
-
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { username: true }
-        });
+        const session = await requireAuth();
+        const username = await getUsernameById(session.user.id);
 
         await prisma.moodBlock.updateMany({
             where: { userId: session.user.id, deletedAt: null },
             data: { deletedAt: new Date() }
         });
 
-        if (user?.username) {
-            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
-        }
-        revalidatePath("/dashboard");
-
+        revalidateProfile(username);
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
         console.error('[clearMoodBlocks]', error);
         return { error: "Erro ao limpar mural" };
     }
 }
 
 export async function reorderMoodBlocks(blocks: { id: string, order: number }[]) {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
-
-    const userId = session.user.id;
-
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { username: true }
-        });
+        const session = await requireAuth();
+        const userId = session.user.id;
+        const username = await getUsernameById(userId);
 
         await prisma.$transaction(
             blocks.map((block) =>
@@ -283,28 +228,20 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
             )
         );
 
-        if (user?.username) {
-            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
-        }
-        revalidatePath("/dashboard");
+        revalidateProfile(username);
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
         console.error('[reorderMoodBlocks]', error);
         return { error: "Erro ao reordenar blocos" };
     }
 }
 
 export async function updateMoodBlocksZIndex(updates: { id: string, zIndex: number }[]) {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
-
-    const userId = session.user.id;
-
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { username: true }
-        });
+        const session = await requireAuth();
+        const userId = session.user.id;
+        const username = await getUsernameById(userId);
 
         await prisma.$transaction(
             updates.map((update) =>
@@ -315,12 +252,10 @@ export async function updateMoodBlocksZIndex(updates: { id: string, zIndex: numb
             )
         );
 
-        if (user?.username) {
-            revalidateTag(CACHE_TAGS.profile(user.username), 'default');
-        }
-        revalidatePath("/dashboard");
+        revalidateProfile(username);
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
         console.error('[updateMoodBlocksZIndex]', error);
         return { error: "Erro ao atualizar camadas" };
     }

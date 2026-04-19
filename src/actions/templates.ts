@@ -1,13 +1,13 @@
 "use server"
 
-import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { MOOD_TEMPLATES } from "@/lib/templates";
+import { requireAuth, getUsernameById } from "@/lib/action-helpers";
 
 export async function applyTemplateAction(templateId: string) {
-    const session = await auth();
-    if (!session?.user?.id) return { error: "Não autorizado" };
+    const session = await requireAuth();
+    const username = await getUsernameById(session.user.id);
 
     const template = MOOD_TEMPLATES[templateId];
     if (!template) return { error: "Template não encontrado" };
@@ -49,7 +49,7 @@ export async function applyTemplateAction(templateId: string) {
         });
 
         revalidatePath("/dashboard");
-        revalidatePath(`/${session.user.username}`);
+        if (username) revalidatePath(`/${username}`);
 
         return { success: true };
     } catch (error) {

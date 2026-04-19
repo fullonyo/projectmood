@@ -46,7 +46,7 @@ export async function addGuestbookMessage(blockId: string, content: string) {
     const isAdmin = session?.user?.id === block.userId
 
     try {
-        const message = await (prisma as any).guestbookMessage.create({
+        const message = await prisma.guestbookMessage.create({
             data: {
                 content: sanitizedContent,
                 author,
@@ -68,7 +68,7 @@ export async function addGuestbookMessage(blockId: string, content: string) {
 
 export async function getGuestbookMessages(blockId: string) {
     try {
-        const messages = await (prisma as any).guestbookMessage.findMany({
+        const messages = await prisma.guestbookMessage.findMany({
             where: { blockId },
             orderBy: { createdAt: 'desc' }
         })

@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { ShapeType, SmartShape } from "./SmartShape"
 import { MoodBlock } from "@/types/database"
+import { BLEND_MODES } from "@/lib/editor-constants"
 
 interface UniversalShapeEditorProps {
     block?: MoodBlock | null
@@ -39,12 +40,6 @@ const SHAPE_OPTIONS: { id: ShapeType; icon: any; tk: string }[] = [
     { id: 'mesh', icon: Share2, tk: 'mesh' },
     { id: 'wave', icon: Waves, tk: 'wave' },
     { id: 'spiral', icon: RefreshCw, tk: 'spiral' },
-]
-
-const BLEND_MODES = [
-    'normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten',
-    'color-dodge', 'color-burn', 'hard-light', 'soft-light',
-    'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'
 ]
 
 export function UniversalShapeEditor({

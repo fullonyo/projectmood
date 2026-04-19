@@ -1,10 +1,10 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { auth } from "@/auth"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { unstable_cache } from "next/cache"
 import { CACHE_TAGS, CACHE_KEYS } from "@/lib/cache-tags"
+import { requireAdmin } from "@/lib/action-helpers"
 
 const CORE_BLOCKS = [
     { key: "block_text", name: "Text Notes", description: "Basic text notes block.", isEnabled: true, isPremium: false },
@@ -44,8 +44,7 @@ const CORE_BLOCKS = [
 ]
 
 export async function seedFeatureFlags() {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" }
+    const session = await requireAdmin()
 
     try {
         let count = 0
@@ -108,8 +107,7 @@ export async function getFeatureFlags() {
     return getFlags()
 }
 export async function toggleFeatureFlag(key: string, field: "isEnabled" | "isPremium", currentValue: boolean) {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN") return { error: "Unauthorized" }
+    const session = await requireAdmin()
 
     try {
         await prisma.featureFlag.update({

@@ -1,31 +1,13 @@
 
 import { Prisma } from "@prisma/client";
+import type { MoodBlockType } from "@/lib/validations";
 
 // Re-export Prisma types for convenience
 export type User = Prisma.UserGetPayload<{}>;
 export type Profile = Prisma.ProfileGetPayload<{}>;
 
-// Explicit MoodBlock Type matching Prisma schema but with typed Content
-export type MoodBlockType =
-    | 'text'
-    | 'ticker'
-    | 'subtitle'
-    | 'floating'
-    | 'gif'
-    | 'video'
-    | 'social'
-    | 'guestbook'
-    | 'tape'
-    | 'doodle'
-    | 'weather'
-    | 'media'
-    | 'music'
-    | 'quote'
-    | 'photo'
-    | 'moodStatus'
-    | 'countdown'
-    | 'shape'
-    | 'rorschach';
+// Re-export MoodBlockType da fonte central (Zod schema em validations.ts)
+export type { MoodBlockType };
 
 export type MoodBlockContent =
     | TextContent
@@ -50,7 +32,7 @@ export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content
     rotation: number;
     isLocked: boolean;
     isHidden: boolean;
-    groupId?: string | null;
+    groupId: string | null;
     content: MoodBlockContent;
 }
 
@@ -92,6 +74,8 @@ export interface ThemeConfig {
     grid: string;
     bgSize: string;
     gridOpacity: string;
+    filter?: string;
+    blend?: string;
 }
 
 export interface ProfileVisualConfig {
@@ -127,6 +111,22 @@ export interface PublicUser {
     isVerified: boolean;
     verificationType: string | null;
 }
+
+export type UserProfileData = Prisma.UserGetPayload<{
+    include: {
+        profile: {
+            include: {
+                versions: {
+                    where: { isActive: true };
+                };
+            };
+        };
+        moodBlocks: {
+            where: { deletedAt: null };
+            orderBy: { order: "asc" };
+        };
+    };
+}>;
 
 export interface PublicMoodPageProps {
     publicUser: PublicUser;
@@ -177,7 +177,7 @@ export interface WeatherContent {
 }
 
 export interface ShapeContent {
-    shapeType: 'circle' | 'rect' | 'triangle' | 'polygon' | 'blob' | 'star';
+    shapeType: 'circle' | 'rect' | 'triangle' | 'polygon' | 'blob' | 'star' | 'line' | 'grid' | 'flower' | 'mesh' | 'wave' | 'spiral';
     color: string;
     opacity: number;
     blur: number;

@@ -2,8 +2,7 @@
 
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
-import { revalidatePath, revalidateTag } from "next/cache"
-import { CACHE_TAGS } from "@/lib/cache-tags"
+import { requireAuth, getUsernameById, revalidateProfile } from "@/lib/action-helpers"
 
 /**
  * Sistema de Publicação — Vercel Deployments Pattern
@@ -16,13 +15,11 @@ import { CACHE_TAGS } from "@/lib/cache-tags"
 // ─── PUBLISH ─────────────────────────────────────────────────────────────────
 
 export async function publishProfile() {
-    const session = await auth()
-    if (!session?.user?.id) return { error: "Não autorizado" }
-
-    const userId = session.user.id
-    const username = (session.user as any).username
-
     try {
+        const session = await requireAuth()
+        const userId = session.user.id
+        const username = await getUsernameById(userId)
+
         const blocks = await prisma.moodBlock.findMany({
             where: { userId, deletedAt: null },
             orderBy: { order: 'asc' },
@@ -89,25 +86,21 @@ export async function publishProfile() {
             })
         ])
 
-        if (username) {
-            revalidateTag(CACHE_TAGS.profile(username), 'default')
-            revalidatePath(`/${username}`)
-        }
+        revalidateProfile(username, username ? [`/${username}`] : [])
 
         return { success: true, version: versionCount + 1 }
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message }
         console.error('[publishProfile]', error)
         return { error: "Erro ao publicar diorama" }
     }
 }
 
 export async function rollbackToVersion(versionId: string) {
-    const session = await auth()
-    if (!session?.user?.id) return { error: "Não autorizado" }
-
-    const username = (session.user as any).username
-
     try {
+        const session = await requireAuth()
+        const username = await getUsernameById(session.user.id)
+
         const version = await prisma.profileVersion.findUnique({
             where: { id: versionId },
             include: { profile: true }
@@ -128,23 +121,20 @@ export async function rollbackToVersion(versionId: string) {
             })
         ])
 
-        if (username) {
-            revalidateTag(CACHE_TAGS.profile(username), 'default')
-            revalidatePath(`/${username}`)
-        }
+        revalidateProfile(username, username ? [`/${username}`] : [])
 
         return { success: true }
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message }
         console.error('[rollbackToVersion]', error)
         return { error: "Erro ao reverter versão" }
     }
 }
 
 export async function getVersionHistory(limit: number = 10) {
-    const session = await auth()
-    if (!session?.user?.id) return { error: "Não autorizado", versions: [] }
-
     try {
+        const session = await requireAuth()
+
         const profile = await prisma.profile.findUnique({
             where: { userId: session.user.id },
             select: { id: true }
@@ -165,37 +155,44 @@ export async function getVersionHistory(limit: number = 10) {
         })
 
         return { versions }
-    } catch (error) {
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message, versions: [] }
         console.error('[getVersionHistory]', error)
         return { error: "Erro ao buscar histórico", versions: [] }
     }
 }
 
 export async function getActiveVersion() {
-    const session = await auth()
-    if (!session?.user?.id) return null
+    try {
+        const session = await requireAuth()
 
-    const profile = await prisma.profile.findUnique({
-        where: { userId: session.user.id },
-        select: { id: true }
-    })
+        const profile = await prisma.profile.findUnique({
+            where: { userId: session.user.id },
+            select: { id: true }
+        })
 
-    if (!profile) return null
+        if (!profile) return null
 
-    return prisma.profileVersion.findFirst({
-        where: { profileId: profile.id, isActive: true },
-        select: { id: true, label: true, createdAt: true }
-    })
+        return prisma.profileVersion.findFirst({
+            where: { profileId: profile.id, isActive: true },
+            select: { id: true, label: true, createdAt: true }
+        })
+    } catch {
+        return null
+    }
 }
 
-export async function computeHasUnpublishedChanges() {
+export async function computeHasUnpublishedChanges(
+    existingProfile?: any,
+    existingDraftBlocks?: any[]
+) {
     const session = await auth()
     if (!session?.user?.id) return false
 
     const userId = session.user.id
 
     try {
-        const profile = await prisma.profile.findUnique({
+        const profile = existingProfile || await prisma.profile.findUnique({
             where: { userId },
             select: {
                 id: true,
@@ -214,8 +211,8 @@ export async function computeHasUnpublishedChanges() {
 
         if (!profile) return false
 
-        const draftBlocks = await prisma.moodBlock.findMany({
-            where: { userId },
+        const draftBlocks = existingDraftBlocks || await prisma.moodBlock.findMany({
+            where: { userId, deletedAt: null },
             orderBy: { order: 'asc' },
             select: {
                 type: true, content: true,
@@ -229,7 +226,7 @@ export async function computeHasUnpublishedChanges() {
             select: { blocks: true, profileData: true }
         })
 
-        if (!activeVersion) return true
+        if (!activeVersion) return draftBlocks.length > 0
 
         const sortKeys = (obj: any): any => {
             if (obj === null || typeof obj !== 'object') return obj;
@@ -254,7 +251,14 @@ export async function computeHasUnpublishedChanges() {
         }));
 
         const publishedProfileDataStr = JSON.stringify(sortKeys(activeVersion.profileData));
-        const draftBlocksStr = JSON.stringify(sortKeys(draftBlocks));
+        
+        // Normalize draft blocks for comparison (ensure only same fields are compared)
+        const normalizedDraftBlocks = draftBlocks.map((b: any) => ({
+            type: b.type, content: b.content,
+            x: b.x, y: b.y, width: b.width, height: b.height,
+            zIndex: b.zIndex, rotation: b.rotation, order: b.order,
+        }));
+        const draftBlocksStr = JSON.stringify(sortKeys(normalizedDraftBlocks));
 
         const publishedBlocks = (activeVersion.blocks as any[])?.map((b: any) => ({
             type: b.type, content: b.content,

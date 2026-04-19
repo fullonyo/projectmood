@@ -68,16 +68,16 @@ export default async function PublicMoodPage({
     const { getProfileWithTags } = await import("@/lib/data-fetching");
     const user = await getProfileWithTags(username);
 
-    if (!user || !(user as any).profile) notFound();
+    if (!user || !user.profile) notFound();
 
-    if ((user as any).isBanned) notFound();
+    if (user.isBanned) notFound();
 
-    const { profile, moodBlocks: liveBlocks } = user as any;
+    const { profile, moodBlocks: liveBlocks } = user;
 
-    const profileWithVersions = profile as ProfileWithVersions;
+    const profileWithVersions = profile as unknown as ProfileWithVersions;
     const activeVersion = profileWithVersions.versions?.[0];
     const moodBlocksRaw = activeVersion
-        ? (activeVersion.blocks as typeof liveBlocks)
+        ? (activeVersion.blocks as unknown as typeof liveBlocks)
         : liveBlocks;
 
     const rawFlags = await getFeatureFlags();

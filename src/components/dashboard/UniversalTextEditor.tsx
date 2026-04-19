@@ -13,6 +13,7 @@ import { useTranslation } from "@/i18n/context"
 import { Textarea } from "@/components/ui/textarea"
 import { FrameType, FrameContainer } from "./FrameContainer"
 import { SmartText, TextBehavior } from "./SmartText"
+import { FRAME_OPTIONS } from "@/lib/editor-constants"
 
 const BEHAVIORS: { id: TextBehavior; label: string; icon: any }[] = [
     { id: 'static', label: 'Estático', icon: Type },
@@ -36,15 +37,7 @@ const STATUS_ICONS = [
     { id: 'Ghost', icon: Ghost },
 ]
 
-const FRAMES: { id: FrameType; label: string }[] = [
-    { id: 'none', label: 'Nenhum' },
-    { id: 'polaroid', label: 'Polaroid' },
-    { id: 'polaroid-dark', label: 'Black Polaroid' },
-    { id: 'frame', label: 'Moldura' },
-    { id: 'minimal', label: 'Minimalist' },
-    { id: 'glass', label: 'Glass' },
-    { id: 'round', label: 'Círculo' },
-]
+
 
 const COLORS = [
     { name: 'Default', value: '' },
@@ -218,7 +211,7 @@ export function UniversalTextEditor({
                     <div className="space-y-3">
                         <Label className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">Moldura / Estilo</Label>
                         <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar snap-x px-1">
-                            {FRAMES.map((f) => (
+                            {FRAME_OPTIONS.map((f) => (
                                 <button
                                     key={f.id}
                                     onClick={() => setFrame(f.id)}

@@ -77,7 +77,7 @@ export default async function DashboardPage() {
     });
     const publishedAt = activeVersion?.createdAt?.toISOString() || null;
 
-    const hasUnpublishedChanges = await computeHasUnpublishedChanges();
+    const hasUnpublishedChanges = await computeHasUnpublishedChanges(profile, moodBlocks);
 
     const isAdmin = (session.user as any)?.role === "ADMIN";
     const rawFlags = await getFeatureFlags();

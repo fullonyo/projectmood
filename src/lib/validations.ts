@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { themeConfigs } from './themes'
 
 // Validação de tipos de blocos permitidos
 export const MoodBlockTypeSchema = z.enum([
@@ -64,14 +65,14 @@ export const GuestbookMessageSchema = z.object({
 
 // Validação de perfil
 export const ProfileUpdateSchema = z.object({
-    theme: z.enum(['light', 'dark', 'vintage', 'notebook', 'blueprint', 'canvas', 'cyberpunk']).optional(),
+    theme: z.enum(Object.keys(themeConfigs) as [string, ...string[]]).optional(),
     primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor inválida").optional(),
     backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor inválida").optional(),
     fontStyle: z.enum(['sans', 'serif', 'mono']).optional(),
     customCursor: z.enum(['auto', 'retro', 'heart', 'pixel', 'ghost']).optional(),
     mouseTrails: z.enum(['none', 'sparkles', 'ghost', 'pixel-dust', 'emoji']).optional(),
     backgroundEffect: z.enum(['none', 'noise', 'aurora', 'liquid', 'mesh-gradient', 'metaballs', 'hyperspeed', 'grid-move', 'stars', 'rain', 'rhythm', 'vintage', 'universe']).optional(),
-    staticTexture: z.enum(['none', 'museum-paper', 'raw-canvas', 'fine-sand']).optional(),
+    staticTexture: z.enum(['none', 'noise', 'dots', 'lines', 'cross', 'museum-paper', 'raw-canvas', 'fine-sand']).optional(),
     customFont: z.string().optional(),
     avatarUrl: z.string().optional()
 })
@@ -91,7 +92,7 @@ export const PhotoBlockContentSchema = z.object({
     imageUrl: z.string().min(1, "Imagem é obrigatória"),
     alt: z.string().max(200).optional(),
     filter: z.enum(['none', 'vintage', 'bw', 'warm', 'cool']).default('none'),
-    frame: z.enum(['none', 'polaroid', 'polaroid-dark', 'frame', 'minimal', 'round']).default('none'),
+    frame: z.enum(['none', 'polaroid', 'polaroid-dark', 'frame', 'minimal', 'round', 'glass']).default('none'),
     caption: z.string().max(100).optional()
 })
 
@@ -132,3 +133,10 @@ export type PhotoBlockContent = z.infer<typeof PhotoBlockContentSchema>
 export type MoodStatusBlockContent = z.infer<typeof MoodStatusBlockContentSchema>
 export type CountdownBlockContent = z.infer<typeof CountdownBlockContentSchema>
 export type GuestbookBlockContent = z.infer<typeof GuestbookBlockContentSchema>
+
+export const RegisterSchema = z.object({
+    email: z.string().email("Email inválido"),
+    password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+    username: z.string().min(3, "Username deve ter no mínimo 3 caracteres").regex(/^[a-zA-Z0-9_]+$/, "Username deve ser alfanumérico"),
+    name: z.string().optional(),
+});

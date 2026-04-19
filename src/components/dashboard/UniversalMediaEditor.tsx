@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
     Search, Music, Youtube, Plus, Video,
-    Monitor, Layout, Layers, Box, Maximize, PlayCircle, Activity,
+    Monitor, Layers, PlayCircle, Activity,
     Upload, FileAudio
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -16,7 +16,8 @@ import { useTranslation } from "@/i18n/context"
 import { FrameType, FrameContainer } from "./FrameContainer"
 import { SmartMedia, MediaType } from "./SmartMedia"
 
-import { MoodBlock, MoodBlockContent } from "@/types/database"
+import { MoodBlock } from "@/types/database"
+import { getFrameOptions } from "@/lib/editor-constants"
 
 interface UniversalMediaEditorProps {
     block?: MoodBlock | null
@@ -25,12 +26,7 @@ interface UniversalMediaEditorProps {
     onClose?: () => void
 }
 
-const FRAMES: { id: FrameType; label: string; icon: any }[] = [
-    { id: 'none', label: 'Nenhum', icon: Maximize },
-    { id: 'polaroid', label: 'Polaroid', icon: Layout },
-    { id: 'glass', label: 'Glass', icon: Layers },
-    { id: 'minimal', label: 'Minimal', icon: Box },
-]
+const FRAMES = getFrameOptions(['none', 'polaroid', 'glass', 'minimal'])
 
 export function UniversalMediaEditor({
     block,

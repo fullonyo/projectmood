@@ -1,13 +1,10 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { auth } from "@/auth"
+import { requireAdmin } from "@/lib/action-helpers"
 
 export async function getAdminAnalytics() {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN") {
-        throw new Error("Unauthorized")
-    }
+    await requireAdmin()
 
     try {
         const now = new Date()

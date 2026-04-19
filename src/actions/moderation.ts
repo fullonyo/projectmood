@@ -1,17 +1,8 @@
 "use server"
 
-import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
-import { revalidatePath, revalidateTag } from "next/cache"
-import { CACHE_TAGS } from "@/lib/cache-tags"
-
-async function requireAdmin() {
-    const session = await auth()
-    if (session?.user?.role !== "ADMIN") {
-        throw new Error("Unauthorized Access: Admin role required.")
-    }
-    return session
-}
+import { revalidatePath } from "next/cache"
+import { requireAdmin, revalidateProfile } from "@/lib/action-helpers"
 
 export async function getAuditFeed(page = 1, pageSize = 20) {
     await requireAdmin()
@@ -77,12 +68,7 @@ export async function adminDeleteBlock(blockId: string) {
             }
         });
 
-        revalidatePath("/admin/audit")
-        revalidatePath("/dashboard")
-        if (block?.user?.username) {
-            revalidateTag(CACHE_TAGS.profile(block.user.username), 'default')
-            revalidatePath(`/${block.user.username}`)
-        }
+        revalidateProfile(block?.user?.username, ["/admin/audit", `/${block?.user?.username}`])
         return { success: true }
     } catch (error) {
         console.error("[adminDeleteBlock] Error:", error)
@@ -114,13 +100,7 @@ export async function adminBanUser(userId: string, isBanned: boolean) {
             }
         });
 
-        revalidatePath("/admin/audit")
-        revalidatePath("/admin/users")
-        revalidatePath("/dashboard")
-        if (targetUser) {
-            revalidateTag(CACHE_TAGS.profile(targetUser.username), 'default')
-            revalidatePath(`/${targetUser.username}`)
-        }
+        revalidateProfile(targetUser?.username, ["/admin/audit", "/admin/users", ...(targetUser ? [`/${targetUser.username}`] : [])])
 
         return { success: true }
     } catch (error) {
@@ -159,12 +139,7 @@ export async function adminVerifyUser(userId: string, isVerified: boolean, type:
             }
         });
 
-        revalidatePath("/admin/users")
-        revalidatePath("/dashboard")
-        if (targetUser) {
-            revalidateTag(CACHE_TAGS.profile(targetUser.username), 'default')
-            revalidatePath(`/${targetUser.username}`)
-        }
+        revalidateProfile(targetUser?.username, ["/admin/users", ...(targetUser ? [`/${targetUser.username}`] : [])])
         return { success: true }
     } catch (error) {
         console.error("[adminVerifyUser] Error:", error)

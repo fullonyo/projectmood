@@ -11,12 +11,7 @@ import { MessageSquare, Sparkles, Globe, Layers, Palette, Terminal, Zap, StickyN
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { MoodBlock } from "@/types/database"
-
-const BLEND_MODES = [
-    'normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten',
-    'color-dodge', 'color-burn', 'hard-light', 'soft-light',
-    'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'
-]
+import { BLEND_MODES } from "@/lib/editor-constants"
 
 const GUESTBOOK_THEMES = [
     { id: 'glass', icon: Sparkles },

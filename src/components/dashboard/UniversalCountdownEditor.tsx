@@ -19,7 +19,6 @@ const ICONS = [
     { name: 'PartyPopper', icon: PartyPopper },
 ]
 
-import { addMoodBlock } from "@/actions/profile"
 
 import { MoodBlock, CountdownContent } from "@/types/database"
 

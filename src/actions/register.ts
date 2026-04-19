@@ -3,13 +3,7 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-
-const RegisterSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(6),
-    username: z.string().min(3).regex(/^[a-zA-Z0-9_]+$/, "Username must be alphanumeric"),
-    name: z.string().optional(),
-});
+import { RegisterSchema } from "@/lib/validations";
 
 export async function registerUser(values: z.infer<typeof RegisterSchema>) {
     const validatedFields = RegisterSchema.safeParse(values);
