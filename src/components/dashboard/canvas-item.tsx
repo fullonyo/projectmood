@@ -290,11 +290,11 @@ export const CanvasItem = memo(({
     const renderHandle = (handle: ResizeHandle) => {
         if (isMultiSelect) return null;
         const isCorner = ['br', 'bl', 'tr', 'tl'].includes(handle)
-        const handleSize = isCorner ? 'w-2.5 h-2.5' : (handle === 'top' || handle === 'bottom' ? 'w-6 h-1' : 'w-1 h-6')
+        const handleSize = isCorner ? 'w-3 h-3' : (handle === 'top' || handle === 'bottom' ? 'w-8 h-1.5' : 'w-1.5 h-8')
         const positionClasses: Record<ResizeHandle, string> = {
             br: '-bottom-1.5 -right-1.5', bl: '-bottom-1.5 -left-1.5', tr: '-top-1.5 -right-1.5', tl: '-top-1.5 -left-1.5',
-            top: '-top-0.5 left-1/2 -translate-x-1/2', bottom: '-bottom-0.5 left-1/2 -translate-x-1/2',
-            left: 'top-1/2 -left-0.5 -translate-y-1/2', right: 'top-1/2 -right-0.5 -translate-y-1/2',
+            top: '-top-0.75 left-1/2 -translate-x-1/2', bottom: '-bottom-0.75 left-1/2 -translate-x-1/2',
+            left: 'top-1/2 -left-0.75 -translate-y-1/2', right: 'top-1/2 -right-0.75 -translate-y-1/2',
         }
         return (
             <motion.div
@@ -303,8 +303,8 @@ export const CanvasItem = memo(({
                 onPan={(e, i) => handleResizePan(handle, e, i)}
                 onPanEnd={handleResizeEnd}
                 className={cn(
-                    "absolute z-[1002] pointer-events-auto bg-black dark:bg-white border hover:scale-[1.2] active:scale-95 transition-transform",
-                    positionClasses[handle], handleSize, isCorner ? "border-transparent" : "border-white dark:border-black"
+                    "absolute z-[1002] pointer-events-auto bg-white dark:bg-zinc-900 border-2 border-zinc-900 dark:border-white shadow-md hover:scale-[1.3] active:scale-95 transition-transform",
+                    positionClasses[handle], handleSize, isCorner ? "rounded-full" : "rounded-full"
                 )}
                 style={{ cursor: getResizeCursor(handle), touchAction: 'none' }}
             />
@@ -379,108 +379,108 @@ export const CanvasItem = memo(({
             {isSelected && (
                 <>
                     <div className={cn(
-                        "absolute -inset-[3px] pointer-events-none z-[1001] transition-all",
-                        isInteractiveMode ? "border-[3px] border-white shadow-none mix-blend-difference" : "border border-dashed border-black/50 dark:border-white/50 bg-black/5"
+                        "absolute -inset-[3px] pointer-events-none z-[1001] transition-all rounded-2xl",
+                        isInteractiveMode ? "border-[3px] border-white shadow-none mix-blend-difference" : "border-2 border-blue-500/50 bg-blue-500/5 shadow-[0_0_15px_rgba(59,130,246,0.1)]"
                     )} />
 
                     {/* Action Toolbar - HIDE IF MULTI-SELECT */}
                     {!isMultiSelect && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 10, x: '-50%' }}
-                            animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
-                            exit={{ opacity: 0, scale: 0.9, y: 10, x: '-50%' }}
-                            transition={{
-                                type: 'spring',
-                                damping: 20,
-                                stiffness: 300,
-                                mass: 0.8
-                            }}
-                            className={cn(
-                                "absolute left-1/2 flex items-center gap-1.5 px-2 py-1.5 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl border border-black/10 dark:border-white/10 z-[1001] pointer-events-auto shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-none",
-                                block.y < 15 ? "top-full mt-4" : "-top-[50px]"
-                            )}
-                        >
-                            <button
-                                onClick={() => onSelect(false)}
-                                className="p-1.5 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors group/edit"
-                                title={t('common.edit')}
-                                aria-label={t('common.edit')}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 10, x: '-50%' }}
+                                animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
+                                exit={{ opacity: 0, scale: 0.9, y: 10, x: '-50%' }}
+                                transition={{
+                                    type: 'spring',
+                                    damping: 20,
+                                    stiffness: 300,
+                                    mass: 0.8
+                                }}
+                                className={cn(
+                                    "absolute left-1/2 flex items-center gap-1 px-1.5 py-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-[1001] pointer-events-auto shadow-2xl rounded-2xl",
+                                    block.y < 15 ? "top-full mt-4" : "-top-[60px]"
+                                )}
                             >
-                                <Pencil className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover/edit:text-current" />
-                            </button>
-                            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-
-                            {block.isLocked ? (
-                                <>
-                                    <div className="p-1.5 text-amber-500" title={t('canvas.layer_unlock')} aria-label={t('canvas.layer_unlock')}>
-                                        <Lock className="w-4 h-4" />
-                                    </div>
-                                    <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-                                </>
-                            ) : (
-                                <>
-                                    <div
-                                        className={cn(
-                                            "p-1.5 cursor-move transition-colors group/move",
-                                            isDragging ? "bg-black text-white dark:bg-white dark:text-black" : "hover:bg-black/5 dark:hover:bg-white/5"
-                                        )}
-                                        title={t('common.move')}
-                                        aria-label={t('common.move')}
-                                    >
-                                        <Move className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-active/move:text-current" />
-                                    </div>
-                                    <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-                                </>
-                            )}
-
-                            {isInteractiveBlock && (
-                                <>
-                                    <button
-                                        onClick={toggleInteraction}
-                                        className={cn("p-1.5 transition-all outline outline-1 -outline-offset-1", isInteractiveMode ? "bg-black text-white dark:bg-white dark:text-black animate-pulse" : "hover:bg-black/5 text-zinc-600 dark:text-zinc-400")}
-                                        title={isInteractiveMode ? t('common.disable_interaction') : t('common.enable_interaction')}
-                                        aria-label={isInteractiveMode ? t('common.disable_interaction') : t('common.enable_interaction')}
-                                    >
-                                        <MousePointer2 className="w-4 h-4" />
-                                    </button>
-                                    <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-                                </>
-                            )}
-
-                            {stateRef.current.rotation !== 0 && (
-                                <>
-                                    <button
-                                        onClick={resetRotation}
-                                        disabled={block.isLocked}
-                                        className={cn("px-2 transition-colors text-[9px] font-black uppercase tracking-widest", block.isLocked ? "text-zinc-300 dark:text-zinc-700" : "hover:bg-black hover:text-white text-zinc-600 dark:text-zinc-400")}
-                                        aria-label={`${t('canvas.layers_normalize')} rotation`}
-                                    >
-                                        {stateRef.current.rotation}°
-                                    </button>
-                                    <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
-                                </>
-                            )}
-
-                            {!block.isLocked && (
                                 <button
-                                    onClick={() => onDeleteRequest(block.id)}
-                                    className="p-1.5 hover:bg-red-500/10 hover:text-red-500 transition-colors text-zinc-600 dark:text-zinc-400 group/del"
-                                    title={`${t('common.delete')} (Del)`}
-                                    aria-label={`${t('common.delete')} (Del)`}
+                                    onClick={() => onSelect(false)}
+                                    className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors group/edit"
+                                    title={t('common.edit')}
+                                    aria-label={t('common.edit')}
                                 >
-                                    <Trash2 className="w-4 h-4 group-hover/del:scale-110 transition-transform" />
+                                    <Pencil className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover/edit:text-zinc-900 dark:group-hover/edit:text-white" />
                                 </button>
-                            )}
-                        </motion.div>
+                                <div className="w-[1px] h-4 bg-zinc-100 dark:bg-zinc-800 mx-1" />
+
+                                {block.isLocked ? (
+                                    <>
+                                        <div className="p-2 text-amber-500" title={t('canvas.layer_unlock')} aria-label={t('canvas.layer_unlock')}>
+                                            <Lock className="w-4 h-4" />
+                                        </div>
+                                        <div className="w-[1px] h-4 bg-zinc-100 dark:bg-zinc-800 mx-1" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <div
+                                            className={cn(
+                                                "p-2 cursor-move rounded-xl transition-colors group/move",
+                                                isDragging ? "bg-zinc-900 text-white dark:bg-white dark:text-black" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                            )}
+                                            title={t('common.move')}
+                                            aria-label={t('common.move')}
+                                        >
+                                            <Move className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-active/move:text-current" />
+                                        </div>
+                                        <div className="w-[1px] h-4 bg-zinc-100 dark:bg-zinc-800 mx-1" />
+                                    </>
+                                )}
+
+                                {isInteractiveBlock && (
+                                    <>
+                                        <button
+                                            onClick={toggleInteraction}
+                                            className={cn("p-2 rounded-xl transition-all", isInteractiveMode ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]" : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400")}
+                                            title={isInteractiveMode ? t('common.disable_interaction') : t('common.enable_interaction')}
+                                            aria-label={isInteractiveMode ? t('common.disable_interaction') : t('common.enable_interaction')}
+                                        >
+                                            <MousePointer2 className="w-4 h-4" />
+                                        </button>
+                                        <div className="w-[1px] h-4 bg-zinc-100 dark:bg-zinc-800 mx-1" />
+                                    </>
+                                )}
+
+                                {stateRef.current.rotation !== 0 && (
+                                    <>
+                                        <button
+                                            onClick={resetRotation}
+                                            disabled={block.isLocked}
+                                            className={cn("px-3 h-9 rounded-xl transition-colors text-[10px] font-bold uppercase tracking-widest", block.isLocked ? "text-zinc-300 dark:text-zinc-700" : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400")}
+                                            aria-label={`${t('canvas.layers_normalize')} rotation`}
+                                        >
+                                            {stateRef.current.rotation}°
+                                        </button>
+                                        <div className="w-[1px] h-4 bg-zinc-100 dark:bg-zinc-800 mx-1" />
+                                    </>
+                                )}
+
+                                {!block.isLocked && (
+                                    <button
+                                        onClick={() => onDeleteRequest(block.id)}
+                                        className="p-2 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 rounded-xl transition-colors text-zinc-600 dark:text-zinc-400 group/del"
+                                        title={`${t('common.delete')} (Del)`}
+                                        aria-label={`${t('common.delete')} (Del)`}
+                                    >
+                                        <Trash2 className="w-4 h-4 group-hover/del:scale-110 transition-transform" />
+                                    </button>
+                                )}
+                            </motion.div>
                     )}
 
                     {!block.isLocked && ['br', 'bl', 'tr', 'tl', 'top', 'bottom', 'left', 'right'].map(h => renderHandle(h as ResizeHandle))}
 
                     {!block.isLocked && !isMultiSelect && (
-                        <div className="absolute left-1/2 -top-8 -translate-x-1/2 w-[2px] h-8 bg-black dark:bg-white z-[1002] pointer-events-auto origin-bottom">
+                        <div className="absolute left-1/2 -top-10 -translate-x-1/2 w-[1.5px] h-10 bg-zinc-900 dark:bg-white z-[1002] pointer-events-auto origin-bottom opacity-50">
                             <motion.div
                                 onPanStart={handleRotateStart} onPan={handleRotatePan} onPanEnd={handleRotateEnd}
-                                className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white dark:bg-zinc-950 border-2 border-black dark:border-white hover:scale-125 transition-transform cursor-grab active:cursor-grabbing"
+                                className="absolute -top-2 -left-2 w-4 h-4 bg-white dark:bg-zinc-900 border-2 border-zinc-900 dark:border-white rounded-full shadow-md hover:scale-125 transition-transform cursor-grab active:cursor-grabbing"
                                 style={{ touchAction: 'none' }}
                             />
                         </div>

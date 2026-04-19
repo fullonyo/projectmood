@@ -45,34 +45,31 @@ export function UniversalRoomInsight({ blocks, profile, publishedAt }: SidebarRo
 
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Atmosphere HUD Section */}
+            {/* Atmosphere Section */}
             <section className="space-y-4">
-                <header className="flex items-center gap-2 opacity-30 px-1">
-                    <Activity className="w-2.5 h-2.5" />
-                    <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">
+                <header className="px-1">
+                    <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
                         {t('sidebar.insight.atmosphere')}
                     </h3>
                 </header>
 
-                <div className="grid grid-cols-2 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
-                    <div className="p-4 bg-white dark:bg-zinc-950 relative group overflow-hidden">
-                        <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white opacity-20 group-hover:opacity-100 transition-opacity" />
-                        <div className="flex items-center gap-2 mb-2 opacity-30">
-                            <Layers className="w-3 h-3" />
-                            <span className="text-[7px] font-black uppercase tracking-[0.3em]">{t('sidebar.insight.memories')}</span>
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-sm group">
+                        <div className="flex items-center gap-2 mb-3 text-zinc-400">
+                            <Layers className="w-3.5 h-3.5" />
+                            <span className="text-[9px] font-bold uppercase tracking-widest">{t('sidebar.insight.memories')}</span>
                         </div>
-                        <div className="text-xl font-black italic tracking-tighter">
+                        <div className="text-2xl font-bold text-zinc-900 dark:text-white">
                             {stats.count.toString().padStart(2, '0')}
                         </div>
                     </div>
 
-                    <div className="p-4 bg-white dark:bg-zinc-950 relative group overflow-hidden">
-                        <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white opacity-20 group-hover:opacity-100 transition-opacity" />
-                        <div className="flex items-center gap-2 mb-2 opacity-30">
-                            <History className="w-3 h-3" />
-                            <span className="text-[7px] font-black uppercase tracking-[0.3em]">{t('sidebar.insight.released')}</span>
+                    <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-sm group">
+                        <div className="flex items-center gap-2 mb-3 text-zinc-400">
+                            <History className="w-3.5 h-3.5" />
+                            <span className="text-[9px] font-bold uppercase tracking-widest">{t('sidebar.insight.released')}</span>
                         </div>
-                        <div className="text-[9px] font-black uppercase tracking-tighter leading-tight italic truncate">
+                        <div className="text-[10px] font-bold text-zinc-900 dark:text-zinc-200 uppercase tracking-tight leading-tight truncate">
                             {stats.lastRelease}
                         </div>
                     </div>
@@ -81,36 +78,34 @@ export function UniversalRoomInsight({ blocks, profile, publishedAt }: SidebarRo
 
             {/* Chromatic Palette */}
             <section className="space-y-4">
-                <header className="flex items-center gap-2 opacity-30 px-1">
-                    <Zap className="w-2.5 h-2.5" />
-                    <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">
+                <header className="px-1">
+                    <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
                         {t('sidebar.insight.luminance')}
                     </h3>
                 </header>
 
-                <div className="flex gap-1 h-8">
+                <div className="flex gap-2 h-10 px-1">
                     {stats.dominantColors.map((color, i) => (
                         <motion.div
                             key={i}
                             initial={{ scaleY: 0 }}
                             animate={{ scaleY: 1 }}
                             transition={{ delay: i * 0.1 }}
-                            className="flex-1 border border-black/5 dark:border-white/5"
+                            className="flex-1 rounded-full border border-black/5 dark:border-white/5 shadow-sm"
                             style={{ backgroundColor: color }}
                         />
                     ))}
-                    {/* Fill remaining space to maintain HUD grid feel */}
+                    {/* Fill remaining space */}
                     {Array.from({ length: Math.max(0, 5 - stats.dominantColors.length) }).map((_, i) => (
-                        <div key={`empty-${i}`} className="flex-1 bg-zinc-100 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 opacity-20" />
+                        <div key={`empty-${i}`} className="flex-1 bg-zinc-100 dark:bg-zinc-800 rounded-full border border-black/5 dark:border-white/5 opacity-50" />
                     ))}
                 </div>
-                <p className="text-[7px] font-mono text-zinc-400 uppercase tracking-widest">
+                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-1">
                     {t('sidebar.insight.dynamic_weight')}
                 </p>
             </section>
 
-            {/* System Status Divider */}
-            <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-zinc-100 dark:via-zinc-800 to-transparent" />
+            <div className="h-[1px] w-full bg-zinc-100 dark:bg-zinc-800" />
         </div>
     )
 }

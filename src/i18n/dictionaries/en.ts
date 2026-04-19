@@ -19,7 +19,8 @@ export const en: Dictionary = {
         update: "Update",
         deploy: "Place on Mural",
         mute_audio: "Silence All",
-        unmute_audio: "Enable Global Sound"
+        unmute_audio: "Enable Global Sound",
+        view: "View"
     },
 
     sidebar: {

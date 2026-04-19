@@ -53,18 +53,13 @@ export function CanvasContextMenu({ x, y, block, onClose, onAction }: ContextMen
     return (
         <div
             ref={menuRef}
-            className="fixed z-[2000] w-48 bg-white/95 dark:bg-black/95 backdrop-blur-2xl border border-zinc-200 dark:border-zinc-800 shadow-[0_10px_40px_rgba(0,0,0,0.1)] p-0 animate-in fade-in zoom-in duration-150 rounded-none overflow-hidden"
+            className="fixed z-[2000] w-56 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-2xl border border-zinc-100 dark:border-zinc-800 shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-1.5 animate-in fade-in zoom-in-95 duration-150 rounded-2xl overflow-hidden"
             style={{ left: x, top: y }}
         >
-            <header className="flex items-center gap-2 opacity-30 px-3 py-2 border-b border-zinc-100 dark:border-zinc-900">
-                <Activity className="w-2 h-2 text-black dark:text-white" />
-                <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('canvas.layers')}</h3>
-            </header>
-
-            <div className="p-1">
+            <div className="flex flex-col gap-0.5">
                 {items.map((item, index) => {
                     if (item.type === 'divider') {
-                        return <div key={`divider-${index}`} className="my-1 border-t border-zinc-100 dark:border-zinc-900 mx-1" />
+                        return <div key={`divider-${index}`} className="my-1.5 border-t border-zinc-100 dark:border-zinc-800/50 mx-2" />
                     }
 
                     const Icon = item.icon
@@ -79,28 +74,23 @@ export function CanvasContextMenu({ x, y, block, onClose, onAction }: ContextMen
                                 onClose()
                             }}
                             className={cn(
-                                "w-full flex items-center gap-3 px-3 py-2 text-[7.5px] font-black uppercase tracking-[0.4em] transition-all font-mono group relative",
+                                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all group relative",
                                 item.disabled
                                     ? "opacity-20 cursor-not-allowed"
                                     : item.variant === 'danger'
-                                        ? "text-red-500 hover:bg-red-500/5"
-                                        : "text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-black dark:hover:text-white"
+                                        ? "text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                        : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white"
                             )}
                         >
-                            {/* HUD corner mark on hover */}
-                            {!item.disabled && (
-                                <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                            )}
-
                             {Icon && (
                                 <Icon className={cn(
-                                    "w-3 h-3 transition-transform duration-300 group-hover:scale-110",
+                                    "w-4 h-4 transition-transform duration-300 group-hover:scale-110",
                                     item.variant === 'danger' ? "text-red-500" : "text-zinc-400 group-hover:text-current"
                                 )} />
                             )}
                             <span className="flex-1 text-left">{item.label}</span>
                             {item.shortcut && (
-                                <span className="opacity-30 text-[7px] font-mono tracking-tighter">
+                                <span className="opacity-40 text-[9px] font-medium tracking-tight bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded-md">
                                     {item.shortcut}
                                 </span>
                             )}

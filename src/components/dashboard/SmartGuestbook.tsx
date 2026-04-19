@@ -121,7 +121,7 @@ export function SmartGuestbook({ block, isPublic = false }: { block: any, isPubl
             ref={ref}
             className={cn(
                 "flex flex-col h-full transition-all duration-700 relative",
-                !isScattered && "rounded-none border overflow-hidden",
+                !isScattered && "rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-xl overflow-hidden",
                 !isScattered && currentTheme.container,
                 currentTheme.extra
             )}
@@ -234,34 +234,33 @@ export function SmartGuestbook({ block, isPublic = false }: { block: any, isPubl
                                     )}
 
                                     <div className="flex items-center" style={{ gap: Math.round(6 * fluidScale), marginBottom: Math.round(4 * fluidScale) }}>
-                                        <div className={cn(
-                                            "rounded-none font-black uppercase tracking-widest flex items-center border transition-all duration-500",
+                                            <div className={cn(
+                                            "rounded-xl font-bold uppercase tracking-widest flex items-center border transition-all duration-500 shadow-sm",
                                             msg.isAdmin
-                                                ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
-                                                : "bg-transparent text-zinc-400 border-zinc-500/10"
+                                                ? "bg-zinc-900 text-white dark:bg-white dark:text-black border-transparent"
+                                                : "bg-white dark:bg-zinc-800 text-zinc-400 border-zinc-100 dark:border-zinc-700"
                                         )} style={{
-                                            padding: `${Math.round(1 * fluidScale)}px ${Math.round(6 * fluidScale)}px`,
-                                            fontSize: Math.max(5, Math.round(6 * fluidScale)),
-                                            gap: Math.round(3 * fluidScale),
-                                            borderColor: msg.isAdmin ? currentTheme.accent : 'inherit'
+                                            padding: `${Math.round(2 * fluidScale)}px ${Math.round(8 * fluidScale)}px`,
+                                            fontSize: Math.max(7, Math.round(8 * fluidScale)),
+                                            gap: Math.round(4 * fluidScale)
                                         }}>
-                                            {msg.isAdmin ? <ShieldCheck style={{ width: Math.round(8 * fluidScale), height: Math.round(8 * fluidScale) }} /> : <User style={{ width: Math.round(8 * fluidScale), height: Math.round(8 * fluidScale) }} />}
+                                            {msg.isAdmin ? <ShieldCheck style={{ width: Math.round(10 * fluidScale), height: Math.round(10 * fluidScale) }} /> : <User style={{ width: Math.round(10 * fluidScale), height: Math.round(10 * fluidScale) }} />}
                                             <span className="truncate max-w-[80px]">{msg.author}</span>
                                         </div>
                                     </div>
 
                                     <div
                                         className={cn(
-                                            "rounded-none leading-relaxed transition-all duration-500",
-                                            isCloud ? "bg-transparent border-none" : "border",
+                                            "rounded-2xl leading-relaxed transition-all duration-500 shadow-sm",
+                                            isCloud ? "bg-transparent border-none shadow-none" : "border border-zinc-100 dark:border-zinc-800",
                                             !isCloud && currentTheme.message,
-                                            isScattered && "shadow-sm group-hover:shadow-md",
+                                            isScattered && "shadow-md group-hover:shadow-xl",
                                             isCloud && "text-center blur-[0.2px] hover:blur-0"
                                         )}
                                         style={{
-                                            padding: Math.round(10 * fluidScale),
-                                            fontSize: Math.round(10 * fluidScale),
-                                            borderLeft: (msg.isAdmin && !isCloud) ? `3px solid ${currentTheme.accent}` : 'inherit',
+                                            padding: Math.round(12 * fluidScale),
+                                            fontSize: Math.round(11 * fluidScale),
+                                            borderLeft: (msg.isAdmin && !isCloud) ? `4px solid ${currentTheme.accent}` : undefined,
                                             color: isCloud ? currentTheme.accent : 'inherit',
                                             textShadow: isCloud ? `0 0 ${Math.round(4 * fluidScale)}px ${currentTheme.accent}44` : 'none'
                                         }}
@@ -296,34 +295,33 @@ export function SmartGuestbook({ block, isPublic = false }: { block: any, isPubl
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="SIGNAL..."
+                        placeholder="Deixe seu recado..."
                         className={cn(
-                            "flex-1 border rounded-none focus:ring-1 outline-none uppercase transition-all duration-500 px-3",
+                            "flex-1 border rounded-2xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-500 px-4",
                             currentTheme.input,
-                            isScattered && "bg-white/5 border-black/10 dark:border-white/10"
+                            isScattered && "bg-white/50 border-zinc-100 dark:border-zinc-800"
                         )}
                         style={{
-                            height: Math.round(32 * fluidScale),
-                            fontSize: Math.round(9 * fluidScale),
-                            borderColor: style === 'vhs' ? `${currentTheme.accent}44` : 'inherit'
+                            height: Math.round(40 * fluidScale),
+                            fontSize: Math.round(11 * fluidScale),
+                            borderColor: style === 'vhs' ? `${currentTheme.accent}44` : undefined
                         }}
                     />
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || isSending}
-                        className="rounded-none flex items-center justify-center hover:scale-[1.05] active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all shadow-none border shrink-0"
+                        className="rounded-2xl flex items-center justify-center hover:scale-[1.05] active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all shadow-lg border-none shrink-0"
                         style={{
-                            width: Math.round(32 * fluidScale),
-                            height: Math.round(32 * fluidScale),
+                            width: Math.round(40 * fluidScale),
+                            height: Math.round(40 * fluidScale),
                             backgroundColor: style === 'vhs' ? 'black' : currentTheme.accent,
-                            color: 'white',
-                            borderColor: currentTheme.accent
+                            color: 'white'
                         }}
                     >
                         {isSending ? (
-                            <div className="w-3 h-3 border-2 border-current border-t-transparent animate-spin rounded-full" />
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent animate-spin rounded-full" />
                         ) : (
-                            <Send style={{ width: Math.round(12 * fluidScale), height: Math.round(12 * fluidScale) }} />
+                            <Send style={{ width: Math.round(14 * fluidScale), height: Math.round(14 * fluidScale) }} />
                         )}
                     </button>
                 </form>

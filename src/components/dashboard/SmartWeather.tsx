@@ -49,7 +49,7 @@ export const SmartWeather = memo(({ content }: WeatherBlockPublicProps) => {
         <div
             ref={ref}
             className={cn(
-                "w-full h-full bg-white/10 dark:bg-zinc-950/70 backdrop-blur-md border border-black/10 dark:border-white/10 rounded-none shadow-none flex items-center justify-center group hover:scale-[1.02] transition-all duration-700 relative overflow-hidden text-zinc-900 dark:text-zinc-100",
+                "w-full h-full bg-white dark:bg-zinc-950/80 backdrop-blur-xl border border-zinc-100 dark:border-zinc-800 rounded-3xl shadow-xl flex items-center justify-center group hover:scale-[1.02] transition-all duration-700 relative overflow-hidden text-zinc-900 dark:text-zinc-100",
                 isHorizontal ? "flex-row text-left px-[10%]" : "flex-col text-center"
             )}
             style={{

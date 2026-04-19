@@ -20,16 +20,15 @@ export function SmartReview({ content, isPublic = false }: MediaBlockPublicProps
 
     return (
         <div className={cn(
-            "shadow-none border border-black/10 dark:border-white/10 rounded-none relative transition-all group hover:-translate-y-1 bg-white/5 dark:bg-zinc-950/50 backdrop-blur-sm",
+            "shadow-xl border border-zinc-100 dark:border-zinc-800 rounded-3xl relative transition-all group hover:-translate-y-2 hover:shadow-2xl",
             isBook
-                ? "text-zinc-800 bg-[#fdfcf0]"
-                : "bg-zinc-950 text-zinc-100 border border-zinc-800"
+                ? "text-zinc-800 bg-white dark:bg-zinc-950"
+                : "bg-zinc-950 text-zinc-100 border-zinc-800"
         )} style={{
-            minWidth: Math.round(160 * scale),
-            maxWidth: Math.round(220 * scale),
-            padding: `${Math.round(36 * scale)}px ${Math.round(20 * scale)}px`,
-            borderLeftWidth: isBook ? Math.round(8 * scale) : undefined,
-            borderColor: isBook ? 'rgba(161, 161, 170, 0.5)' : undefined
+            minWidth: Math.round(180 * scale),
+            maxWidth: Math.round(240 * scale),
+            padding: `${Math.round(40 * scale)}px ${Math.round(24 * scale)}px`,
+            borderLeft: isBook ? `${Math.round(6 * scale)}px solid #3b82f6` : undefined,
         }}>
             <div className="absolute flex items-center" style={{ top: Math.round(12 * scale), left: Math.round(16 * scale), gap: Math.round(6 * scale) }}>
                 {isBook ? <Book className="opacity-30" style={{ width: Math.round(12 * scale), height: Math.round(12 * scale) }} /> : <Film className="opacity-30" style={{ width: Math.round(12 * scale), height: Math.round(12 * scale) }} />}

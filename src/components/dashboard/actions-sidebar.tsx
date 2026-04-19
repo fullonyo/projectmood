@@ -18,6 +18,7 @@ import { useAudio } from "./audio-context"
 import { toast } from "sonner"
 import { getRelativeTime } from "@/lib/utils"
 import { VersionHistoryPanel } from "./version-history-panel"
+import { EditorHeader, EditorSection } from "./EditorUI"
 
 import { Profile } from "@/types/database"
 
@@ -88,8 +89,10 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
     const isDraft = hasUnpublishedChanges ?? !publishedAt
 
     return (
-        <aside className="relative w-80 h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shadow-none z-50 overflow-hidden">
-            <LanguageSwitcher className="absolute top-3 right-6" />
+        <aside className="relative w-80 h-full bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 flex flex-col shadow-xl z-50 overflow-hidden">
+            <div className="absolute top-6 right-6 z-20">
+                <LanguageSwitcher />
+            </div>
 
             <input
                 type="file"
@@ -99,70 +102,62 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                 onChange={handleAvatarUpload}
             />
 
-            <div className="p-8 border-b border-zinc-100 dark:border-zinc-900">
-                <div className="flex items-center justify-between mb-2">
-                    <Link href="/" className="flex flex-col hover:opacity-70 transition-opacity">
-                        <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-30 leading-none mb-1">{t('leftSidebar.system_node')}</span>
-                        <div className="text-2xl font-black tracking-tighter uppercase italic flex items-center gap-2">
-                            MoodSpace
+            <div className="p-8">
+                <div className="flex items-center justify-between mb-8">
+                    <Link href="/" className="flex flex-col hover:opacity-70 transition-all active:scale-95">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400 leading-none mb-1.5">MoodSpace Node</span>
+                        <div className="text-xl font-black tracking-tighter text-zinc-900 dark:text-white">
+                            Studio Studio
                         </div>
                     </Link>
-                    <div className="flex items-center gap-2 px-3 py-1 border border-black dark:border-white mr-10 relative z-10">
-                        <span className="text-[8px] font-black uppercase tracking-widest">{t('leftSidebar.active_studio')}</span>
-                    </div>
                 </div>
-            </div>
 
-            <div className="px-6 py-10">
-                <div className="p-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 relative group transition-all duration-500">
-                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-zinc-300 dark:border-zinc-700" />
-                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-zinc-300 dark:border-zinc-700" />
-
+                <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 shadow-sm relative group transition-all duration-500">
                     <div className="flex items-center gap-5 mb-6">
                         <div className="relative">
                             <button
                                 onClick={handleAvatarClick}
                                 disabled={isUploading}
-                                className="relative w-14 h-14 overflow-hidden border border-zinc-200 dark:border-zinc-800 transition-all duration-500 group/avatar disabled:opacity-50 grayscale hover:grayscale-0"
+                                className="relative w-16 h-16 rounded-2xl overflow-hidden border-2 border-white dark:border-zinc-800 shadow-md transition-all duration-500 group/avatar disabled:opacity-50 active:scale-90"
                             >
                                 <img
                                     src={avatarSrc}
                                     alt={username}
-                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                    className="w-full h-full object-cover"
                                 />
                                 {isUploading ? (
-                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                        <Loader2 className="w-4 h-4 text-white animate-spin" />
+                                    <div className="absolute inset-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm flex items-center justify-center">
+                                        <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
                                     </div>
                                 ) : (
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity">
-                                        <Camera className="w-4 h-4 text-white" />
+                                    <div className="absolute inset-0 bg-blue-600/10 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-[2px]">
+                                        <Camera className="w-5 h-5 text-blue-600" />
                                     </div>
                                 )}
                             </button>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[7px] font-black uppercase tracking-[0.4em] opacity-30 leading-none mb-1.5">{t('leftSidebar.identity_protocol')}</span>
-                            <h4 className="text-xl font-black italic tracking-tighter dark:text-white uppercase">{firstName}</h4>
-                            <span className="text-[7px] font-mono text-zinc-400 mt-1 uppercase">Node // studio://{username.toLowerCase()}</span>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 leading-none mb-1.5">{t('leftSidebar.identity_protocol')}</span>
+                            <h4 className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">{firstName}</h4>
+                            <span className="text-[9px] font-medium text-blue-500/70 mt-1">studio://{username.toLowerCase()}</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-5 border-t border-zinc-100 dark:border-zinc-900">
+                    <div className="flex items-center justify-between pt-5 border-t border-zinc-50 dark:border-zinc-800/50">
                         <div className="flex flex-col">
-                            <p className="text-[7px] uppercase font-black text-zinc-400 tracking-[0.3em] mb-1">{t('leftSidebar.access_level')}</p>
-                            <p className="text-[9px] font-black uppercase text-black dark:text-white">{t('leftSidebar.studio_free')}</p>
+                            <p className="text-[8px] uppercase font-bold text-zinc-400 tracking-widest mb-1">{t('leftSidebar.access_level')}</p>
+                            <p className="text-[10px] font-bold uppercase text-zinc-900 dark:text-zinc-300">{t('leftSidebar.studio_free')}</p>
                         </div>
                         <div className="flex flex-col items-end">
-                            <p className="text-[7px] uppercase font-black text-zinc-400 tracking-[0.3em] mb-1">{t('leftSidebar.system_status')}</p>
-                            <div className="flex items-center gap-1.5">
+                            <p className="text-[8px] uppercase font-bold text-zinc-400 tracking-widest mb-1">{t('leftSidebar.system_status')}</p>
+                            <div className="flex items-center gap-2">
                                 <div className={cn(
-                                    "w-1 h-1 animate-pulse",
-                                    isDraft ? "bg-amber-500" : "bg-black dark:bg-white"
+                                    "w-1.5 h-1.5 rounded-full",
+                                    isDraft ? "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                                 )} />
                                 <p className={cn(
-                                    "text-[9px] font-black uppercase",
-                                    isDraft ? "text-amber-500" : "text-black dark:text-white"
+                                    "text-[10px] font-bold uppercase tracking-wide",
+                                    isDraft ? "text-amber-600" : "text-emerald-600"
                                 )}>
                                     {isDraft ? t('publish.unpublished_changes') : t('publish.synced')}
                                 </p>
@@ -172,82 +167,65 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 pb-6 custom-scrollbar space-y-10 animate-in fade-in slide-in-from-right-2 duration-500">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-8 pb-6 custom-scrollbar space-y-10">
                 <div className="space-y-6">
-                    <header className="flex flex-col gap-2 opacity-30 px-1">
-                        <div className="flex items-center gap-2">
-                            <Activity className="w-2.5 h-2.5" />
-                            <h3 className="text-[7.5px] font-black tracking-[0.4em] uppercase">{t('leftSidebar.deployment_area')}</h3>
-                        </div>
-                    </header>
-                    <div className="flex flex-col border-l border-zinc-100 dark:border-zinc-900 pl-4 py-1 mb-6">
-                        <p className="text-[10px] font-black italic tracking-tighter uppercase">{t('leftSidebar.external_visibility')}</p>
-                    </div>
+                    <EditorHeader 
+                        title={t('leftSidebar.deployment_area')}
+                    />
 
                     <div className="grid gap-4">
                         <Button
                             onClick={() => setShowPublishModal(true)}
                             disabled={isPending}
-                            className="w-full justify-between h-14 rounded-none text-[7.5px] font-black uppercase tracking-[0.4em] bg-black dark:bg-white text-white dark:text-black transition-all group shadow-none border-2 border-black dark:border-white relative overflow-hidden"
+                            className="w-full justify-between h-14 rounded-2xl text-[10px] font-bold uppercase tracking-widest bg-zinc-900 hover:bg-black dark:bg-white dark:text-black transition-all group shadow-lg shadow-zinc-200 dark:shadow-none border-none relative overflow-hidden px-6"
                         >
-                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
                             <div className="flex items-center gap-3">
                                 {isPending ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
-                                    <Upload className="w-4 h-4 transition-transform" />
+                                    <Upload className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
                                 )}
                                 {t('publish.button')}
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                                 {publishedAt && (
-                                    <span className="text-[7px] font-mono opacity-40 flex items-center gap-1">
-                                        <Clock className="w-2.5 h-2.5" />
+                                    <span className="text-[8px] font-medium opacity-60 flex items-center gap-1">
                                         {getRelativeTime(publishedAt, t)}
                                     </span>
                                 )}
                                 <div className={cn(
-                                    "w-1.5 h-1.5",
+                                    "w-2 h-2 rounded-full",
                                     isDraft ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
                                 )} />
                             </div>
                         </Button>
 
-                        <Link href={`/${username}`} target="_blank" className="w-full">
-                            <Button
-                                variant="outline"
-                                className="w-full justify-between h-14 rounded-none text-[7.5px] font-black uppercase tracking-[0.4em] bg-transparent text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all group shadow-none border border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white relative overflow-hidden"
-                            >
-                                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
-                                <div className="flex items-center gap-3">
-                                    <ExternalLink className="w-4 h-4 transition-transform" />
-                                    {t('leftSidebar.launch_public_space')}
-                                </div>
-                                <div className="flex gap-1.5 opacity-30">
-                                    <div className="w-1 h-1 bg-black dark:bg-white animate-pulse" />
-                                    <div className="w-1 h-1 bg-black dark:bg-white animate-pulse delay-75" />
-                                    <div className="w-1 h-1 bg-black dark:bg-white animate-pulse delay-150" />
-                                </div>
-                            </Button>
-                        </Link>
-
-                        <div className="transition-all duration-300">
-                            <ShareProfileButton username={username} />
+                        <div className="grid grid-cols-2 gap-3">
+                            <Link href={`/${username}`} target="_blank" className="w-full">
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-12 rounded-2xl text-[9px] font-bold uppercase tracking-widest bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm"
+                                >
+                                    <ExternalLink className="w-3.5 h-3.5 mr-2" />
+                                    {t('common.view')}
+                                </Button>
+                            </Link>
+                            <div className="w-full">
+                                <ShareProfileButton username={username} />
+                            </div>
                         </div>
 
                         {isAdmin && (
                             <Link href="/admin" className="w-full mt-2">
                                 <Button
                                     variant="outline"
-                                    className="w-full justify-between h-14 rounded-none text-[7.5px] font-black uppercase tracking-[0.4em] bg-[#1a0505] text-red-500 hover:bg-red-500 hover:text-white transition-all group shadow-none border border-red-900/50 hover:border-red-500 relative overflow-hidden"
+                                    className="w-full justify-between h-14 rounded-2xl text-[10px] font-bold uppercase tracking-widest bg-red-50/30 text-red-600 hover:bg-red-50 dark:bg-red-950/10 dark:border-red-900/30 transition-all border-zinc-100 dark:border-zinc-800 shadow-sm px-6"
                                 >
-                                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
                                     <div className="flex items-center gap-3">
                                         <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                                         {t('leftSidebar.command_center')}
                                     </div>
-
-                                    <div className="w-1.5 h-1.5 bg-red-500 animate-pulse glow" />
+                                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
                                 </Button>
                             </Link>
                         )}
@@ -256,38 +234,42 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    <header className="flex items-center gap-2 opacity-30 px-1 mb-2">
-                        <Volume2 className="w-2.5 h-2.5" />
-                        <h3 className="text-[7.5px] font-black tracking-[0.4em] uppercase">{t('leftSidebar.system_ux')}</h3>
-                    </header>
-                    <div className="flex flex-col gap-2">
-                        <Button
-                            variant="outline"
+                <div className="space-y-6">
+                    <EditorHeader 
+                        title={t('leftSidebar.system_ux')}
+                    />
+                    <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 space-y-6 shadow-sm">
+                        <button
                             onClick={toggleGlobalMute}
                             className={cn(
-                                "w-full justify-start gap-4 h-12 rounded-none text-[9px] font-black uppercase tracking-widest border transition-all duration-500 relative overflow-hidden",
+                                "w-full flex items-center justify-between p-4 rounded-2xl border transition-all duration-300",
                                 isGlobalMuted
-                                    ? "border-red-500/50 bg-red-500/5 text-red-500 hover:bg-red-500/10"
-                                    : "border-zinc-200 dark:border-zinc-800 bg-transparent hover:border-black dark:hover:border-white"
+                                    ? "border-red-100 bg-red-50 text-red-600"
+                                    : "border-zinc-50 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50 text-zinc-600"
                             )}
                         >
-                            <div className={cn(
-                                "p-1.5 border transition-colors",
-                                isGlobalMuted ? "border-red-500/20 bg-red-500/10" : "border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950"
-                            )}>
-                                {isGlobalMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                            <div className="flex items-center gap-3">
+                                <div className={cn(
+                                    "p-2 rounded-xl transition-colors",
+                                    isGlobalMuted ? "bg-red-100 text-red-600" : "bg-white dark:bg-zinc-800 text-zinc-400 shadow-sm"
+                                )}>
+                                    {isGlobalMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-widest">
+                                    {isGlobalMuted ? "Áudio Mutado" : "Áudio Ativo"}
+                                </span>
                             </div>
-                            {isGlobalMuted ? t('common.unmute_audio') : t('common.mute_audio')}
-
                             {isGlobalMuted && (
-                                <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-red-500 animate-pulse" />
+                                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
                             )}
-                        </Button>
+                        </button>
 
                         {!isGlobalMuted && (
-                            <div className="flex items-center gap-3 px-1 animate-in fade-in slide-in-from-top-1">
-                                <span className="text-[7px] font-black uppercase tracking-widest opacity-30">Vol</span>
+                            <div className="space-y-4 px-1">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">Master Volume</span>
+                                    <span className="text-[10px] font-bold text-zinc-900 dark:text-white">{Math.round(globalVolume * 100)}%</span>
+                                </div>
                                 <input
                                     type="range"
                                     min="0"
@@ -295,48 +277,42 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                                     step="0.01"
                                     value={globalVolume}
                                     onChange={(e) => setGlobalVolume(parseFloat(e.target.value))}
-                                    className="flex-1 h-[2px] appearance-none bg-zinc-100 dark:bg-zinc-800 accent-black dark:accent-white cursor-pointer"
+                                    className="w-full h-1.5 appearance-none bg-zinc-100 dark:bg-zinc-800 rounded-full accent-blue-600 cursor-pointer"
                                 />
-                                <span className="text-[7px] font-mono opacity-40 w-6">{Math.round(globalVolume * 100)}%</span>
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    <header className="flex items-center gap-2 opacity-30 px-1 mb-2">
-                        <Activity className="w-2.5 h-2.5" />
-                        <h3 className="text-[7.5px] font-black tracking-[0.4em] uppercase">{t('leftSidebar.system_configuration')}</h3>
-                    </header>
-                    <div className="grid gap-2 opacity-30 grayscale cursor-not-allowed">
-                        <Button variant="outline" className="justify-start gap-4 h-12 rounded-none text-[9px] font-black uppercase tracking-widest border border-dashed border-zinc-200 dark:border-zinc-800 bg-transparent">
-                            <div className="p-1.5 border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950">
-                                <User className="w-3.5 h-3.5" />
+                <div className="space-y-6">
+                    <EditorHeader 
+                        title={t('leftSidebar.system_configuration')}
+                    />
+                    <div className="grid gap-3 opacity-60">
+                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800">
+                            <div className="p-2 rounded-xl bg-white dark:bg-zinc-800 shadow-sm">
+                                <User className="w-4 h-4 text-zinc-300" />
                             </div>
-                            {t('leftSidebar.identity_registry')}
-                        </Button>
-                        <Button variant="outline" className="justify-start gap-4 h-12 rounded-none text-[9px] font-black uppercase tracking-widest border border-dashed border-zinc-200 dark:border-zinc-800 bg-transparent">
-                            <div className="p-1.5 border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950">
-                                <Settings className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('leftSidebar.identity_registry')}</span>
+                        </div>
+                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800">
+                            <div className="p-2 rounded-xl bg-white dark:bg-zinc-800 shadow-sm">
+                                <Settings className="w-4 h-4 text-zinc-300" />
                             </div>
-                            {t('leftSidebar.system_ux')}
-                        </Button>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('leftSidebar.system_ux')}</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="p-8 border-t border-zinc-100 dark:border-zinc-900 shrink-0">
+            <div className="p-8 mt-auto">
                 <Button
                     variant="ghost"
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="w-full justify-between h-14 rounded-none text-[7.5px] font-black uppercase tracking-[0.4em] text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all group border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-red-500 relative overflow-hidden"
+                    className="w-full justify-center h-14 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all group border border-zinc-100 dark:border-zinc-800 hover:border-red-500 shadow-sm"
                 >
-                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-current opacity-30 group-hover:opacity-100 transition-opacity" />
-                    <div className="flex items-center gap-3">
-                        <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        {t('leftSidebar.terminate_session')}
-                    </div>
-                    <span className="text-[8px] opacity-20 font-mono">{t('leftSidebar.exit_hex')}</span>
+                    <LogOut className="w-4 h-4 mr-3 group-hover:-translate-x-1 transition-transform" />
+                    {t('leftSidebar.terminate_session')}
                 </Button>
             </div>
 

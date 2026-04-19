@@ -195,7 +195,7 @@ export function SmartMedia({
 
     // Common Wrapper for premium look
     const wrapperClasses = cn(
-        "w-full h-full relative overflow-hidden transition-all duration-700",
+        "w-full h-full relative overflow-hidden transition-all duration-700 rounded-3xl",
         "bg-zinc-100 dark:bg-zinc-900",
         !isPublic && "cursor-pointer group"
     )
@@ -205,7 +205,7 @@ export function SmartMedia({
         return (
             <div
                 ref={ref}
-                className={cn(wrapperClasses, "bg-white dark:bg-zinc-950 flex flex-col items-center justify-center p-6")}
+                className={cn(wrapperClasses, "bg-white dark:bg-zinc-950 flex flex-col items-center justify-center p-8 shadow-xl border border-zinc-100 dark:border-zinc-800")}
             >
                 <audio
                     ref={audioRef}
@@ -216,16 +216,16 @@ export function SmartMedia({
                 />
 
                 {/* Waveform / Visualizer Placeholder */}
-                <div className="flex items-end gap-[2px] h-8 mb-4 opacity-20">
-                    {[...Array(12)].map((_, i) => (
+                <div className="flex items-end gap-[3px] h-10 mb-6 opacity-40">
+                    {[...Array(16)].map((_, i) => (
                         <div
                             key={i}
                             className={cn(
-                                "w-1 bg-black dark:bg-white transition-all duration-300",
+                                "w-1 bg-blue-500 transition-all duration-300 rounded-full",
                                 isPlaying ? "animate-pulse" : "h-1"
                             )}
                             style={{
-                                height: isPlaying ? `${Math.random() * 100}%` : '4px',
+                                height: isPlaying ? `${20 + Math.random() * 80}%` : '4px',
                                 animationDelay: `${i * 0.1}s`
                             }}
                         />
@@ -233,19 +233,19 @@ export function SmartMedia({
                 </div>
 
                 {/* Meta HUD */}
-                <div className="text-center mb-4 overflow-hidden w-full">
-                    <p className="text-[10px] font-black uppercase tracking-widest truncate" style={{ fontSize: Math.max(8, Math.round(10 * scale)) }}>
+                <div className="text-center mb-6 overflow-hidden w-full">
+                    <p className="text-sm font-bold tracking-tight text-zinc-900 dark:text-white truncate" style={{ fontSize: Math.max(10, Math.round(14 * scale)) }}>
                         {audioMetadata?.name || "Untitled Track"}
                     </p>
-                    <p className="text-[7px] font-mono opacity-40 uppercase tracking-tighter truncate" style={{ fontSize: Math.max(6, Math.round(7 * scale)) }}>
+                    <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest truncate mt-1" style={{ fontSize: Math.max(8, Math.round(10 * scale)) }}>
                         {audioMetadata?.artist || "Local Entry"}
                     </p>
                 </div>
 
                 {/* Progress HUD */}
-                <div className="w-full h-[1px] bg-zinc-100 dark:bg-zinc-800 mb-4 relative">
+                <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full mb-6 relative overflow-hidden">
                     <div
-                        className="absolute inset-y-0 left-0 bg-black dark:bg-white transition-all duration-300"
+                        className="absolute inset-y-0 left-0 bg-blue-500 transition-all duration-300"
                         style={{ width: `${progress}%` }}
                     />
                 </div>
@@ -253,21 +253,21 @@ export function SmartMedia({
                 {renderLyricsOverlay('audio')}
 
                 {/* Controls HUD */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6">
                     <button
                         onClick={togglePlay}
-                        className="w-10 h-10 rounded-full border border-black/10 dark:border-white/10 flex items-center justify-center hover:scale-110 active:scale-95 transition-all group/btn bg-zinc-50 dark:bg-zinc-900"
-                        style={{ width: Math.round(40 * scale), height: Math.round(40 * scale) }}
+                        className="w-12 h-12 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg"
+                        style={{ width: Math.round(48 * scale), height: Math.round(48 * scale) }}
                     >
                         {isPlaying ? (
-                            <Pause className="w-4 h-4 text-black dark:text-white" style={{ width: Math.round(16 * scale), height: Math.round(16 * scale) }} />
+                            <Pause className="w-5 h-5" style={{ width: Math.round(20 * scale), height: Math.round(20 * scale) }} />
                         ) : (
-                            <Play className="w-4 h-4 text-black dark:text-white translate-x-0.5" style={{ width: Math.round(16 * scale), height: Math.round(16 * scale) }} />
+                            <Play className="w-5 h-5 translate-x-0.5" style={{ width: Math.round(20 * scale), height: Math.round(20 * scale) }} />
                         )}
                     </button>
                     {isGlobalMuted && (
-                        <div className="opacity-20 animate-pulse">
-                            <VolumeX className="w-3 h-3 text-black dark:text-white" />
+                        <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 text-red-500 animate-pulse">
+                            <VolumeX className="w-4 h-4" />
                         </div>
                     )}
                 </div>
@@ -275,7 +275,6 @@ export function SmartMedia({
                 {!isPublic && (
                     <div className="absolute inset-0 bg-transparent z-10" />
                 )}
-                <div className="absolute inset-0 pointer-events-none border border-black/5 dark:border-white/5 z-20" />
             </div>
         )
     }
@@ -296,13 +295,12 @@ export function SmartMedia({
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
-                    className="w-full h-full grayscale-[0.2] hover:grayscale-0 transition-all duration-1000"
+                    className="w-full h-full grayscale-[0.2] hover:grayscale-0 transition-all duration-1000 rounded-3xl"
                 />
                 {renderLyricsOverlay()}
                 {!isPublic && (
                     <div className="absolute inset-0 bg-transparent z-10" />
                 )}
-                <div className="absolute inset-0 pointer-events-none border border-black/5 dark:border-white/5 z-20" />
             </div>
         )
     }
@@ -314,14 +312,14 @@ export function SmartMedia({
         return (
             <div
                 ref={ref}
-                className={cn(wrapperClasses, "bg-white/5 dark:bg-zinc-950/50 backdrop-blur-md items-center justify-center flex group/spotify")}
-                style={{ padding: Math.round(8 * scale) }}
+                className={cn(wrapperClasses, "bg-white/50 dark:bg-zinc-950/50 backdrop-blur-xl border border-zinc-100 dark:border-zinc-800 items-center justify-center flex group/spotify")}
+                style={{ padding: Math.round(12 * scale) }}
             >
                 <div className="w-full h-full relative">
                     {isGlobalMuted ? (
-                        <div className="w-full h-full bg-zinc-100/10 dark:bg-zinc-900/10 border border-dashed border-white/5 flex flex-col items-center justify-center gap-2 animate-in fade-in duration-500">
-                            <VolumeX className="w-4 h-4 opacity-20" />
-                            <span className="text-[6px] font-black uppercase tracking-[0.2em] opacity-20">Audio Suspended</span>
+                        <div className="w-full h-full bg-zinc-100/10 dark:bg-zinc-900/10 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col items-center justify-center gap-3 animate-in fade-in duration-500">
+                            <VolumeX className="w-5 h-5 text-zinc-400" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Audio Suspended</span>
                         </div>
                     ) : (
                         <iframe
@@ -331,7 +329,7 @@ export function SmartMedia({
                             frameBorder="0"
                             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                             loading="lazy"
-                            className="rounded-none transition-all duration-1000 grayscale-[0.3] group-hover:grayscale-0"
+                            className="rounded-2xl transition-all duration-1000 grayscale-[0.3] group-hover:grayscale-0"
                         />
                     )}
                     {renderLyricsOverlay()}
@@ -339,16 +337,16 @@ export function SmartMedia({
                         <div className="absolute inset-0 bg-transparent z-10" />
                     )}
                 </div>
-                <div className="absolute inset-0 pointer-events-none border border-black/5 dark:border-white/5 z-20" />
             </div>
         )
     }
 
     return (
-        <div ref={ref} className="w-full h-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 border border-dashed border-zinc-300 dark:border-zinc-800 p-4 text-center">
+        <div ref={ref} className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/50 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 text-center">
+            <Music className="w-8 h-8 text-zinc-300 mb-2" />
             <span
-                className="text-[10px] font-black uppercase opacity-20 tracking-widest leading-tight"
-                style={{ fontSize: Math.max(6, Math.round(10 * scale)) }}
+                className="text-[10px] font-bold uppercase text-zinc-400 tracking-widest leading-tight"
+                style={{ fontSize: Math.max(8, Math.round(10 * scale)) }}
             >
                 Media Missing
             </span>

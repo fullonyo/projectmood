@@ -13,8 +13,10 @@ import {
     Link as LinkIcon,
     Plus,
     Share2,
-    Activity
+    Activity,
+    Image as ImageIcon
 } from "lucide-react"
+import { Label } from "@/components/ui/label"
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -48,6 +50,7 @@ const STYLES = [
 ]
 
 import { MoodBlock, SocialContent } from "@/types/database"
+import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, EditorSwitch } from "./EditorUI"
 
 export function UniversalSocialEditor({
     block,
@@ -103,9 +106,7 @@ export function UniversalSocialEditor({
         }
 
         onUpdate(block.id, { content })
-    }, [selectedPlatform, url, label, subLabel, style, isGrid, showBg])
-
-
+    }, [selectedPlatform, url, label, subLabel, style, isGrid, showBg, block?.id, onUpdate])
 
     const handleAction = () => {
         if (!url && !block?.id) return
@@ -129,7 +130,6 @@ export function UniversalSocialEditor({
                 setLabel("")
                 setSubLabel("")
             } else {
-                // Dimensões dinâmicas: se isGrid, cria um cubinho, se não, cria um botão retangular esticado para caber o texto
                 const initialWidth = isGrid ? 50 : 150
                 const initialHeight = isGrid ? 50 : 45
 
@@ -151,147 +151,97 @@ export function UniversalSocialEditor({
     }
     return (
         <div className={cn(
-            "space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 pb-20",
-            highlight ? "border-2 border-black dark:border-white p-6 -m-6 bg-zinc-50 dark:bg-zinc-900/50" : ""
+            "space-y-12 pb-20",
+            highlight ? "p-6 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800" : ""
         )}>
-            {/* Header */}
-            <header className="flex items-center gap-2 opacity-30 px-1">
-                <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
-                <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.social.title')}</h3>
-            </header>
+            <EditorHeader 
+                title={t('editors.social.title')} 
+                subtitle={t('editors.social.subtitle')}
+            />
 
-            <div className="space-y-6 border border-zinc-200 dark:border-zinc-800 p-0 bg-white dark:bg-zinc-950">
-                <div className="p-5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/10">
-                    <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em] mb-4 text-center italic">{t('editors.social.nodes')}</p>
-                    <div className="grid grid-cols-4 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
-                        {PLATFORMS.map((p) => (
-                            <button
-                                key={p.id}
-                                onClick={() => setSelectedPlatform(p)}
-                                className={cn(
-                                    "flex flex-col items-center gap-3 p-4 transition-all relative group",
-                                    selectedPlatform.id === p.id
-                                        ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
-                                        : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                                )}
-                            >
-                                {selectedPlatform.id === p.id && (
-                                    <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
-                                )}
-                                <p.icon className={cn("w-4 h-4 transition-transform", selectedPlatform.id === p.id && "scale-110")} />
-                                <span className="text-[6px] font-black uppercase tracking-widest truncate w-full text-center">
-                                    {p.id === 'custom' ? 'LINK' : p.id.toUpperCase()}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
+            <EditorSection title="Plataforma">
+                <GridSelector
+                    options={PLATFORMS.map(p => ({ id: p.id as any, label: p.id === 'custom' ? 'Link' : p.label, icon: p.icon }))}
+                    activeId={selectedPlatform.id as any}
+                    onChange={(id) => {
+                        const p = PLATFORMS.find(platform => platform.id === id)
+                        if (p) setSelectedPlatform(p)
+                    }}
+                    columns={4}
+                />
+            </EditorSection>
 
-                <div className="p-5 space-y-4">
-                    <div className="space-y-3">
-                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.social.link_protocol')}</p>
-                        <Input
-                            placeholder={t('editors.social.link_placeholder')}
-                            value={url}
-                            onChange={(e) => setUrl(e.target.value)}
-                            className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] font-mono h-11 uppercase tracking-tight focus-visible:ring-0"
-                        />
-                    </div>
-                    <div className="space-y-3">
-                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.social.visual_alias')}</p>
-                        <Input
-                            placeholder={t('editors.social.alias_placeholder')}
-                            value={label}
-                            onChange={(e) => setLabel(e.target.value)}
-                            className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] uppercase font-mono h-11 focus-visible:ring-0"
-                        />
-                    </div>
-                    <div className="space-y-3">
-                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em]">{t('editors.social.sub_label')}</p>
-                        <Input
-                            placeholder={t('editors.social.sub_label_placeholder')}
-                            value={subLabel}
-                            onChange={(e) => setSubLabel(e.target.value)}
-                            className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-900 rounded-none text-[10px] font-mono h-11 focus-visible:ring-0"
-                        />
-                    </div>
-                </div>
-
-                <div className="p-5 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/10 space-y-6">
-                    <div className="space-y-4">
-                        <p className="text-[8px] font-black opacity-30 uppercase tracking-[0.3em] text-center italic">{t('editors.social.style_manifesto')}</p>
-                        <div className="grid grid-cols-5 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
-                            {STYLES.map((s) => (
-                                <button
-                                    key={s.id}
-                                    onClick={() => setStyle(s.id)}
-                                    className={cn(
-                                        "h-10 text-[6px] font-black uppercase tracking-widest transition-all relative group",
-                                        style === s.id
-                                            ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
-                                            : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                                    )}
-                                >
-                                    {style === s.id && (
-                                        <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white" />
-                                    )}
-                                    {t(`editors.social.styles.${s.id}`)}
-                                </button>
-                            ))}
+            <EditorSection title="Configurações">
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-4">
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">Link / URL</Label>
+                        <div className="relative">
+                            <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                            <Input
+                                placeholder="https://..."
+                                value={url}
+                                onChange={(e) => setUrl(e.target.value)}
+                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium"
+                            />
                         </div>
                     </div>
-
-                    <div className="flex flex-col gap-0">
-                        <div className="flex items-center justify-between p-4 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-bold">{t('editors.social.layout_bento')}</p>
-                                <p className="text-[8px] font-mono text-zinc-400 uppercase tracking-widest">{t('editors.social.layout_bento_desc')}</p>
-                            </div>
-                            <button
-                                onClick={() => setIsGrid(!isGrid)}
-                                className={cn(
-                                    "w-10 h-5 transition-colors relative",
-                                    isGrid ? "bg-black dark:bg-white" : "bg-zinc-200 dark:bg-zinc-800"
-                                )}
-                            >
-                                <div className={cn(
-                                    "absolute top-1 w-3 h-3 bg-white dark:bg-black transition-all",
-                                    isGrid ? "left-6" : "left-1"
-                                )} />
-                            </button>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">Label</Label>
+                            <Input
+                                placeholder="Texto do botão"
+                                value={label}
+                                onChange={(e) => setLabel(e.target.value)}
+                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl h-12 text-[11px] font-medium px-4"
+                            />
                         </div>
-
-                        <div className="flex items-center justify-between p-4 bg-white dark:bg-zinc-950 border border-t-0 border-zinc-200 dark:border-zinc-800">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-bold">{t('editors.social.layout_borderless')}</p>
-                                <p className="text-[8px] font-mono text-zinc-400 uppercase tracking-widest leading-relaxed max-w-[200px]">{t('editors.social.layout_borderless_desc')}</p>
-                            </div>
-                            <button
-                                onClick={() => setShowBg(!showBg)}
-                                className={cn(
-                                    "w-10 h-5 transition-colors relative",
-                                    !showBg ? "bg-black dark:bg-white" : "bg-zinc-200 dark:bg-zinc-800"
-                                )}
-                            >
-                                <div className={cn(
-                                    "absolute top-1 w-3 h-3 bg-white dark:bg-black transition-all",
-                                    !showBg ? "left-6" : "left-1"
-                                )} />
-                            </button>
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">Sub-label</Label>
+                            <Input
+                                placeholder="Texto secundário"
+                                value={subLabel}
+                                onChange={(e) => setSubLabel(e.target.value)}
+                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl h-12 text-[11px] font-medium px-4"
+                            />
                         </div>
                     </div>
-
-                    <Button
-                        onClick={handleAction}
-                        disabled={isPending || (!url && !block?.id)}
-                        className="w-full bg-zinc-50 dark:bg-zinc-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black dark:text-white rounded-none h-14 font-black uppercase tracking-[0.4em] text-[7.5px] border border-zinc-100 dark:border-zinc-800 transition-all relative group overflow-hidden"
-                    >
-                        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white" />
-                        <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-black dark:border-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                        {isPending ? t('common.loading') : (block?.id ? t('common.close') : t('editors.social.deploy'))}
-                    </Button>
                 </div>
-            </div>
+            </EditorSection>
+
+            <EditorSection title="Estética">
+                <div className="space-y-6">
+                    <EditorSection title="Estilo Visual">
+                        <PillSelector
+                            variant="scroll"
+                            options={STYLES.map(s => ({ id: s.id as any, label: t(`editors.social.styles.${s.id}`) }))}
+                            activeId={style as any}
+                            onChange={(id) => setStyle(id as any)}
+                        />
+                    </EditorSection>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <EditorSwitch
+                            label="Modo Grade"
+                            value={isGrid}
+                            onChange={setIsGrid}
+                            icon={Share2}
+                        />
+                        <EditorSwitch
+                            label="Sem Fundo"
+                            value={!showBg}
+                            onChange={(v) => setShowBg(!v)}
+                            icon={ImageIcon}
+                        />
+                    </div>
+                </div>
+            </EditorSection>
+
+            <EditorActionButton 
+                onClick={handleAction} 
+                isLoading={isPending} 
+                disabled={!url && !block?.id}
+                label={block?.id ? t('common.close') : t('editors.social.deploy')}
+            />
         </div>
     )
 }

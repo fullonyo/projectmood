@@ -50,17 +50,17 @@ export function SmartCountdown({ content }: CountdownBlockPublicProps) {
             <div className={cn(
                 "shadow-xl text-center flex flex-col items-center justify-center transition-all duration-500",
                 style === 'neon' && "bg-black shadow-pink-500/20",
-                style === 'bold' && "bg-white dark:bg-zinc-900 border-black dark:border-white text-black dark:text-white",
-                style === 'minimal' && "bg-white/10 dark:bg-black/10 backdrop-blur-xl border-white/10"
+                style === 'bold' && "bg-white dark:bg-zinc-900 border-zinc-900 dark:border-white text-zinc-900 dark:text-white shadow-2xl",
+                style === 'minimal' && "bg-white dark:bg-zinc-950/50 backdrop-blur-xl border-zinc-100 dark:border-zinc-800 shadow-xl"
             )} style={{
                 width: '100%',
                 height: '100%',
-                padding: Math.round(20 * fluidScale),
-                gap: Math.round(16 * fluidScale),
+                padding: Math.round(24 * fluidScale),
+                gap: Math.round(20 * fluidScale),
                 borderWidth: style === 'neon' ? Math.round(2 * fluidScale) : style === 'bold' ? Math.round(4 * fluidScale) : Math.round(1 * fluidScale),
                 borderColor: style === 'neon' ? '#ec4899' : undefined,
                 borderStyle: 'solid',
-                borderRadius: Math.round(16 * fluidScale)
+                borderRadius: Math.round(24 * fluidScale)
             }}>
                 {Icon && (
                     <div className={cn(

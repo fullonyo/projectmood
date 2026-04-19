@@ -1,0 +1,25 @@
+FROM node:20-slim
+
+RUN apt-get update -y && apt-get install -y openssl ca-certificates
+
+WORKDIR /app
+
+# Copia apenas os arquivos de dependências primeiro para aproveitar o cache do Docker
+COPY package.json package-lock.json* ./
+
+# Instala dependências (incluindo devDependencies)
+RUN npm install
+
+# Copia o restante do código
+COPY . .
+
+# Gera o cliente Prisma
+RUN npx prisma generate
+
+EXPOSE 3000
+
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Comando para rodar em modo desenvolvimento com Hot Reload
+CMD ["npm", "run", "dev"]

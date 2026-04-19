@@ -19,7 +19,8 @@ export const pt = {
         update: "Atualizar",
         deploy: "Colocar no Mural",
         mute_audio: "Silenciar Tudo",
-        unmute_audio: "Ativar Som Global"
+        unmute_audio: "Ativar Som Global",
+        view: "Visualizar"
     },
 
     sidebar: {

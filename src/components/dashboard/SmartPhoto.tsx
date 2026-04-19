@@ -40,13 +40,13 @@ export function SmartPhoto({ content }: PhotoBlockPublicProps) {
     }
 
     return (
-        <div className="relative w-full h-full overflow-hidden">
+        <div className="relative w-full h-full overflow-hidden rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-xl group hover:scale-[1.02] transition-transform duration-500">
             <Image
                 src={imageUrl}
                 alt={alt || "Mood photo"}
                 fill
                 unoptimized
-                className="object-cover"
+                className="object-cover transition-all duration-700 group-hover:scale-110"
                 style={{ filter: getFilterClass() }}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />

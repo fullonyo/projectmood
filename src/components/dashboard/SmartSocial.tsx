@@ -72,13 +72,13 @@ export function SmartSocial({ content, isPublic = false }: SocialBlockPublicProp
                 content.isGrid ? "justify-center" : "justify-start",
                 !isPublic && "pointer-events-none",
                 content.showBg !== false && [
-                    "border border-black/10 dark:border-white/10 bg-white/5 dark:bg-zinc-950/50",
-                    content.style !== 'ghost' && "backdrop-blur-sm",
+                    "border border-zinc-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 rounded-2xl",
+                    content.style !== 'ghost' && "backdrop-blur-md",
                     // Old Styles
-                    content.style === 'tag' && "bg-[#fefefe] dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 border-l-black dark:border-l-white font-serif italic hover:translate-x-1",
-                    content.style === 'glass' && "bg-white/10 dark:bg-white/5 rounded-none border border-white/20 text-current hover:bg-white/20 hover:scale-[1.05]",
-                    content.style === 'minimal' && "bg-transparent text-current shadow-none hover:opacity-70",
-                    content.style === 'neon' && "bg-black text-green-400 rounded-none border border-green-500/50 hover:bg-zinc-900",
+                    content.style === 'tag' && "bg-[#fefefe] dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 border-l-black dark:border-l-white font-serif italic hover:translate-x-1",
+                    content.style === 'glass' && "bg-white/10 dark:bg-white/5 border-white/20 text-current hover:bg-white/20 hover:scale-[1.05]",
+                    content.style === 'minimal' && "bg-transparent text-current shadow-none hover:opacity-70 border-none",
+                    content.style === 'neon' && "bg-black text-green-400 border border-green-500/50 hover:bg-zinc-900",
                     // New Architectural Styles
                     content.style === 'pill' && "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-black/5 dark:border-white/5 !rounded-full hover:scale-x-[0.98] hover:scale-y-[1.02]",
                     content.style === 'brutalist' && "bg-[#e8fa55] dark:bg-[#c9ff00] text-black border-[3px] border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] !rounded-none hover:translate-y-[4px] hover:translate-x-[4px] hover:shadow-none hover:bg-white",

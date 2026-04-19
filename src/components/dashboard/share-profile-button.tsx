@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button"
 import { ExternalLink, Copy, Download, QrCode, Activity } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
 
+import { cn } from "@/lib/utils"
+import { EditorHeader } from "./EditorUI"
+
 interface ShareProfileButtonProps {
     username: string
 }
@@ -58,19 +61,17 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
             <div className="flex items-center gap-2">
                 <Button
                     variant="outline"
-                    size="sm"
                     onClick={handleCopyLink}
-                    className="h-10 rounded-none border-zinc-200 dark:border-zinc-800 text-[9px] font-black uppercase tracking-[0.4em] px-4 gap-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all relative group overflow-hidden"
+                    className="flex-1 h-12 rounded-2xl border-zinc-100 dark:border-zinc-800 text-[10px] font-bold uppercase tracking-widest gap-2 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm"
                 >
-                    <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-current opacity-20 group-hover:opacity-100 transition-opacity" />
                     {copied ? (
                         <>
-                            <Copy className="w-3 h-3 text-zinc-400 group-hover:text-white" />
+                            <Copy className="w-3.5 h-3.5 text-blue-500" />
                             {t('editors.share.copied')}
                         </>
                     ) : (
                         <>
-                            <Copy className="w-3 h-3" />
+                            <Copy className="w-3.5 h-3.5" />
                             {t('editors.share.link')}
                         </>
                     )}
@@ -78,52 +79,47 @@ export function ShareProfileButton({ username }: ShareProfileButtonProps) {
 
                 <Button
                     variant="outline"
-                    size="sm"
                     onClick={() => setShowQR(!showQR)}
-                    className="h-10 rounded-none border-zinc-200 dark:border-zinc-800 text-[9px] font-black uppercase tracking-[0.4em] px-4 gap-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all relative group overflow-hidden"
+                    className={cn(
+                        "h-12 w-12 rounded-2xl border-zinc-100 dark:border-zinc-800 flex items-center justify-center bg-white dark:bg-zinc-900 transition-all shadow-sm",
+                        showQR && "border-blue-500 text-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    )}
+                    title={t('editors.share.qr_code')}
                 >
-                    <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-current opacity-20 group-hover:opacity-100 transition-opacity" />
-                    <QrCode className="w-3 h-3" />
-                    {t('editors.share.qr_code')}
+                    <QrCode className="w-4 h-4" />
                 </Button>
             </div>
 
             {
                 showQR && (
-                    <div className="absolute top-full right-0 mt-4 p-8 bg-white dark:bg-zinc-950 rounded-none border border-zinc-200 dark:border-zinc-800 z-50 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-500 overflow-hidden group/qr">
-                        <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-black dark:border-white" />
-                        <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-black dark:border-white opacity-0 group-hover/qr:opacity-100 transition-opacity" />
+                    <div className="absolute top-full right-0 mt-4 p-8 bg-white dark:bg-zinc-950 rounded-3xl border border-zinc-100 dark:border-zinc-900 z-50 shadow-2xl w-[320px] animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div className="space-y-8">
+                            <EditorHeader 
+                                title={t('editors.share.qr_code')}
+                                subtitle="Escaneie para acessar o espaço"
+                            />
 
-                        <div className="space-y-6">
-                            <header className="flex items-center gap-2 opacity-30 mb-2">
-                                <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
-                                <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.share.qr_code')}</h3>
-                            </header>
-
-                            <div className="bg-white p-6 border border-zinc-100 shadow-inner group-hover/qr:scale-[1.02] transition-transform duration-700">
+                            <div className="bg-zinc-50 dark:bg-white p-6 rounded-3xl border border-zinc-100 dark:border-zinc-200 shadow-inner flex items-center justify-center">
                                 <QRCodeSVG
                                     id="qr-code-svg"
                                     value={profileUrl}
                                     size={200}
                                     level="H"
-                                    includeMargin={true}
+                                    includeMargin={false}
                                 />
                             </div>
 
                             <div className="space-y-6">
-                                <div className="p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 relative">
-                                    <div className="absolute top-0 right-0 w-1 h-1 border-t border-r border-black dark:border-white opacity-20" />
-                                    <p className="text-[7px] text-zinc-400 text-center font-mono break-all uppercase tracking-[0.2em] leading-relaxed">
+                                <div className="p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800">
+                                    <p className="text-[10px] text-zinc-400 text-center font-medium break-all lowercase tracking-wide leading-relaxed">
                                         {profileUrl}
                                     </p>
                                 </div>
 
                                 <Button
                                     onClick={handleDownloadQR}
-                                    size="sm"
-                                    className="w-full h-14 bg-zinc-50 dark:bg-zinc-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black text-black dark:text-white border border-zinc-100 dark:border-zinc-800 rounded-none text-[9px] font-black uppercase tracking-[0.3em] transition-all relative group/btn overflow-hidden"
+                                    className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
                                 >
-                                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white" />
                                     <Download className="w-4 h-4 mr-2" />
                                     {t('editors.share.save_qr')}
                                 </Button>

@@ -6,10 +6,9 @@ import { cn } from "@/lib/utils"
 import {
     MousePointer2,
     Sparkles,
-    Wallpaper,
-    Loader2,
     Check,
     Activity,
+    Loader2,
     ArrowUpRight,
     Heart,
     LayoutGrid,
@@ -28,11 +27,12 @@ import {
     History,
     Telescope
 } from "lucide-react"
+import { useTranslation } from "@/i18n/context"
+import { EditorSection, GridSelector } from "./EditorUI"
 
 interface EffectsEditorProps {
     profile: any
 }
-import { useTranslation } from "@/i18n/context"
 
 export function UniversalEffectsEditor({ profile }: EffectsEditorProps) {
     const { t } = useTranslation()
@@ -83,75 +83,27 @@ export function UniversalEffectsEditor({ profile }: EffectsEditorProps) {
     ]
 
     return (
-        <div className="space-y-10 p-1">
-            <section className="space-y-4">
-                <header className="flex items-center gap-2 opacity-30 px-1">
-                    <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
-                    <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.effects.cursor_title')}</h3>
-                </header>
-                <div className="grid grid-cols-3 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
-                    {cursors.map((c) => {
-                        const isSelected = profile.customCursor === c.id
-                        return (
-                            <button
-                                key={c.id}
-                                disabled={isPending}
-                                onClick={() => handleUpdate('customCursor', c.id)}
-                                className={cn(
-                                    "p-4 transition-all group flex flex-col items-center gap-2 relative",
-                                    isSelected
-                                        ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
-                                        : "bg-white dark:bg-zinc-950 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                                )}
-                            >
-                                {isSelected && (
-                                    <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />
-                                )}
-                                <c.icon className={cn("w-4 h-4 transition-transform group-hover:scale-110", isSelected && "animate-pulse")} />
-                                <span className="text-[7px] font-black uppercase tracking-[0.2em]">{c.name}</span>
-                            </button>
-                        )
-                    })}
-                </div>
-            </section>
+        <div className="space-y-12 pb-20">
+            <EditorSection title={t('editors.effects.cursor_title')}>
+                <GridSelector
+                    options={cursors.map(c => ({ id: c.id as any, label: c.name, icon: c.icon }))}
+                    activeId={profile.customCursor || 'auto'}
+                    onChange={(id) => handleUpdate('customCursor', id as string)}
+                    columns={3}
+                />
+            </EditorSection>
 
-            <section className="space-y-4">
-                <header className="flex items-center gap-2 opacity-30 px-1">
-                    <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
-                    <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.effects.trails_title')}</h3>
-                </header>
-                <div className="grid grid-cols-2 bg-zinc-100 dark:bg-zinc-900 gap-[1px] border border-zinc-200 dark:border-zinc-800">
-                    {trails.map((t) => {
-                        const isSelected = profile.mouseTrails === t.id
-                        return (
-                            <button
-                                key={t.id}
-                                disabled={isPending}
-                                onClick={() => handleUpdate('mouseTrails', t.id)}
-                                className={cn(
-                                    "p-4 transition-all group flex items-center justify-center gap-3 relative",
-                                    isSelected
-                                        ? "bg-white dark:bg-zinc-950 text-black dark:text-white"
-                                        : "bg-white dark:bg-zinc-950 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                                )}
-                            >
-                                {isSelected && (
-                                    <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />
-                                )}
-                                <t.icon className={cn("w-3.5 h-3.5 transition-transform group-hover:scale-110", isSelected && "animate-pulse")} />
-                                <span className="text-[7px] font-black uppercase tracking-[0.2em]">{t.name}</span>
-                            </button>
-                        )
-                    })}
-                </div>
-            </section>
+            <EditorSection title={t('editors.effects.trails_title')}>
+                <GridSelector
+                    options={trails.map(tInfo => ({ id: tInfo.id as any, label: tInfo.name, icon: tInfo.icon }))}
+                    activeId={profile.mouseTrails || 'none'}
+                    onChange={(id) => handleUpdate('mouseTrails', id as string)}
+                    columns={2}
+                />
+            </EditorSection>
 
-            <section className="space-y-4">
-                <header className="flex items-center gap-2 opacity-30 px-1">
-                    <Activity className="w-2.5 h-2.5 text-black dark:text-white" />
-                    <h3 className="text-[7.5px] font-black uppercase tracking-[0.4em]">{t('editors.effects.atmosphere_title')}</h3>
-                </header>
-                <div className="grid grid-cols-1 gap-2">
+            <EditorSection title={t('editors.effects.atmosphere_title')}>
+                <div className="space-y-3">
                     {backgrounds.map((b) => {
                         const isSelected = profile.backgroundEffect === b.id
                         return (
@@ -160,42 +112,45 @@ export function UniversalEffectsEditor({ profile }: EffectsEditorProps) {
                                 disabled={isPending}
                                 onClick={() => handleUpdate('backgroundEffect', b.id)}
                                 className={cn(
-                                    "w-full p-4 border transition-all group relative overflow-hidden flex items-center justify-between",
+                                    "w-full p-4 rounded-2xl border transition-all group relative overflow-hidden flex items-center justify-between",
                                     isSelected
-                                        ? "bg-zinc-50 dark:bg-zinc-900 border-black dark:border-white"
-                                        : "bg-white dark:bg-black/20 border-zinc-100 dark:border-zinc-800 opacity-60 hover:opacity-100"
+                                        ? "bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-600 shadow-sm"
+                                        : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 text-zinc-400 hover:border-zinc-200 dark:hover:border-zinc-700"
                                 )}
                             >
                                 <div className="flex items-center gap-3 z-10 relative">
-                                    <div className={cn("p-2 border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950", isSelected && "border-black dark:border-white")}>
+                                    <div className={cn(
+                                        "p-2 rounded-xl border transition-all",
+                                        isSelected ? "bg-blue-100 dark:bg-blue-800 text-blue-600" : "bg-zinc-50 dark:bg-zinc-800 text-zinc-400"
+                                    )}>
                                         <b.icon className="w-3.5 h-3.5" />
                                     </div>
-                                    <span className="text-[7.5px] font-black uppercase tracking-[0.4em]">{b.name}</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest">{b.name}</span>
                                 </div>
 
                                 {isSelected && (
                                     <div className="flex items-center gap-1.5 z-10">
-                                        <div className="w-1 h-1 bg-current animate-ping" />
-                                        <span className="text-[7px] font-black opacity-50 uppercase tracking-widest">{t('editors.effects.active')}</span>
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                        <span className="text-[8px] font-bold opacity-60 uppercase tracking-widest">{t('editors.effects.active')}</span>
                                     </div>
                                 )}
                             </button>
                         )
                     })}
                 </div>
-            </section>
+            </EditorSection>
 
             <div className="h-6 flex items-center justify-center">
                 {isPending && (
-                    <div className="flex items-center justify-center gap-2 text-[7px] font-black uppercase tracking-[0.4em] text-zinc-400 animate-pulse">
-                        <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                    <div className="flex items-center justify-center gap-3 text-[9px] font-bold uppercase tracking-widest text-zinc-400 animate-pulse">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         {t('editors.effects.syncing')}
                     </div>
                 )}
 
                 {showSuccess && !isPending && (
-                    <div className="flex items-center justify-center gap-2 text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500">
-                        <Check className="w-2.5 h-2.5" />
+                    <div className="flex items-center justify-center gap-3 text-[9px] font-bold uppercase tracking-widest text-emerald-500">
+                        <Check className="w-3.5 h-3.5" />
                         {t('editors.effects.deployed')}
                     </div>
                 )}
