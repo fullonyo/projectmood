@@ -49,23 +49,14 @@ export function UniversalLayersPanel({
 
     // Elite Entity Generation Logic
     const entities = useMemo(() => {
-        // Only consider blocks that exist
         const validBlocks = blocks.filter(b => b.id)
-        
-        const sortedBlocks = [...validBlocks].sort((a, b) => {
-            if (a.groupId && a.groupId === b.groupId) {
-                return (b.zIndex || 0) - (a.zIndex || 0)
-            }
-            return (b.zIndex || 0) - (a.zIndex || 0)
-        })
-
+        const sortedBlocks = [...validBlocks].sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0))
         const result: LayerEntity[] = []
         const processedGroups = new Set<string>()
 
         sortedBlocks.forEach(block => {
             if (block.groupId && !processedGroups.has(block.groupId)) {
                 const groupMembers = validBlocks.filter(b => b.groupId === block.groupId)
-                // Only show header if group has members
                 if (groupMembers.length > 0) {
                     const groupName = (block.content as any)?.groupName || `Group // ${block.groupId.split('_')[1]?.substring(0, 4)}`
                     result.push({ type: 'header', id: `header_${block.groupId}`, groupId: block.groupId, name: groupName })
@@ -82,7 +73,6 @@ export function UniversalLayersPanel({
         return result
     }, [blocks, collapsedGroups])
 
-    // Atomic Reorder Handler
     const handleReorderEntities = useCallback((newEntities: LayerEntity[]) => {
         const updatedBlocksIds: string[] = []
         const processedGroups = new Set<string>()
@@ -115,8 +105,6 @@ export function UniversalLayersPanel({
         )
     }
 
-    const hasGroupsInSelection = selectedIds.some(id => blocks.find(b => b.id === id)?.groupId)
-
     const handleHeaderSelect = (groupId: string, multi: boolean) => {
         const memberIds = blocks.filter(b => b.groupId === groupId).map(b => b.id)
         if (multi) {
@@ -130,8 +118,11 @@ export function UniversalLayersPanel({
         }
     }
 
+    const hasGroupsInSelection = selectedIds.some(id => blocks.find(b => b.id === id)?.groupId)
+
     return (
         <div className="flex flex-col h-full bg-transparent overflow-hidden select-none">
+            {/* Header Section */}
             <div className="p-8 pb-4 border-b border-zinc-100 dark:border-zinc-800 space-y-6">
                 <EditorHeader 
                     title={t('canvas.layers')}
@@ -215,59 +206,66 @@ export function UniversalLayersPanel({
                 </AnimatePresence>
             </div>
 
+            {/* List Section */}
             <div className="flex-1 overflow-y-auto custom-scrollbar p-3 pt-6">
                 <Reorder.Group 
                     axis="y" 
                     values={entities} 
                     onReorder={handleReorderEntities}
-                    className="space-y-1.5"
+                    className="space-y-1"
                 >
-                    {entities.map((entity) => (
-                        <Reorder.Item 
-                            key={entity.id} 
-                            value={entity}
-                            className="relative"
-                        >
-                            {entity.type === 'header' ? (
-                                <FolderHeader 
-                                    groupId={entity.groupId}
-                                    name={entity.name}
-                                    isCollapsed={collapsedGroups.includes(entity.groupId)}
-                                    onToggle={() => toggleGroupCollapse(entity.groupId)}
-                                    onSelect={(multi: boolean) => handleHeaderSelect(entity.groupId, multi)}
-                                    onUpdateGroup={(updates: any) => {
-                                        const ids = blocks.filter(b => b.groupId === entity.groupId).map(b => b.id)
-                                        onUpdateBlocks(ids, updates)
-                                    }}
-                                    onDelete={() => {
-                                        const ids = blocks.filter(b => b.groupId === entity.groupId).map(b => b.id)
-                                        onDeleteRequest(ids)
-                                    }}
-                                    members={blocks.filter(b => b.groupId === entity.groupId)}
-                                    t={t}
-                                    setHoveredBlockIds={setHoveredBlockIds}
-                                />
-                            ) : (
-                                <LayerItem
-                                    block={entity.data}
-                                    isSelected={selectedIds.includes(entity.id)}
-                                    onSelect={(id, multi) => {
-                                        setSelectedIds(prev => {
-                                            if (multi) {
-                                                if (prev.includes(id)) return prev.filter(i => i !== id)
-                                                return [...prev, id]
-                                            }
-                                            return [id]
-                                        })
-                                    }}
-                                    onUpdate={onUpdateBlock}
-                                    t={t}
-                                    setHoveredBlockIds={setHoveredBlockIds}
-                                    onDelete={(id) => onDeleteRequest([id])}
-                                />
-                            )}
-                        </Reorder.Item>
-                    ))}
+                    {entities.map((entity, index) => {
+                        const isLastInGroup = entity.type === 'block' && entity.data.groupId && 
+                            (index === entities.length - 1 || (entities[index + 1].type === 'block' && entities[index + 1].data.groupId !== entity.data.groupId) || entities[index + 1].type === 'header')
+
+                        return (
+                            <Reorder.Item 
+                                key={entity.id} 
+                                value={entity}
+                                className="relative"
+                            >
+                                {entity.type === 'header' ? (
+                                    <FolderHeader 
+                                        groupId={entity.groupId}
+                                        name={entity.name}
+                                        isCollapsed={collapsedGroups.includes(entity.groupId)}
+                                        onToggle={() => toggleGroupCollapse(entity.groupId)}
+                                        onSelect={(multi: boolean) => handleHeaderSelect(entity.groupId, multi)}
+                                        onUpdateGroup={(updates: any) => {
+                                            const ids = blocks.filter(b => b.groupId === entity.groupId).map(b => b.id)
+                                            onUpdateBlocks(ids, updates)
+                                        }}
+                                        onDelete={() => {
+                                            const ids = blocks.filter(b => b.groupId === entity.groupId).map(b => b.id)
+                                            onDeleteRequest(ids)
+                                        }}
+                                        members={blocks.filter(b => b.groupId === entity.groupId)}
+                                        t={t}
+                                        setHoveredBlockIds={setHoveredBlockIds}
+                                    />
+                                ) : (
+                                    <LayerItem
+                                        block={entity.data}
+                                        isLastInGroup={isLastInGroup}
+                                        isSelected={selectedIds.includes(entity.id)}
+                                        onSelect={(id, multi) => {
+                                            setSelectedIds(prev => {
+                                                if (multi) {
+                                                    if (prev.includes(id)) return prev.filter(i => i !== id)
+                                                    return [...prev, id]
+                                                }
+                                                return [id]
+                                            })
+                                        }}
+                                        onUpdate={onUpdateBlock}
+                                        t={t}
+                                        setHoveredBlockIds={setHoveredBlockIds}
+                                        onDelete={(id) => onDeleteRequest([id])}
+                                    />
+                                )}
+                            </Reorder.Item>
+                        )
+                    })}
                 </Reorder.Group>
 
                 {blocks.length === 0 && (
@@ -280,6 +278,7 @@ export function UniversalLayersPanel({
                 )}
             </div>
 
+            {/* Footer Section */}
             <footer className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50">
                 <div className="flex items-center justify-between text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-2">
                     <div className="flex items-center gap-2">
@@ -307,15 +306,16 @@ const FolderHeader = ({ groupId, name, isCollapsed, onToggle, onSelect, onUpdate
     }
 
     return (
-        <div 
+        <motion.div 
             onClick={(e) => onSelect(e.shiftKey || e.metaKey)}
             onMouseEnter={() => setHoveredBlockIds(members.map((m: any) => m.id))}
             onMouseLeave={() => setHoveredBlockIds([])}
             className={cn(
-                "flex items-center gap-2 px-2 py-2 group/folder cursor-pointer rounded-xl transition-all border border-transparent mb-1",
-                "bg-zinc-50/50 dark:bg-zinc-900/30 hover:border-zinc-200 dark:hover:border-zinc-800 hover:shadow-sm",
-                !isCollapsed && "bg-blue-50/10 dark:bg-blue-900/5 border-blue-500/10"
+                "flex items-center gap-2 px-2 py-2 group/folder cursor-pointer rounded-xl transition-all border border-transparent mb-0.5 relative z-10",
+                "bg-zinc-50/50 dark:bg-zinc-900/30 hover:border-zinc-200 dark:hover:border-zinc-800",
+                !isCollapsed && "bg-blue-50/10 dark:bg-blue-900/10 border-blue-500/10"
             )}
+            whileDrag={{ scale: 1.02, shadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
         >
             <div 
                 onPointerDown={(e) => { e.stopPropagation(); setHoveredBlockIds([]); dragControls.start(e); }} 
@@ -329,7 +329,9 @@ const FolderHeader = ({ groupId, name, isCollapsed, onToggle, onSelect, onUpdate
                 onClick={(e) => { e.stopPropagation(); onToggle(); }}
                 className="p-1 hover:bg-white dark:hover:bg-zinc-800 rounded-lg transition-colors shadow-sm"
             >
-                {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                <motion.div animate={{ rotate: isCollapsed ? 0 : 90 }}>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                </motion.div>
             </button>
             
             <div className="w-7 h-7 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm">
@@ -380,11 +382,11 @@ const FolderHeader = ({ groupId, name, isCollapsed, onToggle, onSelect, onUpdate
                     <Trash2 className="w-3.5 h-3.5" />
                 </button>
             </div>
-        </div>
+        </motion.div>
     )
 }
 
-const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, setHoveredBlockIds }: any) => {
+const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, setHoveredBlockIds, isLastInGroup }: any) => {
     const [isEditingName, setIsEditingName] = useState(false)
     const [tempName, setTempName] = useState((block.content as any).customName || "")
     const dragControls = useDragControls()
@@ -428,23 +430,34 @@ const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, se
     }
 
     return (
-        <div 
+        <motion.div 
             onMouseEnter={() => !isEditingName && setHoveredBlockIds([block.id])}
             onMouseLeave={() => setHoveredBlockIds([])}
-            className="flex items-center"
+            className="flex items-center relative"
+            whileDrag={{ scale: 1.02, shadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
         >
             {block.groupId && (
-                <div className="absolute left-[1.15rem] top-0 bottom-0 w-[1.5px] bg-zinc-200 dark:bg-zinc-800 transition-colors" />
+                <>
+                    {/* Main vertical line */}
+                    <div className="absolute left-[1.15rem] top-0 bottom-0 w-[1.5px] bg-zinc-200 dark:bg-zinc-800/50 transition-colors" />
+                    {/* Curved connector */}
+                    <div className={cn(
+                        "absolute left-[1.15rem] top-1/2 w-4 h-4 border-l-[1.5px] border-b-[1.5px] border-zinc-200 dark:border-zinc-800/50 rounded-bl-lg -translate-y-1/2",
+                        isLastInGroup && "h-1/2 top-0 translate-y-0"
+                    )} />
+                </>
             )}
 
             <div
                 className={cn(
-                    "flex-1 flex items-center gap-3 p-2 rounded-2xl transition-all cursor-pointer border relative overflow-hidden mb-1 group",
+                    "flex-1 flex items-center gap-3 p-2 rounded-2xl transition-all cursor-pointer border relative overflow-hidden mb-0.5 group",
                     isSelected
                         ? "bg-blue-50/80 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 shadow-sm"
                         : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700",
                     block.isHidden && "opacity-40 grayscale",
-                    block.groupId && "ml-8"
+                    block.groupId && "ml-8",
+                    // Group Area Tinting
+                    block.groupId && !isSelected && "bg-zinc-50/30 dark:bg-zinc-900/20"
                 )}
                 onClick={(e) => onSelect(block.id, e.shiftKey || e.metaKey)}
             >
@@ -543,7 +556,7 @@ const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, se
                     </button>
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 })
 

@@ -518,17 +518,6 @@ export const CanvasItem = memo(({
 
                     {/* Subtle Inner Border */}
                     <div className="absolute inset-4 border border-blue-500/20 rounded-[2rem] ring-4 ring-blue-500/5" />
-                    
-                    {/* Floating Label */}
-                    <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-blue-600 rounded-full shadow-xl shadow-blue-600/20"
-                    >
-                        <span className="text-[9px] font-black text-white uppercase tracking-[0.2em] whitespace-nowrap">
-                            {t('canvas.focusing_layer')}
-                        </span>
-                    </motion.div>
                 </div>
             )}
         </motion.div>
