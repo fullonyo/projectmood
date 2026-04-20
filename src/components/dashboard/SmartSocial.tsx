@@ -8,7 +8,8 @@ import {
 } from "lucide-react"
 import {
     DiscordIcon, TikTokIcon, SteamIcon,
-    SpotifyIcon, TwitchIcon, PinterestIcon
+    SpotifyIcon, TwitchIcon, PinterestIcon,
+    RobloxIcon, VRChatIcon, RiotGamesIcon, LOLIcon
 } from "../icons"
 import { toast } from "sonner"
 
@@ -26,6 +27,10 @@ const ICONS: Record<string, SocialIconType> = {
     github: Github,
     linkedin: Linkedin,
     youtube: Youtube,
+    roblox: RobloxIcon,
+    vrchat: VRChatIcon,
+    riot: RiotGamesIcon,
+    lol: LOLIcon,
     custom: LinkIcon
 }
 
@@ -41,6 +46,10 @@ const PLATFORM_COLORS: Record<string, string> = {
     github: '#ffffff',
     linkedin: '#0A66C2',
     youtube: '#FF0000',
+    roblox: '#000000',
+    vrchat: '#000000',
+    riot: '#D32936',
+    lol: '#C89B3C',
     custom: '#999999'
 }
 

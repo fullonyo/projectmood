@@ -22,7 +22,7 @@ import {
     Ghost
 } from "lucide-react"
 import { Label } from "@/components/ui/label"
-import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
+import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon, RobloxIcon, VRChatIcon, RiotGamesIcon, LOLIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useTranslation } from "@/i18n/context"
@@ -37,7 +37,12 @@ const PLATFORMS = [
     { id: 'twitch', icon: TwitchIcon, label: 'Twitch', color: '#9146FF' },
     { id: 'pinterest', icon: PinterestIcon, label: 'Pinterest', color: '#E60023' },
     { id: 'github', icon: Github, label: 'GitHub', color: '#333' },
+    { id: 'linkedin', icon: Linkedin, label: 'LinkedIn', color: '#0A66C2' },
     { id: 'youtube', icon: Youtube, label: 'YouTube', color: '#FF0000' },
+    { id: 'roblox', icon: RobloxIcon, label: 'Roblox', color: '#000000' },
+    { id: 'vrchat', icon: VRChatIcon, label: 'VRChat', color: '#000000' },
+    { id: 'riot', icon: RiotGamesIcon, label: 'Riot Games', color: '#D32936' },
+    { id: 'lol', icon: LOLIcon, label: 'League of Legends', color: '#C89B3C' },
     { id: 'custom', icon: LinkIcon, label: 'custom_link', color: '#666' },
 ]
 
