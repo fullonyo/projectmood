@@ -14,7 +14,12 @@ import {
     Plus,
     Share2,
     Activity,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Globe,
+    Sparkles,
+    LayoutList,
+    Box,
+    Ghost
 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon } from "@/components/icons"
@@ -52,6 +57,8 @@ const STYLES = [
 import { MoodBlock, SocialContent } from "@/types/database"
 import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, EditorSwitch } from "./EditorUI"
 
+type TabType = 'connection' | 'esthetics'
+
 export function UniversalSocialEditor({
     block,
     onUpdate,
@@ -66,34 +73,28 @@ export function UniversalSocialEditor({
     highlight?: boolean
 }) {
     const { t } = useTranslation()
-    const [selectedPlatform, setSelectedPlatform] = useState(PLATFORMS[0])
-    const [url, setUrl] = useState("")
-    const [label, setLabel] = useState("")
-    const [style, setStyle] = useState('tag')
-    const [subLabel, setSubLabel] = useState("")
-    const [isGrid, setIsGrid] = useState(false)
-    const [showBg, setShowBg] = useState(true)
-    const [isPending, startTransition] = useTransition()
+    const content = block?.content as SocialContent | undefined
+    const initialPlatform = PLATFORMS.find(p => p.id === content?.platform) || PLATFORMS[0]
+    
+    let initialLayout: 'classic' | 'bento' | 'floating' = 'classic'
+    if (content?.isGrid && content?.showBg !== false) initialLayout = 'bento'
+    if (content?.showBg === false) initialLayout = 'floating'
 
-    // 1. Sync with selected block
-    useEffect(() => {
-        if (block && block.type === 'social') {
-            const content = block.content as SocialContent
-            const platformId = content.platform
-            const platform = PLATFORMS.find(p => p.id === platformId) || PLATFORMS[0]
-            setSelectedPlatform(platform)
-            setUrl(content.url || "")
-            setLabel(content.label || "")
-            setSubLabel(content.subLabel || "")
-            setStyle(content.style || 'tag')
-            setIsGrid(!!content.isGrid)
-            setShowBg(content.showBg !== false)
-        }
-    }, [block?.id])
+    const [selectedPlatform, setSelectedPlatform] = useState(initialPlatform)
+    const [url, setUrl] = useState(content?.url || "")
+    const [label, setLabel] = useState(content?.label || "")
+    const [style, setStyle] = useState(content?.style || 'tag')
+    const [subLabel, setSubLabel] = useState(content?.subLabel || "")
+    const [layoutMode, setLayoutMode] = useState<'classic' | 'bento' | 'floating'>(initialLayout)
+    const [isPending, startTransition] = useTransition()
+    const [activeTab, setActiveTab] = useState<TabType>('connection')
 
     // 2. Real-time Preview
     useEffect(() => {
         if (!block?.id || !onUpdate) return
+
+        const isGrid = layoutMode === 'bento'
+        const showBg = layoutMode !== 'floating'
 
         const content = {
             platform: selectedPlatform.id,
@@ -106,12 +107,15 @@ export function UniversalSocialEditor({
         }
 
         onUpdate(block.id, { content })
-    }, [selectedPlatform, url, label, subLabel, style, isGrid, showBg, block?.id, onUpdate])
+    }, [selectedPlatform, url, label, subLabel, style, layoutMode, block?.id, onUpdate])
 
     const handleAction = () => {
-        if (!url && !block?.id) return
+        if (!url && !label && !block?.id) return
 
         startTransition(async () => {
+            const isGrid = layoutMode === 'bento'
+            const showBg = layoutMode !== 'floating'
+
             const content = {
                 platform: selectedPlatform.id,
                 url,
@@ -130,8 +134,8 @@ export function UniversalSocialEditor({
                 setLabel("")
                 setSubLabel("")
             } else {
-                const initialWidth = isGrid ? 50 : 150
-                const initialHeight = isGrid ? 50 : 45
+                const initialWidth = layoutMode === 'bento' ? 50 : 150
+                const initialHeight = layoutMode === 'bento' ? 50 : 45
 
                 const res = await addMoodBlock('social', content, {
                     x: 50, y: 50,
@@ -159,87 +163,103 @@ export function UniversalSocialEditor({
                 subtitle={t('editors.social.subtitle')}
             />
 
-            <EditorSection title="Plataforma">
-                <GridSelector
-                    options={PLATFORMS.map(p => ({ id: p.id as any, label: p.id === 'custom' ? 'Link' : p.label, icon: p.icon }))}
-                    activeId={selectedPlatform.id as any}
-                    onChange={(id) => {
-                        const p = PLATFORMS.find(platform => platform.id === id)
-                        if (p) setSelectedPlatform(p)
-                    }}
-                    columns={4}
-                />
-            </EditorSection>
+            <PillSelector
+                options={[
+                    { id: 'connection', label: "Conexão", icon: Globe },
+                    { id: 'esthetics', label: "Estética", icon: Sparkles },
+                ]}
+                activeId={activeTab}
+                onChange={(id) => setActiveTab(id as TabType)}
+            />
 
-            <EditorSection title="Configurações">
-                <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-4">
-                    <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">Link / URL</Label>
-                        <div className="relative">
-                            <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                            <Input
-                                placeholder="https://..."
-                                value={url}
-                                onChange={(e) => setUrl(e.target.value)}
-                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium"
-                            />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">Label</Label>
-                            <Input
-                                placeholder="Texto do botão"
-                                value={label}
-                                onChange={(e) => setLabel(e.target.value)}
-                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl h-12 text-[11px] font-medium px-4"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">Sub-label</Label>
-                            <Input
-                                placeholder="Texto secundário"
-                                value={subLabel}
-                                onChange={(e) => setSubLabel(e.target.value)}
-                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl h-12 text-[11px] font-medium px-4"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </EditorSection>
-
-            <EditorSection title="Estética">
-                <div className="space-y-6">
-                    <EditorSection title="Estilo Visual">
-                        <PillSelector
-                            variant="scroll"
-                            options={STYLES.map(s => ({ id: s.id as any, label: t(`editors.social.styles.${s.id}`) }))}
-                            activeId={style as any}
-                            onChange={(id) => setStyle(id as any)}
+            {activeTab === 'connection' ? (
+                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <EditorSection title={t('editors.social.nodes') || "Plataforma"}>
+                        <GridSelector
+                            options={PLATFORMS.map(p => ({ id: p.id as any, label: '', icon: p.icon, color: p.color }))}
+                            activeId={selectedPlatform.id as any}
+                            onChange={(id) => {
+                                const p = PLATFORMS.find(platform => platform.id === id)
+                                if (p) setSelectedPlatform(p)
+                            }}
+                            columns={5}
+                            variant="circle"
                         />
                     </EditorSection>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <EditorSwitch
-                            label="Modo Grade"
-                            value={isGrid}
-                            onChange={setIsGrid}
-                            icon={Share2}
-                        />
-                        <EditorSwitch
-                            label="Sem Fundo"
-                            value={!showBg}
-                            onChange={(v) => setShowBg(!v)}
-                            icon={ImageIcon}
-                        />
-                    </div>
+                    <EditorSection title="Configurações do Link">
+                        <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-5">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">
+                                    {selectedPlatform.id === 'discord' ? 'Link de Convite (Opcional)' : (t('editors.social.link_protocol') || 'Link / URL')}
+                                </Label>
+                                <div className="relative">
+                                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                    <Input
+                                        placeholder={selectedPlatform.id === 'discord' ? 'https://discord.gg/...' : (t('editors.social.link_placeholder') || 'https://...')}
+                                        value={url}
+                                        onChange={(e) => setUrl(e.target.value)}
+                                        className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">
+                                        {selectedPlatform.id === 'discord' ? 'Sua Tag / Username' : (t('editors.social.visual_alias') || 'Label')}
+                                    </Label>
+                                    <Input
+                                        placeholder={selectedPlatform.id === 'discord' ? 'ex: login.jsx' : (t('editors.social.alias_placeholder') || 'Texto do botão')}
+                                        value={label}
+                                        onChange={(e) => setLabel(e.target.value)}
+                                        className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl h-12 text-[11px] font-medium px-4"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">{t('editors.social.sub_label') || 'Sub-label'}</Label>
+                                    <Input
+                                        placeholder={t('editors.social.sub_label_placeholder') || 'Texto secundário'}
+                                        value={subLabel}
+                                        onChange={(e) => setSubLabel(e.target.value)}
+                                        className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl h-12 text-[11px] font-medium px-4"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </EditorSection>
                 </div>
-            </EditorSection>
+            ) : (
+                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <EditorSection title="Modo de Exibição (Layout)">
+                        <GridSelector
+                            options={[
+                                { id: 'classic', label: 'Lista Clássica', icon: LayoutList },
+                                { id: 'bento', label: t('editors.social.layout_bento') || 'Bento Box', icon: Box },
+                                { id: 'floating', label: t('editors.social.layout_borderless') || 'Flutuante', icon: Ghost }
+                            ]}
+                            activeId={layoutMode}
+                            onChange={(id) => setLayoutMode(id as any)}
+                            columns={3}
+                        />
+                    </EditorSection>
+
+                    <EditorSection title={t('editors.social.style_manifesto') || "Estilo do Botão"}>
+                        <div className="space-y-6">
+                            <PillSelector
+                                variant="scroll"
+                                options={STYLES.map(s => ({ id: s.id as any, label: t(`editors.social.styles.${s.id}`) }))}
+                                activeId={style as any}
+                                onChange={(id) => setStyle(id as any)}
+                            />
+                        </div>
+                    </EditorSection>
+                </div>
+            )}
 
             <EditorActionButton 
                 onClick={handleAction} 
                 isLoading={isPending} 
-                disabled={!url && !block?.id}
+                disabled={!url && !label && !block?.id}
                 label={block?.id ? t('common.close') : t('editors.social.deploy')}
             />
         </div>

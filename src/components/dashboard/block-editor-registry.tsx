@@ -59,9 +59,11 @@ export function BlockEditorRegistry({
     // Memoized Update Handlers to prevent infinite loops in child editors' useEffects
     const selectedIdsString = selectedBlocks.map(b => b.id).join(',')
     
-    const handleSingleUpdate = useMemo(() => (updates: any) => {
+    const handleSingleUpdate = useMemo(() => (idOrUpdates: any, updates?: any) => {
         if (!firstBlock) return
-        onUpdateBlock(firstBlock.id, updates)
+        const actualId = typeof idOrUpdates === 'string' ? idOrUpdates : firstBlock.id
+        const actualUpdates = typeof idOrUpdates === 'string' ? updates : idOrUpdates
+        onUpdateBlock(actualId, actualUpdates)
     }, [firstBlock?.id, onUpdateBlock])
 
     const handleBatchUpdate = useMemo(() => (updates: any) => {
@@ -135,6 +137,7 @@ function getEditor(type: string) {
         'guestbook': UniversalGuestbookEditor,
         'rorschach': UniversalRorschachEditor,
         'shape': UniversalShapeEditor,
+        'social': UniversalSocialEditor,
         'moodStatus': UniversalSocialEditor,
         'effects': UniversalEffectsEditor
     }

@@ -10,6 +10,7 @@ import {
     DiscordIcon, TikTokIcon, SteamIcon,
     SpotifyIcon, TwitchIcon, PinterestIcon
 } from "../icons"
+import { toast } from "sonner"
 
 type SocialIconType = React.ElementType;
 
@@ -63,10 +64,22 @@ export function SmartSocial({ content, isPublic = false }: SocialBlockPublicProp
 
     return (
         <a
-            href={content.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => !isPublic && e.preventDefault()}
+            href={content.url || undefined}
+            target={content.url ? "_blank" : undefined}
+            rel={content.url ? "noopener noreferrer" : undefined}
+            onClick={(e) => {
+                if (!isPublic) {
+                    e.preventDefault()
+                    return
+                }
+                if (!content.url && content.label) {
+                    e.preventDefault()
+                    navigator.clipboard.writeText(content.label)
+                    toast.success(`Copiado para a área de transferência!`, {
+                        description: content.label
+                    })
+                }
+            }}
             className={cn(
                 "flex items-center w-full h-full transition-all duration-300 shadow-none overflow-hidden group",
                 content.isGrid ? "justify-center" : "justify-start",
