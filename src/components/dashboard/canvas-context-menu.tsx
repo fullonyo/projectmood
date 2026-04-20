@@ -29,6 +29,8 @@ export function CanvasContextMenu({ x, y, block, onClose, onAction }: ContextMen
     const menuRef = useRef<HTMLDivElement>(null)
     const { t } = useTranslation()
 
+    if (!block) return null;
+
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(e.target as Node)) {

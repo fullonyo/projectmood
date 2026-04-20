@@ -150,16 +150,16 @@ export function SmartSocial({ content, isPublic = false }: SocialBlockPublicProp
             {!content.isGrid && (
                 <div className="flex flex-col min-w-0" style={{ gap: Math.round(2 * scale) }}>
                     <span className={cn(
-                        "font-bold truncate leading-none",
-                        content.style === 'minimal' && "uppercase tracking-[0.3em]",
-                        content.style === 'retro' && "font-mono uppercase tracking-tighter"
+                        "font-bold truncate leading-tight pb-[0.05em]",
+                        content.style === 'minimal' && "tracking-[0.3em]",
+                        content.style === 'retro' && "font-mono tracking-tighter"
                     )} style={{ fontSize: content.style === 'minimal' ? Math.round(10 * scale) : Math.round(14 * scale) }}>
                         {content.label}
                     </span>
                     {content.subLabel && (
                         <span className={cn(
-                            "truncate opacity-60 leading-none",
-                            content.style === 'minimal' && "uppercase tracking-widest",
+                            "truncate opacity-60 leading-tight pb-[0.05em]",
+                            content.style === 'minimal' && "tracking-widest",
                             content.style === 'retro' && "font-mono"
                         )} style={{ fontSize: Math.round(10 * scale) }}>
                             {content.subLabel}
