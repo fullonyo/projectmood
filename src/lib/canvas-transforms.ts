@@ -217,8 +217,15 @@ export function calculateResize(
     };
 }
 
+interface SnapCandidate {
+    pos: number;          // % target position
+    dist: number;         // % absolute distance
+    guideline: Guideline;
+}
+
 /**
  * Calcula o snap do bloco baseado no grid e em outros blocos.
+ * Utiliza arquitetura "Closest-Wins" com Limiar Magnético em Pixels.
  */
 export function calculateSnap(
     x: number, // % 
@@ -228,128 +235,112 @@ export function calculateSnap(
     canvasWidth: number,
     canvasHeight: number,
     otherBlocks: Array<{ x: number, y: number, width: number | 'auto', height: number | 'auto' }>,
-    snapThreshold = 1, // %
+    snapThresholdPx = 5, // Constante de Força Magnética Absoluta em Pixels (Figma Style)
     gridSize = 2.5 // % (conforme definido no themeConfig)
 ): SnapResult {
+    const wPercent = (width / canvasWidth) * 100;
+    const hPercent = (height / canvasHeight) * 100;
+
+    // Converte os pixels magnéticos para a porcentagem relativa do zoom atual
+    const snapThresholdX = (snapThresholdPx / canvasWidth) * 100;
+    const snapThresholdY = (snapThresholdPx / canvasHeight) * 100;
+
+    const xCandidates: SnapCandidate[] = [];
+    const yCandidates: SnapCandidate[] = [];
+
+    // 1. Grid Snap
+    const gridX = Math.round(x / gridSize) * gridSize;
+    const gridY = Math.round(y / gridSize) * gridSize;
+    if (Math.abs(x - gridX) <= snapThresholdX) xCandidates.push({ pos: gridX, dist: Math.abs(x - gridX), guideline: { type: 'vertical', pos: gridX }});
+    if (Math.abs(y - gridY) <= snapThresholdY) yCandidates.push({ pos: gridY, dist: Math.abs(y - gridY), guideline: { type: 'horizontal', pos: gridY }});
+
+    // 2. Canvas Edges & Safe Areas Snap
+    const safePaddingX = (40 / canvasWidth) * 100;
+    const safePaddingY = (40 / canvasHeight) * 100;
+
+    // Left Edge
+    if (Math.abs(x - safePaddingX) <= snapThresholdX) xCandidates.push({ pos: safePaddingX, dist: Math.abs(x - safePaddingX), guideline: { type: 'vertical', pos: safePaddingX }});
+    if (Math.abs(x - 0) <= snapThresholdX) xCandidates.push({ pos: 0, dist: Math.abs(x - 0), guideline: { type: 'vertical', pos: 0 }});
+    // Right Edge
+    if (Math.abs((x + wPercent) - (100 - safePaddingX)) <= snapThresholdX) xCandidates.push({ pos: 100 - safePaddingX - wPercent, dist: Math.abs((x + wPercent) - (100 - safePaddingX)), guideline: { type: 'vertical', pos: 100 - safePaddingX }});
+    if (Math.abs((x + wPercent) - 100) <= snapThresholdX) xCandidates.push({ pos: 100 - wPercent, dist: Math.abs((x + wPercent) - 100), guideline: { type: 'vertical', pos: 100 }});
+
+    // Top Edge
+    if (Math.abs(y - safePaddingY) <= snapThresholdY) yCandidates.push({ pos: safePaddingY, dist: Math.abs(y - safePaddingY), guideline: { type: 'horizontal', pos: safePaddingY }});
+    if (Math.abs(y - 0) <= snapThresholdY) yCandidates.push({ pos: 0, dist: Math.abs(y - 0), guideline: { type: 'horizontal', pos: 0 }});
+    // Bottom Edge
+    if (Math.abs((y + hPercent) - (100 - safePaddingY)) <= snapThresholdY) yCandidates.push({ pos: 100 - safePaddingY - hPercent, dist: Math.abs((y + hPercent) - (100 - safePaddingY)), guideline: { type: 'horizontal', pos: 100 - safePaddingY }});
+    if (Math.abs((y + hPercent) - 100) <= snapThresholdY) yCandidates.push({ pos: 100 - hPercent, dist: Math.abs((y + hPercent) - 100), guideline: { type: 'horizontal', pos: 100 }});
+
+    // 3. Block-to-Block Snapping
+    for (const block of otherBlocks) {
+        const bW = typeof block.width === 'number' ? (block.width / canvasWidth) * 100 : 0;
+        const bH = typeof block.height === 'number' ? (block.height / canvasHeight) * 100 : 0;
+        const bCenterX = block.x + (bW / 2);
+        const bCenterY = block.y + (bH / 2);
+
+        // -- Eixo X --
+        // Left - Left
+        if (Math.abs(x - block.x) <= snapThresholdX) xCandidates.push({ pos: block.x, dist: Math.abs(x - block.x), guideline: { type: 'vertical', pos: block.x }});
+        // Right - Right
+        if (Math.abs((x + wPercent) - (block.x + bW)) <= snapThresholdX) xCandidates.push({ pos: block.x + bW - wPercent, dist: Math.abs((x + wPercent) - (block.x + bW)), guideline: { type: 'vertical', pos: block.x + bW }});
+        // Center - Center
+        if (Math.abs((x + wPercent / 2) - bCenterX) <= snapThresholdX) xCandidates.push({ pos: bCenterX - (wPercent / 2), dist: Math.abs((x + wPercent / 2) - bCenterX), guideline: { type: 'vertical', pos: bCenterX }});
+        // Left - Right (Edge-to-Edge)
+        if (Math.abs(x - (block.x + bW)) <= snapThresholdX) xCandidates.push({ pos: block.x + bW, dist: Math.abs(x - (block.x + bW)), guideline: { type: 'vertical', pos: block.x + bW }});
+        // Right - Left (Edge-to-Edge)
+        if (Math.abs((x + wPercent) - block.x) <= snapThresholdX) xCandidates.push({ pos: block.x - wPercent, dist: Math.abs((x + wPercent) - block.x), guideline: { type: 'vertical', pos: block.x }});
+
+        // -- Eixo Y --
+        // Top - Top
+        if (Math.abs(y - block.y) <= snapThresholdY) yCandidates.push({ pos: block.y, dist: Math.abs(y - block.y), guideline: { type: 'horizontal', pos: block.y }});
+        // Bottom - Bottom
+        if (Math.abs((y + hPercent) - (block.y + bH)) <= snapThresholdY) yCandidates.push({ pos: block.y + bH - hPercent, dist: Math.abs((y + hPercent) - (block.y + bH)), guideline: { type: 'horizontal', pos: block.y + bH }});
+        // Center - Center
+        if (Math.abs((y + hPercent / 2) - bCenterY) <= snapThresholdY) yCandidates.push({ pos: bCenterY - (hPercent / 2), dist: Math.abs((y + hPercent / 2) - bCenterY), guideline: { type: 'horizontal', pos: bCenterY }});
+        // Top - Bottom (Edge-to-Edge)
+        if (Math.abs(y - (block.y + bH)) <= snapThresholdY) yCandidates.push({ pos: block.y + bH, dist: Math.abs(y - (block.y + bH)), guideline: { type: 'horizontal', pos: block.y + bH }});
+        // Bottom - Top (Edge-to-Edge)
+        if (Math.abs((y + hPercent) - block.y) <= snapThresholdY) yCandidates.push({ pos: block.y - hPercent, dist: Math.abs((y + hPercent) - block.y), guideline: { type: 'horizontal', pos: block.y }});
+    }
+
+    // 4. O Motor "Closest-Wins"
+    xCandidates.sort((a, b) => a.dist - b.dist);
+    yCandidates.sort((a, b) => a.dist - b.dist);
+
     let finalX = x;
     let finalY = y;
     const guidelines: Guideline[] = [];
 
-    const wPercent = (width / canvasWidth) * 100;
-    const hPercent = (height / canvasHeight) * 100;
-
-    // 1. Grid & Canvas Edge Snapping
-    const safePaddingX = (40 / canvasWidth) * 100;
-    const safePaddingY = (40 / canvasHeight) * 100;
-
-    // Grid Snap
-    const snappedX = Math.round(x / gridSize) * gridSize;
-    const snappedY = Math.round(y / gridSize) * gridSize;
-
-    if (Math.abs(x - snappedX) < snapThreshold) finalX = snappedX;
-    if (Math.abs(y - snappedY) < snapThreshold) finalY = snappedY;
-
-    // Canvas Edges Snap (with Safe Area)
-    // Left
-    if (Math.abs(finalX - safePaddingX) < snapThreshold) {
-        finalX = safePaddingX;
-        guidelines.push({ type: 'vertical', pos: safePaddingX });
-    } else if (Math.abs(finalX - 0) < snapThreshold) {
-        finalX = 0;
-        guidelines.push({ type: 'vertical', pos: 0 });
+    // Coroa o vencedor do Eixo X e coleta as linhas guias associadas
+    if (xCandidates.length > 0) {
+        const winner = xCandidates[0];
+        finalX = winner.pos;
+        
+        // Pega todos que empataram com o vencedor (distâncias idênticas geram múltiplas réguas)
+        const tiedWinners = xCandidates.filter(c => Math.abs(c.pos - winner.pos) < 0.001);
+        const uniquePos = new Set<number>();
+        tiedWinners.forEach(c => {
+            if (!uniquePos.has(c.guideline.pos)) {
+                uniquePos.add(c.guideline.pos);
+                guidelines.push(c.guideline);
+            }
+        });
     }
 
-    // Right
-    if (Math.abs((finalX + wPercent) - (100 - safePaddingX)) < snapThreshold) {
-        finalX = 100 - wPercent - safePaddingX;
-        guidelines.push({ type: 'vertical', pos: 100 - safePaddingX });
-    } else if (Math.abs((finalX + wPercent) - 100) < snapThreshold) {
-        finalX = 100 - wPercent;
-        guidelines.push({ type: 'vertical', pos: 100 });
-    }
-
-    // Top
-    if (Math.abs(finalY - safePaddingY) < snapThreshold) {
-        finalY = safePaddingY;
-        guidelines.push({ type: 'horizontal', pos: safePaddingY });
-    } else if (Math.abs(finalY - 0) < snapThreshold) {
-        finalY = 0;
-        guidelines.push({ type: 'horizontal', pos: 0 });
-    }
-
-    // Bottom
-    if (Math.abs((finalY + hPercent) - (100 - safePaddingY)) < snapThreshold) {
-        finalY = 100 - hPercent - safePaddingY;
-        guidelines.push({ type: 'horizontal', pos: 100 - safePaddingY });
-    } else if (Math.abs((finalY + hPercent) - 100) < snapThreshold) {
-        finalY = 100 - hPercent;
-        guidelines.push({ type: 'horizontal', pos: 100 });
-    }
-
-    // 2. Block-to-Block Snapping (simplificado)
-    // No futuro podemos expandir para centros e bordas opostas
-    for (const block of otherBlocks) {
-        const bW = typeof block.width === 'number' ? (block.width / canvasWidth) * 100 : 0;
-        const bH = typeof block.height === 'number' ? (block.height / canvasHeight) * 100 : 0;
-
-        // X Alignments
-        // Left - Left
-        if (Math.abs(finalX - block.x) < snapThreshold) {
-            finalX = block.x;
-            guidelines.push({ type: 'vertical', pos: block.x });
-        }
-        // Right - Right
-        if (Math.abs((finalX + wPercent) - (block.x + bW)) < snapThreshold) {
-            finalX = block.x + bW - wPercent;
-            guidelines.push({ type: 'vertical', pos: block.x + bW });
-        }
-
-        // Center - Center
-        const bCenterX = block.x + (bW / 2);
-        if (Math.abs((finalX + wPercent / 2) - bCenterX) < snapThreshold) {
-            finalX = bCenterX - (wPercent / 2);
-            guidelines.push({ type: 'vertical', pos: bCenterX });
-        }
-
-        // Y Alignments
-        // Top - Top
-        if (Math.abs(finalY - block.y) < snapThreshold) {
-            finalY = block.y;
-            guidelines.push({ type: 'horizontal', pos: block.y });
-        }
-        // Bottom - Bottom
-        if (Math.abs((finalY + hPercent) - (block.y + bH)) < snapThreshold) {
-            finalY = block.y + bH - hPercent;
-            guidelines.push({ type: 'horizontal', pos: block.y + bH });
-        }
-        // Center - Center
-        const bCenterY = block.y + (bH / 2);
-        if (Math.abs((finalY + hPercent / 2) - bCenterY) < snapThreshold) {
-            finalY = bCenterY - (hPercent / 2);
-            guidelines.push({ type: 'horizontal', pos: bCenterY });
-        }
-
-        // 3. Edge-to-Edge Snapping (New: Align opposite edges)
-        // Left - Right
-        if (Math.abs(finalX - (block.x + bW)) < snapThreshold) {
-            finalX = block.x + bW;
-            guidelines.push({ type: 'vertical', pos: block.x + bW });
-        }
-        // Right - Left
-        if (Math.abs((finalX + wPercent) - block.x) < snapThreshold) {
-            finalX = block.x - wPercent;
-            guidelines.push({ type: 'vertical', pos: block.x });
-        }
-        // Top - Bottom
-        if (Math.abs(finalY - (block.y + bH)) < snapThreshold) {
-            finalY = block.y + bH;
-            guidelines.push({ type: 'horizontal', pos: block.y + bH });
-        }
-        // Bottom - Top
-        if (Math.abs((finalY + hPercent) - block.y) < snapThreshold) {
-            finalY = block.y - hPercent;
-            guidelines.push({ type: 'horizontal', pos: block.y });
-        }
+    // Coroa o vencedor do Eixo Y e coleta as linhas guias associadas
+    if (yCandidates.length > 0) {
+        const winner = yCandidates[0];
+        finalY = winner.pos;
+        
+        const tiedWinners = yCandidates.filter(c => Math.abs(c.pos - winner.pos) < 0.001);
+        const uniquePos = new Set<number>();
+        tiedWinners.forEach(c => {
+            if (!uniquePos.has(c.guideline.pos)) {
+                uniquePos.add(c.guideline.pos);
+                guidelines.push(c.guideline);
+            }
+        });
     }
 
     // 4. Distance Guides (Advanced precision UI)
