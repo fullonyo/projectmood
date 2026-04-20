@@ -36,7 +36,7 @@ export function FrameContainer({
             case 'round':
                 return 'border-2 border-black dark:border-white shadow-none overflow-hidden'
             case 'glass':
-                return 'bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 shadow-none'
+                return 'bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--glass-border)] shadow-none'
             default:
                 return ''
         }

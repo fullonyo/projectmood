@@ -12,7 +12,7 @@ export const themeConfigs: Record<string, {
         primary: '#18181b',
         grid: 'radial-gradient(currentColor 1px, transparent 1px)',
         bgSize: '40px 40px',
-        gridOpacity: 'opacity-[0.03] dark:opacity-[0.08]',
+        gridOpacity: 'opacity-[0.06] dark:opacity-[0.12]',
         blend: 'mix-blend-normal'
     },
     dark: {
@@ -20,7 +20,7 @@ export const themeConfigs: Record<string, {
         primary: '#ffffff',
         grid: 'radial-gradient(currentColor 1px, transparent 1px)',
         bgSize: '40px 40px',
-        gridOpacity: 'opacity-[0.08]',
+        gridOpacity: 'opacity-[0.15]',
         blend: 'mix-blend-normal'
     },
     vintage: {

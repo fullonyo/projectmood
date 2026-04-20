@@ -2,13 +2,13 @@
 
 import { useState, useTransition, useEffect } from "react"
 import { searchSpotifyTracks } from "@/actions/spotify"
+import { addMoodBlock } from "@/actions/profile"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
     Search, Music, Youtube, Plus, Video,
-    Monitor, Layers, PlayCircle, Activity,
-    Upload, FileAudio
+    Upload
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
@@ -42,7 +42,6 @@ export function UniversalMediaEditor({
     const [trackId, setTrackId] = useState(content.trackId || "")
     const [audioUrl, setAudioUrl] = useState(content.audioUrl || "")
     const [frame, setFrame] = useState<FrameType>(content.frame || (block?.type === 'music' ? 'minimal' : 'none'))
-    const [textColor, setTextColor] = useState(content.textColor || "#000000")
 
     const [trackName, setTrackName] = useState(content.name || "")
     const [trackArtist, setTrackArtist] = useState(content.artist || "")
@@ -123,7 +122,6 @@ export function UniversalMediaEditor({
             trackId,
             audioUrl,
             frame,
-            textColor,
             lyrics,
             lyricsDisplay,
             ...((mediaType === 'music' || mediaType === 'audio') ? {
@@ -139,7 +137,7 @@ export function UniversalMediaEditor({
             type: typeToSave,
             content: updates
         })
-    }, [mediaType, videoId, trackId, audioUrl, frame, textColor, trackName, trackArtist, trackAlbumArt, lyrics, lyricsDisplay, block?.id, onUpdate, block?.type])
+    }, [mediaType, videoId, trackId, audioUrl, frame, trackName, trackArtist, trackAlbumArt, lyrics, lyricsDisplay, block?.id, onUpdate, block?.type])
 
     const handleSave = () => {
         const finalContent = {
@@ -148,7 +146,6 @@ export function UniversalMediaEditor({
             trackId,
             audioUrl,
             frame,
-            textColor,
             lyrics,
             lyricsDisplay,
             ...((mediaType === 'music' || mediaType === 'audio') ? {
@@ -163,6 +160,9 @@ export function UniversalMediaEditor({
                 if (onClose) onClose()
             } else if (onAdd) {
                 await onAdd('media', finalContent)
+                if (onClose) onClose()
+            } else {
+                await addMoodBlock('media', finalContent, { x: 40, y: 40 })
                 if (onClose) onClose()
             }
         })

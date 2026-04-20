@@ -71,14 +71,6 @@ function PublicMoodPageClientInner({ publicUser, profileId, profile, moodBlocks,
                 username={publicUser.username}
             />
 
-            <div className="fixed inset-0 z-0">
-                <RoomEnvironment
-                    profile={profile}
-                    backgroundEffect={profile.backgroundEffect || 'none'}
-                    weatherSync={activeWeather}
-                />
-            </div>
-
             <div className={cn("transition-all duration-700", isFocusMode && "focus-active")}>
                 <ProfileSignature
                     username={publicUser.username}
@@ -108,6 +100,14 @@ function PublicMoodPageClientInner({ publicUser, profileId, profile, moodBlocks,
 
             <main className="relative w-full h-full overflow-y-auto sm:overflow-hidden">
                 <BoardStage>
+                    {/* Background moved inside the same stacking context */}
+                    <div className="fixed inset-0 z-0 pointer-events-none">
+                        <RoomEnvironment
+                            profile={profile}
+                            backgroundEffect={profile.backgroundEffect || 'none'}
+                            weatherSync={activeWeather}
+                        />
+                    </div>
                     {moodBlocks.map((block: MoodBlock) => (
                         <div
                             key={block.id}

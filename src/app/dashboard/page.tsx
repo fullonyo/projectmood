@@ -5,6 +5,7 @@ import { DashboardClientLayout } from "@/components/dashboard/dashboard-client-l
 import { computeHasUnpublishedChanges } from "@/actions/publish";
 import { getFeatureFlags } from "@/actions/system-config";
 import { MoodBlock } from "@/types/database";
+import { cn } from "@/lib/utils";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -87,7 +88,10 @@ export default async function DashboardPage() {
     }, {} as Record<string, boolean>);
 
     return (
-        <div className="h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden">
+        <div className={cn(
+            "h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden",
+            profile.theme === 'dark' ? 'dark' : ''
+        )}>
             <DashboardClientLayout
                 profile={profile}
                 moodBlocks={moodBlocks}

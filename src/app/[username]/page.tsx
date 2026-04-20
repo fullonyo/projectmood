@@ -118,10 +118,10 @@ export default async function PublicMoodPage({
         <div
             className={cn(
                 "h-screen w-full relative overflow-hidden",
+                theme === 'dark' ? "dark" : "",
                 effectiveProfile.fontStyle === 'serif' ? 'font-serif' : effectiveProfile.fontStyle === 'mono' ? 'font-mono' : 'font-sans'
             )}
             style={{
-                backgroundColor: finalBg,
                 color: finalPrimary
             }}
         >

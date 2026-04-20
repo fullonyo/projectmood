@@ -44,11 +44,60 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
     const { content } = block
     const scale = useViewportScale()
 
-    const renderWithFrame = (children: React.ReactNode, frame: FrameType = 'none', caption?: string) => (
-        <FrameContainer frame={frame} caption={caption}>
-            {children}
-        </FrameContainer>
-    )
+    const renderText = () => {
+        const behavior = content.behavior || (
+            block.type === 'ticker' ? 'ticker' :
+                block.type === 'floating' ? 'floating' :
+                    block.type === 'subtitle' ? 'typewriter' :
+                        block.type === 'quote' ? 'quote' :
+                            (block.type === 'moodStatus' || block.type === 'mood-status') ? 'status' :
+                                'static'
+        )
+        const frame = content.frame || (content.style === 'simple' ? 'none' : content.style as any) || (['ticker', 'subtitle', 'floating'].includes(block.type) ? 'minimal' : 'none')
+        
+        return (
+            <FrameContainer frame={frame}>
+                <SmartText
+                    text={content.text}
+                    behavior={behavior as TextBehavior}
+                    style={content.style}
+                    textColor={content.textColor}
+                    fontSize={content.fontSize}
+                    align={content.align}
+                    speed={content.speed}
+                    direction={content.direction}
+                    cursorType={content.cursorType}
+                    author={content.author}
+                    showQuotes={content.showQuotes}
+                    icon={content.icon}
+                />
+            </FrameContainer>
+        )
+    }
+
+    const renderMedia = () => {
+        const mediaType = content.mediaType || (block.type === 'music' ? 'music' : 'video')
+        const frame = content.frame || (mediaType === 'music' ? 'minimal' : 'none')
+        
+        return (
+            <FrameContainer frame={frame}>
+                <SmartMedia
+                    mediaType={mediaType as MediaType}
+                    videoId={content.videoId}
+                    trackId={content.trackId}
+                    audioUrl={content.audioUrl}
+                    audioMetadata={{
+                        name: content.name,
+                        artist: content.artist
+                    }}
+                    isPublic={isPublic}
+                    hasInteracted={hasInteracted}
+                    lyrics={content.lyrics}
+                    lyricsDisplay={content.lyricsDisplay}
+                />
+            </FrameContainer>
+        )
+    }
 
     switch (block.type) {
         case 'text':
@@ -58,32 +107,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         case 'quote':
         case 'moodStatus':
         case 'mood-status':
-            const behavior = content.behavior || (
-                block.type === 'ticker' ? 'ticker' :
-                    block.type === 'floating' ? 'floating' :
-                        block.type === 'subtitle' ? 'typewriter' :
-                            block.type === 'quote' ? 'quote' :
-                                (block.type === 'moodStatus' || block.type === 'mood-status') ? 'status' :
-                                    'static'
-            )
-            return (
-                <FrameContainer frame={content.frame || (content.style === 'simple' ? 'none' : content.style as any) || (['ticker', 'subtitle', 'floating'].includes(block.type) ? 'minimal' : 'none')}>
-                    <SmartText
-                        text={content.text}
-                        behavior={behavior as TextBehavior}
-                        style={content.style}
-                        textColor={content.textColor}
-                        fontSize={content.fontSize}
-                        align={content.align}
-                        speed={content.speed}
-                        direction={content.direction}
-                        cursorType={content.cursorType}
-                        author={content.author}
-                        showQuotes={content.showQuotes}
-                        icon={content.icon}
-                    />
-                </FrameContainer>
-            )
+            return renderText()
 
         case 'photo':
             return (
@@ -95,42 +119,8 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         case 'video':
         case 'music':
         case 'media':
-            if (content.mediaType) {
-                return (
-                    <FrameContainer frame={content.frame || (content.mediaType === 'music' ? 'minimal' : 'none')}>
-                        <SmartMedia
-                            mediaType={content.mediaType}
-                            videoId={content.videoId}
-                            trackId={content.trackId}
-                            audioUrl={content.audioUrl}
-                            audioMetadata={{
-                                name: content.name,
-                                artist: content.artist
-                            }}
-                            isPublic={isPublic}
-                            hasInteracted={hasInteracted}
-                            lyrics={content.lyrics}
-                            lyricsDisplay={content.lyricsDisplay}
-                        />
-                    </FrameContainer>
-                )
-            }
-            if (block.type === 'video' || block.type === 'music') {
-                return (
-                    <FrameContainer frame={content.frame || (block.type === 'music' ? 'minimal' : 'none')}>
-                        <SmartMedia
-                            mediaType={block.type === 'music' ? 'music' : 'video'}
-                            videoId={content.videoId}
-                            trackId={content.trackId}
-                            isPublic={isPublic}
-                            hasInteracted={hasInteracted}
-                            lyrics={content.lyrics}
-                            lyricsDisplay={content.lyricsDisplay}
-                        />
-                    </FrameContainer>
-                )
-            }
-            return null;
+        case 'audio':
+            return renderMedia()
 
         case 'shape':
             return (
@@ -161,11 +151,12 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                     complexity={content.complexity}
                 />
             )
+            
         case 'gif':
-            return renderWithFrame(
-                <img src={content.url} alt="gif" className="w-full h-full object-cover" />,
-                content.frame || 'none',
-                content.caption
+            return (
+                <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
+                    <img src={content.url} alt="gif" className="w-full h-full object-cover" />
+                </FrameContainer>
             )
 
         case 'tape':
@@ -184,7 +175,6 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         case 'weather':
             return <SmartWeather content={content} />
 
-
         case 'doodle':
             return (
                 <img
@@ -196,7 +186,6 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
 
         case 'social':
             return <SmartSocial content={content} isPublic={isPublic} />
-
 
         case 'guestbook':
             return (

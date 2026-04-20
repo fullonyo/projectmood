@@ -4,8 +4,8 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useStudioBlock } from "@/hooks/use-studio-block"
 
-import { Play, Pause, Music, Volume2, VolumeX } from "lucide-react"
-import { useState, useRef, useEffect } from "react"
+import { Music, VolumeX } from "lucide-react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { useAudio } from "./audio-context"
 
 export type MediaType = 'video' | 'music' | 'audio'
@@ -103,7 +103,6 @@ export function SmartMedia({
     }, [isGlobalMuted, globalVolume])
 
     const togglePlay = (e: React.MouseEvent) => {
-        if (!isPublic) return // Prevent interaction in editor if not intended, or let it work?
         e.stopPropagation()
         if (audioRef.current) {
             if (isPlaying) {
@@ -152,11 +151,24 @@ export function SmartMedia({
         }
     }, [isPlaying, localLyricsDisplay, lyricsMode])
 
-    // SHARED LYRICS OVERLAY (Smart Layout)
-    const renderLyricsOverlay = (mode: 'audio' | 'overlay' = 'overlay') => {
-        // Se o bloco estiver configurado para fullscreen ou o modo global for fullscreen, as legendas aparecem no overlay global
-        if (localLyricsDisplay === 'fullscreen' || lyricsMode === 'fullscreen') return mode === 'audio' ? <div className="h-6 mb-4" /> : null
+    // --- UI HELPERS ---
 
+    const wrapperClasses = cn(
+        "w-full h-full relative overflow-hidden transition-all duration-700",
+        "bg-[var(--glass-bg)] backdrop-blur-2xl border border-[var(--glass-border)]",
+        "rounded-[32px] shadow-2xl group",
+        !isPublic && "cursor-pointer"
+    )
+
+    const renderHUDMarkings = () => (
+        <div className="absolute inset-0 pointer-events-none z-20">
+            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-black/20 dark:border-white/20 m-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-black/20 dark:border-white/20 m-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+        </div>
+    )
+
+    const renderLyricsOverlay = (mode: 'audio' | 'overlay' = 'overlay') => {
+        if (localLyricsDisplay === 'fullscreen' || lyricsMode === 'fullscreen') return mode === 'audio' ? <div className="h-6 mb-4" /> : null
         if (!currentLyric) return mode === 'audio' ? <div className="h-6 mb-4" /> : null
 
         const content = (
@@ -166,7 +178,6 @@ export function SmartMedia({
                     key={currentLyric}
                     initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
                     animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0, y: -5, filter: 'blur(4px)' }}
                     className="font-black uppercase tracking-[0.3em] text-black dark:text-white leading-tight max-w-[90%] text-center"
                     style={{
                         fontSize: Math.max(9, Math.round(14 * scale * 0.8)),
@@ -178,35 +189,26 @@ export function SmartMedia({
             </div>
         )
 
-        if (mode === 'audio') {
-            return (
-                <div className="w-full py-2 z-30 pointer-events-none flex justify-center mb-4">
-                    {content}
-                </div>
-            )
-        }
-
-        return (
-            <div className="absolute inset-x-0 top-[15%] flex flex-col items-center justify-center z-30 pointer-events-none px-6 text-center">
-                {content}
-            </div>
-        )
+        return mode === 'audio' 
+            ? <div className="w-full py-2 z-30 pointer-events-none flex justify-center mb-4">{content}</div>
+            : <div className="absolute inset-x-0 top-[15%] flex flex-col items-center justify-center z-30 pointer-events-none px-6 text-center">{content}</div>
     }
 
-    // Common Wrapper for premium look
-    const wrapperClasses = cn(
-        "w-full h-full relative overflow-hidden transition-all duration-700 rounded-3xl",
-        "bg-zinc-100 dark:bg-zinc-900",
-        !isPublic && "cursor-pointer group"
-    )
+    // --- RENDERING ---
 
-    // Audio Logic (Custom HUD Player)
+    let mediaContent: React.ReactNode = null
+
     if (mediaType === 'audio' && audioUrl) {
-        return (
-            <div
-                ref={ref}
-                className={cn(wrapperClasses, "bg-white dark:bg-zinc-950 flex flex-col items-center justify-center p-8 shadow-xl border border-zinc-100 dark:border-zinc-800")}
-            >
+        mediaContent = (
+            <div className="w-full h-full flex flex-col items-center justify-center pointer-events-auto" onClick={togglePlay}>
+                {/* Background Ambient Glow */}
+                <div 
+                    className={cn(
+                        "absolute inset-0 bg-gradient-to-br from-rose-400/10 via-transparent to-violet-500/10 transition-opacity duration-1000 pointer-events-none",
+                        isPlaying ? "opacity-100" : "opacity-0"
+                    )}
+                />
+
                 <audio
                     ref={audioRef}
                     src={audioUrl}
@@ -215,79 +217,88 @@ export function SmartMedia({
                     loop
                 />
 
-                {/* Waveform / Visualizer Placeholder */}
-                <div className="flex items-end gap-[3px] h-10 mb-6 opacity-40">
-                    {[...Array(16)].map((_, i) => (
-                        <div
-                            key={i}
-                            className={cn(
-                                "w-1 bg-blue-500 transition-all duration-300 rounded-full",
-                                isPlaying ? "animate-pulse" : "h-1"
+                <div className="flex flex-col items-center justify-center w-full relative z-10 shrink-0 px-4">
+                    {/* Organic Centered Waveform */}
+                    <div 
+                        className="flex items-center justify-center opacity-90"
+                        style={{ 
+                            height: `${Math.max(32, Math.round(56 * scale))}px`, 
+                            gap: `${Math.max(2, Math.round(3 * scale))}px`,
+                            marginBottom: `${Math.max(12, Math.round(20 * scale))}px`
+                        }}
+                    >
+                        {[...Array(32)].map((_, i) => (
+                            <div
+                                key={i}
+                                className={cn(
+                                    "transition-all duration-300 rounded-full shrink-0",
+                                    isPlaying 
+                                        ? "bg-gradient-to-t from-rose-400 to-violet-400 dark:from-rose-500 dark:to-violet-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]" 
+                                        : "bg-zinc-300/50 dark:bg-zinc-600/50"
+                                )}
+                                style={{
+                                    width: `${Math.max(2, Math.round(3 * scale))}px`,
+                                    height: isPlaying ? `${15 + Math.random() * 85}%` : `${Math.max(4, Math.round(6 * scale))}px`,
+                                    animationDelay: `${i * 0.03}s`,
+                                    transform: isPlaying ? `scaleY(${0.8 + Math.random() * 0.4})` : 'scaleY(1)'
+                                }}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Meta Info HUD */}
+                    <div className="text-center overflow-hidden w-full flex flex-col items-center">
+                        <div className="flex items-center justify-center gap-2">
+                            {isPlaying && (
+                                <div className="flex gap-[2px] items-center shrink-0">
+                                    <div className="w-1 h-1 rounded-full bg-rose-400 animate-pulse" />
+                                    <div className="w-1 h-1 rounded-full bg-rose-400 animate-pulse delay-75" />
+                                    <div className="w-1 h-1 rounded-full bg-rose-400 animate-pulse delay-150" />
+                                </div>
                             )}
-                            style={{
-                                height: isPlaying ? `${20 + Math.random() * 80}%` : '4px',
-                                animationDelay: `${i * 0.1}s`
-                            }}
-                        />
-                    ))}
-                </div>
-
-                {/* Meta HUD */}
-                <div className="text-center mb-6 overflow-hidden w-full">
-                    <p className="text-sm font-bold tracking-tight text-zinc-900 dark:text-white truncate" style={{ fontSize: Math.max(10, Math.round(14 * scale)) }}>
-                        {audioMetadata?.name || "Untitled Track"}
-                    </p>
-                    <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest truncate mt-1" style={{ fontSize: Math.max(8, Math.round(10 * scale)) }}>
-                        {audioMetadata?.artist || "Local Entry"}
-                    </p>
-                </div>
-
-                {/* Progress HUD */}
-                <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full mb-6 relative overflow-hidden">
-                    <div
-                        className="absolute inset-y-0 left-0 bg-blue-500 transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                    />
+                            <p className="font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 truncate" style={{ fontSize: Math.max(14, Math.round(22 * scale)) }}>
+                                {audioMetadata?.name || "Untitled Track"}
+                            </p>
+                        </div>
+                        
+                        {audioMetadata?.artist && (
+                            <p className="font-medium text-zinc-500 dark:text-zinc-400 truncate opacity-80" style={{ fontSize: Math.max(10, Math.round(14 * scale)), marginTop: `${Math.max(2, Math.round(6 * scale))}px` }}>
+                                {audioMetadata.artist}
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 {renderLyricsOverlay('audio')}
 
-                {/* Controls HUD */}
-                <div className="flex items-center gap-6">
-                    <button
-                        onClick={togglePlay}
-                        className="w-12 h-12 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg"
-                        style={{ width: Math.round(48 * scale), height: Math.round(48 * scale) }}
-                    >
-                        {isPlaying ? (
-                            <Pause className="w-5 h-5" style={{ width: Math.round(20 * scale), height: Math.round(20 * scale) }} />
-                        ) : (
-                            <Play className="w-5 h-5 translate-x-0.5" style={{ width: Math.round(20 * scale), height: Math.round(20 * scale) }} />
-                        )}
-                    </button>
-                    {isGlobalMuted && (
-                        <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 text-red-500 animate-pulse">
-                            <VolumeX className="w-4 h-4" />
-                        </div>
-                    )}
-                </div>
-
-                {!isPublic && (
-                    <div className="absolute inset-0 bg-transparent z-10" />
+                {isGlobalMuted && (
+                    <div className="absolute top-4 right-4 p-2 rounded-xl bg-red-500/10 text-red-500 animate-pulse border border-red-500/20 z-20 backdrop-blur-md">
+                        <VolumeX className="w-4 h-4" />
+                    </div>
                 )}
+
+                {/* Progress Glowing Edge */}
+                <div className="absolute bottom-0 left-0 right-0 z-20 overflow-hidden rounded-b-[32px]">
+                    <div className="w-full bg-black/5 dark:bg-white/5" style={{ height: `${Math.max(4, Math.round(6 * scale))}px` }}>
+                        <div
+                            className="h-full bg-gradient-to-r from-rose-400 via-fuchsia-400 to-violet-500 transition-all duration-300 relative group-hover:brightness-110"
+                            style={{ width: `${progress}%` }}
+                        >
+                            <div className="absolute right-0 top-0 bottom-0 w-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,1)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                    </div>
+                </div>
             </div>
         )
     }
-
-
 
     // YouTube Logic
     if (mediaType === 'video' && videoId) {
         const muteParam = (hasInteracted && !isGlobalMuted) ? '0' : '1';
         const autoplayParam = isPublic ? `&autoplay=1&mute=${muteParam}` : '';
 
-        return (
-            <div ref={ref} className={wrapperClasses}>
+        mediaContent = (
+            <>
                 <iframe
                     src={`https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&controls=1&rel=0${autoplayParam}`}
                     width="100%"
@@ -295,13 +306,10 @@ export function SmartMedia({
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
-                    className="w-full h-full grayscale-[0.2] hover:grayscale-0 transition-all duration-1000 rounded-3xl"
+                    className="w-full h-full grayscale-[0.2] hover:grayscale-0 transition-all duration-1000"
                 />
                 {renderLyricsOverlay()}
-                {!isPublic && (
-                    <div className="absolute inset-0 bg-transparent z-10" />
-                )}
-            </div>
+            </>
         )
     }
 
@@ -309,47 +317,57 @@ export function SmartMedia({
     if (mediaType === 'music' && trackId) {
         const spotifyAutoplay = isPublic && hasInteracted && !isGlobalMuted ? '&autoplay=1' : '';
 
+        mediaContent = (
+            <div className="w-full h-full relative rounded-2xl overflow-hidden p-4">
+                {isGlobalMuted ? (
+                    <div className="w-full h-full bg-zinc-100/10 dark:bg-zinc-900/10 border border-dashed border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl flex flex-col items-center justify-center gap-3 animate-in fade-in duration-500">
+                        <VolumeX className="w-5 h-5 text-zinc-400" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Audio Suspended</span>
+                    </div>
+                ) : (
+                    <iframe
+                        src={`https://open.spotify.com/embed/track/${trackId}?utm_source=generator${spotifyAutoplay}`}
+                        width="100%"
+                        height="100%"
+                        frameBorder="0"
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"
+                        className="transition-all duration-1000 grayscale-[0.3] hover:grayscale-0"
+                    />
+                )}
+                {renderLyricsOverlay()}
+            </div>
+        )
+    }
+
+    if (!mediaContent) {
         return (
-            <div
-                ref={ref}
-                className={cn(wrapperClasses, "bg-white/50 dark:bg-zinc-950/50 backdrop-blur-xl border border-zinc-100 dark:border-zinc-800 items-center justify-center flex group/spotify")}
-                style={{ padding: Math.round(12 * scale) }}
-            >
-                <div className="w-full h-full relative">
-                    {isGlobalMuted ? (
-                        <div className="w-full h-full bg-zinc-100/10 dark:bg-zinc-900/10 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col items-center justify-center gap-3 animate-in fade-in duration-500">
-                            <VolumeX className="w-5 h-5 text-zinc-400" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Audio Suspended</span>
-                        </div>
-                    ) : (
-                        <iframe
-                            src={`https://open.spotify.com/embed/track/${trackId}?utm_source=generator${spotifyAutoplay}`}
-                            width="100%"
-                            height="100%"
-                            frameBorder="0"
-                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                            loading="lazy"
-                            className="rounded-2xl transition-all duration-1000 grayscale-[0.3] group-hover:grayscale-0"
-                        />
-                    )}
-                    {renderLyricsOverlay()}
-                    {!isPublic && (
-                        <div className="absolute inset-0 bg-transparent z-10" />
-                    )}
-                </div>
+            <div ref={ref} className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/50 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 text-center">
+                <Music className="w-8 h-8 text-zinc-300 mb-2" />
+                <span
+                    className="text-[10px] font-bold uppercase text-zinc-400 tracking-widest leading-tight"
+                    style={{ fontSize: Math.max(8, Math.round(10 * scale)) }}
+                >
+                    Media Missing
+                </span>
             </div>
         )
     }
 
     return (
-        <div ref={ref} className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/50 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 text-center">
-            <Music className="w-8 h-8 text-zinc-300 mb-2" />
-            <span
-                className="text-[10px] font-bold uppercase text-zinc-400 tracking-widest leading-tight"
-                style={{ fontSize: Math.max(8, Math.round(10 * scale)) }}
-            >
-                Media Missing
-            </span>
+        <div 
+            ref={ref} 
+            className={cn(
+                wrapperClasses, 
+                mediaType === 'audio' && isPlaying && "shadow-[0_10px_40px_-10px_rgba(244,63,94,0.15)] dark:shadow-[0_10px_40px_-10px_rgba(244,63,94,0.1)]",
+                mediaType === 'audio' && "active:scale-[0.97]"
+            )}
+        >
+            {renderHUDMarkings()}
+            {mediaContent}
+            {!isPublic && (
+                <div className="absolute inset-0 bg-transparent z-10" />
+            )}
         </div>
     )
 }

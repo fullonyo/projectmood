@@ -132,6 +132,8 @@ function getEditor(type: string) {
         'gif': UniversalPhotoEditor,
         'music': UniversalMediaEditor,
         'video': UniversalMediaEditor,
+        'audio': UniversalMediaEditor,
+        'media': UniversalMediaEditor,
         'countdown': UniversalCountdownEditor,
         'weather': UniversalWeatherEditor,
         'guestbook': UniversalGuestbookEditor,

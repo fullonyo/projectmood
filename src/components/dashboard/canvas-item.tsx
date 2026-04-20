@@ -398,7 +398,6 @@ export const CanvasItem = memo(({
                 opacity: block.isHidden ? 0 : ((block.content as any).opacity ?? 1),
                 pointerEvents: (block.isHidden || (block.isLocked && !isSelected)) ? 'none' : 'auto',
                 mixBlendMode: (block.content as any).blendMode || 'normal',
-                isolation: 'isolate',
                 cursor: block.isLocked ? 'not-allowed' : (isSelected ? 'default' : 'grab')
             }}
             onClick={(e) => {
