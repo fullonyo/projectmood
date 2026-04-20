@@ -7,6 +7,17 @@ import { ConfirmModal } from "@/components/ui/confirm-modal"
 import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { themeConfigs } from "@/lib/themes"
+import { BlockEditorRegistry } from './block-editor-registry'
+
+// Helper to extract absolute viewport coordinates reliably across mouse/touch
+const getClientPos = (e: MouseEvent | TouchEvent | PointerEvent | any) => {
+    const isTouch = 'touches' in e && e.touches.length > 0;
+    return {
+        x: isTouch ? e.touches[0].clientX : e.clientX,
+        y: isTouch ? e.touches[0].clientY : e.clientY
+    };
+};
+
 import { BlockRenderer } from "./block-renderer"
 import { BoardStage } from "./board-stage"
 import { useTranslation } from "@/i18n/context"
@@ -313,10 +324,42 @@ export function MoodCanvas({
         addMoodBlock
     })
 
+    const [auraRotation, setAuraRotation] = useState(0);
+
+    // Selection Bounds Calculation for Unified Aura
+    const selectionBounds = useMemo(() => {
+        if (selectedIds.length <= 1) return null;
+        const selectedBlocks = blocks.filter(b => selectedIds.includes(b.id));
+        if (selectedBlocks.length === 0) return null;
+
+        let minX = 100, minY = 100, maxX = 0, maxY = 0;
+        selectedBlocks.forEach(b => {
+            const w = (b.width || 200) / 20; 
+            const h = (b.height || 200) / 20;
+            minX = Math.min(minX, b.x);
+            minY = Math.min(minY, b.y);
+            maxX = Math.max(maxX, b.x + (typeof b.width === 'number' ? 15 : 20)); 
+            maxY = Math.max(maxY, b.y + (typeof b.height === 'number' ? 15 : 20));
+        });
+
+        // Reset aura rotation when selection changes to a new group
+        return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+    }, [selectedIds, blocks]);
+
+    useEffect(() => {
+        if (selectedIds.length > 1) {
+            const firstBlock = blocks.find(b => selectedIds.includes(b.id));
+            if (firstBlock) setAuraRotation(firstBlock.rotation || 0);
+        }
+    }, [selectedIds]);
+
+    const dragPivot = useRef<{ x: number, y: number, angle?: number, initialMouseAngle?: number, initialRotation?: number } | null>(null);
+    const selectionAuraRef = useRef<HTMLDivElement>(null);
+    
     return (
         <div
             className={cn(
-                "w-full h-full relative overflow-hidden select-none touch-none",
+                "w-full h-full relative overflow-hidden select-none touch-none mood-canvas",
                 isSpacePressed ? "cursor-grab active:cursor-grabbing" : "cursor-crosshair",
                 profile.theme === 'dark' ? "bg-zinc-950" : "bg-white"
             )}
@@ -338,13 +381,205 @@ export function MoodCanvas({
                         width: Math.abs(selectionRect.x2 - selectionRect.x1),
                         height: Math.abs(selectionRect.y2 - selectionRect.y1),
                         border: '1.5px solid #3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         zIndex: 99999,
                         pointerEvents: 'none',
-                        boxShadow: '0 0 15px rgba(59, 130, 246, 0.2)'
+                        borderRadius: '2px'
                     }}
                 />
             )}
+
+            {/* UNIFIED MULTI-SELECTION AURA (MINIMALIST) */}
+            <AnimatePresence>
+                {selectionBounds && (
+                    <motion.div
+                        ref={selectionAuraRef}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        className="absolute pointer-events-none z-[5]"
+                        style={{
+                            left: `${selectionBounds.x}%`,
+                            top: `${selectionBounds.y}%`,
+                            width: `${selectionBounds.w}%`,
+                            height: `${selectionBounds.h}%`,
+                            rotate: auraRotation,
+                            transition: 'none'
+                        }}
+                    >
+                        {/* Atmospheric Glow */}
+                        <div className="absolute -inset-12 bg-blue-500/5 blur-[80px] rounded-full" />
+                        
+                        {/* Group Label (Unified) */}
+                        {(() => {
+                            const selectedBlocks = blocks.filter(b => selectedIds.includes(b.id));
+                            const firstGroupId = selectedBlocks[0]?.groupId;
+                            const isSameGroup = firstGroupId && selectedBlocks.every(b => b.groupId === firstGroupId);
+                            
+                            if (isSameGroup) {
+                                const groupName = (selectedBlocks[0].content as any)?.groupName || `Group // ${firstGroupId.split('_')[1]?.substring(0, 4)}`;
+                                return (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="absolute -top-12 left-0 flex items-center gap-2 px-3 py-1 bg-zinc-950/80 backdrop-blur-md rounded-full border border-white/10 shadow-2xl"
+                                    >
+                                        <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)] animate-pulse" />
+                                        <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">
+                                            {groupName}
+                                        </span>
+                                    </motion.div>
+                                );
+                            }
+                            return null;
+                        })()}
+
+                        {/* Minimalist Corner Markers (Brackets) */}
+                        <div className="absolute inset-[-10px]">
+                            {/* Top Left */}
+                            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-blue-500/30 rounded-tl-lg" />
+                            {/* Top Right */}
+                            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blue-500/30 rounded-tr-lg" />
+                            {/* Bottom Left */}
+                            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-blue-500/30 rounded-bl-lg" />
+                            {/* Bottom Right */}
+                            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-blue-500/30 rounded-br-lg" />
+                        </div>
+
+                        {/* Pro Group Rotation Handles (Figma Style) */}
+                        <div className="absolute inset-[-20px] pointer-events-none">
+                            {['tl', 'tr', 'bl', 'br'].map(corner => (
+                                <motion.div
+                                    key={`rotate-group-${corner}`}
+                                    onPointerDown={(e) => e.stopPropagation()} // BLOCK CANVAS DRAG CONFLICT
+                                    onPanStart={(e, info) => {
+                                        if (!selectionBounds || !canvasRef.current) return;
+                                        const canvas = canvasRef.current.getBoundingClientRect();
+
+                                        // STABLE GROUP CENTER (Viewport percentage to Viewport pixels)
+                                        const cx = canvas.left + (selectionBounds.x * canvas.width / 100) + (selectionBounds.w * canvas.width / 200);
+                                        const cy = canvas.top + (selectionBounds.y * canvas.height / 100) + (selectionBounds.h * canvas.height / 200);
+
+                                        const { x: clientX, y: clientY } = getClientPos(e);
+
+                                        dragPivot.current = {
+                                            x: cx,
+                                            y: cy,
+                                            initialMouseAngle: Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI),
+                                            initialRotation: auraRotation
+                                        };
+                                    }}
+                                    onPan={(e, info) => {
+                                        if (!dragPivot.current) return;
+                                        
+                                        const centerX = dragPivot.current.x;
+                                        const centerY = dragPivot.current.y;
+                                        
+                                        const { x: clientX, y: clientY } = getClientPos(e);
+
+                                        // Calculate delta using Viewport coordinates
+                                        const currentMouseAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+                                        let deltaAngle = currentMouseAngle - (dragPivot.current.initialMouseAngle || 0);
+                                        
+                                        // ANGLE NORMALIZATION
+                                        if (deltaAngle > 180) deltaAngle -= 360;
+                                        if (deltaAngle < -180) deltaAngle += 360;
+                                        
+                                        let angleDeg = (dragPivot.current.initialRotation || 0) + deltaAngle;
+                                        
+                                        // Instant visual feedback for the aura
+                                        setAuraRotation(angleDeg);
+                                        
+                                        // HIGH-PERFORMANCE DISPATCH (NO REACT RENDER, NO TEARING)
+                                        if (dragPivot.current.angle !== angleDeg) {
+                                            dragPivot.current.angle = angleDeg;
+                                            window.dispatchEvent(new CustomEvent('mood-group-rotate', { detail: { deltaAngle } }));
+                                        }
+                                    }}
+                                    onPanEnd={() => {
+                                        if (!dragPivot.current || dragPivot.current.angle === undefined) return;
+                                        
+                                        // Calculate the final delta applied during this drag session
+                                        const finalDelta = dragPivot.current.angle - (dragPivot.current.initialRotation || 0);
+                                        
+                                        // PERSIST TO DATABASE ONLY ON DROP (ZERO TEARING)
+                                        onUpdateBlocks(selectedIds, (block) => {
+                                            if (block.isLocked) return {};
+                                            return { rotation: (block.rotation || 0) + finalDelta };
+                                        });
+                                        
+                                        dragPivot.current = null;
+                                    }}
+                                    className={cn(
+                                        "absolute w-12 h-12 pointer-events-auto cursor-alias opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center",
+                                        corner === 'tl' && "top-0 left-0 -translate-x-1/2 -translate-y-1/2",
+                                        corner === 'tr' && "top-0 right-0 translate-x-1/2 -translate-y-1/2",
+                                        corner === 'bl' && "bottom-0 left-0 -translate-x-1/2 translate-y-1/2",
+                                        corner === 'br' && "bottom-0 right-0 translate-x-1/2 translate-y-1/2"
+                                    )}
+                                >
+                                    <div className="w-6 h-6 rounded-full border-2 border-blue-500/40 bg-blue-500/10" />
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        {/* Pivot Point Indicator (Center Crosshair) */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 flex items-center justify-center opacity-30">
+                            <div className="absolute w-[1px] h-full bg-blue-500" />
+                            <div className="absolute h-[1px] w-full bg-blue-500" />
+                        </div>
+
+                        {/* Corner Resize Handles */}
+                        <div className="absolute inset-[-4px] pointer-events-auto">
+                            {['tl', 'tr', 'bl', 'br'].map(handle => (
+                                <motion.div
+                                    key={handle}
+                                    onPan={(e, info) => {
+                                        if (selectedIds.length === 0 || !selectionBounds) return;
+                                        
+                                        const centerX = selectionBounds.x + selectionBounds.w / 2;
+                                        const centerY = selectionBounds.y + selectionBounds.h / 2;
+                                        
+                                        const canvas = canvasRef.current!.getBoundingClientRect();
+                                        const currentX = ((info.point.x - canvas.left) / canvas.width) * 100;
+                                        const currentY = ((info.point.y - canvas.top) / canvas.height) * 100;
+                                        
+                                        const oldDist = Math.sqrt(Math.pow(selectionBounds.w / 2, 2) + Math.pow(selectionBounds.h / 2, 2));
+                                        if (oldDist < 1) return; // Division by zero safety
+
+                                        const newDist = Math.sqrt(Math.pow(currentX - centerX, 2) + Math.pow(currentY - centerY, 2));
+                                        const scaleFactor = newDist / oldDist;
+
+                                        // Safety bounds for scaling
+                                        if (scaleFactor < 0.1 || scaleFactor > 5) return;
+
+                                        onUpdateBlocks(selectedIds, (block) => {
+                                            if (block.isLocked) return {};
+                                            
+                                            const relX = block.x - centerX;
+                                            const relY = block.y - centerY;
+                                            
+                                            return {
+                                                x: centerX + (relX * scaleFactor),
+                                                y: centerY + (relY * scaleFactor),
+                                                width: (block.width || 200) * scaleFactor,
+                                                height: (block.height || 200) * scaleFactor
+                                            };
+                                        });
+                                    }}
+                                    className={cn(
+                                        "absolute w-2.5 h-2.5 bg-white dark:bg-zinc-950 border-2 border-blue-500 rounded-full shadow-sm hover:scale-150 transition-transform cursor-nwse-resize",
+                                        handle === 'tl' && "top-0 left-0",
+                                        handle === 'tr' && "top-0 right-0 cursor-nesw-resize",
+                                        handle === 'bl' && "bottom-0 left-0 cursor-nesw-resize",
+                                        handle === 'br' && "bottom-0 right-0 cursor-nwse-resize"
+                                    )}
+                                />
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Room Environment Effects (Background, Textures, Atmosphere) */}
             <RoomEnvironment

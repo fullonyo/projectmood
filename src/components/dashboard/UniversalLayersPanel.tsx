@@ -47,7 +47,7 @@ export function UniversalLayersPanel({
     
     const [collapsedGroups, setCollapsedGroups] = useState<string[]>([])
 
-    // Elite Entity Generation Logic
+    // Elite Entity Generation Logic - Stable and Performant
     const entities = useMemo(() => {
         const validBlocks = blocks.filter(b => b.id)
         const sortedBlocks = [...validBlocks].sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0))
@@ -73,29 +73,38 @@ export function UniversalLayersPanel({
         return result
     }, [blocks, collapsedGroups])
 
+    // Bulletproof Hierarchical Reorder Handler
     const handleReorderEntities = useCallback((newEntities: LayerEntity[]) => {
-        const updatedBlocksIds: string[] = []
+        const fullZOrder: string[] = []
         const processedGroups = new Set<string>()
         
+        // Construct the full flat order including hidden members
         newEntities.forEach(entity => {
             if (entity.type === 'block') {
-                if (!updatedBlocksIds.includes(entity.id)) updatedBlocksIds.push(entity.id)
+                if (!fullZOrder.includes(entity.id)) fullZOrder.push(entity.id)
             } else if (entity.type === 'header') {
                 if (processedGroups.has(entity.groupId)) return
+                // Find all members of this group and preserve their relative internal order
                 const members = blocks
                     .filter(b => b.groupId === entity.groupId)
                     .sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0))
                 
                 members.forEach(m => {
-                    if (!updatedBlocksIds.includes(m.id)) updatedBlocksIds.push(m.id)
+                    if (!fullZOrder.includes(m.id)) fullZOrder.push(m.id)
                 })
                 processedGroups.add(entity.groupId)
             }
         })
 
-        onUpdateBlocks(updatedBlocksIds, (block) => {
-            const index = updatedBlocksIds.indexOf(block.id)
-            return { zIndex: (updatedBlocksIds.length - index) + 10 }
+        // Add any missing blocks (safety net)
+        blocks.forEach(b => {
+            if (!fullZOrder.includes(b.id)) fullZOrder.push(b.id)
+        })
+
+        // Apply bulk update with clean Z-indexing
+        onUpdateBlocks(fullZOrder, (block) => {
+            const index = fullZOrder.indexOf(block.id)
+            return { zIndex: (fullZOrder.length - index) + 10 }
         })
     }, [blocks, onUpdateBlocks])
 
@@ -104,6 +113,8 @@ export function UniversalLayersPanel({
             prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
         )
     }
+
+    const hasGroupsInSelection = selectedIds.some(id => blocks.find(b => b.id === id)?.groupId)
 
     const handleHeaderSelect = (groupId: string, multi: boolean) => {
         const memberIds = blocks.filter(b => b.groupId === groupId).map(b => b.id)
@@ -118,11 +129,8 @@ export function UniversalLayersPanel({
         }
     }
 
-    const hasGroupsInSelection = selectedIds.some(id => blocks.find(b => b.id === id)?.groupId)
-
     return (
         <div className="flex flex-col h-full bg-transparent overflow-hidden select-none">
-            {/* Header Section */}
             <div className="p-8 pb-4 border-b border-zinc-100 dark:border-zinc-800 space-y-6">
                 <EditorHeader 
                     title={t('canvas.layers')}
@@ -206,7 +214,6 @@ export function UniversalLayersPanel({
                 </AnimatePresence>
             </div>
 
-            {/* List Section */}
             <div className="flex-1 overflow-y-auto custom-scrollbar p-3 pt-6">
                 <Reorder.Group 
                     axis="y" 
@@ -278,7 +285,6 @@ export function UniversalLayersPanel({
                 )}
             </div>
 
-            {/* Footer Section */}
             <footer className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50">
                 <div className="flex items-center justify-between text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-2">
                     <div className="flex items-center gap-2">
@@ -315,7 +321,7 @@ const FolderHeader = ({ groupId, name, isCollapsed, onToggle, onSelect, onUpdate
                 "bg-zinc-50/50 dark:bg-zinc-900/30 hover:border-zinc-200 dark:hover:border-zinc-800",
                 !isCollapsed && "bg-blue-50/10 dark:bg-blue-900/10 border-blue-500/10"
             )}
-            whileDrag={{ scale: 1.02, shadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
+            whileDrag={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
         >
             <div 
                 onPointerDown={(e) => { e.stopPropagation(); setHoveredBlockIds([]); dragControls.start(e); }} 
@@ -434,13 +440,11 @@ const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, se
             onMouseEnter={() => !isEditingName && setHoveredBlockIds([block.id])}
             onMouseLeave={() => setHoveredBlockIds([])}
             className="flex items-center relative"
-            whileDrag={{ scale: 1.02, shadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
+            whileDrag={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
         >
             {block.groupId && (
                 <>
-                    {/* Main vertical line */}
                     <div className="absolute left-[1.15rem] top-0 bottom-0 w-[1.5px] bg-zinc-200 dark:bg-zinc-800/50 transition-colors" />
-                    {/* Curved connector */}
                     <div className={cn(
                         "absolute left-[1.15rem] top-1/2 w-4 h-4 border-l-[1.5px] border-b-[1.5px] border-zinc-200 dark:border-zinc-800/50 rounded-bl-lg -translate-y-1/2",
                         isLastInGroup && "h-1/2 top-0 translate-y-0"
@@ -456,7 +460,6 @@ const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, se
                         : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700",
                     block.isHidden && "opacity-40 grayscale",
                     block.groupId && "ml-8",
-                    // Group Area Tinting
                     block.groupId && !isSelected && "bg-zinc-50/30 dark:bg-zinc-900/20"
                 )}
                 onClick={(e) => onSelect(block.id, e.shiftKey || e.metaKey)}

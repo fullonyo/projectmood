@@ -230,9 +230,10 @@ export function DashboardSidebar({
                                 />
 
                                 <BlockEditorRegistry
-                                    selectedBlock={selectedBlocks[0]}
+                                    selectedBlocks={selectedBlocks}
                                     draftBlockType={draftBlockType}
                                     onUpdateBlock={onUpdateBlock}
+                                    onUpdateBlocks={onUpdateBlocks}
                                     onClose={() => {
                                         setSelectedIds([])
                                         setDraftBlockType(null)

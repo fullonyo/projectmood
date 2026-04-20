@@ -1,14 +1,11 @@
 "use client"
-
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Calendar, Gift, Cake, Rocket, Heart, Hourglass, Sparkles, PartyPopper, Check, Activity, Timer } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useState } from "react"
+import { Calendar, Gift, Cake, Rocket, Heart, Hourglass, Sparkles, PartyPopper, Activity, Timer } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
 import { MoodBlock, CountdownContent } from "@/types/database"
-import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, EditorSlider, EditorSwitch } from "./EditorUI"
+import { EditorHeader, EditorSection, GridSelector, EditorActionButton } from "./EditorUI"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
 const ICONS = [
     { name: 'Gift', icon: Gift },
@@ -23,32 +20,34 @@ const ICONS = [
 
 interface CountdownEditorProps {
     block?: MoodBlock | null
-    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
+    onUpdate?: (updates: Partial<MoodBlock>) => void
     onAdd?: (content: CountdownContent) => Promise<void>
     onClose?: () => void
 }
 
 export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: CountdownEditorProps) {
     const { t } = useTranslation()
-    const defaultContent = block?.content || {}
+    const defaultContent = (block?.content as CountdownContent) || {}
+    
     const [title, setTitle] = useState(defaultContent.title || "")
     const [targetDate, setTargetDate] = useState(defaultContent.targetDate || "")
     const [emoji, setEmoji] = useState(defaultContent.emoji || "PartyPopper")
     const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>(defaultContent.style || 'minimal')
     const [isPending, setIsPending] = useState(false)
 
-    useEffect(() => {
-        if (!block?.id || !onUpdate) return
-
-        const content: CountdownContent = {
-            title: title.trim(),
-            targetDate,
-            emoji,
-            style
-        }
-
-        onUpdate(block.id, { content })
-    }, [title, targetDate, emoji, style, block?.id, onUpdate])
+    // Manual update to avoid useEffect loops
+    const triggerUpdate = (updates: Partial<CountdownContent>) => {
+        if (!onUpdate) return
+        onUpdate({
+            content: {
+                title,
+                targetDate,
+                emoji,
+                style,
+                ...updates
+            }
+        })
+    }
 
     const handleAction = async () => {
         if ((!title.trim() || !targetDate) && !block?.id) return
@@ -78,6 +77,7 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
             <EditorHeader 
                 title={t('editors.countdown.title')}
                 subtitle={t('editors.countdown.subtitle')}
+                onClose={onClose}
             />
 
             <EditorSection title="Configuração">
@@ -88,7 +88,10 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                             <Timer className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                             <Input
                                 value={title}
-                                onChange={(e) => setTitle(e.target.value)}
+                                onChange={(e) => {
+                                    setTitle(e.target.value)
+                                    triggerUpdate({ title: e.target.value })
+                                }}
                                 placeholder={t('editors.countdown.placeholder')}
                                 maxLength={50}
                                 className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-base font-medium"
@@ -102,7 +105,10 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                             <Input
                                 type="datetime-local"
                                 value={targetDate}
-                                onChange={(e) => setTargetDate(e.target.value)}
+                                onChange={(e) => {
+                                    setTargetDate(e.target.value)
+                                    triggerUpdate({ targetDate: e.target.value })
+                                }}
                                 className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-base font-medium uppercase"
                             />
                         </div>
@@ -114,7 +120,10 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                 <GridSelector
                     options={ICONS.map(i => ({ id: i.name as any, label: i.name, icon: i.icon }))}
                     activeId={emoji as any}
-                    onChange={(id) => setEmoji(id as string)}
+                    onChange={(id) => {
+                        setEmoji(id as string)
+                        triggerUpdate({ emoji: id as string })
+                    }}
                     columns={4}
                 />
             </EditorSection>
@@ -127,7 +136,10 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                         { id: 'neon', label: 'Neon', icon: Activity },
                     ]}
                     activeId={style as any}
-                    onChange={(id) => setStyle(id as any)}
+                    onChange={(id) => {
+                        setStyle(id as any)
+                        triggerUpdate({ style: id as any })
+                    }}
                     columns={3}
                 />
             </EditorSection>

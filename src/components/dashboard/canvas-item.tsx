@@ -1,8 +1,17 @@
 "use client"
 
+// Helper to extract absolute viewport coordinates reliably across mouse/touch
+const getClientPos = (e: MouseEvent | TouchEvent | PointerEvent | any) => {
+    const isTouch = 'touches' in e && e.touches.length > 0;
+    return {
+        x: isTouch ? e.touches[0].clientX : e.clientX,
+        y: isTouch ? e.touches[0].clientY : e.clientY
+    };
+};
+
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion"
 import { useState, useRef, useEffect, useCallback } from "react"
-import { Pencil, Lock, Move, MousePointer2, Trash2 } from "lucide-react"
+import { Pencil, Lock, Move, MousePointer2, Trash2, RotateCw } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { useViewportScale, scaleBlockSize } from "@/lib/canvas-scale"
@@ -57,9 +66,10 @@ export const CanvasItem = memo(({
 }: CanvasItemProps) => {
     const { t } = useTranslation()
     const viewportScale = useViewportScale()
-    const { hoveredBlockIds } = useCanvasInteraction()
+    const { hoveredBlockIds, setHoveredBlockIds } = useCanvasInteraction()
 
     const unscaleValue = (v: number | 'auto') => typeof v === 'number' ? Math.round(v / viewportScale) : v
+    const itemRef = useRef<HTMLDivElement>(null)
 
     const stateRef = useRef({
         x: block.x,
@@ -69,8 +79,11 @@ export const CanvasItem = memo(({
         rotation: block.rotation || 0,
         isInteracting: false,
         isInteractiveMode: false,
+        isRotating: false,
         startX: block.x,
-        startY: block.y
+        startY: block.y,
+        initialMouseAngle: 0,
+        initialRotation: 0
     })
 
     const mvX = useMotionValue(stateRef.current.x)
@@ -134,7 +147,7 @@ export const CanvasItem = memo(({
     }, [isSelected])
 
     const handleDragPan = useCallback((e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        if (stateRef.current.isInteractiveMode || block.isLocked) return;
+        if (stateRef.current.isInteractiveMode || block.isLocked || stateRef.current.isRotating) return;
         if (!canvasRef.current) return;
 
         const canvas = canvasRef.current.getBoundingClientRect();
@@ -185,7 +198,7 @@ export const CanvasItem = memo(({
     }, [block.id, block.isLocked, blocks, canvasRef, mvX, mvY, setGuidelines, isMultiSelect, isSelected, onMultiMove, shiftHeld])
 
     const handleDragStart = useCallback(() => {
-        if (stateRef.current.isInteractiveMode || block.isLocked) return;
+        if (stateRef.current.isInteractiveMode || block.isLocked || stateRef.current.isRotating) return;
         setIsDragging(true);
         stateRef.current.isInteracting = true;
         stateRef.current.startX = stateRef.current.x;
@@ -246,6 +259,33 @@ export const CanvasItem = memo(({
         setIsResizing(true); stateRef.current.isInteracting = true;
     }, [block.isLocked])
 
+    // --- ZERO-TEARING ARCHITECTURE: SYNC & CUSTOM DOM EVENTS ---
+    
+    // 1. Sync external DB changes cleanly to GPU when not interacting
+    useEffect(() => {
+        if (!stateRef.current.isInteracting && !isRotating && block.rotation !== undefined && block.rotation !== stateRef.current.rotation) {
+            stateRef.current.rotation = block.rotation;
+            mvR.set(block.rotation);
+        }
+    }, [block.rotation, isRotating, mvR]);
+
+    // 2. Listen to custom High-Performance Group Rotation events
+    useEffect(() => {
+        if (!isSelected || block.isLocked) return;
+
+        const handleGroupRotate = (e: any) => {
+            const { deltaAngle } = e.detail;
+            const newRotation = (block.rotation || 0) + deltaAngle;
+            mvR.set(newRotation);
+            stateRef.current.rotation = newRotation;
+        };
+
+        window.addEventListener('mood-group-rotate', handleGroupRotate);
+        return () => window.removeEventListener('mood-group-rotate', handleGroupRotate);
+    }, [isSelected, block.isLocked, block.rotation, mvR]);
+    
+    // -------------------------------------------------------------
+
     const handleResizeEnd = useCallback(() => {
         setIsResizing(false); stateRef.current.isInteracting = false;
         onUpdate({
@@ -301,6 +341,7 @@ export const CanvasItem = memo(({
         return (
             <motion.div
                 key={handle}
+                initial={false}
                 onPanStart={handleResizeStart}
                 onPan={(e, i) => handleResizePan(handle, e, i)}
                 onPanEnd={handleResizeEnd}
@@ -315,6 +356,7 @@ export const CanvasItem = memo(({
 
     return (
         <motion.div
+            ref={itemRef}
             variants={{
                 hidden: {
                     opacity: 0,
@@ -350,21 +392,22 @@ export const CanvasItem = memo(({
                 willChange: 'transform, opacity, filter',
                 left: styleLeft, top: styleTop, width: mvW, height: mvH, rotate: mvR,
                 zIndex: isDragging || isSelected ? 999 : (block.zIndex || 10),
-                boxShadow: isSelected ? `0 0 0 2px ${themeConfig?.bg || '#000'}, 0 0 0 4px ${profile?.primaryColor || '#3b82f6'}` : 'none',
+                boxShadow: (isSelected && !isMultiSelect) ? `0 0 0 2px ${themeConfig?.bg || '#000'}, 0 0 0 4px ${profile?.primaryColor || '#3b82f6'}` : 'none',
                 touchAction: 'none', transformOrigin: 'center',
                 display: block.isHidden ? 'none' : 'block',
                 opacity: block.isHidden ? 0 : ((block.content as any).opacity ?? 1),
-                pointerEvents: block.isHidden ? 'none' : 'auto',
+                pointerEvents: (block.isHidden || (block.isLocked && !isSelected)) ? 'none' : 'auto',
                 mixBlendMode: (block.content as any).blendMode || 'normal',
-                isolation: 'isolate'
+                isolation: 'isolate',
+                cursor: block.isLocked ? 'not-allowed' : (isSelected ? 'default' : 'grab')
             }}
             onClick={(e) => {
-                if (isInteractiveMode) return;
+                if (isInteractiveMode || block.isLocked) return;
                 e.stopPropagation();
                 onSelect(e.shiftKey);
             }}
             onDoubleClick={(e) => {
-                if (isInteractiveMode) return;
+                if (isInteractiveMode || block.isLocked) return;
                 e.stopPropagation();
                 onSelect(false);
             }}
@@ -372,13 +415,32 @@ export const CanvasItem = memo(({
             className={cn(
                 "absolute group will-change-transform",
                 !isInteractiveMode && "select-none touch-none",
-                isSelected ? "cursor-default" : "cursor-grab active:cursor-grabbing"
+                block.isLocked ? "opacity-90" : (isSelected ? "cursor-default" : "cursor-grab active:cursor-grabbing")
             )}
+            onMouseEnter={() => {
+                if (isInteractiveMode) return;
+                const siblings = block.groupId 
+                    ? blocks.filter(b => b.groupId === block.groupId).map(b => b.id)
+                    : [block.id];
+                
+                // Only update if the selection actually changed to prevent infinite loops
+                const isSame = hoveredBlockIds.length === siblings.length && 
+                              siblings.every(id => hoveredBlockIds.includes(id));
+                
+                if (!isSame) {
+                    setHoveredBlockIds(siblings);
+                }
+            }}
+            onMouseLeave={() => {
+                if (hoveredBlockIds.length > 0) {
+                    setHoveredBlockIds([]);
+                }
+            }}
             onContextMenu={(e) => onContextMenu(e, block.id)}
             data-block-id={block.id}
         >
             {/* Selection UI */}
-            {isSelected && (
+            {isSelected && !isMultiSelect && (
                 <>
                     <div className={cn(
                         "absolute -inset-[3px] pointer-events-none z-[1001] transition-all rounded-2xl",
@@ -449,19 +511,22 @@ export const CanvasItem = memo(({
                                     </>
                                 )}
 
-                                {stateRef.current.rotation !== 0 && (
-                                    <>
-                                        <button
-                                            onClick={resetRotation}
-                                            disabled={block.isLocked}
-                                            className={cn("px-3 h-9 rounded-xl transition-colors text-[10px] font-bold uppercase tracking-widest", block.isLocked ? "text-zinc-300 dark:text-zinc-700" : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400")}
-                                            aria-label={`${t('canvas.layers_normalize')} rotation`}
-                                        >
-                                            {stateRef.current.rotation}°
-                                        </button>
-                                        <div className="w-[1px] h-4 bg-zinc-100 dark:bg-zinc-800 mx-1" />
-                                    </>
-                                )}
+                                {/* Integrated Rotation Info/Reset */}
+                                <button
+                                    onClick={resetRotation}
+                                    className={cn(
+                                        "px-2 h-9 rounded-xl transition-all flex items-center gap-2 group/rot",
+                                        stateRef.current.rotation !== 0 ? "text-blue-500 bg-blue-500/5" : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                                    )}
+                                    title="Clique para resetar ângulo"
+                                >
+                                    <RotateCw className={cn("w-3.5 h-3.5 transition-transform", stateRef.current.rotation !== 0 && "animate-pulse")} />
+                                    {stateRef.current.rotation !== 0 && (
+                                        <span className="text-[9px] font-black tabular-nums">{Math.round(stateRef.current.rotation)}°</span>
+                                    )}
+                                </button>
+
+                                <div className="w-[1px] h-4 bg-zinc-100 dark:bg-zinc-800 mx-1" />
 
                                 {!block.isLocked && (
                                     <button
@@ -476,15 +541,71 @@ export const CanvasItem = memo(({
                             </motion.div>
                     )}
 
+                    {/* Resize Handles */}
                     {!block.isLocked && ['br', 'bl', 'tr', 'tl', 'top', 'bottom', 'left', 'right'].map(h => renderHandle(h as ResizeHandle))}
 
+                    {/* Pro Rotation Handles (Figma Style) */}
                     {!block.isLocked && !isMultiSelect && (
-                        <div className="absolute left-1/2 -top-10 -translate-x-1/2 w-[1.5px] h-10 bg-zinc-900 dark:bg-white z-[1002] pointer-events-auto origin-bottom opacity-50">
-                            <motion.div
-                                onPanStart={handleRotateStart} onPan={handleRotatePan} onPanEnd={handleRotateEnd}
-                                className="absolute -top-2 -left-2 w-4 h-4 bg-white dark:bg-zinc-900 border-2 border-zinc-900 dark:border-white rounded-full shadow-md hover:scale-125 transition-transform cursor-grab active:cursor-grabbing"
-                                style={{ touchAction: 'none' }}
-                            />
+                        <div className="absolute inset-[-20px] pointer-events-none">
+                            {['tl', 'tr', 'bl', 'br'].map(corner => (
+                                <motion.div
+                                    key={`rotate-${corner}`}
+                                    onPointerDown={(e) => e.stopPropagation()} // BLOCK DRAG CONFLICT
+                                    onPanStart={(e, info) => {
+                                        setIsRotating(true)
+                                        stateRef.current.isRotating = true
+                                        const rect = itemRef.current?.getBoundingClientRect()
+                                        if (!rect) return
+                                        
+                                        // The center of an axis-aligned bounding box of a center-rotated element IS ALWAYS its true center.
+                                        // Adding scrollX/Y ensures it matches absolute viewport if page is scrolled.
+                                        const cx = rect.left + window.scrollX + rect.width / 2
+                                        const cy = rect.top + window.scrollY + rect.height / 2
+                                        
+                                        stateRef.current.startX = cx
+                                        stateRef.current.startY = cy
+                                        
+                                        const { x: clientX, y: clientY } = getClientPos(e);
+                                        
+                                        stateRef.current.initialMouseAngle = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI)
+                                        stateRef.current.initialRotation = block.rotation || 0
+                                    }}
+                                    onPan={(e, info) => {
+                                        const centerX = stateRef.current.startX
+                                        const centerY = stateRef.current.startY
+                                        
+                                        const { x: clientX, y: clientY } = getClientPos(e);
+                                        
+                                        const currentMouseAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI)
+                                        let deltaAngle = currentMouseAngle - stateRef.current.initialMouseAngle
+                                        
+                                        // ANGLE NORMALIZATION
+                                        if (deltaAngle > 180) deltaAngle -= 360
+                                        if (deltaAngle < -180) deltaAngle += 360
+                                        
+                                        let newRotation = stateRef.current.initialRotation + deltaAngle
+                                        
+                                        // INSTANT VISUAL FEEDBACK (FREE ROTATION)
+                                        mvR.set(newRotation)
+                                        stateRef.current.rotation = newRotation
+                                    }}
+                                    onPanEnd={() => {
+                                        setIsRotating(false)
+                                        stateRef.current.isRotating = false
+                                        // Persist only at the end
+                                        onUpdate({ rotation: stateRef.current.rotation })
+                                    }}
+                                    className={cn(
+                                        "absolute w-10 h-10 pointer-events-auto cursor-alias opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center",
+                                        corner === 'tl' && "top-0 left-0 -translate-x-1/2 -translate-y-1/2",
+                                        corner === 'tr' && "top-0 right-0 translate-x-1/2 -translate-y-1/2",
+                                        corner === 'bl' && "bottom-0 left-0 -translate-x-1/2 translate-y-1/2",
+                                        corner === 'br' && "bottom-0 right-0 translate-x-1/2 translate-y-1/2"
+                                    )}
+                                >
+                                    <div className="w-5 h-5 rounded-full border-2 border-blue-500/30 bg-blue-500/10" />
+                                </motion.div>
+                            ))}
                         </div>
                     )}
                 </>
@@ -494,30 +615,50 @@ export const CanvasItem = memo(({
                 <BlockRenderer block={block} isPublic={isInteractiveMode} />
             </div>
 
-            {/* Hover Highlight from Sidebar - Designer Edition */}
-            {hoveredBlockIds.includes(block.id) && !isSelected && (
+            {/* Hover Highlight & Sibling Glow - Designer Edition */}
+            {(hoveredBlockIds.includes(block.id) || isSelected) && (
                 <div className="absolute -inset-6 pointer-events-none z-[1000]">
-                    {/* Atmospheric Glow */}
+                    {/* Atmospheric Glow (Stronger for primary hover, subtle for siblings) */}
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="absolute inset-4 bg-blue-500/10 blur-2xl rounded-[3rem]" 
+                        animate={{ 
+                            opacity: hoveredBlockIds[0] === block.id ? 1 : 0.4, 
+                            scale: 1 
+                        }}
+                        className={cn(
+                            "absolute inset-4 blur-2xl rounded-[3rem]",
+                            isSelected ? "bg-blue-500/15" : "bg-blue-500/10"
+                        )} 
                     />
                     
-                    {/* Elegant Corner Brackets */}
-                    <div className="absolute inset-0">
-                        {/* Top Left */}
-                        <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-blue-500/50 rounded-tl-2xl" />
-                        {/* Top Right */}
-                        <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-blue-500/50 rounded-tr-2xl" />
-                        {/* Bottom Left */}
-                        <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-blue-500/50 rounded-bl-2xl" />
-                        {/* Bottom Right */}
-                        <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-blue-500/50 rounded-br-2xl" />
-                    </div>
+                    {/* Elegant Corner Brackets - Only for Primary Hover or Selection */}
+                    {(hoveredBlockIds[0] === block.id || (isSelected && !isMultiSelect)) && (
+                        <div className="absolute inset-0">
+                            <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-blue-500/50 rounded-tl-2xl" />
+                            <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-blue-500/50 rounded-tr-2xl" />
+                            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-blue-500/50 rounded-bl-2xl" />
+                            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-blue-500/50 rounded-br-2xl" />
+                        </div>
+                    )}
+
+                    {/* Parent Tag - Minimalist Group Label */}
+                    {block.groupId && (hoveredBlockIds[0] === block.id || isSelected) && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="absolute -top-10 left-0 px-2 py-0.5 bg-zinc-900 dark:bg-white rounded-md flex items-center gap-1.5 shadow-xl border border-white/10 dark:border-black/10"
+                        >
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                            <span className="text-[8px] font-black text-white dark:text-zinc-900 uppercase tracking-widest whitespace-nowrap">
+                                {(block.content as any)?.groupName || `Group // ${block.groupId.split('_')[1]?.substring(0, 4)}`}
+                            </span>
+                        </motion.div>
+                    )}
 
                     {/* Subtle Inner Border */}
-                    <div className="absolute inset-4 border border-blue-500/20 rounded-[2rem] ring-4 ring-blue-500/5" />
+                    {(hoveredBlockIds[0] === block.id || (isSelected && !isMultiSelect)) && (
+                        <div className="absolute inset-4 border border-blue-500/20 rounded-[2rem] ring-4 ring-blue-500/5" />
+                    )}
                 </div>
             )}
         </motion.div>

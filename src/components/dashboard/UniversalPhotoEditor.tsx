@@ -1,30 +1,27 @@
 "use client"
-
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback } from "react"
 import { useDropzone } from "react-dropzone"
 import imageCompression from 'browser-image-compression'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Image as ImageIcon, Upload, X, Activity } from "lucide-react"
+import { Upload, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { toast } from "sonner"
-
 import { MoodBlock, PhotoContent } from "@/types/database"
+import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector } from "./EditorUI"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
 interface PhotoEditorProps {
     block?: MoodBlock | null
-    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
+    onUpdate?: (updates: Partial<MoodBlock>) => void
     onAdd?: (content: PhotoContent) => Promise<void>
     onClose?: () => void
 }
 
-import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector } from "./EditorUI"
-
 export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoEditorProps) {
     const { t } = useTranslation()
-    const defaultContent = block?.content || {}
+    const defaultContent = (block?.content as PhotoContent) || {}
+    
     const [imageUrl, setImageUrl] = useState<string>(defaultContent.imageUrl || "")
     const [alt, setAlt] = useState(defaultContent.alt || "")
     const [caption, setCaption] = useState(defaultContent.caption || "")
@@ -33,20 +30,20 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
     const [isUploading, setIsUploading] = useState(false)
     const [isPending, setIsPending] = useState(false)
 
-    // 2. Real-time Preview
-    useEffect(() => {
-        if (!block?.id || !onUpdate) return
-
-        const content = {
-            imageUrl,
-            alt: alt || undefined,
-            filter,
-            frame,
-            caption: caption || undefined
-        }
-
-        onUpdate(block.id, { content })
-    }, [imageUrl, alt, caption, filter, frame, block?.id, onUpdate])
+    // Manual update to avoid useEffect loops
+    const triggerUpdate = (updates: Partial<PhotoContent>) => {
+        if (!onUpdate) return
+        onUpdate({
+            content: {
+                imageUrl,
+                alt,
+                caption,
+                filter,
+                frame,
+                ...updates
+            }
+        })
+    }
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         const file = acceptedFiles[0]
@@ -65,7 +62,9 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
 
             const reader = new FileReader()
             reader.onload = () => {
-                setImageUrl(reader.result as string)
+                const result = reader.result as string
+                setImageUrl(result)
+                triggerUpdate({ imageUrl: result })
                 setIsUploading(false)
             }
             reader.onerror = () => {
@@ -81,23 +80,23 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
     }, [t])
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
+        onDrop: (files) => onDrop(files),
         accept: {
             'image/*': ['.png', '.jpg', '.jpeg', '.webp', '.gif']
         },
         maxFiles: 1
     })
 
-    const handleAdd = async () => {
+    const handleAction = async () => {
         if (!imageUrl && !block?.id) return
 
         setIsPending(true)
-        const content = {
+        const content: PhotoContent = {
             imageUrl,
-            alt: alt || undefined,
+            alt,
             filter,
             frame,
-            caption: caption || undefined
+            caption
         }
 
         if (block?.id) {
@@ -115,10 +114,11 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
 
     const handleRemoveImage = () => {
         setImageUrl("")
+        triggerUpdate({ imageUrl: "" })
     }
 
-    const getFilterClass = () => {
-        switch (filter) {
+    const getFilterStyle = (f: string) => {
+        switch (f) {
             case 'vintage': return 'sepia(50%) contrast(110%)'
             case 'bw': return 'grayscale(100%)'
             case 'warm': return 'saturate(130%) hue-rotate(-10deg)'
@@ -132,6 +132,7 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
             <EditorHeader 
                 title={t('editors.photo.title')}
                 subtitle={t('editors.photo.subtitle')}
+                onClose={onClose}
             />
 
             <EditorSection title="Imagem">
@@ -148,28 +149,20 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                         <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                             {isDragActive ? t('editors.photo.drop_link') : t('editors.photo.inject_visual')}
                         </p>
-                        <p className="text-[9px] text-zinc-400 font-medium mt-2">JPEG, PNG, WEBP (MAX. 10MB)</p>
-                        {isUploading && (
-                            <div className="mt-6 flex items-center justify-center gap-3">
-                                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" />
-                            </div>
-                        )}
+                        {isUploading && <p className="mt-4 animate-pulse text-[10px] text-blue-500 font-black">Processando...</p>}
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        <div className="relative rounded-3xl overflow-hidden shadow-lg group">
+                        <div className="relative rounded-3xl overflow-hidden shadow-lg group bg-zinc-100 dark:bg-zinc-900">
                             <img
                                 src={imageUrl}
                                 alt="Preview"
-                                className="w-full h-64 object-cover transition-all duration-700"
-                                style={{ filter: getFilterClass() }}
+                                className="w-full h-64 object-cover"
+                                style={{ filter: getFilterStyle(filter) }}
                             />
-                            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
                             <button
                                 onClick={handleRemoveImage}
-                                className="absolute top-4 right-4 w-10 h-10 bg-white/90 dark:bg-black/90 rounded-full flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all scale-0 group-hover:scale-100"
+                                className="absolute top-4 right-4 w-10 h-10 bg-white/90 dark:bg-black/90 rounded-full flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all"
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -180,18 +173,24 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                                 <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('editors.photo.caption')}</Label>
                                 <Input
                                     value={caption}
-                                    onChange={(e) => setCaption(e.target.value)}
+                                    onChange={(e) => {
+                                        setCaption(e.target.value)
+                                        triggerUpdate({ caption: e.target.value })
+                                    }}
                                     placeholder={t('editors.photo.caption_placeholder')}
-                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl text-base h-11 focus-visible:ring-blue-500/20"
+                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl"
                                 />
                             </div>
                             <div className="space-y-2 px-1">
                                 <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('editors.photo.alt_text')}</Label>
                                 <Input
                                     value={alt}
-                                    onChange={(e) => setAlt(e.target.value)}
+                                    onChange={(e) => {
+                                        setAlt(e.target.value)
+                                        triggerUpdate({ alt: e.target.value })
+                                    }}
                                     placeholder={t('editors.photo.alt_placeholder')}
-                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl text-base h-11 focus-visible:ring-blue-500/20"
+                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl"
                                 />
                             </div>
                         </div>
@@ -207,7 +206,10 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                                     { id: 'cool', label: 'Cool' },
                                 ]}
                                 activeId={filter}
-                                onChange={(id) => setFilter(id as any)}
+                                onChange={(id) => {
+                                    setFilter(id as any)
+                                    triggerUpdate({ filter: id as any })
+                                }}
                             />
                         </EditorSection>
 
@@ -225,12 +227,15 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                                     { id: 'frame', label: 'Classic' },
                                 ]}
                                 activeId={frame}
-                                onChange={(id) => setFrame(id as any)}
+                                onChange={(id) => {
+                                    setFrame(id as any)
+                                    triggerUpdate({ frame: id as any })
+                                }}
                             />
                         </EditorSection>
 
                         <EditorActionButton 
-                            onClick={handleAdd} 
+                            onClick={handleAction} 
                             isLoading={isPending} 
                             disabled={isUploading || (!imageUrl && !block?.id)}
                             label={block?.id ? t('common.close') : t('editors.photo.deploy')}

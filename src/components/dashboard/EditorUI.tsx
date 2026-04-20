@@ -11,13 +11,29 @@ import { Palette, Zap } from "lucide-react"
 interface EditorHeaderProps {
     title: string
     subtitle?: string
+    onClose?: () => void
 }
 
-export function EditorHeader({ title, subtitle }: EditorHeaderProps) {
+export function EditorHeader({ title, subtitle, onClose }: EditorHeaderProps) {
     return (
-        <header className="px-1 space-y-1.5 mb-8">
-            <h3 className="text-[13px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider leading-tight">{title}</h3>
-            {subtitle && <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">{subtitle}</p>}
+        <header className="px-1 space-y-1.5 mb-8 relative flex items-start justify-between">
+            <div className="space-y-1.5 flex-1 pr-8">
+                <h3 className="text-[13px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider leading-tight">{title}</h3>
+                {subtitle && <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">{subtitle}</p>}
+            </div>
+            {onClose && (
+                <button 
+                    onClick={onClose}
+                    className="p-2 -mr-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors group"
+                >
+                    <div className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </div>
+                </button>
+            )}
         </header>
     )
 }

@@ -1,161 +1,142 @@
 "use client"
-
-import { UniversalTextEditor } from "./UniversalTextEditor"
-import { UniversalSocialEditor } from "./UniversalSocialEditor"
-import { UniversalMediaEditor } from "./UniversalMediaEditor"
-import { UniversalPhotoEditor } from "./UniversalPhotoEditor"
-import { GifPicker } from "./gif-picker"
-import { UniversalGuestbookEditor } from "./UniversalGuestbookEditor"
-import { ArtTools } from "./art-tools"
-import { DoodlePad } from "./doodle-pad"
-import { UniversalCountdownEditor } from "./UniversalCountdownEditor"
-import { UniversalShapeEditor } from "./UniversalShapeEditor"
-import { UniversalWeatherEditor } from "./UniversalWeatherEditor"
-import { UniversalRorschachEditor } from "./UniversalRorschachEditor"
-import { addMoodBlock } from "@/actions/profile"
 import { MoodBlock } from "@/types/database"
-import { getInitialBlockSize } from "@/lib/canvas-scale"
+import { UniversalTextEditor } from "./UniversalTextEditor"
+import { UniversalPhotoEditor } from "./UniversalPhotoEditor"
+import { UniversalMediaEditor } from "./UniversalMediaEditor"
+import { UniversalCountdownEditor } from "./UniversalCountdownEditor"
+import { UniversalWeatherEditor } from "./UniversalWeatherEditor"
+import { UniversalGuestbookEditor } from "./UniversalGuestbookEditor"
+import { UniversalRorschachEditor } from "./UniversalRorschachEditor"
+import { UniversalShapeEditor } from "./UniversalShapeEditor"
+import { UniversalSocialEditor } from "./UniversalSocialEditor"
+import { UniversalEffectsEditor } from "./UniversalEffectsEditor"
+import { UniversalCommonEditor } from "./UniversalCommonEditor"
+import { useTranslation } from "@/i18n/context"
+import { Layout, Boxes } from "lucide-react"
+import { useMemo } from "react"
 
 interface BlockEditorRegistryProps {
-    selectedBlock: MoodBlock | null;
-    draftBlockType: string | null;
-    onUpdateBlock: (id: string, content: any) => void;
-    onClose: () => void;
-    setDraftBlockType: (type: string | null) => void;
+    selectedBlocks: MoodBlock[]
+    draftBlockType: string | null
+    onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void
+    onUpdateBlocks: (ids: string[], updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => void
+    onClose: () => void
+    setDraftBlockType: (type: string | null) => void
 }
 
 export function BlockEditorRegistry({
-    selectedBlock,
+    selectedBlocks,
     draftBlockType,
     onUpdateBlock,
+    onUpdateBlocks,
     onClose,
     setDraftBlockType
 }: BlockEditorRegistryProps) {
-    const activeType = selectedBlock?.type || draftBlockType || '';
+    const { t } = useTranslation()
 
-    const handleAdd = async (type: string, content: any, typeOverride?: string) => {
-        const { width, height } = getInitialBlockSize(type);
-        const result = await addMoodBlock(typeOverride || type, content, { x: 40, y: 40, width, height });
-        if (result?.success) setDraftBlockType(null);
-    }
+    // Detect if we are in Multi-Selection Mode
+    const isMultiSelect = selectedBlocks.length > 1
+    const firstBlock = selectedBlocks[0]
+    
+    // Check if all selected blocks share the same type
+    const allSameType = isMultiSelect && selectedBlocks.every(b => b.type === firstBlock?.type)
 
-    if (['text', 'ticker', 'subtitle', 'floating', 'phrase', 'quote', 'moodStatus', 'mood-status'].includes(activeType)) {
+    if (draftBlockType) {
+        // Handle New Block Creation
+        const Editor = getEditor(draftBlockType)
+        if (!Editor) return null
         return (
-            <UniversalTextEditor
-                key={selectedBlock?.id || 'draft-universal-text'}
-                block={selectedBlock}
-                onUpdate={onUpdateBlock}
-                onAdd={(type, content) => handleAdd('text', content)}
+            <Editor
+                onUpdate={(updates: any) => {
+                    // Logic for draft is handled via addMoodBlock in parent, 
+                    // but editors might need internal state
+                }}
                 onClose={onClose}
             />
         )
     }
 
-    if (activeType === 'social') {
-        const socialBlock = selectedBlock || { content: {} } as MoodBlock;
+    // Memoized Update Handlers to prevent infinite loops in child editors' useEffects
+    const selectedIdsString = selectedBlocks.map(b => b.id).join(',')
+    
+    const handleSingleUpdate = useMemo(() => (updates: any) => {
+        if (!firstBlock) return
+        onUpdateBlock(firstBlock.id, updates)
+    }, [firstBlock?.id, onUpdateBlock])
+
+    const handleBatchUpdate = useMemo(() => (updates: any) => {
+        onUpdateBlocks(selectedBlocks.map(b => b.id), updates)
+    }, [selectedIdsString, onUpdateBlocks])
+
+    if (selectedBlocks.length === 0) return null
+
+    // Multi-Selection Logic
+    if (isMultiSelect) {
+        if (allSameType) {
+            // Bulk Edit for items of the same type
+            const Editor = getEditor(firstBlock.type)
+            if (Editor) {
+                return (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 px-1 mb-2">
+                            <Boxes className="w-3.5 h-3.5 text-blue-500" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">
+                                {t('canvas.multi_select')} // {selectedBlocks.length} {t('common.items')}
+                            </span>
+                        </div>
+                        <Editor
+                            block={firstBlock} 
+                            selectedBlocks={selectedBlocks} 
+                            onUpdate={handleBatchUpdate}
+                            onClose={onClose}
+                        />
+                    </div>
+                )
+            }
+        }
+
+        // Mixed Selection or fallback: Common Properties Editor
         return (
-            <UniversalSocialEditor
-                block={socialBlock}
-                onUpdate={selectedBlock ? onUpdateBlock : (_, content) => handleAdd('social', content)}
+            <UniversalCommonEditor
+                selectedBlocks={selectedBlocks}
+                onUpdateBlocks={onUpdateBlocks}
                 onClose={onClose}
             />
         )
     }
 
-    if (['video', 'music', 'media'].includes(activeType)) {
-        return (
-            <UniversalMediaEditor
-                key={selectedBlock?.id || 'draft-universal-media'}
-                block={selectedBlock}
-                onUpdate={onUpdateBlock}
-                onAdd={(type, content) => handleAdd('media', content)}
-                onClose={onClose}
-            />
-        )
-    }
+    // Single Block Edit
+    const Editor = getEditor(firstBlock.type)
+    if (!Editor) return (
+        <div className="flex flex-col items-center justify-center p-12 text-center opacity-50">
+            <Layout className="w-12 h-12 mb-4 text-zinc-300" />
+            <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Editor indisponível para {firstBlock.type}</p>
+        </div>
+    )
 
-    if (activeType === 'photo') {
-        return (
-            <UniversalPhotoEditor
-                key={selectedBlock?.id || 'draft-photo'}
-                block={selectedBlock}
-                onUpdate={onUpdateBlock}
-                onAdd={selectedBlock ? undefined : (content) => handleAdd('photo', content)}
-                onClose={onClose}
-            />
-        )
-    }
+    return (
+        <Editor
+            block={firstBlock}
+            onUpdate={handleSingleUpdate}
+            onClose={onClose}
+        />
+    )
+}
 
-    if (activeType === 'gif') {
-        return <GifPicker key={selectedBlock?.id || 'draft-gif'} />
+function getEditor(type: string) {
+    const editors: Record<string, any> = {
+        'text': UniversalTextEditor,
+        'photo': UniversalPhotoEditor,
+        'gif': UniversalPhotoEditor,
+        'music': UniversalMediaEditor,
+        'video': UniversalMediaEditor,
+        'countdown': UniversalCountdownEditor,
+        'weather': UniversalWeatherEditor,
+        'guestbook': UniversalGuestbookEditor,
+        'rorschach': UniversalRorschachEditor,
+        'shape': UniversalShapeEditor,
+        'moodStatus': UniversalSocialEditor,
+        'effects': UniversalEffectsEditor
     }
-
-    if (activeType === 'guestbook') {
-        return (
-            <UniversalGuestbookEditor
-                key={selectedBlock?.id || 'draft-guestbook'}
-                block={selectedBlock}
-                onUpdate={onUpdateBlock}
-                onClose={onClose}
-            />
-        )
-    }
-
-    if (activeType === 'weather') {
-        return (
-            <UniversalWeatherEditor
-                key={selectedBlock?.id || 'draft-weather'}
-                block={selectedBlock}
-                onUpdate={onUpdateBlock}
-                onAdd={(type, content) => handleAdd('weather', content)}
-                onClose={onClose}
-            />
-        )
-    }
-
-    if (activeType === 'tape') {
-        return <ArtTools key={selectedBlock?.id || 'draft-art'} />
-    }
-
-    if (activeType === 'doodle') {
-        return <DoodlePad key={selectedBlock?.id || 'draft-doodle'} />
-    }
-
-    if (activeType === 'countdown') {
-        return (
-            <UniversalCountdownEditor
-                key={selectedBlock?.id || 'draft-countdown'}
-                block={selectedBlock}
-                onUpdate={onUpdateBlock}
-                onAdd={selectedBlock ? undefined : (content) => handleAdd('countdown', content)}
-                onClose={onClose}
-            />
-        )
-    }
-
-    if (activeType === 'shape') {
-        return (
-            <UniversalShapeEditor
-                key={selectedBlock?.id || 'draft-shape'}
-                block={selectedBlock}
-                onUpdate={onUpdateBlock}
-                onAdd={(type, content) => handleAdd('shape', content)}
-                onClose={onClose}
-            />
-        )
-    }
-
-    if (activeType === 'rorschach') {
-        return (
-            <UniversalRorschachEditor
-                key={selectedBlock?.id || 'draft-rorschach'}
-                block={selectedBlock}
-                onUpdate={onUpdateBlock}
-                onAdd={(type: string, content: any) => handleAdd('rorschach', content)}
-                onClose={onClose}
-            />
-        )
-    }
-
-    return null;
+    return editors[type]
 }
