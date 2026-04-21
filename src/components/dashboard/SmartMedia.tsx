@@ -32,7 +32,7 @@ interface LyricLine {
 }
 
 const AudioPlayer = ({ 
-    audioUrl, isPlaying, togglePlay, progress, scale = 1, audioMetadata, 
+    audioUrl, isPlaying, togglePlay, progress, setProgress, scale = 1, audioMetadata, 
     renderLyricsOverlay, isGlobalMuted, audioRef, handleTimeUpdate, setIsPlaying
 }: any) => {
     // Generate static heights for waveform - more striking and organic variations
@@ -51,6 +51,19 @@ const AudioPlayer = ({
     }
 
     const currentTime = audioRef.current?.currentTime || 0
+
+    // SEEKING LOGIC
+    const handleScrub = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation()
+        if (audioRef.current && audioRef.current.duration) {
+            const rect = e.currentTarget.getBoundingClientRect()
+            const x = e.clientX - rect.left
+            const percentage = Math.max(0, Math.min(1, x / rect.width))
+            const seekTime = percentage * audioRef.current.duration
+            audioRef.current.currentTime = seekTime
+            setProgress(percentage * 100)
+        }
+    }
 
     // Adjusted sizes for better harmony
     const buttonSize = Math.max(40, Math.round(48 * scale))
@@ -95,7 +108,11 @@ const AudioPlayer = ({
 
                 {/* Waveform Row */}
                 <div className="flex items-center" style={{ gap: `${Math.round(16 * scale)}px` }}>
-                    <div className="flex-1 flex items-center justify-between relative overflow-hidden" style={{ height: `${Math.round(40 * scale)}px`, gap: `${barGap}px` }}>
+                    <div 
+                        className="flex-1 flex items-center justify-between relative overflow-hidden cursor-pointer group/scrub" 
+                        onClick={handleScrub}
+                        style={{ height: `${Math.round(40 * scale)}px`, gap: `${barGap}px` }}
+                    >
                         {staticHeights.map((h, i) => {
                             const barProgress = (i / 36) * 100;
                             const isActive = barProgress <= progress;
@@ -108,7 +125,8 @@ const AudioPlayer = ({
                                         isActive 
                                             ? "bg-gradient-to-t from-rose-500 to-rose-400 dark:from-rose-400 dark:to-rose-300 shadow-[0_0_8px_rgba(244,63,94,0.3)]" 
                                             : "bg-zinc-200/80 dark:bg-zinc-800/80",
-                                        isPlaying && isActive && "animate-waveform"
+                                        isPlaying && isActive && "animate-waveform",
+                                        "group-hover/scrub:brightness-110"
                                     )}
                                     style={{
                                         width: `${barWidth}px`,
@@ -221,7 +239,7 @@ export function SmartMedia({
 
         const lines = lyrics.split('\n')
         const parsed = lines.map(line => {
-            const match = line.match(/\[(\d{2}):(\d{2})\]\s*(.*)/)
+            const match = line.match(/\[(\d{2}):(\d{2})(?:\.\d+)?\]\s*(.*)/)
             if (match) {
                 const mins = parseInt(match[1])
                 const secs = parseInt(match[2])
@@ -340,7 +358,7 @@ export function SmartMedia({
     
     if (mediaType === 'audio' && audioUrl) {
         content = <AudioPlayer 
-            audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} scale={scale} 
+            audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} setProgress={setProgress} scale={scale} 
             audioMetadata={audioMetadata} renderLyricsOverlay={renderLyricsOverlay} isGlobalMuted={isGlobalMuted} 
             audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} setIsPlaying={setIsPlaying}
         />

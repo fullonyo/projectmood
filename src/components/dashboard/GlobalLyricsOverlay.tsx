@@ -24,14 +24,9 @@ export function GlobalLyricsOverlay() {
                     transition={{ duration: 0.5, ease: "easeOut" }}
                     className="flex flex-col items-center gap-2"
                 >
-                    <span className="text-[8px] font-black tracking-[0.6em] opacity-40 uppercase text-black dark:text-white">
-                        Global Lyrics // Studio System
-                    </span>
                     <p className="text-2xl md:text-3xl font-black uppercase tracking-widest text-black dark:text-white leading-tight drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] dark:drop-shadow-[0_0_30px_rgba(0,0,0,0.5)]">
                         {activeLyrics}
                     </p>
-                    {/* Linha técnica HUD */}
-                    <div className="w-24 h-[1px] bg-current opacity-10 mt-2" />
                 </motion.div>
             </AnimatePresence>
         </div>
