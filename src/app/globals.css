@@ -155,3 +155,15 @@ body {
 .vhs-scanlines {
   animation: studio-vhs-flicker 0.15s infinite;
 }
+@keyframes waveform-bounce {
+  0%, 100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1.2);
+  }
+}
+.animate-waveform {
+  animation: waveform-bounce 1.2s ease-in-out infinite;
+}
+
