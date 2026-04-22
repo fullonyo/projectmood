@@ -12,12 +12,16 @@ export async function registerUser(values: z.infer<typeof RegisterSchema>) {
         return { error: "Campos inválidos!" };
     }
 
-    const { email, password, username, name } = validatedFields.data;
+    const { email, password, username: rawUsername, name } = validatedFields.data;
+    const username = rawUsername.toLowerCase();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const existingUser = await prisma.user.findFirst({
         where: {
-            OR: [{ email }, { username }],
+            OR: [
+                { email },
+                { username: { equals: username, mode: 'insensitive' } }
+            ],
         },
     });
 

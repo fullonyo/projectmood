@@ -20,19 +20,24 @@ export async function generateMetadata({
     const { username } = await params;
 
     const user = await prisma.user.findUnique({
-        where: { username },
+        where: { username: username.toLowerCase() },
     });
 
     if (!user) return { title: "Usuário não encontrado | MoodSpace" };
 
-    const title = user.isVerified
-        ? `${user.name || user.username} ✓ (@${user.username})`
-        : `${user.name || user.username} (@${user.username})`;
+    const displayName = user.name && user.name !== user.username 
+        ? `${user.name} (@${user.username})` 
+        : `@${user.username}`;
+
+    const separator = user.isVerified ? "✦" : "—";
+    const title = `${displayName} ${separator} moodspace`;
 
     const description = `Confira o espaço criativo de @${user.username} no MoodSpace. Aesthetic moods, music & GIFs.`;
 
     return {
-        title,
+        title: {
+            absolute: title
+        },
         description,
         openGraph: {
             title,
@@ -54,6 +59,21 @@ export async function generateMetadata({
             description,
             images: [`/${user.username}/opengraph-image`],
         },
+        alternates: {
+            canonical: `/${user.username}`,
+        },
+        robots: {
+            index: true,
+            follow: true,
+            nocache: true,
+            googleBot: {
+                index: true,
+                follow: true,
+                'max-video-preview': -1,
+                'max-image-preview': 'large',
+                'max-snippet': -1,
+            },
+        },
         themeColor: "#000000",
     };
 }
@@ -61,7 +81,15 @@ export async function generateMetadata({
 export default async function PublicMoodPage({
     params,
 }: Props) {
-    const { username } = await params;
+    const { username: rawUsername } = await params;
+    const username = rawUsername.toLowerCase();
+
+    // Redirecionamento canônico: Se o usuário acessou /Nyo, redireciona para /nyo
+    if (rawUsername !== username) {
+        const { redirect } = await import("next/navigation");
+        redirect(`/${username}`);
+    }
+
     const session = await auth();
     const isGuest = !session;
 

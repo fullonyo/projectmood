@@ -134,9 +134,48 @@ export type MoodStatusBlockContent = z.infer<typeof MoodStatusBlockContentSchema
 export type CountdownBlockContent = z.infer<typeof CountdownBlockContentSchema>
 export type GuestbookBlockContent = z.infer<typeof GuestbookBlockContentSchema>
 
+const RESERVED_USERNAMES = [
+    "admin",
+    "dashboard",
+    "settings",
+    "api",
+    "auth",
+    "login",
+    "register",
+    "help",
+    "support",
+    "mood",
+    "moodspace",
+    "official",
+    "verified",
+    "root",
+    "terms",
+    "privacy",
+    "system",
+    "config",
+    "profile",
+    "edit",
+    "assets",
+    "public",
+    "static",
+    "search",
+    "explore",
+    "notifications",
+    "messages",
+    "activity",
+    "analytics"
+];
+
+export const UsernameSchema = z
+    .string()
+    .min(3, "Username deve ter no mínimo 3 caracteres")
+    .max(30, "Username deve ter no máximo 30 caracteres")
+    .regex(/^[a-z0-9_]+$/, "Username deve conter apenas letras minúsculas, números e sublinhado")
+    .refine((u) => !RESERVED_USERNAMES.includes(u), "Este nome de usuário já está reservado pelo sistema");
+
 export const RegisterSchema = z.object({
     email: z.string().email("Email inválido"),
     password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
-    username: z.string().min(3, "Username deve ter no mínimo 3 caracteres").regex(/^[a-zA-Z0-9_]+$/, "Username deve ser alfanumérico"),
+    username: UsernameSchema,
     name: z.string().optional(),
 });

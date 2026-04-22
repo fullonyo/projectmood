@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -6,6 +7,10 @@ import { computeHasUnpublishedChanges } from "@/actions/publish";
 import { getFeatureFlags } from "@/actions/system-config";
 import { MoodBlock } from "@/types/database";
 import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = {
+    title: "studio",
+};
 
 export default async function DashboardPage() {
     const session = await auth();

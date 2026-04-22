@@ -104,14 +104,10 @@ type ActionResult<T> = T | { error: string }
  * Wrapper para Server Actions com autenticação automática.
  * Encapsula o padrão try/catch + auth + revalidação.
  *
- * Segue o padrão Next.js de Server Actions com retorno seguro
- * (nunca lança exceptions para o cliente — sempre retorna `{ error }` ou `{ success }`).
- *
  * @example
  * export const myAction = withAuth(async (session) => {
  *     // session está garantida
  *     const username = await getUsernameById(session.user.id)
- *     // ... lógica ...
  *     revalidateProfile(username)
  *     return { success: true }
  * })

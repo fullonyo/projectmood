@@ -2,11 +2,11 @@ import { auth } from "@/auth"
 
 export default auth((req) => {
     const isLoggedIn = !!req.auth
-    const isAuthPage = req.nextUrl.pathname.startsWith("/auth")
-    const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard")
-    const isRootPage = req.nextUrl.pathname === "/"
-
-    const isAdminPage = req.nextUrl.pathname.startsWith("/admin")
+    const pathname = req.nextUrl.pathname
+    const isAuthPage = pathname.startsWith("/auth/") || pathname === "/auth"
+    const isDashboardPage = pathname.startsWith("/dashboard/") || pathname === "/dashboard"
+    const isRootPage = pathname === "/"
+    const isAdminPage = pathname.startsWith("/admin/") || pathname === "/admin"
 
     if (isDashboardPage && !isLoggedIn) {
         return Response.redirect(new URL("/auth/login", req.nextUrl))

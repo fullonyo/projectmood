@@ -278,5 +278,26 @@ O sistema foi elevado para um novo padrão de performance e organização:
     - **Performance**: Elimina centenas de listeners redundantes de resize, centralizando o controle em um único Context.
     - **FUS (Fluid Unit Scaling)**: Garante que o canvas seja idêntico em qualquer resolução (1080p, 4K, Mobile).
 
+### User Identity & Aesthetic Metadata (Studio 2.2) 🛡️✨
+
+Para garantir segurança, SEO e a estética minimalista da plataforma, o tratamento de identidades segue regras estritas:
+
+- **Username Standard**: 
+    - **Casing**: Todos os nomes de usuário são forçados para **letras minúsculas** (`[a-z0-9_]`) no registro e salvamento.
+    - **Reserved Names**: Lista de 29+ termos do sistema bloqueados (ex: `admin`, `api`, `dashboard`, `auth`) para evitar "sequestro" de rotas.
+    - **Normalization**: Consultas ao banco de dados usam `.toLowerCase()` e `mode: 'insensitive'` para máxima resiliência.
+- **URL Handling**: 
+    - **Canonical Redirects**: Qualquer URL de perfil acessada com letras maiúsculas (ex: `/Nyo`) é redirecionada permanentemente (301) para sua versão canônica em minúsculo (`/nyo`).
+    - **Middleware**: Verificação de caminhos com precisão absoluta (`/dashboard/` vs `/dashboard-user`) para evitar colisões entre rotas do sistema e perfis de usuários.
+- **Aesthetic Metadata (Browser Tabs)**:
+    - **Template Global**: `%s — moodspace` (Uso de letras minúsculas e travessão `—`).
+    - **Símbolos de Status**: 
+        - **Padrão**: Travessão (`—`) como separador.
+        - **Autoridade/Verificado**: Brilho (`✦`) como separador.
+    - **Lógica de Título Inteligente**: 
+        - **Apenas Username**: `@username — moodspace`
+        - **Com Nome Real**: `Nome (@username) — moodspace` (Evita redundância se o nome for igual ao username).
+    - **Admin Hub**: Título absoluto `admin ✦ moodspace`.
+
 ---
-*Documentação atualizada por Antigravity em 28/02/2026. Smart Architecture e ScaleProvider integrados.*
+*Documentação atualizada por Antigravity em 22/04/2026. User Identity & Aesthetic Metadata integrados.*

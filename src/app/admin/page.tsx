@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { Users, Eye, Zap, Activity, ShieldAlert, UserX, CheckCircle2 } from "lucide-react"
 import { getAdminAnalytics } from "@/actions/admin-analytics"
 import { MetricCard } from "@/components/admin/metric-card"
@@ -8,6 +9,12 @@ import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+
+export const metadata: Metadata = {
+    title: {
+        absolute: "admin ✦ moodspace"
+    },
+};
 
 export default async function AdminDashboardPage() {
     const { metrics, blockUsage, recentUsers, growthData, roleDistribution, verificationDistribution } = await getAdminAnalytics()

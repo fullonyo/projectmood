@@ -22,8 +22,8 @@ const geistMono = Geist_Mono({
 //teste
 export const metadata: Metadata = {
   title: {
-    default: "MoodSpace | Seu espaço, seu mood",
-    template: "%s | MoodSpace"
+    default: "moodspace — curate your reality",
+    template: "%s — moodspace"
   },
   description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, music & GIFs.",
   keywords: ["moodboard", "aesthetic", "creative space", "personal profile", "moodspace"],
