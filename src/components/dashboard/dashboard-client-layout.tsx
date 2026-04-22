@@ -11,6 +11,7 @@ import { MouseTrails } from "../effects/mouse-trails";
 import { MoodBlock, Profile } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
 import { updateMoodBlocksZIndex } from "@/actions/profile";
+import { I18nProvider } from "@/i18n/context";
 import { CanvasInteractionProvider, useCanvasInteraction } from "./canvas-interaction-context";
 import { AudioProvider } from "./audio-context";
 import { LyricsProvider } from "./lyrics-context";
@@ -29,13 +30,15 @@ interface DashboardClientLayoutProps {
 
 export function DashboardClientLayout({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
     return (
-        <AudioProvider>
-            <LyricsProvider>
-                <CanvasInteractionProvider>
-                    <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
-                </CanvasInteractionProvider>
-            </LyricsProvider>
-        </AudioProvider>
+        <I18nProvider>
+            <AudioProvider>
+                <LyricsProvider>
+                    <CanvasInteractionProvider>
+                        <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
+                    </CanvasInteractionProvider>
+                </LyricsProvider>
+            </AudioProvider>
+        </I18nProvider>
     )
 }
 

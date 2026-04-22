@@ -1,19 +1,23 @@
 "use client"
 
-import { useState, useEffect, useTransition } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
+import { useState, useEffect } from "react"
 import {
-    Palette, Layers, Sparkles, RefreshCw,
-    Droplets, Maximize2, Split, Shapes, Activity
+    Palette, Shapes, RefreshCw,
+    Droplets, Maximize2, Split, Activity
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { MoodBlock } from "@/types/database"
-import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, EditorSlider, EditorColorPicker } from "./EditorUI"
+import { addMoodBlock } from "@/actions/profile"
+import { toast } from "sonner"
+import { 
+    EditorHeader, 
+    EditorSection, 
+    PillSelector, 
+    GridSelector, 
+    EditorActionButton, 
+    EditorSlider, 
+    EditorColorPicker 
+} from "./EditorUI"
 
 interface UniversalRorschachEditorProps {
     block?: MoodBlock | null
@@ -31,7 +35,7 @@ export function UniversalRorschachEditor({
     onClose
 }: UniversalRorschachEditorProps) {
     const { t } = useTranslation()
-    const [isPending, startTransition] = useTransition()
+    const [isPending, setIsPending] = useState(false)
 
     const content = block?.content || {}
     const [seed, setSeed] = useState(content.seed ?? Math.floor(Math.random() * 10000))
@@ -57,30 +61,40 @@ export function UniversalRorschachEditor({
         onUpdate(block.id, { content: updates })
     }, [seed, color, opacity, blur, symmetry, complexity, block?.id, onUpdate])
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const finalContent = {
             seed, color, opacity, blur, symmetry, complexity
         }
 
-        startTransition(async () => {
+        setIsPending(true)
+        try {
             if (block?.id) {
                 if (onClose) onClose()
             } else if (onAdd) {
                 await onAdd('rorschach', finalContent)
                 if (onClose) onClose()
+            } else {
+                const res = await addMoodBlock('rorschach', finalContent, {
+                    x: 50, y: 50,
+                    width: 250,
+                    height: 250
+                })
+                if (res.error) toast.error(res.error)
+                else if (onClose) onClose()
             }
-        })
-    }
-
-    const regenerate = () => {
-        setSeed(Math.floor(Math.random() * 10000))
+        } catch (error) {
+            toast.error("Erro ao salvar Rorschach")
+        } finally {
+            setIsPending(false)
+        }
     }
 
     return (
         <div className="space-y-12 pb-20">
             <EditorHeader 
-                title={t('editors.rorschach.title')}
+                title={block ? t('editors.rorschach.edit_title') || "Editar Rorschach" : t('editors.rorschach.title')}
                 subtitle={t('editors.rorschach.subtitle')}
+                onClose={onClose}
             />
 
             <PillSelector
@@ -90,6 +104,7 @@ export function UniversalRorschachEditor({
                 ]}
                 activeId={activeTab}
                 onChange={(id) => setActiveTab(id as TabType)}
+                variant="ghost"
             />
 
             {activeTab === 'geometry' && (
@@ -104,6 +119,8 @@ export function UniversalRorschachEditor({
                             activeId={symmetry}
                             onChange={(id) => setSymmetry(id as any)}
                             columns={3}
+                            variant="ghost"
+                            id="rorschach-symmetry"
                         />
                     </EditorSection>
 
@@ -114,6 +131,7 @@ export function UniversalRorschachEditor({
                         max={10000}
                         onChange={setSeed}
                         icon={RefreshCw}
+                        variant="ghost"
                     />
 
                     <EditorSlider
@@ -123,6 +141,7 @@ export function UniversalRorschachEditor({
                         max={20}
                         onChange={setComplexity}
                         icon={Maximize2}
+                        variant="ghost"
                     />
                 </div>
             )}
@@ -130,7 +149,7 @@ export function UniversalRorschachEditor({
             {activeTab === 'style' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <EditorSection title="Cor Principal">
-                        <EditorColorPicker value={color} onChange={setColor} />
+                        <EditorColorPicker value={color} onChange={setColor} variant="ghost" />
                     </EditorSection>
 
                     <div className="grid grid-cols-2 gap-6">
@@ -141,6 +160,7 @@ export function UniversalRorschachEditor({
                             min={0}
                             max={100}
                             onChange={(v) => setOpacity(v / 100)}
+                            variant="ghost"
                         />
                         <EditorSlider
                             label="Desfoque"
@@ -150,6 +170,7 @@ export function UniversalRorschachEditor({
                             max={20}
                             onChange={setBlur}
                             icon={Droplets}
+                            variant="ghost"
                         />
                     </div>
                 </div>
@@ -158,7 +179,7 @@ export function UniversalRorschachEditor({
             <EditorActionButton 
                 onClick={handleSave} 
                 isLoading={isPending} 
-                label={block?.id ? t('common.update') : t('common.deploy')}
+                label={block?.id ? t('common.save') : t('common.deploy')}
             />
         </div>
     )

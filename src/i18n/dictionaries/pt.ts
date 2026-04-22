@@ -397,7 +397,9 @@ export const pt = {
             deploy: "Começar contagem",
         },
         guestbook: {
-            title: "Mural de recados",
+            title: "Recados",
+            add_title: "Mural de Recados",
+            edit_title: "Editar Mural",
             subtitle: "Registro de Conexões",
             label: "Qual é a pergunta ou título?",
             placeholder: "Deixe um recadinho...",

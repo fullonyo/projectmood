@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Palette, X } from "lucide-react"
+import { Palette, X, ChevronRight, Sparkles } from "lucide-react"
 import { useState } from "react"
 
 interface EditorHeaderProps {
@@ -18,23 +18,23 @@ interface EditorHeaderProps {
 export function EditorHeader({ title, subtitle, onClose }: EditorHeaderProps) {
     return (
         <div className="relative mb-8 pt-2">
-            <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                    <h2 className="text-4xl font-black uppercase tracking-tighter leading-none text-zinc-900 dark:text-white">
+            <div className="flex items-center justify-between gap-4">
+                <div className="space-y-1 min-w-0">
+                    <h2 className="text-3xl font-black uppercase tracking-tighter leading-[0.9] text-zinc-900 dark:text-white break-words">
                         {title}
                     </h2>
                     {subtitle && (
-                        <p className="text-sm text-zinc-500 font-mono lowercase opacity-70">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-400 dark:text-zinc-500 truncate">
                             {subtitle}
                         </p>
                     )}
                 </div>
                 {onClose && (
-                    <button
+                    <button 
                         onClick={onClose}
-                        className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
+                        className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all shrink-0"
                     >
-                        <X className="w-5 h-5" />
+                        <ChevronRight className="w-4 h-4" />
                     </button>
                 )}
             </div>
@@ -71,13 +71,16 @@ interface PillSelectorProps<T> {
     options: { id: T, label: string, icon?: any }[]
     activeId: T
     onChange: (id: T) => void
-    variant?: 'standard' | 'scroll'
+    variant?: 'standard' | 'scroll' | 'ghost'
 }
 
 export function PillSelector<T extends string>({ options, activeId, onChange, variant = 'standard' }: PillSelectorProps<T>) {
+    const isGhost = variant === 'ghost'
+
     return (
         <div className={cn(
-            "flex p-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl",
+            "flex p-1 rounded-2xl transition-all",
+            !isGhost && "bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800",
             variant === 'scroll' ? "overflow-x-auto no-scrollbar" : "w-full"
         )}>
             {options.map((opt) => {
@@ -88,7 +91,7 @@ export function PillSelector<T extends string>({ options, activeId, onChange, va
                         key={opt.id}
                         onClick={() => onChange(opt.id)}
                         className={cn(
-                            "relative flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                            "relative flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all",
                             active ? "text-zinc-900 dark:text-white" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300",
                             variant === 'scroll' && "flex-none"
                         )}
@@ -96,13 +99,16 @@ export function PillSelector<T extends string>({ options, activeId, onChange, va
                         {active && (
                             <motion.div
                                 layoutId="pill-active"
-                                className="absolute inset-0 bg-white dark:bg-zinc-800 shadow-sm rounded-xl border border-black/5 dark:border-white/5"
+                                className={cn(
+                                    "absolute inset-0 shadow-sm rounded-xl border border-black/5 dark:border-white/5",
+                                    isGhost ? "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700" : "bg-white dark:bg-zinc-800"
+                                )}
                                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                             />
                         )}
-                        <span className="relative z-10 flex items-center gap-2">
-                            {Icon && <Icon className="w-3.5 h-3.5" />}
-                            {opt.label}
+                        <span className="relative z-10 flex items-center gap-1.5 truncate">
+                            {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
+                            <span className="truncate">{opt.label}</span>
                         </span>
                     </button>
                 )
@@ -219,6 +225,43 @@ export function GridSelector<T extends string>({ options, activeId, onChange, co
     )
 }
 
+interface EditorListSelectorProps<T> {
+    options: { id: T, label: string, icon?: any }[]
+    activeId: T
+    onChange: (id: T) => void
+    maxHeight?: string
+}
+
+export function EditorListSelector<T extends string>({ options, activeId, onChange, maxHeight = "max-h-64" }: EditorListSelectorProps<T>) {
+    return (
+        <div className={cn("overflow-y-auto custom-scrollbar px-1", maxHeight)}>
+            <div className="space-y-1">
+                {options.map((opt) => {
+                    const active = activeId === opt.id
+                    const Icon = opt.icon
+                    return (
+                        <button
+                            key={opt.id}
+                            onClick={() => onChange(opt.id)}
+                            className={cn(
+                                "w-full flex items-center justify-between px-4 py-3 rounded-xl text-[11px] font-black uppercase transition-all",
+                                active 
+                                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-lg shadow-black/5" 
+                                    : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            )}
+                        >
+                            <span className="truncate pr-2">{opt.label}</span>
+                            {active && (
+                                Icon ? <Icon className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                            )}
+                        </button>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
 interface EditorActionButtonProps {
     onClick: () => void
     disabled?: boolean
@@ -257,15 +300,27 @@ interface EditorSliderProps {
     label?: string
     unit?: string
     icon?: any
+    variant?: 'standard' | 'ghost'
 }
 
-export function EditorSlider({ value, min, max, step = 1, onChange, label, unit = '', icon: Icon }: EditorSliderProps) {
+export function EditorSlider({ value, min, max, step = 1, onChange, label, unit = '', icon: Icon, variant = 'standard' }: EditorSliderProps) {
+    const isGhost = variant === 'ghost'
+
     return (
-        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex justify-between items-center px-1">
-                {label && <Label className="text-[10px] font-bold uppercase text-zinc-400 tracking-widest">{label}</Label>}
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">{value}{unit}</span>
+        <div className={cn(
+            "transition-all",
+            isGhost ? "p-1 space-y-3" : "bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6"
+        )}>
+            <div className="flex justify-between items-center px-1 gap-2">
+                {label && (
+                    <Label className="text-[9px] font-black uppercase text-zinc-400 dark:text-zinc-500 tracking-wider truncate">
+                        {label}
+                    </Label>
+                )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 tabular-nums">
+                        {value}{unit}
+                    </span>
                     {Icon && <Icon className="w-3.5 h-3.5 text-zinc-300" />}
                 </div>
             </div>
@@ -285,11 +340,17 @@ interface EditorColorPickerProps {
     value: string
     onChange: (val: string) => void
     label?: string
+    variant?: 'standard' | 'ghost'
 }
 
-export function EditorColorPicker({ value, onChange, label }: EditorColorPickerProps) {
+export function EditorColorPicker({ value, onChange, label, variant = 'standard' }: EditorColorPickerProps) {
+    const isGhost = variant === 'ghost'
+
     return (
-        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm flex items-center gap-4">
+        <div className={cn(
+            "flex items-center gap-4 transition-all",
+            isGhost ? "p-1" : "bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm"
+        )}>
             <div className="relative flex-1">
                 <Palette className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                 <Input

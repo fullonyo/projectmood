@@ -15,17 +15,20 @@ import { CustomCursor } from "@/components/effects/custom-cursor"
 import { MouseTrails } from "@/components/effects/mouse-trails"
 import type { PublicMoodPageProps, MoodBlock } from "@/types/database"
 import { ExperienceOverlay } from "@/components/dashboard/ExperienceOverlay"
+import { I18nProvider } from "@/i18n/context"
 import { AudioProvider, useAudio } from "@/components/dashboard/audio-context"
 import { LyricsProvider } from "@/components/dashboard/lyrics-context"
 import { GlobalLyricsOverlay } from "@/components/dashboard/GlobalLyricsOverlay"
 
 export function PublicMoodPageClient(props: PublicMoodPageProps) {
     return (
-        <AudioProvider>
-            <LyricsProvider>
-                <PublicMoodPageClientInner {...props} />
-            </LyricsProvider>
-        </AudioProvider>
+        <I18nProvider>
+            <AudioProvider>
+                <LyricsProvider>
+                    <PublicMoodPageClientInner {...props} />
+                </LyricsProvider>
+            </AudioProvider>
+        </I18nProvider>
     )
 }
 

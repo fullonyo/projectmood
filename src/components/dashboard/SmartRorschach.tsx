@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { cn } from "@/lib/utils"
 
 interface SmartRorschachProps {
@@ -31,6 +31,9 @@ export function SmartRorschach({
     // Unique ID for SVG filters to avoid collisions
     const filterId = useMemo(() => `rorschach-filter-${seed}`, [seed]);
 
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
     const paths = useMemo(() => {
         const generatedPaths: string[] = [];
         const numShapes = Math.floor(complexity * 1.5) + 3;
@@ -41,12 +44,12 @@ export function SmartRorschach({
             return seededRandom(localSeed);
         };
 
-        for (let i = 0; i < numShapes; i++) {
-            // Generate basic points in a "half" or "quarter" section
-            const points: [number, number][] = [];
-            const numPoints = Math.floor(getRand() * 3) + 3; // 3 to 5 points
+        const r = (n: number) => Math.round(n * 100) / 100;
 
-            // Area distribution based on symmetry
+        for (let i = 0; i < numShapes; i++) {
+            const points: [number, number][] = [];
+            const numPoints = Math.floor(getRand() * 3) + 3; 
+
             const maxX = symmetry === 'vertical' || symmetry === 'quad' ? 50 : 100;
             const maxY = symmetry === 'horizontal' || symmetry === 'quad' ? 50 : 100;
 
@@ -56,20 +59,18 @@ export function SmartRorschach({
             for (let j = 0; j < numPoints; j++) {
                 const angle = (j / numPoints) * Math.PI * 2;
                 const dist = getRand() * 20 + 5;
-                const px = centerX + Math.cos(angle) * dist;
-                const py = centerY + Math.sin(angle) * dist;
+                const px = r(centerX + Math.cos(angle) * dist);
+                const py = r(centerY + Math.sin(angle) * dist);
                 points.push([px, py]);
             }
 
-            // Create smooth path
             let d = `M ${points[0][0]} ${points[0][1]}`;
             for (let j = 1; j < points.length; j++) {
                 const prev = points[j - 1];
                 const curr = points[j];
-                const next = points[(j + 1) % points.length];
 
-                const cp1x = prev[0] + (curr[0] - prev[0]) / 2;
-                const cp1y = prev[1] + (curr[1] - prev[1]) / 2;
+                const cp1x = r(prev[0] + (curr[0] - prev[0]) / 2);
+                const cp1y = r(prev[1] + (curr[1] - prev[1]) / 2);
 
                 d += ` Q ${curr[0]} ${curr[1]}, ${cp1x} ${cp1y}`;
             }
@@ -79,6 +80,8 @@ export function SmartRorschach({
 
         return generatedPaths;
     }, [seed, complexity, symmetry]);
+
+    if (!mounted) return <div className="w-full h-full" />;
 
     return (
         <div className="w-full h-full relative group overflow-hidden">
@@ -90,7 +93,6 @@ export function SmartRorschach({
             >
                 <defs>
                     <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
-                        {/* Ink bleeding effect */}
                         <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur" />
                         <feColorMatrix
                             in="blur"
@@ -103,7 +105,6 @@ export function SmartRorschach({
                 </defs>
 
                 <g filter={`url(#${filterId})`} opacity={opacity} fill={color}>
-                    {/* Render original and mirrored parts */}
                     {paths.map((p, i) => (
                         <g key={i}>
                             <motion.path

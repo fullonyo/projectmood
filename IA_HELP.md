@@ -134,7 +134,21 @@ Para elevar o nível de sofisticação e reduzir a carga cognitiva, o Studio 2.1
 ### Experiência Pública & Autoplay
 - O `ExperienceOverlay.tsx` captura a interação inicial do usuário para desbloquear o som.
 - Players de YouTube e Spotify reagem ao estado `hasInteracted` para iniciar com áudio.
+### 📐 Studio 2.1: Countdown & Configuration Standard
 
+1. **Ghost Configuration Pattern**:
+   - Remova molduras (`border`, `bg-white`) de containers internos nos editores.
+   - Use `EditorSection` para separar grupos logicamente, mas mantenha os inputs flutuando sobre o fundo da sidebar.
+   - Inputs premium: `h-14`, `rounded-2xl`, ícones em slots `w-8 h-8` que reagem ao foco.
+
+2. **Persistência Autônoma**:
+   - Editores devem ser "Soberanos": Importar `addMoodBlock` e usá-lo como fallback se `onAdd` não for fornecido.
+   - Sempre disparar `onClose()` após criação bem-sucedida para fluidez de UX.
+
+3. **Premium Ghost Pattern (Tooltips)**:
+   - Seletores de ícones/estilos devem usar `variant="ghost"` no `GridSelector`.
+   - Obrigatório o uso de `id` único para isolar a bolinha indicadora (`layoutId`).
+   - Tooltips flutuantes via `AnimatePresence` para compensar a ausência de labels de texto fixos.
 ### 🎨 Ferramentas Artísticas (Smart Architecture)
 O sistema **Smart Architecture** permite a composição de murais complexos e estéticos com alta performance.
 

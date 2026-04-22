@@ -335,7 +335,9 @@ export const en: Dictionary = {
         },
         rorschach: {
             title: "Smart Rorschach",
-            subtitle: "Symmetrical generative art",
+            add_title: "Inkblot Test",
+            edit_title: "Edit Inkblot",
+            subtitle: "Psychology & Fluid Art",
             tabs: {
                 geometry: "Geometry",
                 style: "Style"
@@ -397,7 +399,9 @@ export const en: Dictionary = {
             deploy: "Start countdown",
         },
         guestbook: {
-            title: "Guestbook mural",
+            title: "Guestbook",
+            add_title: "Guestbook",
+            edit_title: "Edit Guestbook",
             subtitle: "Connection Registry",
             label: "What's the question or title?",
             placeholder: "Leave a little note...",
@@ -443,7 +447,9 @@ export const en: Dictionary = {
             deploy: "Mark quote",
         },
         social: {
-            title: "Add Social Link",
+            title: "Connections",
+            add_title: "Add Social Link",
+            subtitle: "Connect your Identity",
             nodes: "What link is this?",
             link_protocol: "What's the link?",
             link_placeholder: "https://...",
@@ -553,8 +559,10 @@ export const en: Dictionary = {
             }
         },
         shape: {
-            title: "Smart Shapes",
-            subtitle: "Artistic Geometry & Blending",
+            title: "Shapes",
+            add_title: "Smart Shapes",
+            edit_title: "Edit Shape",
+            subtitle: "Geometry & Blending",
             geometry_label: "Base Geometry",
             adjust_sides: "Sides Adjustment",
             adjust_points: "Points Adjustment",

@@ -60,7 +60,7 @@ const STYLES = [
 ]
 
 import { MoodBlock, SocialContent } from "@/types/database"
-import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, EditorSwitch } from "./EditorUI"
+import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, EditorSwitch, EditorListSelector } from "./EditorUI"
 
 type TabType = 'connection' | 'esthetics'
 
@@ -164,8 +164,9 @@ export function UniversalSocialEditor({
             highlight ? "p-6 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800" : ""
         )}>
             <EditorHeader 
-                title={t('editors.social.title')} 
+                title={block ? t('editors.social.edit_title') || "Editar Link" : t('editors.social.add_title')} 
                 subtitle={t('editors.social.subtitle')}
+                onClose={onClose}
             />
 
             <PillSelector
@@ -175,6 +176,7 @@ export function UniversalSocialEditor({
                 ]}
                 activeId={activeTab}
                 onChange={(id) => setActiveTab(id as TabType)}
+                variant="ghost"
             />
 
             {activeTab === 'connection' ? (
@@ -194,40 +196,42 @@ export function UniversalSocialEditor({
                     </EditorSection>
 
                     <EditorSection title="Configurações do Link">
-                        <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-5">
+                        <div className="space-y-6 px-1">
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">
                                     {selectedPlatform.id === 'discord' ? 'Link de Convite (Opcional)' : (t('editors.social.link_protocol') || 'Link / URL')}
                                 </Label>
-                                <div className="relative">
-                                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                <div className="relative group">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center transition-all group-focus-within:scale-110 group-focus-within:text-blue-500">
+                                        <LinkIcon className="w-4 h-4" />
+                                    </div>
                                     <Input
                                         placeholder={selectedPlatform.id === 'discord' ? 'https://discord.gg/...' : (t('editors.social.link_placeholder') || 'https://...')}
                                         value={url}
                                         onChange={(e) => setUrl(e.target.value)}
-                                        className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium"
+                                        className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl pl-16 h-14 text-[13px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20"
                                     />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">
-                                        {selectedPlatform.id === 'discord' ? 'Sua Tag / Username' : (t('editors.social.visual_alias') || 'Label')}
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">
+                                        {selectedPlatform.id === 'discord' ? 'Username' : (t('editors.social.visual_alias') || 'Label')}
                                     </Label>
                                     <Input
                                         placeholder={selectedPlatform.id === 'discord' ? 'ex: login.jsx' : (t('editors.social.alias_placeholder') || 'Texto do botão')}
                                         value={label}
                                         onChange={(e) => setLabel(e.target.value)}
-                                        className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl h-12 text-[11px] font-medium px-4"
+                                        className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl h-14 text-[13px] font-medium px-4 focus-visible:ring-1 focus-visible:ring-blue-500/20"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">{t('editors.social.sub_label') || 'Sub-label'}</Label>
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">{t('editors.social.sub_label') || 'Sub-label'}</Label>
                                     <Input
-                                        placeholder={t('editors.social.sub_label_placeholder') || 'Texto secundário'}
+                                        placeholder={t('editors.social.sub_label_placeholder') || 'Secundário'}
                                         value={subLabel}
                                         onChange={(e) => setSubLabel(e.target.value)}
-                                        className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl h-12 text-[11px] font-medium px-4"
+                                        className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl h-14 text-[13px] font-medium px-4 focus-visible:ring-1 focus-visible:ring-blue-500/20"
                                     />
                                 </div>
                             </div>
@@ -246,18 +250,20 @@ export function UniversalSocialEditor({
                             activeId={layoutMode}
                             onChange={(id) => setLayoutMode(id as any)}
                             columns={3}
+                            variant="ghost"
+                            id="social-layouts"
                         />
                     </EditorSection>
 
                     <EditorSection title={t('editors.social.style_manifesto') || "Estilo do Botão"}>
-                        <div className="space-y-6">
-                            <PillSelector
-                                variant="scroll"
-                                options={STYLES.map(s => ({ id: s.id as any, label: t(`editors.social.styles.${s.id}`) }))}
-                                activeId={style as any}
-                                onChange={(id) => setStyle(id as any)}
-                            />
-                        </div>
+                        <EditorListSelector
+                            options={STYLES.map(s => ({ 
+                                id: s.id as any, 
+                                label: t(`editors.social.styles.${s.id}`) || s.label 
+                            }))}
+                            activeId={style as any}
+                            onChange={(id) => setStyle(id as any)}
+                        />
                     </EditorSection>
                 </div>
             )}
