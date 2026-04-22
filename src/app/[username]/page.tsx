@@ -19,11 +19,16 @@ export async function generateMetadata({
 }: Props): Promise<Metadata> {
     const { username } = await params;
 
-    const user = await prisma.user.findUnique({
-        where: { username: username.toLowerCase() },
+    const user = await prisma.user.findFirst({
+        where: { 
+            username: {
+                equals: username,
+                mode: 'insensitive'
+            }
+        },
     });
 
-    if (!user) return { title: "Usuário não encontrado | MoodSpace" };
+    if (!user) return { title: { absolute: "404 — moodspace" } };
 
     const displayName = user.name && user.name !== user.username 
         ? `${user.name} (@${user.username})` 
