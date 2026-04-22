@@ -620,6 +620,19 @@ export const pt = {
             copied: "Copiado",
             qr_code: "QR CODE",
             save_qr: "Salvar QR"
+        },
+        identity: {
+            title: "identidade",
+            subtitle: "metadados pessoais",
+            display_name_label: "display name",
+            display_name_hint: "como você aparece dentro do mural.",
+            username_label: "username",
+            username_hint: "seu identificador único (alias).",
+            tab_view_label: "browser tab",
+            sync_btn: "sincronizar identidade",
+            syncing: "sincronizando...",
+            success: "identidade atualizada com sucesso",
+            error_in_use: "este nome de usuário já está em uso por outra conta."
         }
     },
     canvas: {

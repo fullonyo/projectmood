@@ -108,9 +108,9 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                 {activeTab === 'identity' ? (
                     <motion.div
                         key="identity-editor"
-                        initial={{ x: 320, opacity: 0 }}
+                        initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: 320, opacity: 0 }}
+                        exit={{ x: -20, opacity: 0 }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
                         className="absolute inset-0 z-50 bg-white dark:bg-zinc-900 p-8"
                     >
@@ -120,8 +120,15 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                             onClose={() => setActiveTab('main')}
                         />
                     </motion.div>
-                ) : null}
-            </AnimatePresence>
+                ) : (
+                    <motion.div
+                        key="main-content"
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 20, opacity: 0 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="flex flex-col h-full overflow-hidden"
+                    >
 
             <div className="absolute top-6 right-6 z-20">
                 <LanguageSwitcher />
@@ -352,6 +359,10 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                     {t('leftSidebar.terminate_session')}
                 </Button>
             </div>
+
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <ConfirmModal
                 isOpen={showPublishModal}

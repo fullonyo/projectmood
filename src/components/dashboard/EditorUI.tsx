@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Palette, X, ChevronRight, Sparkles } from "lucide-react"
+import { Palette, X, ChevronRight, Sparkles, Loader2 } from "lucide-react"
 import { useState } from "react"
 
 interface EditorHeaderProps {
@@ -302,26 +302,34 @@ interface EditorActionButtonProps {
     isLoading?: boolean
     label: string
     variant?: 'primary' | 'danger'
+    icon?: any
 }
 
-export function EditorActionButton({ onClick, disabled, isLoading, label, variant = 'primary' }: EditorActionButtonProps) {
+export function EditorActionButton({ onClick, disabled, isLoading, label, variant = 'primary', icon: Icon }: EditorActionButtonProps) {
     return (
-        <Button
+        <button
             onClick={onClick}
             disabled={disabled || isLoading}
             className={cn(
-                "w-full h-14 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all shadow-lg relative group overflow-hidden border-none",
+                "w-full h-14 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all shadow-lg relative group overflow-hidden border-none flex items-center justify-center gap-3",
                 variant === 'danger' 
                     ? "bg-red-50 dark:bg-red-950/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-950/40 shadow-red-500/10"
                     : "bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-100"
             )}
         >
-            {isLoading ? "Processando..." : label}
+            <div className="relative z-10 flex items-center gap-2">
+                {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                    Icon && <Icon className="w-4 h-4" />
+                )}
+                {isLoading ? "Processando..." : label}
+            </div>
             <div className={cn(
                 "absolute inset-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300",
                 variant === 'danger' ? "bg-red-500/5" : "bg-white/10 dark:bg-black/10"
             )} />
-        </Button>
+        </button>
     )
 }
 

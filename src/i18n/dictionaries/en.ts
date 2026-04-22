@@ -335,8 +335,6 @@ export const en: Dictionary = {
         },
         rorschach: {
             title: "Smart Rorschach",
-            add_title: "Inkblot Test",
-            edit_title: "Edit Inkblot",
             subtitle: "Psychology & Fluid Art",
             tabs: {
                 geometry: "Geometry",
@@ -622,6 +620,19 @@ export const en: Dictionary = {
             copied: "Copied",
             qr_code: "QR CODE",
             save_qr: "Save QR"
+        },
+        identity: {
+            title: "identity",
+            subtitle: "personal metadata",
+            display_name_label: "display name",
+            display_name_hint: "how you appear inside the mural.",
+            username_label: "username",
+            username_hint: "your unique identifier (alias).",
+            tab_view_label: "browser tab",
+            sync_btn: "sync identity",
+            syncing: "syncing...",
+            success: "identity updated successfully",
+            error_in_use: "this username is already in use by another account."
         }
     },
     canvas: {

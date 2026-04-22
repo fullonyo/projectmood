@@ -43,6 +43,12 @@ Localizados em `src/components/dashboard/`, os editores centralizam toda a lógi
 - **Fluxo Único**: Gerenciam tanto a criação de novos blocos (`onAdd`) quanto a atualização em tempo real de blocos existentes (`onUpdate`).
 - **Registro Central**: Todas as rotas de edição são mapeadas no `block-editor-registry.tsx`.
 
+#### Universal Identity Editor (`UniversalIdentityEditor.tsx`) 🛡️👤
+- **Padrão Visual**: Segue o **Studio Editor Standard**, utilizando `EditorHeader`, `EditorSection` e `EditorActionButton`.
+- **Inputs HUD**: Utiliza inputs com fundo `bg-zinc-50 dark:bg-zinc-900/50`, cantos `rounded-2xl` e ícones técnicos (`User`, `AtSign`).
+- **Feedback Reativo**: Exibe um "Tab Preview" em tempo real para que o usuário veja como sua identidade aparecerá na aba do navegador antes de salvar.
+- **i18n Integrado**: Todas as labels, hints e toasts de sucesso/erro são consumidos via `useTranslation` (`editors.identity.*`).
+
 ## Core Tecnológico
 
 ### Mood Canvas & WYSIWYG

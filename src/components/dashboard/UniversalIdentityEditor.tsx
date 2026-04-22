@@ -1,14 +1,13 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { User, AtSign, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
+import { User, AtSign, Globe, Check } from "lucide-react"
 import { EditorHeader, EditorSection, EditorActionButton } from "./EditorUI"
-import { Input } from "@/components/ui/input"
 import { updateProfile } from "@/actions/profile"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/i18n/context"
-import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 interface UniversalIdentityEditorProps {
     currentName: string
@@ -25,9 +24,15 @@ export function UniversalIdentityEditor({ currentName, currentUsername, onClose 
     const [username, setUsername] = useState(currentUsername || "")
     const [error, setError] = useState<string | null>(null)
 
+    const isChanged = name !== (currentName || "") || username !== (currentUsername || "")
+
     const handleSave = () => {
+        if (!isChanged) {
+            onClose()
+            return
+        }
+
         setError(null)
-        
         startTransition(async () => {
             const result = await updateProfile({ 
                 name: name.trim(), 
@@ -36,121 +41,96 @@ export function UniversalIdentityEditor({ currentName, currentUsername, onClose 
 
             if (result?.error) {
                 setError(result.error)
-                toast.error(result.error)
+                // Traduz o erro se for o conhecido de username em uso
+                const errorMessage = result.error === "Este nome de usuário já está em uso por outra conta." 
+                    ? t('editors.identity.error_in_use') 
+                    : result.error
+                toast.error(errorMessage)
             } else {
-                toast.success(t('common.success') || "Identidade atualizada")
+                toast.success(t('editors.identity.success') || "Identidade atualizada")
                 router.refresh()
                 onClose()
             }
         })
     }
 
-    const isChanged = name !== (currentName || "") || username !== (currentUsername || "")
-
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
+        <div className="flex flex-col h-full">
             <EditorHeader 
-                title="identity" 
-                subtitle="personal metadata"
+                title={t('editors.identity.title')} 
+                subtitle={t('editors.identity.subtitle')}
                 onClose={onClose}
             />
 
-            <div className="flex-1 overflow-y-auto px-1 space-y-16 pb-10 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto space-y-12 pb-24 custom-scrollbar">
                 {/* Display Name Section */}
-                <div className="space-y-2 group/input">
-                    <label className="text-[9px] font-black uppercase tracking-[0.5em] text-zinc-300 dark:text-zinc-700 px-1 group-focus-within/input:text-blue-500 transition-colors">
-                        display name
-                    </label>
-                    <div className="relative">
-                        <Input
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="visual name..."
-                            className="h-14 px-1 rounded-none bg-transparent border-none text-2xl font-black tracking-tighter placeholder:text-zinc-100 dark:placeholder:text-zinc-800 focus-visible:ring-0 transition-all caret-blue-500"
-                        />
-                        {/* Linha de Foco Animada */}
-                        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                        <motion.div 
-                            className="absolute bottom-0 left-0 h-[1.5px] bg-blue-500 z-10"
-                            initial={{ width: 0 }}
-                            whileInView={{ width: "auto" }}
-                            animate={{ 
-                                width: name !== (currentName || "") ? "100%" : "0%",
-                                opacity: name !== (currentName || "") ? 1 : 0
-                            }}
-                        />
-                        <motion.div 
-                            className="absolute bottom-0 left-0 h-[1.5px] bg-zinc-900 dark:bg-white z-20"
-                            initial={{ width: 0 }}
-                            whileFocus={{ width: "100%" }}
-                        />
+                <EditorSection title={t('editors.identity.display_name_label')}>
+                    <div className="space-y-3">
+                        <div className="relative group">
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                            <input
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="visual name..."
+                                className="w-full h-14 bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-2xl pl-12 pr-4 text-[13px] font-bold tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none shadow-sm placeholder:text-zinc-400 transition-all"
+                            />
+                        </div>
+                        <p className="text-[10px] text-zinc-400 px-1 lowercase italic">
+                            {t('editors.identity.display_name_hint')}
+                        </p>
                     </div>
-                    <p className="text-[9px] text-zinc-400 dark:text-zinc-600 px-1 font-medium italic opacity-40 group-focus-within/input:opacity-100 transition-opacity">
-                        how you appear inside the mural.
-                    </p>
-                </div>
+                </EditorSection>
 
                 {/* Username Section */}
-                <div className="space-y-2 group/input">
-                    <label className="text-[9px] font-black uppercase tracking-[0.5em] text-zinc-300 dark:text-zinc-700 px-1 group-focus-within/input:text-blue-500 transition-colors">
-                        username
-                    </label>
-                    <div className="space-y-8">
-                        <div className="relative">
-                            <span className="absolute left-1 top-1/2 -translate-y-1/2 text-2xl font-black text-zinc-200 dark:text-zinc-800 pointer-events-none">@</span>
-                            <Input
+                <EditorSection title={t('editors.identity.username_label')}>
+                    <div className="space-y-3">
+                        <div className="relative group">
+                            <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                            <input
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
                                 placeholder="alias"
-                                className="h-14 pl-8 pr-1 rounded-none bg-transparent border-none text-2xl font-mono font-bold tracking-tighter placeholder:text-zinc-100 dark:placeholder:text-zinc-800 focus-visible:ring-0 transition-all caret-blue-500"
-                            />
-                            {/* Linha de Foco Animada */}
-                            <div className="absolute bottom-0 left-0 w-full h-[1px] bg-zinc-100 dark:bg-zinc-800" />
-                            <motion.div 
-                                className="absolute bottom-0 left-0 h-[1.5px] bg-blue-500 z-10"
-                                animate={{ 
-                                    width: username !== (currentUsername || "") ? "100%" : "0%",
-                                    opacity: username !== (currentUsername || "") ? 1 : 0
-                                }}
-                            />
-                            <motion.div 
-                                className="absolute bottom-0 left-0 h-[1.5px] bg-zinc-900 dark:bg-white z-20"
-                                initial={{ width: 0 }}
-                                whileFocus={{ width: "100%" }}
+                                className={cn(
+                                    "w-full h-14 bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-2xl pl-12 pr-4 text-[13px] font-bold lowercase tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none shadow-sm placeholder:text-zinc-400 transition-all",
+                                    error ? "ring-1 ring-red-500/50" : ""
+                                )}
                             />
                         </div>
+                        <p className="text-[10px] text-zinc-400 px-1 lowercase italic">
+                            {t('editors.identity.username_hint')}
+                        </p>
+                    </div>
+                </EditorSection>
 
-                        {/* Preview Minimalista da Aba */}
-                        <div className="pt-2 flex flex-col gap-4">
-                            <span className="text-[9px] font-black uppercase tracking-[0.5em] text-zinc-200 dark:text-zinc-800 px-1">browser tab</span>
-                            <div className="flex items-center gap-4 px-2 py-3 bg-zinc-50/50 dark:bg-zinc-950/30 rounded-xl border border-zinc-100/50 dark:border-zinc-800/50">
-                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                                <span className="text-[12px] font-bold text-zinc-400 dark:text-zinc-500 tracking-tight lowercase">
-                                    @{username || "username"} — moodspace
-                                </span>
-                            </div>
+                {/* Preview Section */}
+                <EditorSection title={t('editors.identity.tab_view_label')}>
+                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800/50 flex items-center gap-3">
+                        <Globe className="w-4 h-4 text-zinc-400" />
+                        <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 truncate">
+                            {username || 'nyo'} — moodspace
+                        </span>
+                        <div className="ml-auto flex gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-400/20" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400/20" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400/20" />
                         </div>
                     </div>
-                </div>
+                </EditorSection>
 
                 {error && (
-                    <motion.div 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="text-[10px] font-bold uppercase tracking-tight text-red-500 px-1 pt-4 flex items-center gap-2"
-                    >
+                    <div className="text-[10px] font-bold uppercase tracking-tight text-red-500 px-1 pt-2 flex items-center gap-2">
                         <div className="w-1 h-1 rounded-full bg-red-500" />
-                        {error}
-                    </motion.div>
+                        {error === "Este nome de usuário já está em uso por outra conta." ? t('editors.identity.error_in_use') : error}
+                    </div>
                 )}
             </div>
 
-            <div className="pt-10">
-                <EditorActionButton
-                    label={isPending ? "syncing..." : "sync identity"}
-                    onClick={handleSave}
-                    disabled={!isChanged || !username}
+            <div className="p-6 bg-gradient-to-t from-white via-white to-transparent dark:from-[#050505] dark:via-[#050505] absolute bottom-0 left-0 right-0">
+                <EditorActionButton 
+                    onClick={handleSave} 
                     isLoading={isPending}
+                    label={isChanged ? t('editors.identity.sync_btn') : t('common.close')}
+                    icon={Check}
                 />
             </div>
         </div>
