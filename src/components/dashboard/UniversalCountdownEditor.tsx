@@ -18,6 +18,9 @@ const ICONS = [
     { name: 'PartyPopper', icon: PartyPopper },
 ]
 
+import { addMoodBlock } from "@/actions/profile"
+import { toast } from "sonner"
+
 interface CountdownEditorProps {
     block?: MoodBlock | null
     onUpdate?: (updates: Partial<MoodBlock>) => void
@@ -60,16 +63,31 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
             style
         }
 
-        if (block?.id) {
-            if (onClose) onClose()
-        } else if (onAdd) {
-            await onAdd(content)
-            setTitle("")
-            setTargetDate("")
-            setEmoji("PartyPopper")
-            setStyle('minimal')
+        try {
+            if (block?.id) {
+                if (onClose) onClose()
+            } else if (onAdd) {
+                await onAdd(content)
+                if (onClose) onClose()
+            } else {
+                // Fallback direct creation
+                const res = await addMoodBlock('countdown', content, {
+                    x: 50, y: 50,
+                    width: 150,
+                    height: 150
+                })
+                
+                if (res.error) {
+                    toast.error(res.error)
+                } else {
+                    if (onClose) onClose()
+                }
+            }
+        } catch (error) {
+            toast.error("Erro ao criar cronômetro")
+        } finally {
+            setIsPending(false)
         }
-        setIsPending(false)
     }
 
     return (
