@@ -6,8 +6,6 @@ import { calculateAlignment, calculateDistribution, AlignmentType, DistributionT
 
 import { MoodBlock } from '@/types/database';
 
-// Helper types removed if unused
-
 export function useCanvasManager(initialBlocks: MoodBlock[]) {
     const [isSaving, setIsSaving] = useState(false);
 
@@ -23,7 +21,6 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
     const pendingUpdates = useRef<Record<string, Partial<MoodBlock>>>({});
 
     // 5. HISTORY SYSTEM
-    // 5. HISTORY SYSTEM (Centralizado)
     const [history, setHistory] = useState<HistoryState<MoodBlock[]>>(createHistory(blocks));
     const isUndoRedoAction = useRef(false);
     const historyDebounceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -32,6 +29,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
     const [canvasState, setCanvasState] = useState<'IDLE' | 'DRAGGING' | 'RESIZING' | 'SELECTING'>('IDLE');
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+    // 7. PERSISTENCE LOGIC
     const scheduleBackendSave = useCallback((id: string) => {
         if (saveTimers.current[id]) clearTimeout(saveTimers.current[id]);
         saveTimers.current[id] = setTimeout(async () => {
@@ -40,12 +38,9 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
             delete pendingUpdates.current[id];
 
             try {
-                // Sanitize: Prisma returns null for width/height, but Action expects number | undefined
-                // Also protect against NaN/Infinity which can crash Zod/Prisma
                 const sanitizedUpdates = Object.fromEntries(
                     Object.entries(mergedUpdates)
                         .filter(([k, v]) => {
-                            // Filter out fields updateMoodBlockLayout doesn't handle or that are invalid
                             if (['id', 'userId', 'createdAt', 'updatedAt', 'deletedAt', 'type'].includes(k)) return false;
                             if (typeof v === 'number' && (isNaN(v) || !isFinite(v))) return false;
                             return true;
@@ -66,7 +61,6 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
                 }, 1500);
             } catch (error) {
                 console.error("Batch sync failed for", id, error);
-                // toast.error(`Falha ao sincronizar bloco: ${id}`);
             } finally {
                 setIsSaving(false);
             }
@@ -83,49 +77,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         }, 300);
     }, []);
 
-    // 6. SAFEGUARD (DIRTY TRACKING): Previne fechamento acidental da guia do Chrome antes do async
-    useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isSaving || Object.keys(pendingUpdates.current).length > 0) {
-                e.preventDefault();
-                e.returnValue = ''; // Trigger nativo
-            }
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isSaving]);
-
-    // Smart Sync from Server Props
-    useEffect(() => {
-        setBlocks(prev => {
-            return initialBlocks.map(initial => {
-                const current = prev.find(b => b.id === initial.id);
-                if (!current) return initial;
-
-                // EPOCH PROTECTION: If recently edited locally, ignore server
-                const currentEpoch = epochRef.current[initial.id] || 0;
-                if (currentEpoch > 0) return current;
-
-                // Reconciliation: Only accept if significant change
-                const hasChanged =
-                    Math.abs(initial.x - current.x) > 0.001 ||
-                    Math.abs(initial.y - current.y) > 0.001 ||
-                    initial.width !== current.width ||
-                    initial.height !== current.height ||
-                    initial.zIndex !== current.zIndex ||
-                    initial.rotation !== current.rotation ||
-                    initial.isLocked !== current.isLocked ||
-                    initial.isHidden !== current.isHidden ||
-                    JSON.stringify(initial.content) !== JSON.stringify(current.content);
-
-
-                return hasChanged ? initial : current;
-            });
-        });
-    }, [initialBlocks]);
-
     const updateBlocks = useCallback((ids: string[], updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => {
-        // Optimistic State Update for all
         setBlocks(prev => {
             captureHistory(prev);
 
@@ -139,9 +91,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
                     updatedBlock.content = { ...(block.content || {}), ...blockUpdates.content };
                 }
 
-                // Lock Epoch
                 epochRef.current[block.id] = (epochRef.current[block.id] || 0) + 1;
-                // Accumulate updates, deep merging content if necessary
                 const currentPending = pendingUpdates.current[block.id] || {};
                 const newPending = { ...currentPending, ...blockUpdates };
 
@@ -150,17 +100,61 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
                 }
 
                 pendingUpdates.current[block.id] = newPending;
-
                 return updatedBlock;
             });
         });
 
-        // Debounced Batch Backend Persistence
         ids.forEach(id => {
             scheduleBackendSave(id);
         });
     }, [captureHistory, scheduleBackendSave]);
 
+    // 8. LAYER MANAGEMENT (Z-Index)
+    const maxZ = useMemo(() => {
+        if (blocks.length === 0) return 20;
+        return Math.max(20, ...blocks.map(b => b.zIndex || 0));
+    }, [blocks]);
+
+    const bringToFront = useCallback((id: string) => {
+        updateBlocks([id], { zIndex: maxZ + 1 });
+    }, [maxZ, updateBlocks]);
+
+    const sendToBack = useCallback((id: string) => {
+        const minZ = Math.min(...blocks.map(b => b.zIndex || 10));
+        updateBlocks([id], { zIndex: Math.max(1, minZ - 1) });
+    }, [blocks, updateBlocks]);
+
+    const bringForward = useCallback((id: string) => {
+        const currentBlock = blocks.find(b => b.id === id);
+        if (!currentBlock) return;
+        const currentZ = currentBlock.zIndex || 0;
+        const above = blocks
+            .filter(b => (b.zIndex || 0) > currentZ)
+            .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+        
+        if (above.length > 0) {
+            updateBlocks([id], { zIndex: (above[0].zIndex || 0) + 1 });
+        } else {
+            bringToFront(id);
+        }
+    }, [blocks, bringToFront, updateBlocks]);
+
+    const sendBackward = useCallback((id: string) => {
+        const currentBlock = blocks.find(b => b.id === id);
+        if (!currentBlock) return;
+        const currentZ = currentBlock.zIndex || 0;
+        const below = blocks
+            .filter(b => (b.zIndex || 0) < currentZ)
+            .sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0));
+        
+        if (below.length > 0) {
+            updateBlocks([id], { zIndex: Math.max(1, (below[0].zIndex || 10) - 1) });
+        } else {
+            sendToBack(id);
+        }
+    }, [blocks, sendToBack, updateBlocks]);
+
+    // 9. HISTORY CONTROL
     const applyHistoryAction = useCallback(async (action: 'undo' | 'redo') => {
         const isUndo = action === 'undo';
         if (isUndo && history.past.length === 0) return;
@@ -197,12 +191,10 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         setBlocks(nextState);
         setHistory(newHistory);
 
-        // Sync with backend
         const syncPromises = nextState.map(async (nextBlock) => {
             const currBlock = currentBlocks.find(b => b.id === nextBlock.id);
             if (!currBlock) {
-                const ok = await safeRestore(nextBlock.id);
-                if (!ok) toast.error(`Erro ao restaurar bloco ${nextBlock.id.slice(0, 4)}...`);
+                await safeRestore(nextBlock.id);
             } else if (JSON.stringify(nextBlock) !== JSON.stringify(currBlock)) {
                 const { id, userId, createdAt, updatedAt, deletedAt, ...updates } = nextBlock;
                 pendingUpdates.current[nextBlock.id] = updates;
@@ -214,8 +206,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         const deletePromises = currentBlocks
             .filter(currBlock => !nextState.find(b => b.id === currBlock.id))
             .map(async (currBlock) => {
-                const ok = await safeDelete(currBlock.id);
-                if (!ok) toast.error(`Erro ao remover bloco ${currBlock.id.slice(0, 4)}...`);
+                await safeDelete(currBlock.id);
             });
 
         await Promise.all([...syncPromises, ...deletePromises]);
@@ -225,11 +216,31 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
     const undo = useCallback(() => applyHistoryAction('undo'), [applyHistoryAction]);
     const redo = useCallback(() => applyHistoryAction('redo'), [applyHistoryAction]);
 
+    // 10. SMART SELECTION
+    const setSmartSelectedIds = useCallback((newIdsOrFn: string[] | ((prev: string[]) => string[])) => {
+        setSelectedIds(prev => {
+            const next = typeof newIdsOrFn === 'function' ? newIdsOrFn(prev) : newIdsOrFn;
+            if (next.length === 0) return [];
+
+            const groupsTouched = new Set(
+                blocks.filter(b => next.includes(b.id) && b.groupId).map(b => b.groupId)
+            );
+
+            if (groupsTouched.size === 0) return next;
+
+            const allMemberIds = blocks
+                .filter(b => b.groupId && groupsTouched.has(b.groupId))
+                .map(b => b.id);
+
+            return [...new Set([...next, ...allMemberIds])];
+        });
+    }, [blocks]);
+
+    // 11. ACTIONS
     const updateBlock = useCallback((id: string, updates: Partial<MoodBlock>) => {
         updateBlocks([id], updates);
     }, [updateBlocks]);
 
-    // Helper for direct property updates
     const moveBlock = useCallback((id: string, x: number, y: number) => {
         updateBlock(id, { x, y });
     }, [updateBlock]);
@@ -242,7 +253,6 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
             return prev.filter(b => !ids.includes(b.id));
         });
 
-        // Fire & Forget: Deleção Assíncrona via Banco
         ids.forEach(id => {
             deleteMoodBlock(id).catch(e => console.error("Optimistic delete failed", e));
         });
@@ -255,9 +265,6 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         });
     }, [captureHistory, undo]);
 
-    // ─── ALIGNMENT & DISTRIBUTION ───────────────────────────────────────────
-
-    // Helper to get current canvas dimensions safely
     const getCanvasDimensions = useCallback(() => {
         if (typeof document === 'undefined') return { width: 2000, height: 2000 };
         const canvas = document.querySelector('.mood-canvas-stage');
@@ -280,7 +287,6 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
 
         if (updates.length === 0) return;
 
-        // 1. Filter for ACTUAL changes
         const actualUpdates = updates.filter(update => {
             const block = blocks.find(b => b.id === update.id);
             if (!block) return false;
@@ -291,25 +297,14 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
 
         if (actualUpdates.length === 0) return;
 
-        // 2. Snapshot for History (Optimistic UI)
-        setBlocks(prev => {
-            captureHistory(prev);
-            return prev.map(block => {
-                const update = actualUpdates.find(u => u.id === block.id);
-                if (!update) return block;
-                const { id: _, ...cleanUpdates } = update;
-                return { ...block, ...cleanUpdates };
-            });
+        const updatesById: Record<string, Partial<MoodBlock>> = {};
+        actualUpdates.forEach(u => {
+            const { id, ...clean } = u;
+            updatesById[id] = clean;
         });
 
-        // 3. Side-Effects (Persistence)
-        actualUpdates.forEach(update => {
-            const { id, ...cleanUpdates } = update;
-            pendingUpdates.current[id] = { ...pendingUpdates.current[id], ...cleanUpdates };
-            epochRef.current[id] = (epochRef.current[id] || 0) + 1;
-            scheduleBackendSave(id);
-        });
-    }, [selectedIds, blocks, getCanvasDimensions, captureHistory, scheduleBackendSave]);
+        updateBlocks(actualUpdates.map(u => u.id), (block) => updatesById[block.id] || {});
+    }, [selectedIds, blocks, getCanvasDimensions, updateBlocks]);
 
     const alignSelected = useCallback((type: AlignmentType) => {
         applyTransform(2, (selected, w, h) => calculateAlignment(selected as any, type, w, h));
@@ -318,8 +313,6 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
     const distributeSelected = useCallback((axis: DistributionType) => {
         applyTransform(3, (selected, w, h) => calculateDistribution(selected as any, axis, w, h));
     }, [applyTransform]);
-
-    // ─── GROUPING ───────────────────────────────────────────────────────────
 
     const groupSelected = useCallback(() => {
         const selectedIdArray = Array.isArray(selectedIds) ? selectedIds : [];
@@ -333,14 +326,12 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         const selectedIdArray = Array.isArray(selectedIds) ? selectedIds : [];
         if (selectedIdArray.length === 0) return;
 
-        // Find all unique groups in selection
         const groupsToDissolve = new Set(
             blocks.filter(b => selectedIdArray.includes(b.id) && b.groupId).map(b => b.groupId)
         );
 
         if (groupsToDissolve.size === 0) return;
 
-        // Find ALL blocks belonging to these groups
         const blockIdsToUpdate = blocks
             .filter(b => b.groupId && groupsToDissolve.has(b.groupId))
             .map(b => b.id);
@@ -349,26 +340,42 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         toast('Grupos desfeitos');
     }, [selectedIds, blocks, updateBlocks]);
 
-    // Helper to wrap setSelectedIds and always include group members
-    const setSmartSelectedIds = useCallback((newIdsOrFn: string[] | ((prev: string[]) => string[])) => {
-        setSelectedIds(prev => {
-            const next = typeof newIdsOrFn === 'function' ? newIdsOrFn(prev) : newIdsOrFn;
-            if (next.length === 0) return [];
+    // SAFEGUARD (DIRTY TRACKING)
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isSaving || Object.keys(pendingUpdates.current).length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isSaving]);
 
-            // Expand selection to include all members of all groups touched by selection
-            const groupsTouched = new Set(
-                blocks.filter(b => next.includes(b.id) && b.groupId).map(b => b.groupId)
-            );
+    // Smart Sync from Server Props
+    useEffect(() => {
+        setBlocks(prev => {
+            return initialBlocks.map(initial => {
+                const current = prev.find(b => b.id === initial.id);
+                if (!current) return initial;
+                const currentEpoch = epochRef.current[initial.id] || 0;
+                if (currentEpoch > 0) return current;
 
-            if (groupsTouched.size === 0) return next;
+                const hasChanged =
+                    Math.abs(initial.x - current.x) > 0.001 ||
+                    Math.abs(initial.y - current.y) > 0.001 ||
+                    initial.width !== current.width ||
+                    initial.height !== current.height ||
+                    initial.zIndex !== current.zIndex ||
+                    initial.rotation !== current.rotation ||
+                    initial.isLocked !== current.isLocked ||
+                    initial.isHidden !== current.isHidden ||
+                    JSON.stringify(initial.content) !== JSON.stringify(current.content);
 
-            const allMemberIds = blocks
-                .filter(b => b.groupId && groupsTouched.has(b.groupId))
-                .map(b => b.id);
-
-            return [...new Set([...next, ...allMemberIds])];
+                return hasChanged ? initial : current;
+            });
         });
-    }, [blocks]);
+    }, [initialBlocks]);
 
     return {
         blocks,
@@ -389,6 +396,11 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         alignSelected,
         distributeSelected,
         groupSelected,
-        ungroupSelected
+        ungroupSelected,
+        maxZ,
+        bringToFront,
+        sendToBack,
+        bringForward,
+        sendBackward
     };
 }

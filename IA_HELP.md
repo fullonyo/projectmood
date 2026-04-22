@@ -60,6 +60,28 @@ Localizados em `src/components/dashboard/`, os editores centralizam toda a lógi
 - **Módulo de cálculos**: `src/lib/canvas-transforms.ts` — funções puras para resize, separadas da UI.
 - **8 Handles**: 4 cantos (BR, BL, TR, TL) + 4 bordas (top, bottom, left, right) para resize em 1 ou 2 eixos.
 - **Canto oposto fixo**: Ao arrastar TL, o canto BR permanece fixo (e vice-versa). Padrão Figma.
+
+### MoodSpace Architecture 2.2: The Sovereign State
+**Objetivo**: Performance extrema (60 FPS), consistência atômica e modularidade Figma-like.
+
+#### 1. Zero-Tearing Architecture
+Para operações de alta frequência (movimentação, rotação), não dependemos do ciclo de renderização do React/DB para feedback visual.
+- **Refs & MotionValues**: O estado visual imediato é mantido em `refs` e `MotionValues`.
+- **Custom DOM Events**: Comunicação entre componentes de seleção (Aura) e itens do canvas via `CANVAS_EVENTS.GROUP_ROTATE` etc.
+- **Batch Persistence**: Persistência no banco de dados ocorre apenas no `onPanEnd` ou via debounced batch updates no `useCanvasManager`.
+
+#### 2. useCanvasManager: Single Source of Truth
+Toda a lógica de mutação de blocos deve passar por este hook.
+- **Z-Index Intelligence**: Gerenciamento automático de camadas (`bringToFront`, `sendToBack`).
+- **Smart Selection**: Inclusão automática de membros de grupo e normalização de IDs.
+- **Epoch System**: Proteção contra race conditions entre Server Actions e atualizações locais.
+
+#### 3. Modular Canvas UI
+Lógicas pesadas de renderização foram extraídas do `MoodCanvas.tsx`:
+- **SelectionAura**: Handles de rotação/redimensionamento, labels de grupo e glows atmosféricos.
+- **LassoSelector**: Lógica de seleção por área (clique e arraste).
+- **CanvasUtils**: Normalização de inputs (`getClientPos`) e cálculos de bounding box.
+
 - **Aspect Ratio Lock**: Segurar **Shift** durante resize mantém a proporção original.
 - **Limites**: Mínimo 40×40px, máximo 2000×2000px. Blindado no Zod, no backend e no frontend.
 - **Modularização de Itens**: `src/components/dashboard/canvas-item.tsx` — componente isolado que gerencia transformações, physics de mola (spring) e toolbar dedicada.
@@ -307,3 +329,13 @@ Para garantir segurança, SEO e a estética minimalista da plataforma, o tratame
 
 ---
 *Documentação atualizada por Antigravity em 22/04/2026. User Identity & Aesthetic Metadata integrados.*
+
+### 📐 Canvas Architecture 2.2 (Referência Rápida)
+Para detalhes profundos, consulte: `docs/CANVAS_ARCHITECTURE.md`
+
+#### Regras de Ouro para Manutenção:
+1.  **Não use `useState` para transformações em tempo real**: Use `MotionValues` (framer-motion) e `refs`.
+2.  **Mutações via `useCanvasManager`**: Nunca modifique o array de blocos diretamente no `MoodCanvas`. Use `updateBlocks` ou os helpers de Z-index.
+3.  **Eventos Customizados**: Se adicionar um novo tipo de manipulação global (ex: skew, zoom), use o barramento `CANVAS_EVENTS` em `canvas-utils.ts`.
+4.  **Coordenadas**: Sempre converta cálculos de pixel para porcentagem (%) usando as dimensões do canvas antes de salvar.
+5.  **Smart Selection**: Sempre respeite o `groupId`. Se um bloco for movido, todos do grupo devem segui-lo (o `useCanvasManager` já faz isso no `updateBlocks`).
