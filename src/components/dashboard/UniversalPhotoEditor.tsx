@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { toast } from "sonner"
 import { MoodBlock, PhotoContent } from "@/types/database"
-import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector } from "./EditorUI"
+import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, ListSelector } from "./EditorUI"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 
@@ -152,25 +152,26 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                         {isUploading && <p className="mt-4 animate-pulse text-[10px] text-blue-500 font-black">Processando...</p>}
                     </div>
                 ) : (
-                    <div className="space-y-6">
-                        <div className="relative rounded-3xl overflow-hidden shadow-lg group bg-zinc-100 dark:bg-zinc-900">
+                    <div className="space-y-10">
+                        <div className="relative rounded-[2rem] overflow-hidden shadow-2xl group bg-zinc-100 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
                             <img
                                 src={imageUrl}
                                 alt="Preview"
-                                className="w-full h-64 object-cover"
+                                className="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-105"
                                 style={{ filter: getFilterStyle(filter) }}
                             />
-                            <button
-                                onClick={handleRemoveImage}
-                                className="absolute top-4 right-4 w-10 h-10 bg-white/90 dark:bg-black/90 rounded-full flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button
+                                    onClick={handleRemoveImage}
+                                    className="w-12 h-12 bg-white/90 dark:bg-black/90 rounded-full flex items-center justify-center shadow-xl hover:bg-red-500 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-300"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2 px-1">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('editors.photo.caption')}</Label>
+                        <div className="grid grid-cols-1 gap-6">
+                            <EditorSection title={t('editors.photo.caption')}>
                                 <Input
                                     value={caption}
                                     onChange={(e) => {
@@ -178,32 +179,20 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                                         triggerUpdate({ caption: e.target.value })
                                     }}
                                     placeholder={t('editors.photo.caption_placeholder')}
-                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl"
+                                    className="h-14 bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-2xl px-6 text-[12px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-blue-500/20 placeholder:text-zinc-400"
                                 />
-                            </div>
-                            <div className="space-y-2 px-1">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('editors.photo.alt_text')}</Label>
-                                <Input
-                                    value={alt}
-                                    onChange={(e) => {
-                                        setAlt(e.target.value)
-                                        triggerUpdate({ alt: e.target.value })
-                                    }}
-                                    placeholder={t('editors.photo.alt_placeholder')}
-                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-xl"
-                                />
-                            </div>
+                            </EditorSection>
                         </div>
 
                         <EditorSection title="Filtro Profissional">
-                            <PillSelector
-                                variant="scroll"
+                            <ListSelector
+                                id="photo-filter"
                                 options={[
-                                    { id: 'none', label: 'RAW' },
-                                    { id: 'vintage', label: 'Vintage' },
-                                    { id: 'bw', label: 'B&W' },
-                                    { id: 'warm', label: 'Warm' },
-                                    { id: 'cool', label: 'Cool' },
+                                    { id: 'none', label: 'RAW (Sem Filtro)' },
+                                    { id: 'vintage', label: 'Vintage (Nostálgico)' },
+                                    { id: 'bw', label: 'B&W (Preto e Branco)' },
+                                    { id: 'warm', label: 'Warm (Aquecido)' },
+                                    { id: 'cool', label: 'Cool (Frio)' },
                                 ]}
                                 activeId={filter}
                                 onChange={(id) => {
@@ -214,17 +203,17 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                         </EditorSection>
 
                         <EditorSection title="Geometria / Moldura">
-                            <PillSelector
-                                variant="scroll"
+                            <ListSelector
+                                id="photo-frame"
                                 options={[
-                                    { id: 'none', label: 'None' },
+                                    { id: 'none', label: 'Original' },
                                     { id: 'polaroid', label: 'Polaroid' },
-                                    { id: 'minimal', label: 'Minimal' },
-                                    { id: 'glass', label: 'Glass' },
-                                    { id: 'round', label: 'Round' },
-                                    { id: 'shadow', label: 'Shadow' },
-                                    { id: 'border', label: 'Border' },
-                                    { id: 'frame', label: 'Classic' },
+                                    { id: 'minimal', label: 'Minimalist' },
+                                    { id: 'glass', label: 'Glassmorphism' },
+                                    { id: 'round', label: 'Rounded Circles' },
+                                    { id: 'shadow', label: 'Deep Shadow' },
+                                    { id: 'border', label: 'Clean Border' },
+                                    { id: 'frame', label: 'Classic Gallery' },
                                 ]}
                                 activeId={frame}
                                 onChange={(id) => {
