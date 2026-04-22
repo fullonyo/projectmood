@@ -237,14 +237,36 @@ export function UniversalMediaEditor({
                     <div className="space-y-4">
                         <Label
                             htmlFor="audio-upload"
-                            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[2rem] hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 group"
+                            className={cn(
+                                "flex flex-col items-center justify-center w-full h-44 border-2 border-dashed rounded-[2rem] transition-all cursor-pointer group relative overflow-hidden",
+                                audioUrl 
+                                    ? "border-emerald-500/50 bg-emerald-50/30 dark:bg-emerald-500/5" 
+                                    : "border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 hover:border-blue-500 hover:bg-blue-50/50"
+                            )}
                         >
-                            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-zinc-100 dark:border-zinc-700">
-                                <Upload className="w-5 h-5 text-zinc-400 group-hover:text-blue-600 transition-colors" />
+                            <div className={cn(
+                                "w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border",
+                                audioUrl 
+                                    ? "bg-emerald-500 text-white border-emerald-400" 
+                                    : "bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700"
+                            )}>
+                                {audioUrl ? <Plus className="w-5 h-5 rotate-45" /> : <Upload className="w-5 h-5 text-zinc-400 group-hover:text-blue-600 transition-colors" />}
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
-                                {t('editors.universal_media.audio_placeholder')}
-                            </span>
+
+                            <div className="text-center px-6">
+                                <span className={cn(
+                                    "text-[10px] font-black uppercase tracking-[0.2em] block mb-1",
+                                    audioUrl ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
+                                )}>
+                                    {audioUrl ? 'Áudio Carregado' : t('editors.universal_media.audio_placeholder')}
+                                </span>
+                                {audioUrl && (
+                                    <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400 uppercase truncate max-w-[200px] block mx-auto">
+                                        {trackName || 'Arquivo de áudio'}
+                                    </span>
+                                )}
+                            </div>
+
                             <Input
                                 id="audio-upload"
                                 type="file"
@@ -252,6 +274,10 @@ export function UniversalMediaEditor({
                                 className="hidden"
                                 onChange={handleAudioUpload}
                             />
+
+                            {audioUrl && (
+                                <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            )}
                         </Label>
                     </div>
                 )}
