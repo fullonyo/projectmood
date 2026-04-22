@@ -16,12 +16,15 @@ import { MouseTrails } from "@/components/effects/mouse-trails"
 import type { PublicMoodPageProps, MoodBlock } from "@/types/database"
 import { ExperienceOverlay } from "@/components/dashboard/ExperienceOverlay"
 import { AudioProvider, useAudio } from "@/components/dashboard/audio-context"
+import { LyricsProvider } from "@/components/dashboard/lyrics-context"
 import { GlobalLyricsOverlay } from "@/components/dashboard/GlobalLyricsOverlay"
 
 export function PublicMoodPageClient(props: PublicMoodPageProps) {
     return (
         <AudioProvider>
-            <PublicMoodPageClientInner {...props} />
+            <LyricsProvider>
+                <PublicMoodPageClientInner {...props} />
+            </LyricsProvider>
         </AudioProvider>
     )
 }

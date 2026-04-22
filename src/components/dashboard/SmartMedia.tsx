@@ -7,6 +7,7 @@ import { useStudioBlock } from "@/hooks/use-studio-block"
 import { Music, VolumeX, Play, Pause } from "lucide-react"
 import { useState, useRef, useEffect, useMemo } from "react"
 import { useAudio } from "./audio-context"
+import { useLyrics } from "./lyrics-context"
 
 export type MediaType = 'video' | 'music' | 'audio'
 
@@ -121,7 +122,7 @@ const AudioPlayer = ({
                                 <div
                                     key={i}
                                     className={cn(
-                                        "transition-all duration-300 rounded-full shrink-0",
+                                        "transition-all duration-300 rounded-full shrink-0 origin-bottom",
                                         isActive 
                                             ? "bg-gradient-to-t from-rose-500 to-rose-400 dark:from-rose-400 dark:to-rose-300 shadow-[0_0_8px_rgba(244,63,94,0.3)]" 
                                             : "bg-zinc-200/80 dark:bg-zinc-800/80",
@@ -130,7 +131,9 @@ const AudioPlayer = ({
                                     )}
                                     style={{
                                         width: `${barWidth}px`,
-                                        height: isPlaying ? `${h}%` : isActive ? '25%' : '15%',
+                                        height: `100%`,
+                                        transform: `scaleY(${isPlaying ? h/100 : isActive ? 0.25 : 0.15})`,
+                                        willChange: 'transform',
                                         animationDelay: `${i * 0.04}s`,
                                         animationDuration: `${0.6 + (i % 3) * 0.2}s`
                                     }}
@@ -220,7 +223,8 @@ export function SmartMedia({
     lyricsDisplay: localLyricsDisplay
 }: SmartMediaProps) {
     const { ref, fluidScale } = useStudioBlock()
-    const { isGlobalMuted, globalVolume, setActiveLyrics, lyricsMode } = useAudio()
+    const { isGlobalMuted, globalVolume, lyricsMode } = useAudio()
+    const { setActiveLyrics } = useLyrics()
     const scale = manualScale ?? fluidScale
 
     const [isPlaying, setIsPlaying] = useState(false)
@@ -292,9 +296,14 @@ export function SmartMedia({
             setProgress((current / duration) * 100)
 
             if (parsedLyrics.current.length > 0) {
-                const activeLine = [...parsedLyrics.current]
-                    .reverse()
-                    .find(line => current >= line.time)
+                // Otimização P0: Busca reversa sem clonagem de array para performance máxima
+                let activeLine = null;
+                for (let i = parsedLyrics.current.length - 1; i >= 0; i--) {
+                    if (current >= parsedLyrics.current[i].time) {
+                        activeLine = parsedLyrics.current[i];
+                        break;
+                    }
+                }
 
                 if (activeLine && activeLine.text !== currentLyric) {
                     setCurrentLyric(activeLine.text)

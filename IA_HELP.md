@@ -158,6 +158,30 @@ O bloco **Rorschach** (`SmartRorschach.tsx`) é um motor de arte abstrata proced
   - **Prisão de Tipos**: Use o perfil `'default'` em `revalidateTag(tag, 'default')` conforme exigido pelo Next.js 16.
   - **Detecção de Mudanças (Draft vs. Published)**: Algoritmo de normalização recursiva em `publish.ts` garante que a detecção de "mudanças não publicadas" seja determinística (ordena chaves de objetos e arrays) para evitar falsos positivos.
 
+### Central de Performance & Blindagem (P0-P3) ⚡🚀
+Para garantir fluidez absoluta em murais com alta densidade de blocos:
+- **P0 (Lyrics Loop)**: NUNCA clone arrays (`[...]`) ou use `.reverse()` dentro do `onTimeUpdate` de áudio. Use loops reversos simples para busca de letras para evitar pressão no Garbage Collector.
+- **P1 (Context Isolation)**: O estado de letras deve residir estritamente no `LyricsProvider`. O `AudioProvider` lida apenas com estados globais (volume/mute). Isso evita que mudanças frequentes de letras re-renderizem a UI de áudio.
+- **P2 (GPU Acceleration)**: Animações de progresso e Waveforms devem usar `transform: scale()` ou `translate()` com `will-change: transform`. Evite animar `width` ou `height` para não disparar ciclos de *Layout/Reflow*.
+- **P3 (Scale Mapping)**: Operações de normalização de camadas (Z-Index) devem usar `Map` para mapeamento $O(1)$ de IDs, garantindo performance linear mesmo com centenas de elementos.
+
+### Catálogo de Blocos (User Architecture) 📦🎨
+O ecossistema MoodSpace é composto por 11 tipos de blocos fundamentais, cada um com comportamentos e especializações únicas:
+
+1.  **Typography (`text`)**: Bloco base para comunicação. Suporta múltiplos comportamentos: `static`, `ticker` (letreiro), `typewriter` (máquina de escrever), `floating` (flutuação suave) e `quote` (estilização de citação).
+2.  **Photo (`photo`)**: Renderização de imagens com suporte a legendas (`caption`) e múltiplos estilos de moldura (`FrameContainer`).
+3.  **Universal Media (`media`)**: O coração dinâmico. Suporta Player de Música (Spotify/Local) com letras sincronizadas e Player de Vídeo (YouTube/TikTok).
+4.  **GIF (`gif`)**: Integração rápida para elementos visuais em loop, ideal para texturas animadas ou memes.
+5.  **Weather (`weather`)**: Bloco de utilidade que exibe clima e temperatura em tempo real com estética minimalista.
+6.  **Doodle (`doodle`)**: Camada de arte livre. Renderiza traços e desenhos manuais exportados do `FullscreenDoodleOverlay`.
+7.  **Guestbook (`guestbook`)**: Bloco de interação social. Suporta modos `Classic`, `Scattered` e `Cloud` (veja seção específica abaixo).
+8.  **Countdown (`countdown`)**: Relógio de contagem regressiva para datas específicas, focando em antecipação estética.
+9.  **Social (`social`)**: Links rápidos para redes externas com ícones técnicos e layouts de cartão minimalistas.
+10. **Shape (`shape`)**: Elementos geométricos generativos (Blobs, Polígonos, Estrelas). Usados para criar "Auras" decorativas atrás de outros blocos.
+11. **Rorschach (`rorschach`)**: Bloco de arte generativa baseada em simetria de manchas, variando conforme o `seed`.
+
+*Nota: O **SmartReview** é uma especialização semântica de mídia focada em avaliações críticas, geralmente integrada ao fluxo de curadoria.*
+
 ### HUD System: Public Slots (Studio 2.1) 🎛️
 Para evitar sobreposição e manter uma leitura limpa das obras, os overlays da página pública são estritamente alinhados em um grid técnico imersivo:
 - **Top-Left**: `ProfileSignature` (Avatar, Nome, Role e HUD Volume/Focus Controls).
@@ -192,6 +216,7 @@ Para manter a blindagem estética e técnica:
 3. **Abas & Grades**: Devem usar `grid` técnico com `gap-[1px]` e marcadores de canto quando ativos.
 4. **Glassmorphism**: Fundos `bg-white/95` ou `bg-black/95` com `backdrop-blur-2xl`.
 5. **Comandos HUD**: Modais devem usar `rounded-none`.
+6. **Memoização Obrigatória**: Todos os componentes HUD (`ProfileSignature`, `AnalyticsDisplay`, `StudioCatalogID`, `SignatureShare`) DEVEM ser envolvidos em `React.memo` para proteção contra re-renderizações em cascata dos Providers.
 
 ### Guestbook Studio 3.0 (Evolução Criativa) 💎🌪️✨
 O Mural de Recados foi elevado para além do container tradicional, permitindo composições orgânicas.

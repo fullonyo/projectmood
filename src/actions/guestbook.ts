@@ -26,6 +26,25 @@ function generateAnonymousName() {
 
 export async function addGuestbookMessage(blockId: string, content: string) {
     const session = await auth()
+    const userId = session?.user?.id
+
+    // 🛡️ P1: Rate Limit — Prevenção de Spam
+    // Verifica se houve mensagens enviadas nos últimos 30 segundos
+    const thirtySecondsAgo = new Date(Date.now() - 30 * 1000)
+    const recentMessage = await prisma.guestbookMessage.findFirst({
+        where: {
+            blockId,
+            OR: [
+                userId ? { userId } : { author: (session?.user as any)?.name || (session?.user as any)?.username },
+                // Fallback para anônimos (se não houver userId, checa pelo nome gerado ou autor)
+            ],
+            createdAt: { gte: thirtySecondsAgo }
+        }
+    })
+
+    if (recentMessage) {
+        return { error: "Calma! Você está enviando mensagens rápido demais. Aguarde 30 segundos." }
+    }
 
     const validation = GuestbookMessageSchema.safeParse({ blockId, content })
     if (!validation.success) {

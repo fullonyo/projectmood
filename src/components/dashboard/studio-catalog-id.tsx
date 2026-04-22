@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, memo } from "react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
@@ -10,7 +10,7 @@ interface StudioCatalogIDProps {
     views?: number
 }
 
-export function StudioCatalogID({ profileId, createdAt, views = 0 }: StudioCatalogIDProps) {
+export const StudioCatalogID = memo(function StudioCatalogID({ profileId, createdAt, views = 0 }: StudioCatalogIDProps) {
     const { t } = useTranslation()
 
     const catalogNumber = useMemo(() => {
@@ -49,4 +49,4 @@ export function StudioCatalogID({ profileId, createdAt, views = 0 }: StudioCatal
             </div>
         </div>
     )
-}
+})

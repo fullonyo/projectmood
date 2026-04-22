@@ -19,6 +19,7 @@ interface UseCanvasKeyboardProps {
     zoomOut?: () => void;
     resetZoom?: () => void;
     addMoodBlock: (type: string, content: any, options?: any) => void;
+    addMoodBlocksBulk: (blocks: any[]) => void;
 }
 
 export function useCanvasKeyboard({
@@ -37,7 +38,8 @@ export function useCanvasKeyboard({
     zoomIn,
     zoomOut,
     resetZoom,
-    addMoodBlock
+    addMoodBlock,
+    addMoodBlocksBulk
 }: UseCanvasKeyboardProps) {
     const blocksRef = useRef(blocks);
 
@@ -160,15 +162,18 @@ export function useCanvasKeyboard({
                     if (rawData) {
                         try {
                             const copiedBlocks = JSON.parse(rawData);
-                            copiedBlocks.forEach((b: any) => {
-                                // Use the content directly
-                                addMoodBlock(b.type, b.content, {
+                            const blocksToCreate = copiedBlocks.map((b: any) => ({
+                                type: b.type,
+                                content: b.content,
+                                options: {
                                     x: Math.min(98, b.x + 5),
                                     y: Math.min(98, b.y + 5),
                                     width: b.width,
                                     height: b.height
-                                });
-                            });
+                                }
+                            }));
+                            
+                            addMoodBlocksBulk(blocksToCreate);
                             toast(`${copiedBlocks.length} bloco(s) colado(s)`);
                         } catch (err) {
                             console.error("Paste failed", err);

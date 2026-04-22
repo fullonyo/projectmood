@@ -13,6 +13,7 @@ import { useCanvasManager } from "@/hooks/use-canvas-manager";
 import { updateMoodBlocksZIndex } from "@/actions/profile";
 import { CanvasInteractionProvider, useCanvasInteraction } from "./canvas-interaction-context";
 import { AudioProvider } from "./audio-context";
+import { LyricsProvider } from "./lyrics-context";
 import { FullscreenDoodleOverlay } from "./fullscreen-doodle-overlay";
 import { GlobalLyricsOverlay } from "./GlobalLyricsOverlay";
 
@@ -29,9 +30,11 @@ interface DashboardClientLayoutProps {
 export function DashboardClientLayout({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
     return (
         <AudioProvider>
-            <CanvasInteractionProvider>
-                <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
-            </CanvasInteractionProvider>
+            <LyricsProvider>
+                <CanvasInteractionProvider>
+                    <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
+                </CanvasInteractionProvider>
+            </LyricsProvider>
         </AudioProvider>
     )
 }
@@ -55,9 +58,11 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
         const sorted = [...blocks].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
         const updates: { id: string, zIndex: number }[] = []
 
+        // Otimização P3: Mapeamento O(1) para evitar busca O(n) dentro do loop
+        const idToZ = new Map(sorted.map((b, i) => [b.id, i + 10]))
+
         const newBlocks = blocks.map(block => {
-            const index = sorted.findIndex(b => b.id === block.id)
-            const targetZ = index + 10
+            const targetZ = idToZ.get(block.id) || 10
             if (block.zIndex !== targetZ) {
                 updates.push({ id: block.id, zIndex: targetZ })
                 return { ...block, zIndex: targetZ }

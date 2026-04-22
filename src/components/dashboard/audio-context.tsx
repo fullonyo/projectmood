@@ -5,12 +5,10 @@ import React, { createContext, useContext, useState, useEffect } from "react"
 interface AudioContextState {
     isGlobalMuted: boolean
     globalVolume: number
-    activeLyrics: string | null
     lyricsMode: 'integrated' | 'fullscreen'
     toggleGlobalMute: () => void
     setIsGlobalMuted: (val: boolean) => void
     setGlobalVolume: (val: number) => void
-    setActiveLyrics: (lyrics: string | null) => void
     setLyricsMode: (mode: 'integrated' | 'fullscreen') => void
 }
 
@@ -19,7 +17,6 @@ const AudioContext = createContext<AudioContextState | undefined>(undefined)
 export function AudioProvider({ children }: { children: React.ReactNode }) {
     const [isGlobalMuted, setIsGlobalMuted] = useState(false)
     const [globalVolume, setGlobalVolume] = useState(1)
-    const [activeLyrics, setActiveLyrics] = useState<string | null>(null)
     const [lyricsMode, setLyricsMode] = useState<'integrated' | 'fullscreen'>('integrated')
 
     // Load initial state
@@ -57,20 +54,18 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         setIsGlobalMuted(prev => !prev)
     }
 
+    const value = React.useMemo(() => ({
+        isGlobalMuted,
+        globalVolume,
+        lyricsMode,
+        toggleGlobalMute,
+        setIsGlobalMuted,
+        setGlobalVolume,
+        setLyricsMode
+    }), [isGlobalMuted, globalVolume, lyricsMode])
+
     return (
-        <AudioContext.Provider
-            value={{
-                isGlobalMuted,
-                globalVolume,
-                activeLyrics,
-                lyricsMode,
-                toggleGlobalMute,
-                setIsGlobalMuted,
-                setGlobalVolume,
-                setActiveLyrics,
-                setLyricsMode
-            }}
-        >
+        <AudioContext.Provider value={value}>
             {children}
         </AudioContext.Provider>
     )

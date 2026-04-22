@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, memo } from "react"
 import { Check, Link as LinkIcon, Fingerprint } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
@@ -9,7 +9,7 @@ interface SignatureShareProps {
     username: string
 }
 
-export function SignatureShare({ username }: SignatureShareProps) {
+export const SignatureShare = memo(function SignatureShare({ username }: SignatureShareProps) {
     const { t } = useTranslation()
     const [status, setStatus] = useState<'idle' | 'copied'>('idle')
 
@@ -77,4 +77,4 @@ export function SignatureShare({ username }: SignatureShareProps) {
             </button>
         </div>
     )
-}
+})

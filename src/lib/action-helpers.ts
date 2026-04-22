@@ -33,6 +33,18 @@ export async function requireAuth() {
     if (!session?.user?.id) {
         throw new ActionError("Não autorizado")
     }
+
+    // 🛡️ Segurança em Tempo Real: Verifica se o usuário foi banido no banco de dados
+    // Isso evita que usuários banidos continuem editando se o cookie da sessão ainda for válido.
+    const userStatus = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { isBanned: true }
+    })
+
+    if (userStatus?.isBanned) {
+        throw new ActionError("Sua conta foi temporariamente suspensa por violação dos termos.")
+    }
+
     return session
 }
 

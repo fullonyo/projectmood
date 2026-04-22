@@ -1,6 +1,7 @@
 "use client"
 
 import { useAudio } from "./audio-context"
+import { useLyrics } from "./lyrics-context"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
@@ -8,7 +9,8 @@ import { motion, AnimatePresence } from "framer-motion"
  * Aparece na base da tela (fora dos blocos) quando o modo 'fullscreen' está ativo.
  */
 export function GlobalLyricsOverlay() {
-    const { activeLyrics, lyricsMode } = useAudio()
+    const { lyricsMode } = useAudio()
+    const { activeLyrics } = useLyrics()
 
     // Renderiza sempre que houver uma legenda ativa (o SmartMedia controla o envio)
     if (!activeLyrics) return null

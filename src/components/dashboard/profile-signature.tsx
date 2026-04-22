@@ -3,7 +3,7 @@ import { ShieldCheck, Volume2, VolumeX, Lightbulb, LightbulbOff } from "lucide-r
 import { useTranslation } from "@/i18n/context"
 import { useAudio } from "./audio-context"
 import { motion, AnimatePresence } from "framer-motion"
-import { useState } from "react"
+import { memo, useState } from "react"
 
 interface ProfileSignatureProps {
     username: string
@@ -17,7 +17,7 @@ interface ProfileSignatureProps {
 
 import { VerificationBadge } from "@/components/ui/verification-badge"
 
-export function ProfileSignature({
+export const ProfileSignature = memo(function ProfileSignature({
     username,
     name,
     avatarUrl,
@@ -122,4 +122,4 @@ export function ProfileSignature({
             </div>
         </header>
     )
-}
+})

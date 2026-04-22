@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, memo } from "react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { Activity } from "lucide-react"
@@ -10,7 +10,7 @@ interface AnalyticsDisplayProps {
     loading: boolean
 }
 
-export function AnalyticsDisplay({ views, loading }: AnalyticsDisplayProps) {
+export const AnalyticsDisplay = memo(function AnalyticsDisplay({ views, loading }: AnalyticsDisplayProps) {
     const { t } = useTranslation()
 
     const getVibeStatus = (count: number) => {
@@ -50,4 +50,4 @@ export function AnalyticsDisplay({ views, loading }: AnalyticsDisplayProps) {
             </div>
         </div>
     )
-}
+})

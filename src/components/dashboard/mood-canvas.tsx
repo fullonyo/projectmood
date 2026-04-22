@@ -21,7 +21,7 @@ const getClientPos = (e: MouseEvent | TouchEvent | PointerEvent | any) => {
 import { BlockRenderer } from "./block-renderer"
 import { BoardStage } from "./board-stage"
 import { useTranslation } from "@/i18n/context"
-import { duplicateMoodBlock, addMoodBlock } from "@/actions/profile"
+import { duplicateMoodBlock, addMoodBlock, addMoodBlocksBulk } from "@/actions/profile"
 import { CanvasContextMenu } from "./canvas-context-menu"
 import { MultiSelectToolbar } from "./MultiSelectToolbar"
 import { CommandCenter } from "./command-center"
@@ -316,13 +316,14 @@ export function MoodCanvas({
         onUngroup,
         zoomIn: () => setZoom(prev => Math.min(3, prev + 0.1)),
         zoomOut: () => setZoom(prev => Math.max(0.2, prev - 0.1)),
-        resetZoom: () => {
-            setZoom(1);
-            mvPanX.set(0);
-            mvPanY.set(0);
-        },
-        addMoodBlock
-    })
+            resetZoom: () => {
+                setZoom(1);
+                mvPanX.set(0);
+                mvPanY.set(0);
+            },
+            addMoodBlock,
+            addMoodBlocksBulk
+        })
 
     const [auraRotation, setAuraRotation] = useState(0);
 

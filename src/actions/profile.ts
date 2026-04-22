@@ -91,6 +91,36 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
     }
 }
 
+export async function addMoodBlocksBulk(blocks: { type: string, content: any, options: { x: number, y: number, width?: number, height?: number } }[]) {
+    try {
+        const session = await requireAuth();
+        const username = await getUsernameById(session.user.id);
+
+        if (!blocks.length) return { success: true };
+
+        await prisma.$transaction(
+            blocks.map(b => prisma.moodBlock.create({
+                data: {
+                    userId: session.user.id,
+                    type: b.type,
+                    content: b.content as any,
+                    x: b.options.x,
+                    y: b.options.y,
+                    width: b.options.width ? Math.round(b.options.width) : null,
+                    height: b.options.height ? Math.round(b.options.height) : null,
+                }
+            }))
+        );
+
+        revalidateProfile(username);
+        return { success: true };
+    } catch (error: any) {
+        if (error.name === "ActionError") return { error: error.message };
+        console.error('[addMoodBlocksBulk]', error);
+        return { error: "Erro ao colar blocos" };
+    }
+}
+
 export async function updateMoodBlockLayout(blockId: string, data: { x?: number, y?: number, width?: number, height?: number, zIndex?: number, rotation?: number, isLocked?: boolean, isHidden?: boolean, content?: any }) {
     try {
         const session = await requireAuth();
