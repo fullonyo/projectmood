@@ -7,8 +7,13 @@ import { UserProfileData } from "@/types/database";
 // NOTA: moodBlocks é incluído como fallback para perfis sem versão publicada.
 // Quando todos os perfis tiverem ao menos uma publicação, este include pode ser removido.
 export const getProfileWithTags = async (username: string): Promise<UserProfileData | null> => {
-    return await prisma.user.findUnique({
-        where: { username },
+    return await prisma.user.findFirst({
+        where: { 
+            username: {
+                equals: username,
+                mode: 'insensitive'
+            }
+        },
         include: {
             profile: {
                 include: {

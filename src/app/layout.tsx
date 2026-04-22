@@ -32,8 +32,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://moodproject.vercel.app",
-    siteName: "MoodSpace",
+    url: "https://moodspace.com.br",
+    siteName: "moodspace",
     title: "MoodSpace | Seu espaço, seu mood",
     description: "Crie e compartilhe seu mural pessoal estético e imersivo.",
     images: [

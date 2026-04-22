@@ -4,7 +4,7 @@ const envSchema = z.object({
     DATABASE_URL: z.string().url(),
     AUTH_SECRET: z.string().min(1),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    // Adicionaremos SPOTIFY_CLIENT_ID e SECRET depois quando integrarmos a busca
+    NEXT_PUBLIC_APP_URL: z.string().url().default("https://moodspace.com.br"),
 });
 
 const _env = envSchema.safeParse(process.env);

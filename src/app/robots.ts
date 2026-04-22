@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/dashboard/', '/api/', '/auth/'],
       },
     ],
-    sitemap: 'https://moodspace.com/sitemap.xml', // Ajustar para o domínio real se necessário
+    sitemap: 'https://moodspace.com.br/sitemap.xml',
   };
 }
