@@ -361,7 +361,7 @@ export function EditorSlider({ value, min, max, step = 1, onChange, label, unit 
                 )}
                 <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 tabular-nums">
-                        {value}{unit}
+                        {Math.round(Number(value))}{unit}
                     </span>
                     {Icon && <Icon className="w-3.5 h-3.5 text-zinc-300" />}
                 </div>

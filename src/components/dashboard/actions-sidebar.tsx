@@ -19,7 +19,7 @@ import { useAudio } from "./audio-context"
 import { toast } from "sonner"
 import { getRelativeTime } from "@/lib/utils"
 import { VersionHistoryPanel } from "./version-history-panel"
-import { EditorHeader, EditorSection } from "./EditorUI"
+import { EditorHeader, EditorSection, EditorSlider } from "./EditorUI"
 
 import { Profile } from "@/types/database"
 import { UniversalIdentityEditor } from "./UniversalIdentityEditor"
@@ -252,9 +252,7 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                                     {t('common.view')}
                                 </Button>
                             </Link>
-                            <div className="w-full">
-                                <ShareProfileButton username={currentUsername} />
-                            </div>
+                            <ShareProfileButton username={currentUsername} />
                         </div>
 
                         {isAdmin && (
@@ -280,46 +278,53 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                     <EditorHeader 
                         title={t('leftSidebar.system_ux')}
                     />
-                    <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 space-y-6 shadow-sm">
-                        <button
-                            onClick={toggleGlobalMute}
-                            className={cn(
-                                "w-full flex items-center justify-between p-4 rounded-2xl border transition-all duration-300",
-                                isGlobalMuted
-                                    ? "border-red-100 bg-red-50 text-red-600"
-                                    : "border-zinc-50 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50 text-zinc-600"
-                            )}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={cn(
-                                    "p-2 rounded-xl transition-colors",
-                                    isGlobalMuted ? "bg-red-100 text-red-600" : "bg-white dark:bg-zinc-800 text-zinc-400 shadow-sm"
-                                )}>
-                                    {isGlobalMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    
+                    <div className="space-y-8 px-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={toggleGlobalMute}
+                                    className={cn(
+                                        "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 relative group",
+                                        isGlobalMuted
+                                            ? "bg-red-500 text-white shadow-lg shadow-red-500/20"
+                                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10"
+                                    )}
+                                >
+                                    {isGlobalMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                                    {!isGlobalMuted && (
+                                        <motion.div 
+                                            animate={{ scale: [1, 1.2, 1] }}
+                                            transition={{ repeat: Infinity, duration: 2 }}
+                                            className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-zinc-900" 
+                                        />
+                                    )}
+                                </button>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white leading-none mb-1.5">
+                                        {isGlobalMuted ? "Sistema Mutado" : "Áudio Master"}
+                                    </span>
+                                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest opacity-60">
+                                        {isGlobalMuted ? "Sons desativados" : "Saída global ativa"}
+                                    </span>
                                 </div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest">
-                                    {isGlobalMuted ? "Áudio Mutado" : "Áudio Ativo"}
-                                </span>
                             </div>
-                            {isGlobalMuted && (
-                                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                            
+                            {!isGlobalMuted && (
+                                <span className="text-[11px] font-black tabular-nums text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-1 rounded-lg">
+                                    {Math.round(globalVolume * 100)}%
+                                </span>
                             )}
-                        </button>
+                        </div>
 
                         {!isGlobalMuted && (
-                            <div className="space-y-4 px-1">
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">Master Volume</span>
-                                    <span className="text-[10px] font-bold text-zinc-900 dark:text-white">{Math.round(globalVolume * 100)}%</span>
-                                </div>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="1"
-                                    step="0.01"
-                                    value={globalVolume}
-                                    onChange={(e) => setGlobalVolume(parseFloat(e.target.value))}
-                                    className="w-full h-1.5 appearance-none bg-zinc-100 dark:bg-zinc-800 rounded-full accent-blue-600 cursor-pointer"
+                            <div className="pt-2">
+                                <EditorSlider
+                                    value={Math.round(globalVolume * 100)}
+                                    min={0}
+                                    max={100}
+                                    onChange={(v) => setGlobalVolume(v / 100)}
+                                    variant="ghost"
                                 />
                             </div>
                         )}
@@ -338,12 +343,15 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                     <div className="grid gap-3">
                         <button 
                             onClick={() => setActiveTab('identity')}
-                            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all group/config"
+                            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-zinc-100/50 dark:bg-zinc-800/20 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all group/config"
                         >
-                            <div className="p-2 rounded-xl bg-white dark:bg-zinc-800 shadow-sm group-hover/config:text-blue-500 transition-colors">
+                            <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-800 shadow-sm group-hover/config:text-blue-500 transition-colors">
                                 <User className="w-4 h-4" />
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 group-hover/config:text-zinc-900 dark:group-hover/config:text-white transition-colors">identity</span>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 group-hover/config:text-zinc-900 dark:group-hover/config:text-white transition-colors">identity</span>
+                                <span className="text-[8px] font-bold uppercase tracking-tighter text-zinc-400/40">Gerenciar conta</span>
+                            </div>
                         </button>
                     </div>
                 </div>
