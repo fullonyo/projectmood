@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
     Search, Music, Youtube, Plus, Video,
-    Upload
+    Upload, Maximize2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
@@ -16,7 +16,7 @@ import { FrameType } from "./FrameContainer"
 import { MediaType } from "./SmartMedia"
 import { MoodBlock } from "@/types/database"
 import { getFrameOptions } from "@/lib/editor-constants"
-import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton } from "./EditorUI"
+import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, ListSelector } from "./EditorUI"
 
 interface UniversalMediaEditorProps {
     block?: MoodBlock | null
@@ -81,6 +81,7 @@ export function UniversalMediaEditor({
             setMediaType('video')
             setUrlInput("")
             setError(null)
+            triggerUpdate({ videoId: id, mediaType: 'video' })
         } else {
             setError(t('editors.youtube.error'))
         }
@@ -106,17 +107,19 @@ export function UniversalMediaEditor({
         const reader = new FileReader()
         reader.onload = (event) => {
             const base64 = event.target?.result as string
+            const name = file.name.replace(/\.[^/.]+$/, "")
             setAudioUrl(base64)
-            setTrackName(file.name.replace(/\.[^/.]+$/, ""))
+            setTrackName(name)
             setIsLoading(false)
+            triggerUpdate({ audioUrl: base64, name })
         }
         reader.readAsDataURL(file)
     }
 
-    useEffect(() => {
+    const triggerUpdate = (updates: any) => {
         if (!block?.id || !onUpdate) return
 
-        const updates = {
+        const currentContent = {
             mediaType,
             videoId,
             trackId,
@@ -124,20 +127,19 @@ export function UniversalMediaEditor({
             frame,
             lyrics,
             lyricsDisplay,
-            ...((mediaType === 'music' || mediaType === 'audio') ? {
-                name: trackName,
-                artist: trackArtist,
-                albumArt: trackAlbumArt
-            } : {})
+            name: trackName,
+            artist: trackArtist,
+            albumArt: trackAlbumArt,
+            ...updates
         }
 
         const typeToSave = ['video', 'music'].includes(block.type) ? 'media' : block.type
 
         onUpdate(block.id, {
             type: typeToSave,
-            content: updates
+            content: currentContent
         })
-    }, [mediaType, videoId, trackId, audioUrl, frame, trackName, trackArtist, trackAlbumArt, lyrics, lyricsDisplay, block?.id, onUpdate, block?.type])
+    }
 
     const handleSave = () => {
         const finalContent = {
@@ -176,77 +178,84 @@ export function UniversalMediaEditor({
             />
 
             <EditorSection title="Tipo de Mídia">
-                <PillSelector
+                <ListSelector
+                    id="media-type"
                     options={[
-                        { id: 'video', label: t('editors.universal_media.video_tab'), icon: Youtube },
-                        { id: 'music', label: t('editors.universal_media.music_tab'), icon: Music },
-                        { id: 'audio', label: t('editors.universal_media.audio_tab'), icon: Upload },
+                        { id: 'video', label: t('editors.universal_media.video_tab') },
+                        { id: 'music', label: t('editors.universal_media.music_tab') },
+                        { id: 'audio', label: t('editors.universal_media.audio_tab') },
                     ]}
-                    activeId={mediaType as string}
-                    onChange={(id) => { setMediaType(id as MediaType); setError(null); }}
+                    activeId={mediaType}
+                    onChange={(id) => { 
+                        setMediaType(id as MediaType); 
+                        setError(null);
+                        triggerUpdate({ mediaType: id as MediaType });
+                    }}
                 />
             </EditorSection>
 
             <EditorSection title="Fonte de Dados">
-                <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
-                    {mediaType === 'video' ? (
-                        <div className="space-y-4">
-                            <div className="relative">
-                                <Video className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                                <Input
-                                    placeholder={t('editors.universal_media.youtube_placeholder')}
-                                    value={urlInput}
-                                    onChange={(e) => setUrlInput(e.target.value)}
-                                    className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium"
-                                />
+                {mediaType === 'video' ? (
+                    <div className="space-y-4">
+                        <div className="relative group">
+                            <Video className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                            <Input
+                                placeholder={t('editors.universal_media.youtube_placeholder')}
+                                value={urlInput}
+                                onChange={(e) => setUrlInput(e.target.value)}
+                                className="bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-2xl pl-12 h-14 text-[11px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-blue-500/20 placeholder:text-zinc-400"
+                            />
+                        </div>
+                        <Button
+                            onClick={handleAddYoutube}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl h-14 font-black uppercase tracking-widest text-[9px] shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+                        >
+                            {t('editors.universal_media.youtube_btn')}
+                        </Button>
+                    </div>
+                ) : mediaType === 'music' ? (
+                    <div className="space-y-4">
+                        <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                            <Input
+                                placeholder={t('editors.universal_media.spotify_placeholder')}
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                className="bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-2xl pl-12 h-14 text-[11px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-blue-500/20 placeholder:text-zinc-400"
+                            />
+                        </div>
+                        <Button
+                            onClick={handleSearch}
+                            isLoading={isLoading}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl h-14 font-black uppercase tracking-widest text-[9px] shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+                        >
+                            {t('editors.universal_media.spotify_btn')}
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <Label
+                            htmlFor="audio-upload"
+                            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[2rem] hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 group"
+                        >
+                            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-zinc-100 dark:border-zinc-700">
+                                <Upload className="w-5 h-5 text-zinc-400 group-hover:text-blue-600 transition-colors" />
                             </div>
-                            <Button
-                                onClick={handleAddYoutube}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-12 font-bold uppercase tracking-widest text-[9px] transition-all"
-                            >
-                                {t('editors.universal_media.youtube_btn')}
-                            </Button>
-                        </div>
-                    ) : mediaType === 'music' ? (
-                        <div className="space-y-4">
-                            <div className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                                <Input
-                                    placeholder={t('editors.universal_media.spotify_placeholder')}
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                    className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium"
-                                />
-                            </div>
-                            <Button
-                                onClick={handleSearch}
-                                isLoading={isLoading}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-12 font-bold uppercase tracking-widest text-[9px] transition-all"
-                            >
-                                {t('editors.universal_media.spotify_btn')}
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            <Label
-                                htmlFor="audio-upload"
-                                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-2xl hover:border-blue-500 hover:bg-blue-50/50 transition-all cursor-pointer bg-zinc-50 dark:bg-zinc-800 group"
-                            >
-                                <Upload className="w-6 h-6 mb-2 text-zinc-400 group-hover:text-blue-600 transition-colors" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t('editors.universal_media.audio_placeholder')}</span>
-                                <Input
-                                    id="audio-upload"
-                                    type="file"
-                                    accept="audio/*"
-                                    className="hidden"
-                                    onChange={handleAudioUpload}
-                                />
-                            </Label>
-                        </div>
-                    )}
-                    {error && <p className="mt-4 text-[9px] text-red-500 font-bold uppercase tracking-widest text-center">{error}</p>}
-                </div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
+                                {t('editors.universal_media.audio_placeholder')}
+                            </span>
+                            <Input
+                                id="audio-upload"
+                                type="file"
+                                accept="audio/*"
+                                className="hidden"
+                                onChange={handleAudioUpload}
+                            />
+                        </Label>
+                    </div>
+                )}
+                {error && <p className="mt-4 text-[9px] text-red-500 font-bold uppercase tracking-widest text-center animate-bounce">{error}</p>}
             </EditorSection>
 
             {mediaType === 'music' && results.length > 0 && (
@@ -261,6 +270,12 @@ export function UniversalMediaEditor({
                                 setTrackAlbumArt(track.albumArt)
                                 setResults([])
                                 setQuery("")
+                                triggerUpdate({ 
+                                    trackId: track.id, 
+                                    name: track.name, 
+                                    artist: track.artist, 
+                                    albumArt: track.albumArt 
+                                })
                             }}
                             className="w-full flex items-center gap-4 p-4 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all text-left group"
                         >
@@ -278,45 +293,43 @@ export function UniversalMediaEditor({
                 <div className="space-y-10">
                     <EditorSection title="Estética">
                         <EditorSection title="Moldura">
-                            <PillSelector
-                                variant="scroll"
+                            <ListSelector
+                                id="frame-type"
                                 options={FRAMES.map(f => ({ id: f.id as string, label: f.label }))}
                                 activeId={frame as string}
-                                onChange={(id) => setFrame(id as any)}
+                                onChange={(id) => {
+                                    setFrame(id as any)
+                                    triggerUpdate({ frame: id as any })
+                                }}
                             />
                         </EditorSection>
                     </EditorSection>
 
-                    <EditorSection title="Legendas (Letras)">
-                        <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">Modo de Exibição</span>
-                                <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
-                                    <button
-                                        onClick={() => setLyricsDisplay('integrated')}
-                                        className={cn(
-                                            "px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all",
-                                            lyricsDisplay === 'integrated' ? "bg-white dark:bg-zinc-900 text-blue-600 shadow-sm" : "text-zinc-400"
-                                        )}
-                                    >
-                                        Integrado
-                                    </button>
-                                    <button
-                                        onClick={() => setLyricsDisplay('fullscreen')}
-                                        className={cn(
-                                            "px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all",
-                                            lyricsDisplay === 'fullscreen' ? "bg-white dark:bg-zinc-900 text-blue-600 shadow-sm" : "text-zinc-400"
-                                        )}
-                                    >
-                                        Full
-                                    </button>
-                                </div>
-                            </div>
+                    <EditorSection title="Letras (Lyrics)">
+                        <div className="space-y-6">
+                            <EditorSection title="Exibição">
+                                <ListSelector
+                                    id="lyrics-mode"
+                                    options={[
+                                        { id: 'integrated', label: 'Integrado' },
+                                        { id: 'fullscreen', label: 'Tela Cheia' }
+                                    ]}
+                                    activeId={lyricsDisplay}
+                                    onChange={(id) => {
+                                        setLyricsDisplay(id as any)
+                                        triggerUpdate({ lyricsDisplay: id as any })
+                                    }}
+                                />
+                            </EditorSection>
+
                             <textarea
                                 value={lyrics}
-                                onChange={(e) => setLyrics(e.target.value)}
+                                onChange={(e) => {
+                                    setLyrics(e.target.value)
+                                    triggerUpdate({ lyrics: e.target.value })
+                                }}
                                 placeholder="Insira as letras aqui..."
-                                className="w-full h-32 bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl p-4 text-[11px] font-medium resize-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                className="w-full h-32 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 text-[12px] font-medium resize-none focus:ring-2 focus:ring-blue-500/10 transition-all custom-scrollbar"
                             />
                         </div>
                     </EditorSection>
