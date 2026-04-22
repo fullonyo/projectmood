@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { useState, useTransition, useEffect } from "react"
 import { searchSpotifyTracks } from "@/actions/spotify"
 import { addMoodBlock } from "@/actions/profile"
@@ -212,6 +213,27 @@ export function UniversalMediaEditor({
                         >
                             {t('editors.universal_media.youtube_btn')}
                         </Button>
+
+                        {videoId && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="p-4 bg-zinc-900 rounded-2xl border border-white/5 flex items-center gap-4 overflow-hidden relative group"
+                            >
+                                <div className="w-20 h-12 rounded-lg bg-zinc-800 overflow-hidden flex-shrink-0 border border-white/10">
+                                    <img 
+                                        src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`} 
+                                        className="w-full h-full object-cover opacity-80"
+                                        alt="Thumbnail"
+                                    />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[8px] font-black text-blue-500 uppercase tracking-widest mb-1">Vídeo Selecionado</p>
+                                    <p className="text-[10px] font-bold text-white uppercase truncate">ID: {videoId}</p>
+                                </div>
+                                <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                            </motion.div>
+                        )}
                     </div>
                 ) : mediaType === 'music' ? (
                     <div className="space-y-4">
@@ -232,6 +254,24 @@ export function UniversalMediaEditor({
                         >
                             {t('editors.universal_media.spotify_btn')}
                         </Button>
+
+                        {trackId && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="p-4 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-2xl border border-emerald-500/20 flex items-center gap-4 overflow-hidden relative"
+                            >
+                                {trackAlbumArt && (
+                                    <img src={trackAlbumArt} className="w-12 h-12 rounded-xl shadow-sm border border-emerald-500/20" alt="Album" />
+                                )}
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Música Selecionada</p>
+                                    <p className="text-[10px] font-bold text-zinc-900 dark:text-white uppercase truncate">{trackName}</p>
+                                    <p className="text-[9px] text-zinc-500 uppercase truncate">{trackArtist}</p>
+                                </div>
+                                <div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            </motion.div>
+                        )}
                     </div>
                 ) : (
                     <div className="space-y-4">
