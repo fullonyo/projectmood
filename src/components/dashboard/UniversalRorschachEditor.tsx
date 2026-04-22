@@ -46,20 +46,15 @@ export function UniversalRorschachEditor({
     const [complexity, setComplexity] = useState(content.complexity ?? 5)
     const [activeTab, setActiveTab] = useState<TabType>('geometry')
 
-    useEffect(() => {
+    const triggerUpdate = (updates: any) => {
         if (!block?.id || !onUpdate) return
-
-        const updates = {
-            seed,
-            color,
-            opacity,
-            blur,
-            symmetry,
-            complexity
-        }
-
-        onUpdate(block.id, { content: updates })
-    }, [seed, color, opacity, blur, symmetry, complexity, block?.id, onUpdate])
+        onUpdate(block.id, {
+            content: {
+                seed, color, opacity, blur, symmetry, complexity,
+                ...updates
+            }
+        })
+    }
 
     const handleSave = async () => {
         const finalContent = {
@@ -117,7 +112,10 @@ export function UniversalRorschachEditor({
                                 { id: 'quad', label: 'Quadrática', icon: Maximize2 },
                             ]}
                             activeId={symmetry}
-                            onChange={(id) => setSymmetry(id as any)}
+                            onChange={(id) => {
+                                setSymmetry(id as any)
+                                triggerUpdate({ symmetry: id as any })
+                            }}
                             columns={3}
                             variant="ghost"
                             id="rorschach-symmetry"
@@ -129,7 +127,10 @@ export function UniversalRorschachEditor({
                         value={seed}
                         min={0}
                         max={10000}
-                        onChange={setSeed}
+                        onChange={(v) => {
+                            setSeed(v)
+                            triggerUpdate({ seed: v })
+                        }}
                         icon={RefreshCw}
                         variant="ghost"
                     />
@@ -139,7 +140,10 @@ export function UniversalRorschachEditor({
                         value={complexity}
                         min={1}
                         max={20}
-                        onChange={setComplexity}
+                        onChange={(v) => {
+                            setComplexity(v)
+                            triggerUpdate({ complexity: v })
+                        }}
                         icon={Maximize2}
                         variant="ghost"
                     />
@@ -149,7 +153,14 @@ export function UniversalRorschachEditor({
             {activeTab === 'style' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <EditorSection title="Cor Principal">
-                        <EditorColorPicker value={color} onChange={setColor} variant="ghost" />
+                        <EditorColorPicker 
+                            value={color} 
+                            onChange={(v) => {
+                                setColor(v)
+                                triggerUpdate({ color: v })
+                            }} 
+                            variant="ghost" 
+                        />
                     </EditorSection>
 
                     <div className="grid grid-cols-2 gap-6">
@@ -159,7 +170,10 @@ export function UniversalRorschachEditor({
                             unit="%"
                             min={0}
                             max={100}
-                            onChange={(v) => setOpacity(v / 100)}
+                            onChange={(v) => {
+                                setOpacity(v / 100)
+                                triggerUpdate({ opacity: v / 100 })
+                            }}
                             variant="ghost"
                         />
                         <EditorSlider
@@ -168,7 +182,10 @@ export function UniversalRorschachEditor({
                             unit="px"
                             min={0}
                             max={20}
-                            onChange={setBlur}
+                            onChange={(v) => {
+                                setBlur(v)
+                                triggerUpdate({ blur: v })
+                            }}
                             icon={Droplets}
                             variant="ghost"
                         />

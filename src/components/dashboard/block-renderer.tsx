@@ -155,7 +155,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         case 'gif':
             return (
                 <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
-                    <img src={content.url} alt="gif" className="w-full h-full object-cover" />
+                    <SmartPhoto content={content} />
                 </FrameContainer>
             )
 

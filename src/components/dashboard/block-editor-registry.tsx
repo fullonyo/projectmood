@@ -11,6 +11,7 @@ import { UniversalShapeEditor } from "./UniversalShapeEditor"
 import { UniversalSocialEditor } from "./UniversalSocialEditor"
 import { UniversalEffectsEditor } from "./UniversalEffectsEditor"
 import { UniversalCommonEditor } from "./UniversalCommonEditor"
+import { UniversalGiphyEditor } from "./UniversalGiphyEditor"
 import { DoodlePad } from "./doodle-pad"
 import { useTranslation } from "@/i18n/context"
 import { Layout, Boxes } from "lucide-react"
@@ -23,6 +24,7 @@ interface BlockEditorRegistryProps {
     onUpdateBlocks: (ids: string[], updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => void
     onClose: () => void
     setDraftBlockType: (type: string | null) => void
+    onAddBlock?: (type: string, content: any) => Promise<void>
 }
 
 export function BlockEditorRegistry({
@@ -31,9 +33,25 @@ export function BlockEditorRegistry({
     onUpdateBlock,
     onUpdateBlocks,
     onClose,
-    setDraftBlockType
+    setDraftBlockType,
+    onAddBlock
 }: BlockEditorRegistryProps) {
     const { t } = useTranslation()
+
+    // Hooks moved to top to follow React Rules of Hooks
+    const selectedIdsString = selectedBlocks.map(b => b.id).join(',')
+    
+    const handleSingleUpdate = useMemo(() => (idOrUpdates: any, updates?: any) => {
+        const firstBlock = selectedBlocks[0]
+        if (!firstBlock) return
+        const actualId = typeof idOrUpdates === 'string' ? idOrUpdates : firstBlock.id
+        const actualUpdates = typeof idOrUpdates === 'string' ? updates : idOrUpdates
+        onUpdateBlock(actualId, actualUpdates)
+    }, [selectedBlocks, onUpdateBlock])
+
+    const handleBatchUpdate = useMemo(() => (updates: any) => {
+        onUpdateBlocks(selectedBlocks.map(b => b.id), updates)
+    }, [selectedIdsString, onUpdateBlocks])
 
     // Detect if we are in Multi-Selection Mode
     const isMultiSelect = selectedBlocks.length > 1
@@ -48,28 +66,14 @@ export function BlockEditorRegistry({
         if (!Editor) return null
         return (
             <Editor
+                onAdd={onAddBlock}
                 onUpdate={(updates: any) => {
-                    // Logic for draft is handled via addMoodBlock in parent, 
-                    // but editors might need internal state
+                    // Logic for draft is handled via addMoodBlock in parent
                 }}
                 onClose={onClose}
             />
         )
     }
-
-    // Memoized Update Handlers to prevent infinite loops in child editors' useEffects
-    const selectedIdsString = selectedBlocks.map(b => b.id).join(',')
-    
-    const handleSingleUpdate = useMemo(() => (idOrUpdates: any, updates?: any) => {
-        if (!firstBlock) return
-        const actualId = typeof idOrUpdates === 'string' ? idOrUpdates : firstBlock.id
-        const actualUpdates = typeof idOrUpdates === 'string' ? updates : idOrUpdates
-        onUpdateBlock(actualId, actualUpdates)
-    }, [firstBlock?.id, onUpdateBlock])
-
-    const handleBatchUpdate = useMemo(() => (updates: any) => {
-        onUpdateBlocks(selectedBlocks.map(b => b.id), updates)
-    }, [selectedIdsString, onUpdateBlocks])
 
     if (selectedBlocks.length === 0) return null
 
@@ -130,7 +134,7 @@ function getEditor(type: string) {
     const editors: Record<string, any> = {
         'text': UniversalTextEditor,
         'photo': UniversalPhotoEditor,
-        'gif': UniversalPhotoEditor,
+        'gif': UniversalGiphyEditor,
         'music': UniversalMediaEditor,
         'video': UniversalMediaEditor,
         'audio': UniversalMediaEditor,

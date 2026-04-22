@@ -17,7 +17,7 @@ import {
     EditorActionButton, 
     EditorSlider, 
     EditorColorPicker,
-    EditorListSelector 
+    ListSelector 
 } from "./EditorUI"
 
 const GUESTBOOK_THEMES = [
@@ -131,15 +131,14 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
             ) : (
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <EditorSection title="Tema Visual">
-                        <EditorListSelector
+                        <ListSelector
+                            id="guestbook-themes"
                             options={GUESTBOOK_THEMES.map(th => ({ 
                                 id: th.id, 
-                                label: t(`editors.guestbook.styles.${th.id}`) || th.label,
-                                icon: th.icon 
+                                label: t(`editors.guestbook.styles.${th.id}`) || th.label
                             }))}
                             activeId={style}
                             onChange={setStyle}
-                            maxHeight="max-h-56"
                         />
                     </EditorSection>
 
@@ -154,26 +153,24 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                         variant="ghost"
                     />
 
-                    <div className="grid grid-cols-2 gap-6">
-                        <EditorSlider
-                            label="Opacidade"
-                            value={Math.round(opacity * 100)}
-                            unit="%"
-                            min={0}
-                            max={100}
-                            onChange={(v) => setOpacity(v / 100)}
-                            variant="ghost"
-                        />
+                    <EditorSlider
+                        label="Opacidade"
+                        value={Math.round(opacity * 100)}
+                        unit="%"
+                        min={0}
+                        max={100}
+                        onChange={(v) => setOpacity(v / 100)}
+                        variant="ghost"
+                    />
 
-                        <EditorSection title="Blend Mode">
-                            <EditorListSelector
-                                options={BLEND_MODES.map(m => ({ id: m, label: m.replace('-', ' ') }))}
-                                activeId={blendMode}
-                                onChange={setBlendMode}
-                                maxHeight="max-h-40"
-                            />
-                        </EditorSection>
-                    </div>
+                    <EditorSection title="Blend Mode">
+                        <ListSelector
+                            id="guestbook-blend"
+                            options={BLEND_MODES.map(m => ({ id: m, label: m.replace('-', ' ') }))}
+                            activeId={blendMode}
+                            onChange={(id) => setBlendMode(id as any)}
+                        />
+                    </EditorSection>
                 </div>
             )}
 

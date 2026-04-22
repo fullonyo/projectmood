@@ -559,10 +559,10 @@ export const en: Dictionary = {
             }
         },
         shape: {
-            title: "Shapes",
-            add_title: "Smart Shapes",
+            title: "Smart Shapes",
+            add_title: "Artistic Geometry & Blending",
             edit_title: "Edit Shape",
-            subtitle: "Geometry & Blending",
+            subtitle: "Artistic Geometry & Blending",
             geometry_label: "Base Geometry",
             adjust_sides: "Sides Adjustment",
             adjust_points: "Points Adjustment",

@@ -10,7 +10,7 @@ import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
 import { MoodBlock, Profile } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
-import { updateMoodBlocksZIndex } from "@/actions/profile";
+import { updateMoodBlocksZIndex, addMoodBlock } from "@/actions/profile";
 import { I18nProvider } from "@/i18n/context";
 import { CanvasInteractionProvider, useCanvasInteraction } from "./canvas-interaction-context";
 import { AudioProvider } from "./audio-context";
@@ -49,13 +49,43 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
     const [localProfile, setLocalProfile] = useState(profile);
     const { isDrawingMode } = useCanvasInteraction();
 
-    // 🧠 CENTRAL CORTEX: Sovereign management of blocks and persistence
     const {
         blocks, setBlocks, updateBlock, updateBlocks, removeBlocks,
         isSaving, undo, redo, canUndo, canRedo,
         selectedIds, setSelectedIds, alignSelected, distributeSelected,
         groupSelected, ungroupSelected
     } = useCanvasManager(moodBlocks);
+
+    const handleAddNewBlock = useCallback(async (type: string, content: any, shouldSelect = true) => {
+        try {
+            // GIFs por padrão não devem ser selecionados automaticamente para permitir multi-add
+            const actualShouldSelect = type === 'gif' ? false : shouldSelect;
+
+            // Definição de dimensões iniciais inteligentes baseadas no tipo
+            let options = { x: Math.random() * 20 + 40, y: Math.random() * 20 + 40, width: 200, height: 200 };
+            
+            if (type === 'gif' || type === 'photo') {
+                options = { ...options, width: 250, height: 250 };
+            } else if (type === 'text' || type === 'quote') {
+                options = { ...options, width: 300, height: 120 };
+            } else if (type === 'social') {
+                options = { ...options, width: 160, height: 50 };
+            }
+
+            const res = await addMoodBlock(type, content, options);
+            
+            if (res.success && res.block) {
+                // Adiciona o novo bloco localmente para feedback instantâneo
+                setBlocks(prev => [...prev, res.block]);
+                
+                if (actualShouldSelect) {
+                    setSelectedIds([res.block.id]);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to add block:", error);
+        }
+    }, []);
 
     const normalizeZIndexes = useCallback(async () => {
         const sorted = [...blocks].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
@@ -180,6 +210,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                         onUpdateBlock={updateBlock}
                         onUpdateBlocks={updateBlocks}
                         removeBlocks={removeBlocks}
+                        onAddBlock={handleAddNewBlock}
                         onGroup={groupSelected}
                         onUngroup={ungroupSelected}
                         onUpdateProfile={handleUpdateLocalProfile}

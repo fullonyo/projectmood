@@ -22,7 +22,7 @@ import {
     EditorSlider, 
     EditorColorPicker, 
     EditorSwitch,
-    EditorListSelector
+    ListSelector
 } from "./EditorUI"
 
 interface UniversalShapeEditorProps {
@@ -179,26 +179,23 @@ export function UniversalShapeEditor({
                         <EditorColorPicker value={color} onChange={setColor} variant="ghost" />
                     </EditorSection>
 
-                    <div className="grid grid-cols-2 gap-6">
-                        <EditorSlider
-                            label="Opacidade"
-                            value={Math.round(opacity * 100)}
-                            unit="%"
-                            min={0}
-                            max={100}
-                            onChange={(v) => setOpacity(v / 100)}
-                            variant="ghost"
-                        />
+                    <EditorSlider
+                        label="Opacidade"
+                        value={Math.round(opacity * 100)}
+                        unit="%"
+                        min={0}
+                        max={100}
+                        onChange={(v) => setOpacity(v / 100)}
+                        variant="ghost"
+                    />
 
-                        <EditorSection title="Blend Mode">
-                            <EditorListSelector
-                                options={BLEND_MODES.map(m => ({ id: m, label: m.replace('-', ' ') }))}
-                                activeId={blendMode}
-                                onChange={setBlendMode}
-                                maxHeight="max-h-40"
-                            />
-                        </EditorSection>
-                    </div>
+                    <EditorSection title="Blend Mode">
+                        <ListSelector
+                            options={BLEND_MODES.map(m => ({ id: m, label: m.replace('-', ' ') }))}
+                            activeId={blendMode}
+                            onChange={(id) => setBlendMode(id as any)}
+                        />
+                    </EditorSection>
 
                     <EditorSection title="Gradiente Studio">
                         <div className="space-y-4">

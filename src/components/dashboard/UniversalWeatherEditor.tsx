@@ -5,14 +5,14 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Cloud, Search, MapPin, Loader2, Sparkles, Wind, Sun, CloudRain, Snowflake, Droplets, Layers, Globe, Activity } from "lucide-react"
+import { Cloud, Search, MapPin, Loader2, Sparkles, Wind, Sun, CloudRain, Snowflake, Droplets, Layers, Globe, Activity, Palette } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { MoodBlock } from "@/types/database"
 import { getWeatherAction } from "@/actions/weather"
 import { Slider } from "@/components/ui/slider"
 import { BLEND_MODES } from "@/lib/editor-constants"
-import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, EditorSlider } from "./EditorUI"
+import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, EditorSlider, ListSelector } from "./EditorUI"
 
 const WEATHER_ICONS: Record<string, any> = {
     sun: Sun,
@@ -52,12 +52,15 @@ export function UniversalWeatherEditor({
     const [opacity, setOpacity] = useState(content.opacity ?? 1)
     const [blendMode, setBlendMode] = useState(content.blendMode || 'normal')
 
-    useEffect(() => {
+    const triggerUpdate = (updates: any) => {
         if (!block?.id || !onUpdate) return
         onUpdate(block.id, {
-            content: { location, vibe, temp, icon, mode, opacity, blendMode }
+            content: {
+                location, vibe, temp, icon, mode, opacity, blendMode,
+                ...updates
+            }
         })
-    }, [location, vibe, temp, icon, mode, opacity, blendMode, block?.id, onUpdate])
+    }
 
     const handleFetchWeather = async (searchLoc?: string) => {
         setError(null)
@@ -124,26 +127,31 @@ export function UniversalWeatherEditor({
                                 { id: 'manual', label: 'Manual', icon: Search }
                             ]}
                             activeId={mode}
-                            onChange={(id) => setMode(id as any)}
+                            onChange={(id) => {
+                                setMode(id as any)
+                                triggerUpdate({ mode: id as any })
+                            }}
                         />
                     </EditorSection>
 
                     {mode === 'manual' && (
                         <EditorSection title="Localização">
-                            <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm flex gap-4">
-                                <div className="relative flex-1">
-                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                                    <Input
-                                        value={location}
-                                        onChange={(e) => setLocation(e.target.value)}
-                                        placeholder="Ex: São Paulo, Tokyo..."
-                                        className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium"
-                                    />
-                                </div>
+                            <div className="relative group">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                                <Input
+                                    value={location}
+                                    onChange={(e) => {
+                                        setLocation(e.target.value)
+                                        triggerUpdate({ location: e.target.value })
+                                    }}
+                                    placeholder="Ex: São Paulo, Tokyo..."
+                                    className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-2xl pl-12 h-14 text-[11px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-blue-500/20"
+                                />
                                 <Button
                                     onClick={() => handleFetchWeather(location)}
                                     disabled={isFetching}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-12 px-6 font-bold uppercase tracking-widest text-[9px]"
+                                    variant="ghost"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-4 rounded-xl text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-black text-[9px] uppercase tracking-widest"
                                 >
                                     {isFetching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Buscar"}
                                 </Button>
@@ -158,77 +166,70 @@ export function UniversalWeatherEditor({
                     )}
 
                     <EditorSection title="Status Atual">
-                        <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm flex flex-col items-center text-center gap-6 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50/50 dark:bg-blue-900/10 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+                        <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[2.5rem] p-10 flex flex-col items-center text-center gap-6 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 dark:bg-blue-900/10 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-125 blur-3xl" />
                             
-                            <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-800 rounded-2xl flex items-center justify-center shadow-inner">
+                            <div className="w-24 h-24 bg-white dark:bg-zinc-800 rounded-[2rem] flex items-center justify-center shadow-2xl border border-white/10">
                                 {isFetching ? (
                                     <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
                                 ) : (
                                     (() => {
                                         const CurrentIcon = WEATHER_ICONS[icon] || Cloud
-                                        return <CurrentIcon className="w-10 h-10 text-zinc-800 dark:text-white" />
+                                        return <CurrentIcon className="w-12 h-12 text-zinc-900 dark:text-white" />
                                     })()
                                 )}
                             </div>
 
-                            <div className="space-y-2">
-                                <h4 className="text-5xl font-black italic tracking-tighter text-zinc-900 dark:text-white">{temp}°C</h4>
-                                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-blue-600">{vibe || 'Detectando vibe...'}</p>
+                            <div className="space-y-1">
+                                <h4 className="text-6xl font-black tracking-tighter text-zinc-900 dark:text-white tabular-nums">{temp}°C</h4>
+                                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">{vibe || 'Detectando vibe...'}</p>
                             </div>
 
-                            <div className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-800 rounded-full">
+                            <div className="flex items-center gap-2 px-6 py-2 bg-white dark:bg-zinc-800 rounded-full shadow-sm border border-zinc-100 dark:border-zinc-700">
                                 <MapPin className="w-3 h-3 text-zinc-400" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{location || '...'}</span>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">{location || '...'}</span>
                             </div>
                         </div>
                     </EditorSection>
                 </div>
             ) : (
-                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <EditorSection title="Mensagem / Vibe">
-                        <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
-                            <div className="relative">
-                                <Wind className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                                <Input
-                                    value={vibe}
-                                    onChange={(e) => setVibe(e.target.value)}
-                                    placeholder="Ex: Tarde chuvosa de outono..."
-                                    className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-[11px] font-medium"
-                                />
-                            </div>
+                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <EditorSection title="Mensagem Customizada">
+                        <div className="relative group">
+                            <Wind className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                            <Input
+                                value={vibe}
+                                onChange={(e) => {
+                                    setVibe(e.target.value)
+                                    triggerUpdate({ vibe: e.target.value })
+                                }}
+                                placeholder="Ex: Tarde chuvosa de outono..."
+                                className="bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 rounded-2xl pl-12 h-14 text-[11px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-blue-500/20"
+                            />
                         </div>
                     </EditorSection>
 
-                    <div className="grid grid-cols-2 gap-6">
-                        <EditorSlider
-                            label="Opacidade"
-                            value={Math.round(opacity * 100)}
-                            unit="%"
-                            min={0}
-                            max={100}
-                            onChange={(v) => setOpacity(v / 100)}
+                    <EditorSlider
+                        label="Opacidade do Bloco"
+                        value={Math.round(opacity * 100)}
+                        unit="%"
+                        min={0}
+                        max={100}
+                        onChange={(v) => {
+                            setOpacity(v / 100)
+                            triggerUpdate({ opacity: v / 100 })
+                        }}
+                    />
+                    <EditorSection title="Modo de Mesclagem">
+                        <ListSelector
+                            options={BLEND_MODES.map(m => ({ id: m, label: m.replace('-', ' ') }))}
+                            activeId={blendMode}
+                            onChange={(id) => {
+                                setBlendMode(id as any)
+                                triggerUpdate({ blendMode: id as any })
+                            }}
                         />
-
-                        <EditorSection title="Blend Mode">
-                            <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-4 shadow-sm max-h-40 overflow-y-auto custom-scrollbar">
-                                <div className="space-y-1">
-                                    {BLEND_MODES.map(m => (
-                                        <button
-                                            key={m}
-                                            onClick={() => setBlendMode(m)}
-                                            className={cn(
-                                                "w-full text-left px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all",
-                                                blendMode === m ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600" : "text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                            )}
-                                        >
-                                            {m.replace('-', ' ')}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </EditorSection>
-                    </div>
+                    </EditorSection>
                 </div>
             )}
 

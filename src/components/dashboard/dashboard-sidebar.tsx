@@ -50,7 +50,8 @@ export function DashboardSidebar({
     blocks,
     systemFlags,
     publishedAt,
-    onNormalize
+    onNormalize,
+    onAddBlock
 }: {
     profile: Profile;
     selectedBlocks: MoodBlock[];
@@ -65,6 +66,7 @@ export function DashboardSidebar({
     systemFlags?: Record<string, boolean>;
     publishedAt?: string | null;
     onNormalize?: () => void;
+    onAddBlock?: (type: string, content: any) => Promise<void>;
 }) {
 
     const { t } = useTranslation()
@@ -74,10 +76,22 @@ export function DashboardSidebar({
     const [isClearing, setIsClearing] = useState(false)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-    const handleAddBlock = async (type: string) => {
-        setDraftBlockType(type)
-        setSelectedIds([])
+    const handleAddBlock = async (type: string, content?: any) => {
+        if (content && onAddBlock) {
+            await onAddBlock(type, content);
+            // O fechamento do draft e seleção do novo bloco agora é gerido 
+            // pelo DashboardClientLayout para evitar resets de UI.
+        } else {
+            setDraftBlockType(type);
+            setSelectedIds([]);
+        }
     }
+
+    useEffect(() => {
+        if (selectedBlocks.length > 0 && draftBlockType) {
+            setDraftBlockType(null)
+        }
+    }, [selectedBlocks.length, draftBlockType])
 
     useEffect(() => {
         if (selectedBlocks.length > 0 && activeTab !== 'elements') {
@@ -234,6 +248,7 @@ export function DashboardSidebar({
                                     draftBlockType={draftBlockType}
                                     onUpdateBlock={onUpdateBlock}
                                     onUpdateBlocks={onUpdateBlocks}
+                                    onAddBlock={handleAddBlock}
                                     onClose={() => {
                                         setSelectedIds([])
                                         setDraftBlockType(null)

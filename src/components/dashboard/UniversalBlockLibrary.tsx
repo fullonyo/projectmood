@@ -40,7 +40,7 @@ export function UniversalBlockLibrary({ onAddBlock, systemFlags = {} }: BlockLib
         {
             items: [
                 { id: 'media', type: 'media', icon: Play, tk: 'universal_media' },
-                { id: 'gif', type: 'gif', icon: Youtube, tk: 'gif' },
+                { id: 'gif', type: 'gif', icon: Activity, tk: 'gif' },
                 { id: 'weather', type: 'weather', icon: Cloud, tk: 'weather' },
             ]
         },

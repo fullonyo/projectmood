@@ -43,6 +43,40 @@ export function EditorHeader({ title, subtitle, onClose }: EditorHeaderProps) {
     )
 }
 
+interface ListSelectorProps {
+    options: { id: string; label: string }[]
+    activeId: string
+    onChange: (id: string) => void
+    id?: string
+}
+
+export function ListSelector({ options, activeId, onChange, id }: ListSelectorProps) {
+    return (
+        <div className="flex flex-col gap-1">
+            {options.map(option => (
+                <button
+                    key={option.id}
+                    onClick={() => onChange(option.id)}
+                    className={cn(
+                        "w-full text-left px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-between group",
+                        activeId === option.id 
+                            ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
+                            : "text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
+                    )}
+                >
+                    {option.label}
+                    {activeId === option.id && (
+                        <motion.div 
+                            layoutId={`list-active-dot-${id || 'default'}`} 
+                            className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" 
+                        />
+                    )}
+                </button>
+            ))}
+        </div>
+    )
+}
+
 interface EditorSectionProps {
     title: string
     children: React.ReactNode

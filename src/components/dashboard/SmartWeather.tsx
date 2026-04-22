@@ -58,7 +58,9 @@ export const SmartWeather = memo(({ content, isInsideFrame = false }: WeatherBlo
                 isHorizontal ? "flex-row text-left px-[10%]" : "flex-col text-center"
             )}
             style={{
-                gap: Math.round((isHorizontal ? 24 : 16) * fluidScale)
+                gap: Math.round((isHorizontal ? 24 : 16) * fluidScale),
+                opacity: content.opacity ?? 1,
+                mixBlendMode: (content.blendMode || 'normal') as any
             }}
         >
             {/* Atmospheric Background Component */}

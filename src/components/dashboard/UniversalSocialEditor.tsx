@@ -60,7 +60,7 @@ const STYLES = [
 ]
 
 import { MoodBlock, SocialContent } from "@/types/database"
-import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, EditorSwitch, EditorListSelector } from "./EditorUI"
+import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, EditorSwitch, ListSelector } from "./EditorUI"
 
 type TabType = 'connection' | 'esthetics'
 
@@ -256,7 +256,7 @@ export function UniversalSocialEditor({
                     </EditorSection>
 
                     <EditorSection title={t('editors.social.style_manifesto') || "Estilo do Botão"}>
-                        <EditorListSelector
+                        <ListSelector
                             options={STYLES.map(s => ({ 
                                 id: s.id as any, 
                                 label: t(`editors.social.styles.${s.id}`) || s.label 
