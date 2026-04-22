@@ -11,6 +11,7 @@ import { UniversalShapeEditor } from "./UniversalShapeEditor"
 import { UniversalSocialEditor } from "./UniversalSocialEditor"
 import { UniversalEffectsEditor } from "./UniversalEffectsEditor"
 import { UniversalCommonEditor } from "./UniversalCommonEditor"
+import { DoodlePad } from "./doodle-pad"
 import { useTranslation } from "@/i18n/context"
 import { Layout, Boxes } from "lucide-react"
 import { useMemo } from "react"
@@ -141,6 +142,7 @@ function getEditor(type: string) {
         'shape': UniversalShapeEditor,
         'social': UniversalSocialEditor,
         'moodStatus': UniversalSocialEditor,
+        'doodle': DoodlePad,
         'effects': UniversalEffectsEditor
     }
     return editors[type]

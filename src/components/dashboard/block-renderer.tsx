@@ -176,11 +176,14 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
             return <SmartWeather content={content} isInsideFrame={content.frame && content.frame !== 'none'} />
 
         case 'doodle':
+            if (!content.image) return null;
             return (
                 <img
                     src={content.image}
                     alt="doodle"
-                    className="w-full h-full object-contain pointer-events-none drop-shadow-none"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-contain pointer-events-none drop-shadow-none transition-opacity duration-300"
                 />
             )
 
