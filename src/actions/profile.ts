@@ -4,11 +4,14 @@ import prisma from "@/lib/prisma";
 import {
     ProfileUpdateSchema,
     CreateMoodBlockSchema,
-    UpdateMoodBlockLayoutSchema
+    UpdateMoodBlockLayoutSchema,
+    UsernameSchema
 } from "@/lib/validations";
 import { requireAuth, getUsernameById, revalidateProfile } from "@/lib/action-helpers";
 
 export async function updateProfile(data: {
+    name?: string;
+    username?: string;
     theme?: string;
     primaryColor?: string;
     backgroundColor?: string;
@@ -20,20 +23,76 @@ export async function updateProfile(data: {
 }) {
     try {
         const session = await requireAuth();
+        const userId = session.user.id;
+
+        const currentUsername = await getUsernameById(userId);
+
+        // Se houver tentativa de mudar o username, validamos
+        if (data.username) {
+            const normalizedUsername = data.username.toLowerCase().trim();
+            
+            // Se o username for o mesmo que o atual (apenas mudança de case ou sem mudança), permitimos
+            if (normalizedUsername === currentUsername?.toLowerCase()) {
+                data.username = normalizedUsername;
+            } else {
+                const usernameValidation = UsernameSchema.safeParse(normalizedUsername);
+                if (!usernameValidation.success) {
+                    return { error: usernameValidation.error.issues[0].message };
+                }
+
+                // Verifica se o username já existe (excluindo o próprio usuário por ID e ignorando deletados)
+                const existing = await prisma.user.findFirst({
+                    where: { 
+                        username: { equals: normalizedUsername, mode: 'insensitive' },
+                        NOT: { id: userId },
+                        deletedAt: null // Importante: Ignorar usuários deletados
+                    },
+                    select: { id: true }
+                });
+
+                if (existing) {
+                    return { error: "Este nome de usuário já está em uso por outra conta." };
+                }
+                
+                data.username = normalizedUsername;
+            }
+        }
 
         const validation = ProfileUpdateSchema.safeParse(data);
         if (!validation.success) {
             return { error: "Dados inválidos: " + validation.error.issues[0].message };
         }
 
-        const username = await getUsernameById(session.user.id);
+        // Atualização em transação para garantir consistência entre User e Profile
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: userId },
+                data: {
+                    name: data.name,
+                    username: data.username,
+                }
+            }),
+            prisma.profile.update({
+                where: { userId },
+                data: {
+                    theme: data.theme,
+                    primaryColor: data.primaryColor,
+                    backgroundColor: data.backgroundColor,
+                    fontStyle: data.fontStyle,
+                    customCursor: data.customCursor,
+                    mouseTrails: data.mouseTrails,
+                    backgroundEffect: data.backgroundEffect,
+                    avatarUrl: data.avatarUrl,
+                },
+            })
+        ]);
 
-        await prisma.profile.update({
-            where: { userId: session.user.id },
-            data: validation.data,
-        });
+        // Revalida ambos os caminhos (antigo e novo) se houve troca
+        revalidateProfile(currentUsername);
+        if (data.username && data.username !== currentUsername) {
+            revalidateProfile(data.username);
+        }
 
-        revalidateProfile(username);
         return { success: true };
     } catch (error: any) {
         if (error.name === "ActionError") return { error: error.message };

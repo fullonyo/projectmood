@@ -22,19 +22,20 @@ interface DashboardClientLayoutProps {
     profile: Profile;
     moodBlocks: MoodBlock[];
     username: string;
+    name: string | null;
     publishedAt?: string | null;
     hasUnpublishedChanges?: boolean;
     isAdmin?: boolean;
     systemFlags?: Record<string, boolean>;
 }
 
-export function DashboardClientLayout({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
+export function DashboardClientLayout({ profile, moodBlocks, username, name, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
     return (
         <I18nProvider>
             <AudioProvider>
                 <LyricsProvider>
                     <CanvasInteractionProvider>
-                        <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
+                        <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} name={name} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
                     </CanvasInteractionProvider>
                 </LyricsProvider>
             </AudioProvider>
@@ -42,7 +43,7 @@ export function DashboardClientLayout({ profile, moodBlocks, username, published
     )
 }
 
-function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
+function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
     const [isMobile, setIsMobile] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
@@ -264,7 +265,14 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, publishedAt
                 className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
             >
                 <div className={`h-full shadow-none relative ${isRightSidebarOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
-                    <ActionsSidebar username={username} profile={localProfile} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} />
+                    <ActionsSidebar 
+                        username={username} 
+                        name={name}
+                        profile={localProfile} 
+                        publishedAt={publishedAt} 
+                        hasUnpublishedChanges={hasUnpublishedChanges} 
+                        isAdmin={isAdmin} 
+                    />
 
                     {/* Ghost Trigger: Collapse Right */}
                     <button

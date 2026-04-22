@@ -1,13 +1,14 @@
 "use client"
 
 import { LogOut, ExternalLink, User, Settings, Camera, Loader2, Upload, Clock, History, ChevronDown, RotateCcw, Sparkles, Activity, Volume2, VolumeX } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "../ui/button"
 import { ShareProfileButton } from "./share-profile-button"
 import { ConfirmModal } from "../ui/confirm-modal"
 import Link from "next/link"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
-import { useState, useRef, useTransition } from "react"
+import { useState, useRef, useTransition, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { updateProfile } from "@/actions/profile"
 import { publishProfile } from "@/actions/publish"
@@ -21,20 +22,34 @@ import { VersionHistoryPanel } from "./version-history-panel"
 import { EditorHeader, EditorSection } from "./EditorUI"
 
 import { Profile } from "@/types/database"
+import { UniversalIdentityEditor } from "./UniversalIdentityEditor"
 
 interface ActionsSidebarProps {
     username: string
+    name: string | null
     profile: Profile
     publishedAt?: Date | string | null
     hasUnpublishedChanges?: boolean
     isAdmin?: boolean
 }
 
-export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedChanges, isAdmin }: ActionsSidebarProps) {
+export function ActionsSidebar({ username: initialUsername, name: initialName, profile, publishedAt, hasUnpublishedChanges, isAdmin }: ActionsSidebarProps) {
     const { t } = useTranslation()
     const [isUploading, setIsUploading] = useState(false)
     const [showPublishModal, setShowPublishModal] = useState(false)
+    const [activeTab, setActiveTab] = useState<'main' | 'identity'>('main')
     const [isPending, startTransition] = useTransition()
+    
+    // Estados locais para feedback instantâneo após edição
+    const [currentName, setCurrentName] = useState(initialName)
+    const [currentUsername, setCurrentUsername] = useState(initialUsername)
+
+    // Sincroniza estado local com props do servidor (importante após router.refresh)
+    useEffect(() => {
+        setCurrentName(initialName)
+        setCurrentUsername(initialUsername)
+    }, [initialName, initialUsername])
+
     const fileInputRef = useRef<HTMLInputElement>(null)
     const { isGlobalMuted, toggleGlobalMute, globalVolume, setGlobalVolume } = useAudio()
     const router = useRouter()
@@ -84,12 +99,30 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
         })
     }
 
-    const firstName = username
-    const avatarSrc = profile.avatarUrl || `https://avatar.vercel.sh/${username}`
+    const avatarSrc = profile.avatarUrl || `https://avatar.vercel.sh/${currentUsername}`
     const isDraft = hasUnpublishedChanges ?? !publishedAt
 
     return (
         <aside className="relative w-80 h-full bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 flex flex-col shadow-xl z-50 overflow-hidden">
+            <AnimatePresence mode="wait">
+                {activeTab === 'identity' ? (
+                    <motion.div
+                        key="identity-editor"
+                        initial={{ x: 320, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 320, opacity: 0 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="absolute inset-0 z-50 bg-white dark:bg-zinc-900 p-8"
+                    >
+                        <UniversalIdentityEditor 
+                            currentName={currentName || ""}
+                            currentUsername={currentUsername}
+                            onClose={() => setActiveTab('main')}
+                        />
+                    </motion.div>
+                ) : null}
+            </AnimatePresence>
+
             <div className="absolute top-6 right-6 z-20">
                 <LanguageSwitcher />
             </div>
@@ -122,7 +155,7 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                             >
                                 <img
                                     src={avatarSrc}
-                                    alt={username}
+                                    alt={currentUsername}
                                     className="w-full h-full object-cover"
                                 />
                                 {isUploading ? (
@@ -138,8 +171,10 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 leading-none mb-1.5">{t('leftSidebar.identity_protocol')}</span>
-                            <h4 className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">{firstName}</h4>
-                            <span className="text-[9px] font-medium text-blue-500/70 mt-1">studio://{username.toLowerCase()}</span>
+                            <h4 className="text-xl font-black tracking-tight text-zinc-900 dark:text-white truncate max-w-[140px]">
+                                {currentName || currentUsername}
+                            </h4>
+                            <span className="text-[9px] font-medium text-blue-500/70 mt-1">studio://{currentUsername.toLowerCase()}</span>
                         </div>
                     </div>
 
@@ -201,7 +236,7 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                         </Button>
 
                         <div className="grid grid-cols-2 gap-3">
-                            <Link href={`/${username}`} target="_blank" className="w-full">
+                            <Link href={`/${currentUsername}`} target="_blank" className="w-full">
                                 <Button
                                     variant="outline"
                                     className="w-full h-12 rounded-2xl text-[9px] font-bold uppercase tracking-widest bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm"
@@ -211,7 +246,7 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                                 </Button>
                             </Link>
                             <div className="w-full">
-                                <ShareProfileButton username={username} />
+                                <ShareProfileButton username={currentUsername} />
                             </div>
                         </div>
 
@@ -284,23 +319,25 @@ export function ActionsSidebar({ username, profile, publishedAt, hasUnpublishedC
                     </div>
                 </div>
 
+                <div className="h-[1px] w-full bg-zinc-100 dark:bg-zinc-800/50" />
+
+                {/* Configuration Section */}
                 <div className="space-y-6">
-                    <EditorHeader 
-                        title={t('leftSidebar.system_configuration')}
-                    />
-                    <div className="grid gap-3 opacity-60">
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800">
-                            <div className="p-2 rounded-xl bg-white dark:bg-zinc-800 shadow-sm">
-                                <User className="w-4 h-4 text-zinc-300" />
+                    <div className="flex flex-col gap-1 px-1">
+                        <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-600">
+                            configuration
+                        </h4>
+                    </div>
+                    <div className="grid gap-3">
+                        <button 
+                            onClick={() => setActiveTab('identity')}
+                            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all group/config"
+                        >
+                            <div className="p-2 rounded-xl bg-white dark:bg-zinc-800 shadow-sm group-hover/config:text-blue-500 transition-colors">
+                                <User className="w-4 h-4" />
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('leftSidebar.identity_registry')}</span>
-                        </div>
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800">
-                            <div className="p-2 rounded-xl bg-white dark:bg-zinc-800 shadow-sm">
-                                <Settings className="w-4 h-4 text-zinc-300" />
-                            </div>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('leftSidebar.system_ux')}</span>
-                        </div>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 group-hover/config:text-zinc-900 dark:group-hover/config:text-white transition-colors">identity</span>
+                        </button>
                     </div>
                 </div>
             </div>

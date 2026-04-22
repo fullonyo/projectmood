@@ -30,12 +30,8 @@ export async function generateMetadata({
 
     if (!user) return { title: { absolute: "404 — moodspace" } };
 
-    const displayName = user.name && user.name !== user.username 
-        ? `${user.name} (@${user.username})` 
-        : `@${user.username}`;
-
     const separator = user.isVerified ? "✦" : "—";
-    const title = `${displayName} ${separator} moodspace`;
+    const title = `@${user.username} ${separator} moodspace`;
 
     const description = `Confira o espaço criativo de @${user.username} no MoodSpace. Aesthetic moods, music & GIFs.`;
 

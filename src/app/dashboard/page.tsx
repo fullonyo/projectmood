@@ -101,6 +101,7 @@ export default async function DashboardPage() {
                 profile={profile}
                 moodBlocks={moodBlocks}
                 username={username}
+                name={user.name}
                 publishedAt={publishedAt}
                 hasUnpublishedChanges={hasUnpublishedChanges}
                 isAdmin={isAdmin}
