@@ -154,16 +154,17 @@ export function DashboardSidebar({
                             <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">{t('sidebar.header_title')}</h1>
                         </div>
 
-                        {selectedBlocks.length === 1 && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setSelectedIds([])}
-                                className="h-8 px-3 text-[10px] font-bold uppercase tracking-wider rounded-xl border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
+                        {(selectedBlocks.length === 1 || draftBlockType) && (
+                            <button
+                                onClick={() => {
+                                    setSelectedIds([])
+                                    setDraftBlockType(null)
+                                }}
+                                className="w-10 h-10 flex items-center justify-center rounded-full text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-90 group"
+                                title={t('common.close')}
                             >
-                                <ChevronLeft className="w-3.5 h-3.5 mr-1" />
-                                {t('common.close')}
-                            </Button>
+                                <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
+                            </button>
                         )}
                     </div>
                 )}
@@ -236,13 +237,6 @@ export function DashboardSidebar({
                             </div>
                         ) : (
                             <div className="space-y-6">
-                                <UniversalBackButton
-                                    onClick={() => {
-                                        setSelectedIds([])
-                                        setDraftBlockType(null)
-                                    }}
-                                />
-
                                 <BlockEditorRegistry
                                     selectedBlocks={selectedBlocks}
                                     draftBlockType={draftBlockType}

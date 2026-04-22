@@ -39,27 +39,6 @@ export const LIQUID_SHADER = `
     }
 `
 
-export const MESH_GRADIENT_SHADER = `
-    precision highp float;
-    uniform float iTime;
-    uniform vec2 iResolution;
-    uniform vec3 uColor;
-
-    void main() {
-        vec2 uv = gl_FragCoord.xy / iResolution.xy;
-        float t = iTime * 0.5;
-        
-        vec3 col1 = uColor;
-        vec3 col2 = vec3(uColor.g, uColor.b, uColor.r) * 0.8;
-        vec3 col3 = uColor * 0.3;
-        
-        float n = sin(uv.x * 3.0 + t) * cos(uv.y * 2.0 - t * 0.5);
-        vec3 finalCol = mix(col1, col2, uv.x + n * 0.2);
-        finalCol = mix(finalCol, col3, uv.y - n * 0.1);
-        
-        gl_FragColor = vec4(finalCol, max(finalCol.r, max(finalCol.g, finalCol.b)) * 0.5);
-    }
-`
 
 export const METABALLS_SHADER = `
     precision highp float;
@@ -94,28 +73,6 @@ export const METABALLS_SHADER = `
     }
 `
 
-export const HYPERSPEED_SHADER = `
-    precision highp float;
-    uniform float iTime;
-    uniform vec2 iResolution;
-    uniform vec3 uColor;
-
-    void main() {
-        vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / min(iResolution.y, iResolution.x);
-        float t = iTime * 2.0;
-        
-        float angle = atan(uv.y, uv.x);
-        float dist = length(uv);
-        
-        float s = 0.5 / (dist + 0.01);
-        float pulse = sin(s + t) * 0.5 + 0.5;
-        
-        vec3 color = uColor * pulse * dist;
-        color += uColor * 0.2 * sin(angle * 10.0 + t);
-        
-        gl_FragColor = vec4(color, dist * 0.5);
-    }
-`
 
 export const STARS_SHADER = `
     precision highp float;
@@ -145,60 +102,6 @@ export const STARS_SHADER = `
     }
 `
 
-export const RAIN_SHADER = `
-    precision highp float;
-    uniform float iTime;
-    uniform vec2 iResolution;
-
-    float hash(vec2 p) {
-        p = fract(p * vec2(123.34, 456.21));
-        p += dot(p, p + 45.32);
-        return fract(p.x * p.y);
-    }
-
-    void main() {
-        vec2 uv = gl_FragCoord.xy / iResolution.xy;
-        vec2 p = uv;
-        p.x *= iResolution.x / iResolution.y;
-        
-        float t = iTime * 0.5;
-        vec2 rainUV = p * 4.0;
-        rainUV.y += t * 0.5;
-        
-        vec2 id = floor(rainUV);
-        vec2 gv = fract(rainUV) - 0.5;
-        
-        float h = hash(id);
-        gv.y += h * 2.0;
-        
-        float drop = smoothstep(0.05, 0.0, length(gv * vec2(1.0, 0.15)));
-        float trail = smoothstep(0.03, 0.0, length(gv.x)) * smoothstep(0.5, -0.5, gv.y) * 0.5;
-        
-        vec3 col = vec3(0.05, 0.05, 0.1);
-        col += (drop + trail) * 0.2;
-        
-        gl_FragColor = vec4(col, 0.3 + drop * 0.4);
-    }
-`
-
-export const RHYTHM_SHADER = `
-    precision highp float;
-    uniform float iTime;
-    uniform vec2 iResolution;
-    uniform vec3 uColor;
-
-    void main() {
-        vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / min(iResolution.y, iResolution.x);
-        float t = iTime * 1.5;
-        
-        float dist = length(uv);
-        float wave = sin(dist * 20.0 - t) * 0.5 + 0.5;
-        wave *= exp(-dist * 2.0);
-        
-        vec3 color = uColor * wave;
-        gl_FragColor = vec4(color, wave * 0.2);
-    }
-`
 
 export const UNIVERSE_SHADER = `
     precision highp float;

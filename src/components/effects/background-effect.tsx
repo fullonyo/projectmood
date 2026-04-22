@@ -4,12 +4,8 @@ import { useEffect, useRef } from "react"
 import {
     AURORA_SHADER,
     LIQUID_SHADER,
-    MESH_GRADIENT_SHADER,
     METABALLS_SHADER,
-    HYPERSPEED_SHADER,
     STARS_SHADER,
-    RAIN_SHADER,
-    RHYTHM_SHADER,
     UNIVERSE_SHADER,
     createProgram
 } from "@/lib/shaders"
@@ -17,12 +13,8 @@ import {
 const SHADER_MAP: Record<string, string> = {
     aurora: AURORA_SHADER,
     liquid: LIQUID_SHADER,
-    'mesh-gradient': MESH_GRADIENT_SHADER,
     metaballs: METABALLS_SHADER,
-    hyperspeed: HYPERSPEED_SHADER,
     'stars': STARS_SHADER,
-    'rain': RAIN_SHADER,
-    'rhythm': RHYTHM_SHADER,
     'universe': UNIVERSE_SHADER
 }
 
