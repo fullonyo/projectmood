@@ -99,108 +99,116 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         )
     }
 
-    switch (block.type) {
-        case 'text':
-        case 'ticker':
-        case 'subtitle':
-        case 'floating':
-        case 'quote':
-        case 'moodStatus':
-        case 'mood-status':
-            return renderText()
+    const element = (() => {
+        switch (block.type) {
+            case 'text':
+            case 'ticker':
+            case 'subtitle':
+            case 'floating':
+            case 'quote':
+            case 'moodStatus':
+            case 'mood-status':
+                return renderText()
 
-        case 'photo':
-            return (
-                <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
-                    <SmartPhoto content={content} />
-                </FrameContainer>
-            )
+            case 'photo':
+                return (
+                    <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
+                        <SmartPhoto content={content} />
+                    </FrameContainer>
+                )
 
-        case 'video':
-        case 'music':
-        case 'media':
-        case 'audio':
-            return renderMedia()
+            case 'video':
+            case 'music':
+            case 'media':
+            case 'audio':
+                return renderMedia()
 
-        case 'shape':
-            return (
-                <SmartShape
-                    type={content.shapeType}
-                    color={content.color}
-                    opacity={content.opacity}
-                    blur={content.blur}
-                    sides={content.sides}
-                    points={content.points}
-                    seed={content.seed}
-                    glowIntensity={content.glowIntensity}
-                    isFloating={content.isFloating}
-                    floatSpeed={content.floatSpeed}
-                    gradient={content.gradient}
-                    gradientType={content.gradientType as any}
-                />
-            )
+            case 'shape':
+                return (
+                    <SmartShape
+                        type={content.shapeType}
+                        color={content.color}
+                        blur={content.blur}
+                        sides={content.sides}
+                        points={content.points}
+                        seed={content.seed}
+                        glowIntensity={content.glowIntensity}
+                        isFloating={content.isFloating}
+                        floatSpeed={content.floatSpeed}
+                        gradient={content.gradient}
+                        gradientType={content.gradientType as any}
+                    />
+                )
 
-        case 'rorschach':
-            return (
-                <SmartRorschach
-                    seed={content.seed}
-                    color={content.color}
-                    opacity={content.opacity}
-                    blur={content.blur}
-                    symmetry={content.symmetry}
-                    complexity={content.complexity}
-                />
-            )
-            
-        case 'gif':
-            return (
-                <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
-                    <SmartPhoto content={content} />
-                </FrameContainer>
-            )
+            case 'rorschach':
+                return (
+                    <SmartRorschach
+                        seed={content.seed}
+                        color={content.color}
+                        blur={content.blur}
+                        symmetry={content.symmetry}
+                        complexity={content.complexity}
+                    />
+                )
+                
+            case 'gif':
+                return (
+                    <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
+                        <SmartPhoto content={content} />
+                    </FrameContainer>
+                )
 
-        case 'tape':
-            return (
-                <div
-                    className="w-full h-full shadow-none border border-black/5 backdrop-blur-[2px]"
-                    style={{
-                        backgroundColor: content.color,
-                        backgroundImage: content.pattern === 'dots' ? `radial-gradient(rgba(0,0,0,0.1) ${Math.max(1, Math.round(1 * scale))}px, transparent ${Math.max(1, Math.round(1 * scale))}px)` : 'none',
-                        backgroundSize: `${Math.round(4 * scale)}px ${Math.round(4 * scale)}px`,
-                        clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 98%)'
-                    }}
-                />
-            )
+            case 'tape':
+                return (
+                    <div
+                        className="w-full h-full shadow-none border border-black/5 backdrop-blur-[2px]"
+                        style={{
+                            backgroundColor: content.color,
+                            backgroundImage: content.pattern === 'dots' ? `radial-gradient(rgba(0,0,0,0.1) ${Math.max(1, Math.round(1 * scale))}px, transparent ${Math.max(1, Math.round(1 * scale))}px)` : 'none',
+                            backgroundSize: `${Math.round(4 * scale)}px ${Math.round(4 * scale)}px`,
+                            clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 98%)'
+                        }}
+                    />
+                )
 
-        case 'weather':
-            return <SmartWeather content={content} isInsideFrame={content.frame && content.frame !== 'none'} />
+            case 'weather':
+                return <SmartWeather content={content} isInsideFrame={content.frame && content.frame !== 'none'} />
 
-        case 'doodle':
-            if (!content.image) return null;
-            return (
-                <img
-                    src={content.image}
-                    alt="doodle"
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-contain pointer-events-none drop-shadow-none transition-opacity duration-300"
-                />
-            )
+            case 'doodle':
+                if (!content.image) return null;
+                return (
+                    <img
+                        src={content.image}
+                        alt="doodle"
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-contain pointer-events-none drop-shadow-none transition-opacity duration-300"
+                    />
+                )
 
-        case 'social':
-            return <SmartSocial content={content} isPublic={isPublic} isInsideFrame={content.frame && content.frame !== 'none'} />
+            case 'social':
+                return <SmartSocial content={content} isPublic={isPublic} isInsideFrame={content.frame && content.frame !== 'none'} />
 
-        case 'guestbook':
-            return (
-                <div className="w-full h-full min-h-0 flex flex-col">
-                    <SmartGuestbook block={block} isPublic={isPublic} />
-                </div>
-            )
+            case 'guestbook':
+                return (
+                    <div className="w-full h-full min-h-0 flex flex-col">
+                        <SmartGuestbook block={block} isPublic={isPublic} />
+                    </div>
+                )
 
-        case 'countdown':
-            return <SmartCountdown content={content} />
+            case 'countdown':
+                return <SmartCountdown content={content} />
 
-        default:
-            return <div className="p-4 bg-red-500/10 text-red-500 text-[10px] uppercase font-black">Unknown Block Type: {block.type}</div>
-    }
+            default:
+                return <div className="p-4 bg-red-500/10 text-red-500 text-[10px] uppercase font-black">Unknown Block Type: {block.type}</div>
+        }
+    })()
+
+    const opacity = content.opacity ?? 1
+
+    return (
+        <div className="w-full h-full" style={{ opacity }}>
+            {element}
+        </div>
+    )
 }

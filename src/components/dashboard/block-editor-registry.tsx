@@ -15,7 +15,7 @@ import { UniversalGiphyEditor } from "./UniversalGiphyEditor"
 import { DoodlePad } from "./doodle-pad"
 import { useTranslation } from "@/i18n/context"
 import { Layout, Boxes } from "lucide-react"
-import { useMemo } from "react"
+import { useMemo, useCallback } from "react"
 
 interface BlockEditorRegistryProps {
     selectedBlocks: MoodBlock[]
@@ -41,15 +41,15 @@ export function BlockEditorRegistry({
     // Hooks moved to top to follow React Rules of Hooks
     const selectedIdsString = selectedBlocks.map(b => b.id).join(',')
     
-    const handleSingleUpdate = useMemo(() => (idOrUpdates: any, updates?: any) => {
-        const firstBlock = selectedBlocks[0]
-        if (!firstBlock) return
-        const actualId = typeof idOrUpdates === 'string' ? idOrUpdates : firstBlock.id
+    const firstBlockId = selectedBlocks[0]?.id
+    const handleSingleUpdate = useCallback((idOrUpdates: any, updates?: any) => {
+        const actualId = typeof idOrUpdates === 'string' ? idOrUpdates : firstBlockId
         const actualUpdates = typeof idOrUpdates === 'string' ? updates : idOrUpdates
+        if (!actualId) return
         onUpdateBlock(actualId, actualUpdates)
-    }, [selectedBlocks, onUpdateBlock])
+    }, [firstBlockId, onUpdateBlock])
 
-    const handleBatchUpdate = useMemo(() => (updates: any) => {
+    const handleBatchUpdate = useCallback((updates: any) => {
         onUpdateBlocks(selectedBlocks.map(b => b.id), updates)
     }, [selectedIdsString, onUpdateBlocks])
 

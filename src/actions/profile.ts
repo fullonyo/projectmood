@@ -8,8 +8,6 @@ import {
 } from "@/lib/validations";
 import { requireAuth, getUsernameById, revalidateProfile } from "@/lib/action-helpers";
 
-// ─── Profile ──────────────────────────────────────────────────────────────────
-
 export async function updateProfile(data: {
     theme?: string;
     primaryColor?: string;
@@ -44,13 +42,10 @@ export async function updateProfile(data: {
     }
 }
 
-// ─── Blocks CRUD ──────────────────────────────────────────────────────────────
-
 export async function addMoodBlock(type: string, content: any, options: { x?: number, y?: number, width?: number, height?: number } = {}) {
     try {
         const session = await requireAuth();
 
-        // Feature flag check
         const flagKey = `block_${type}`;
         const flag = await prisma.featureFlag.findUnique({ where: { key: flagKey } });
 
@@ -221,8 +216,6 @@ export async function duplicateMoodBlock(blockId: string) {
         return { error: "Erro ao duplicar bloco" };
     }
 }
-
-// ─── Bulk Operations ──────────────────────────────────────────────────────────
 
 export async function clearMoodBlocks() {
     try {

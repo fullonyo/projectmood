@@ -49,6 +49,7 @@ export const SmartShape = React.memo(({
     const containerStyle: React.CSSProperties = {
         width: '100%',
         height: '100%',
+        opacity: opacity,
         filter: blur > 0 ? `blur(${blur * fluidScale}px)` : 'none',
         transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
         display: 'flex',

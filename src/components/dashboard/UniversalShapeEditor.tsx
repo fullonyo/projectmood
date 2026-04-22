@@ -83,8 +83,16 @@ export function UniversalShapeEditor({
             glowIntensity, isFloating, floatSpeed, gradientType
         }
 
-        onUpdate(block.id, { content: updates })
-    }, [shapeType, color, opacity, blur, sides, points, blendMode, gradient, seed, glowIntensity, isFloating, floatSpeed, gradientType, block?.id, onUpdate])
+        // Deep check to prevent infinite loops: only update if something actually changed
+        const currentContent = block.content || {}
+        const hasChanged = Object.entries(updates).some(([key, value]) => {
+            return currentContent[key] !== value
+        })
+
+        if (hasChanged) {
+            onUpdate(block.id, { content: updates })
+        }
+    }, [shapeType, color, opacity, blur, sides, points, blendMode, gradient, seed, glowIntensity, isFloating, floatSpeed, gradientType, block?.id, onUpdate, block?.content])
 
     const handleSave = async () => {
         const finalContent = {

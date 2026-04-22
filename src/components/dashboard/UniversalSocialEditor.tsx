@@ -101,7 +101,7 @@ export function UniversalSocialEditor({
         const isGrid = layoutMode === 'bento'
         const showBg = layoutMode !== 'floating'
 
-        const content = {
+        const updates = {
             platform: selectedPlatform.id,
             url,
             label: label || selectedPlatform.label,
@@ -111,8 +111,16 @@ export function UniversalSocialEditor({
             showBg
         }
 
-        onUpdate(block.id, { content })
-    }, [selectedPlatform, url, label, subLabel, style, layoutMode, block?.id, onUpdate])
+        // Deep check to prevent infinite loops
+        const currentContent = block.content as any || {}
+        const hasChanged = Object.entries(updates).some(([key, value]) => {
+            return currentContent[key] !== value
+        })
+
+        if (hasChanged) {
+            onUpdate(block.id, { content: updates })
+        }
+    }, [selectedPlatform, url, label, subLabel, style, layoutMode, block?.id, onUpdate, block?.content])
 
     const handleAction = () => {
         if (!url && !label && !block?.id) return
