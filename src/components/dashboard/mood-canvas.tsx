@@ -1,3 +1,4 @@
+"use client"
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { deleteMoodBlock } from "@/actions/profile"

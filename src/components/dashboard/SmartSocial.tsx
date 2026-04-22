@@ -64,12 +64,15 @@ interface SocialBlockPublicProps {
         showBg?: boolean
     }
     isPublic?: boolean
+    isInsideFrame?: boolean
 }
 
-export function SmartSocial({ content, isPublic = false }: SocialBlockPublicProps) {
+export function SmartSocial({ content, isPublic = false, isInsideFrame = false }: SocialBlockPublicProps) {
     const Icon = ICONS[content.platform] || LinkIcon
     const scale = useViewportScale()
     const platformColor = PLATFORM_COLORS[content.platform] || '#ffffff'
+
+    const shouldShowBg = content.showBg !== false && !isInsideFrame
 
     return (
         <a
@@ -93,7 +96,7 @@ export function SmartSocial({ content, isPublic = false }: SocialBlockPublicProp
                 "flex items-center w-full h-full transition-all duration-300 shadow-none overflow-hidden group",
                 content.isGrid ? "justify-center" : "justify-start",
                 !isPublic && "pointer-events-none",
-                content.showBg !== false && [
+                shouldShowBg && [
                     "border border-zinc-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 rounded-2xl",
                     content.style !== 'ghost' && "backdrop-blur-md",
                     // Old Styles
@@ -109,7 +112,7 @@ export function SmartSocial({ content, isPublic = false }: SocialBlockPublicProp
                     content.style === 'retro' && "bg-[#c0c0c0] text-black border-[3px] border-t-[#ffffff] border-l-[#ffffff] border-b-[#808080] border-r-[#808080] !rounded-none hover:border-t-[#808080] hover:border-l-[#808080] hover:border-b-[#ffffff] hover:border-r-[#ffffff] active:bg-[#a0a0a0]",
                     content.style === 'aura' && "text-white border border-white/10 !rounded-xl transition-shadow hover:shadow-[0_0_20px_var(--aura-color)] hover:border-[var(--aura-color)]",
                 ],
-                content.showBg === false && [
+                !shouldShowBg && [
                     "bg-transparent border-transparent text-current",
                     content.style === 'tag' && "font-serif italic hover:translate-x-1",
                     content.style === 'glass' && "hover:scale-[1.05] hover:opacity-80",
@@ -129,16 +132,16 @@ export function SmartSocial({ content, isPublic = false }: SocialBlockPublicProp
             style={{
                 gap: content.isGrid ? 0 : Math.round(20 * scale),
                 padding: content.isGrid ? `${Math.round(16 * scale)}px` : `${Math.round(8 * scale)}px ${Math.round(16 * scale)}px`,
-                borderLeftWidth: content.style === 'tag' && !content.isGrid && content.showBg !== false ? Math.round(6 * scale) : undefined,
+                borderLeftWidth: content.style === 'tag' && !content.isGrid && shouldShowBg ? Math.round(6 * scale) : undefined,
                 borderRadius: content.style === 'tag' ? Math.round(2 * scale) : undefined,
                 // Pass dynamic color for Social Aura hover effect
                 '--aura-color': platformColor,
-                backgroundColor: content.style === 'aura' && content.showBg !== false ? `color-mix(in srgb, ${platformColor} 5%, #09090b)` : undefined,
+                backgroundColor: content.style === 'aura' && shouldShowBg ? `color-mix(in srgb, ${platformColor} 5%, #09090b)` : undefined,
             } as React.CSSProperties}
         >
             <div className={cn(
                 "flex items-center justify-center shrink-0 transition-transform group-hover:scale-110",
-                content.showBg !== false && [
+                shouldShowBg && [
                     content.style === 'minimal' && "bg-transparent text-current !rounded-none",
                     content.style === 'pill' && "bg-zinc-100 dark:bg-white/10 !rounded-full",
                     content.style === 'ghost' && "bg-transparent",

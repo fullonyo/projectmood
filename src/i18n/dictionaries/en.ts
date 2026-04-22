@@ -388,6 +388,7 @@ export const en: Dictionary = {
         },
         countdown: {
             title: "Countdown",
+            subtitle: "Mark special moments in time",
             label: "When is it for?",
             placeholder: "My birthday...",
             target: "Marked date",

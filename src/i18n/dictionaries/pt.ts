@@ -388,6 +388,7 @@ export const pt = {
         },
         countdown: {
             title: "Contagem regressiva",
+            subtitle: "Marque momentos especiais no tempo",
             label: "Para quando é?",
             placeholder: "Meu aniversário...",
             target: "Data marcada",

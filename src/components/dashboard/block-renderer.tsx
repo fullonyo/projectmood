@@ -173,7 +173,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
             )
 
         case 'weather':
-            return <SmartWeather content={content} />
+            return <SmartWeather content={content} isInsideFrame={content.frame && content.frame !== 'none'} />
 
         case 'doodle':
             return (
@@ -185,7 +185,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
             )
 
         case 'social':
-            return <SmartSocial content={content} isPublic={isPublic} />
+            return <SmartSocial content={content} isPublic={isPublic} isInsideFrame={content.frame && content.frame !== 'none'} />
 
         case 'guestbook':
             return (

@@ -330,20 +330,26 @@ export function SmartMedia({
     }, [isPlaying, localLyricsDisplay, lyricsMode, setActiveLyrics])
 
     const renderLyricsOverlay = (mode: 'audio' | 'overlay' = 'overlay') => {
-        if (localLyricsDisplay === 'fullscreen' || lyricsMode === 'fullscreen') return mode === 'audio' ? <div className="h-6 mb-4" /> : null
-        if (!currentLyric) return mode === 'audio' ? <div className="h-6 mb-4" /> : null
+        if (localLyricsDisplay === 'fullscreen' || lyricsMode === 'fullscreen') return mode === 'audio' ? <div style={{ height: Math.round(24 * scale), marginBottom: Math.round(16 * scale) }} /> : null
+        if (!currentLyric) return mode === 'audio' ? <div style={{ height: Math.round(24 * scale), marginBottom: Math.round(16 * scale) }} /> : null
 
         const content = (
-            <div className="flex flex-col items-center gap-1.5 backdrop-blur-md bg-white/5 dark:bg-black/20 p-2 rounded-xl border border-white/10 shadow-lg">
-                <span className="text-[7px] font-black tracking-[0.4em] opacity-50 uppercase text-rose-500">Lyrics • Live</span>
+            <div 
+                className="flex flex-col items-center backdrop-blur-md bg-white/5 dark:bg-black/20 rounded-xl border border-white/10 shadow-lg overflow-hidden"
+                style={{
+                    padding: Math.round(8 * scale),
+                    gap: Math.round(6 * scale)
+                }}
+            >
+                <span className="font-black tracking-[0.4em] opacity-50 uppercase text-rose-500" style={{ fontSize: Math.max(6, Math.round(7 * scale)) }}>Lyrics • Live</span>
                 <motion.p
                     key={currentLyric}
                     initial={{ opacity: 0, y: 8, filter: 'blur(8px)' }}
                     animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                     className="font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white leading-tight max-w-[95%] text-center px-4"
                     style={{
-                        fontSize: Math.max(10, Math.round(16 * scale * 0.8)),
-                        textShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                        fontSize: Math.max(10, Math.round(18 * scale)),
+                        textShadow: `0 ${Math.round(4 * scale)}px ${Math.round(12 * scale)}px rgba(0,0,0,0.3)`
                     }}
                 >
                     {currentLyric}
@@ -352,14 +358,28 @@ export function SmartMedia({
         )
 
         return mode === 'audio' 
-            ? <div className="w-full py-2 z-30 pointer-events-none flex justify-center mb-4">{content}</div>
+            ? <div className="w-full z-30 pointer-events-none flex justify-center" style={{ padding: `${Math.round(8 * scale)}px 0`, marginBottom: Math.round(16 * scale) }}>{content}</div>
             : <div className="absolute inset-x-0 bottom-[15%] flex flex-col items-center justify-center z-30 pointer-events-none px-6 text-center">{content}</div>
     }
 
     const renderHUDMarkings = () => (
         <div className="absolute inset-0 pointer-events-none z-20">
-            <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-zinc-900/10 dark:border-white/10 m-5 opacity-40 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-zinc-900/10 dark:border-white/10 m-5 opacity-40 group-hover:opacity-100 transition-opacity duration-500" />
+            <div 
+                className="absolute top-0 right-0 border-t-2 border-r-2 border-zinc-900/10 dark:border-white/10 opacity-40 group-hover:opacity-100 transition-opacity duration-500" 
+                style={{ 
+                    width: Math.round(24 * scale), 
+                    height: Math.round(24 * scale),
+                    margin: Math.round(20 * scale) 
+                }} 
+            />
+            <div 
+                className="absolute bottom-0 left-0 border-b-2 border-l-2 border-zinc-900/10 dark:border-white/10 opacity-40 group-hover:opacity-100 transition-opacity duration-500" 
+                style={{ 
+                    width: Math.round(24 * scale), 
+                    height: Math.round(24 * scale),
+                    margin: Math.round(20 * scale) 
+                }} 
+            />
         </div>
     )
 

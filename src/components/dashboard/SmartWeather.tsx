@@ -22,14 +22,16 @@ interface WeatherBlockPublicProps {
         temp?: number | string
         opacity?: number
         blendMode?: string
+        frame?: string
     }
+    isInsideFrame?: boolean
 }
 
 /**
  * WeatherBlockPublic - Padronizado com Studio FUS 💎
  * Utiliza o hook universal useStudioBlock para redimensionamento fluido.
  */
-export const SmartWeather = memo(({ content }: WeatherBlockPublicProps) => {
+export const SmartWeather = memo(({ content, isInsideFrame = false }: WeatherBlockPublicProps) => {
     const { t } = useTranslation()
     const { ref, isHorizontal, isSmall, fluidScale, viewportScale } = useStudioBlock()
 
@@ -45,11 +47,14 @@ export const SmartWeather = memo(({ content }: WeatherBlockPublicProps) => {
     const displayVibe = content.vibe || '...'
     const displayTemp = content.temp !== undefined ? content.temp : '--'
 
+    const shouldShowBg = !isInsideFrame
+
     return (
         <div
             ref={ref}
             className={cn(
-                "w-full h-full bg-white dark:bg-zinc-950/80 backdrop-blur-xl border border-zinc-100 dark:border-zinc-800 rounded-3xl shadow-xl flex items-center justify-center group hover:scale-[1.02] transition-all duration-700 relative overflow-hidden text-zinc-900 dark:text-zinc-100",
+                "w-full h-full flex items-center justify-center group transition-all duration-700 relative overflow-hidden text-zinc-900 dark:text-zinc-100",
+                shouldShowBg && "bg-white dark:bg-zinc-950/80 backdrop-blur-xl border border-zinc-100 dark:border-zinc-800 rounded-3xl shadow-xl hover:scale-[1.02]",
                 isHorizontal ? "flex-row text-left px-[10%]" : "flex-col text-center"
             )}
             style={{

@@ -72,7 +72,7 @@ export function FrameContainer({
     }
 
     return (
-        <div className={cn("w-full h-full flex flex-col group", className)} style={getFrameStyles()}>
+        <div className={cn("w-full h-full flex flex-col group overflow-hidden", className)} style={getFrameStyles()}>
             <div className={cn(
                 "relative w-full h-full flex-1 flex flex-col transition-all duration-500",
                 getFrameClass()
@@ -83,7 +83,10 @@ export function FrameContainer({
 
                 {caption && (frame === 'polaroid' || frame === 'polaroid-dark') && (
                     <div className="absolute text-center pointer-events-none w-full" style={{ bottom: Math.round(12 * scale) }}>
-                        <p className="font-black uppercase tracking-widest text-zinc-500 truncate px-4" style={{ fontSize: Math.round(10 * scale) }}>
+                        <p className={cn(
+                            "font-black uppercase tracking-widest truncate px-4",
+                            frame === 'polaroid-dark' ? "text-zinc-400" : "text-zinc-500"
+                        )} style={{ fontSize: Math.round(10 * scale) }}>
                             {caption}
                         </p>
                     </div>

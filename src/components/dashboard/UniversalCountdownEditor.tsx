@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { Calendar, Gift, Cake, Rocket, Heart, Hourglass, Sparkles, PartyPopper, Activity, Timer } from "lucide-react"
+import { Calendar, Gift, Cake, Rocket, Heart, Hourglass, Sparkles, PartyPopper, Box, CircleDashed, Timer } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
 import { MoodBlock, CountdownContent } from "@/types/database"
 import { EditorHeader, EditorSection, GridSelector, EditorActionButton } from "./EditorUI"
@@ -32,7 +32,7 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
     const [title, setTitle] = useState(defaultContent.title || "")
     const [targetDate, setTargetDate] = useState(defaultContent.targetDate || "")
     const [emoji, setEmoji] = useState(defaultContent.emoji || "PartyPopper")
-    const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>(defaultContent.style || 'minimal')
+    const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>(() => (defaultContent.style as any) || 'minimal')
     const [isPending, setIsPending] = useState(false)
 
     // Manual update to avoid useEffect loops
@@ -81,11 +81,15 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
             />
 
             <EditorSection title="Configuração">
-                <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-4">
+                <div className="space-y-6 px-1">
                     <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">O que estamos esperando?</Label>
-                        <div className="relative">
-                            <Timer className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">
+                            {t('editors.countdown.label') || "O que estamos esperando?"}
+                        </Label>
+                        <div className="relative group">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center transition-all group-focus-within:scale-110 group-focus-within:text-blue-500">
+                                <Timer className="w-4 h-4" />
+                            </div>
                             <Input
                                 value={title}
                                 onChange={(e) => {
@@ -94,14 +98,18 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                                 }}
                                 placeholder={t('editors.countdown.placeholder')}
                                 maxLength={50}
-                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-base font-medium"
+                                className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl pl-16 h-14 text-[13px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20"
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-1">Data e Hora Alvo</Label>
-                        <div className="relative">
-                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">
+                            {t('editors.countdown.target') || "Data e Hora Alvo"}
+                        </Label>
+                        <div className="relative group">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center transition-all group-focus-within:scale-110 group-focus-within:text-blue-500">
+                                <Calendar className="w-4 h-4" />
+                            </div>
                             <Input
                                 type="datetime-local"
                                 value={targetDate}
@@ -109,7 +117,7 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                                     setTargetDate(e.target.value)
                                     triggerUpdate({ targetDate: e.target.value })
                                 }}
-                                className="bg-zinc-50 dark:bg-zinc-800 border-none rounded-xl pl-12 h-12 text-base font-medium uppercase"
+                                className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl pl-16 h-14 text-[13px] font-medium uppercase focus-visible:ring-1 focus-visible:ring-blue-500/20"
                             />
                         </div>
                     </div>
@@ -125,22 +133,26 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                         triggerUpdate({ emoji: id as string })
                     }}
                     columns={4}
+                    variant="ghost"
+                    id="countdown-icons"
                 />
             </EditorSection>
 
             <EditorSection title="Estilo Visual">
                 <GridSelector
                     options={[
-                        { id: 'minimal', label: 'Minimal', icon: Activity },
-                        { id: 'bold', label: 'Bold', icon: Activity },
-                        { id: 'neon', label: 'Neon', icon: Activity },
+                        { id: 'minimal', label: 'Minimal', icon: CircleDashed },
+                        { id: 'bold', label: 'Bold', icon: Box },
+                        { id: 'neon', label: 'Neon', icon: Sparkles },
                     ]}
                     activeId={style as any}
                     onChange={(id) => {
                         setStyle(id as any)
                         triggerUpdate({ style: id as any })
                     }}
-                    columns={3}
+                    columns={4}
+                    variant="ghost"
+                    id="countdown-styles"
                 />
             </EditorSection>
 

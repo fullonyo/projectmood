@@ -46,68 +46,66 @@ export function SmartCountdown({ content }: CountdownBlockPublicProps) {
     }, [targetDate])
 
     return (
-        <div ref={ref} className="w-full h-full flex flex-col items-center justify-center p-[5%]" style={{ gap: Math.round(16 * fluidScale) }}>
-            <div className={cn(
-                "shadow-xl text-center flex flex-col items-center justify-center transition-all duration-500",
-                style === 'neon' && "bg-black shadow-pink-500/20",
-                style === 'bold' && "bg-white dark:bg-zinc-900 border-zinc-900 dark:border-white text-zinc-900 dark:text-white shadow-2xl",
-                style === 'minimal' && "bg-white dark:bg-zinc-950/50 backdrop-blur-xl border-zinc-100 dark:border-zinc-800 shadow-xl"
-            )} style={{
-                width: '100%',
-                height: '100%',
-                padding: Math.round(24 * fluidScale),
-                gap: Math.round(20 * fluidScale),
-                borderWidth: style === 'neon' ? Math.round(2 * fluidScale) : style === 'bold' ? Math.round(4 * fluidScale) : Math.round(1 * fluidScale),
-                borderColor: style === 'neon' ? '#ec4899' : undefined,
-                borderStyle: 'solid',
-                borderRadius: Math.round(24 * fluidScale)
-            }}>
-                {Icon && (
-                    <div className={cn(
-                        "flex justify-center shrink-0",
-                        style === 'neon' ? "text-pink-500 animate-pulse" : "text-current"
-                    )}>
-                        <Icon strokeWidth={1.5} style={{ width: Math.round(48 * fluidScale), height: Math.round(48 * fluidScale) }} />
-                    </div>
-                )}
+        <div ref={ref} className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden text-zinc-900 dark:text-zinc-100" style={{ 
+            padding: Math.round(16 * fluidScale),
+            gap: Math.round(12 * fluidScale) 
+        }}>
+            {Icon && (
+                <div className={cn(
+                    "flex justify-center shrink-0 mb-2",
+                    style === 'neon' ? "text-pink-500 animate-pulse" : "text-current"
+                )}>
+                    <Icon 
+                        strokeWidth={style === 'bold' ? 2.5 : 1.5} 
+                        style={{ 
+                            width: Math.round(42 * fluidScale), 
+                            height: Math.round(42 * fluidScale),
+                            filter: style === 'neon' ? 'drop-shadow(0 0 10px rgba(236,72,153,0.4))' : 'none'
+                        }} 
+                    />
+                </div>
+            )}
 
-                <h3 className={cn(
-                    "font-black uppercase tracking-widest leading-tight line-clamp-1",
-                    style === 'bold' ? "" : "opacity-60",
-                )} style={{ fontSize: Math.round((style === 'bold' ? 24 : 12) * fluidScale) }}>
-                    {title}
-                </h3>
+            <h3 className={cn(
+                "font-black uppercase tracking-[0.3em] leading-tight line-clamp-1 text-center",
+                style === 'bold' ? "opacity-100" : "opacity-40",
+            )} style={{ fontSize: Math.round(10 * fluidScale) }}>
+                {title}
+            </h3>
 
-                {timeLeft.finished ? (
-                    <div className={cn(
-                        "font-black uppercase tracking-tighter italic",
-                        style === 'neon' && "text-pink-400"
-                    )} style={{ fontSize: Math.round(24 * fluidScale) }}>
-                        O Momento Chegou
-                    </div>
-                ) : (
-                    <div className="flex justify-center items-center w-full grow min-h-0" style={{ gap: Math.round(12 * fluidScale) }}>
-                        {[
-                            { value: timeLeft.days, label: 'Dias' },
-                            { value: timeLeft.hours, label: 'Hrs' },
-                            { value: timeLeft.minutes, label: 'Min' },
-                            { value: timeLeft.seconds, label: 'Seg' }
-                        ].map((item, idx) => (
-                            <div key={idx} className="flex flex-col items-center flex-1" style={{ gap: Math.round(2 * fluidScale) }}>
-                                <div suppressHydrationWarning className={cn(
-                                    "font-black tabular-nums tracking-tighter leading-none",
-                                    style === 'neon' && "text-pink-400",
-                                )} style={{ fontSize: Math.round(28 * fluidScale) }}>
-                                    {String(item.value).padStart(2, '0')}
-                                </div>
-                                <div className="font-bold uppercase tracking-widest opacity-40 whitespace-nowrap" style={{ fontSize: Math.round(7 * fluidScale) }}>
-                                    {item.label}
-                                </div>
+            {timeLeft.finished ? (
+                <div className={cn(
+                    "font-black uppercase tracking-tighter italic text-center",
+                    style === 'neon' ? "text-pink-400" : "text-current"
+                )} style={{ fontSize: Math.round(20 * fluidScale) }}>
+                    O Momento Chegou
+                </div>
+            ) : (
+                <div className="flex justify-center items-center w-full grow min-h-0" style={{ gap: Math.round(16 * fluidScale) }}>
+                    {[
+                        { value: timeLeft.days, label: 'Dias' },
+                        { value: timeLeft.hours, label: 'Hrs' },
+                        { value: timeLeft.minutes, label: 'Min' },
+                        { value: timeLeft.seconds, label: 'Seg' }
+                    ].map((item, idx) => (
+                        <div key={idx} className="flex flex-col items-center flex-1" style={{ gap: Math.round(4 * fluidScale) }}>
+                            <div suppressHydrationWarning className={cn(
+                                "font-black tabular-nums tracking-tighter leading-none",
+                                style === 'neon' ? "text-pink-400" : "text-current",
+                                style === 'bold' && "scale-110"
+                            )} style={{ 
+                                fontSize: Math.round(32 * fluidScale),
+                                textShadow: style === 'neon' ? '0 0 15px rgba(236,72,153,0.3)' : 'none'
+                            }}>
+                                {String(item.value).padStart(2, '0')}
                             </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                            <div className="font-bold uppercase tracking-[0.2em] opacity-30 whitespace-nowrap" style={{ fontSize: Math.round(7 * fluidScale) }}>
+                                {item.label}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div >
     )
 }

@@ -115,6 +115,22 @@ O MoodSpace utiliza um motor de precisão para manipulação de blocos:
     - **Distinção Crítica**: Não confundir `Mídia Universal` com `Coleção de Mídia`.
 - **Limpeza de Base**: 14 arquivos obsoletos (editores e blocos públicos individuais) foram removidos em favor desta arquitetura modular de texto e mídia.
 
+### Arquitetura de UI Premium (Studio 2.1) 🕹️💎
+Para elevar o nível de sofisticação e reduzir a carga cognitiva, o Studio 2.1 adota padrões de design ultra-minimalistas:
+
+- **Premium Ghost Pattern (Sidebar/Editors)**:
+    - **Filosofia**: Ícones puros são os protagonistas. Remova molduras (círculos/cards) e títulos quando o símbolo for autoexplicativo (ex: redes sociais, emojis de countdown, estilos visuais).
+    - **GridSelector**: Utilize `variant="ghost"` no componente `GridSelector`.
+    - **Escala**: Os ícones devem ser proeminentes (`w-8 h-8` ou 32px) para compensar a ausência de moldura.
+    - **Indicador Ativo**: Use o ponto flutuante centralizado na base (`ghost-active`) via `framer-motion` para sinalizar a seleção de forma sutil.
+    - **Cromatismo**: O estado ativo deve respeitar a cor da marca (brand color) se disponível, reforçando a identidade da plataforma sem poluir o layout.
+
+- **Frame Awareness (Consciência de Moldura)**:
+    - **Objetivo**: Evitar o erro estético de "Bordas Duplas".
+    - **Lógica**: Blocos utilitários (`Social`, `Weather`, `Countdown`) devem aceitar a prop `isInsideFrame`.
+    - **Comportamento**: Se `isInsideFrame` for verdadeiro (detectado via `BlockRenderer` ao verificar se há um `FrameContainer` ativo), o bloco deve remover automaticamente seus próprios `background`, `border`, `shadow` e `borderRadius`.
+    - **Resultado**: O bloco se "funde" à moldura escolhida (Polaroid, Glass, etc.), herdando sua estética de forma limpa e profissional.
+
 ### Experiência Pública & Autoplay
 - O `ExperienceOverlay.tsx` captura a interação inicial do usuário para desbloquear o som.
 - Players de YouTube e Spotify reagem ao estado `hasInteracted` para iniciar com áudio.

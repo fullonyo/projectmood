@@ -1,12 +1,13 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Palette, Zap } from "lucide-react"
+import { Palette, X } from "lucide-react"
+import { useState } from "react"
 
 interface EditorHeaderProps {
     title: string
@@ -16,109 +17,91 @@ interface EditorHeaderProps {
 
 export function EditorHeader({ title, subtitle, onClose }: EditorHeaderProps) {
     return (
-        <header className="px-1 space-y-1.5 mb-8 relative flex items-start justify-between">
-            <div className="space-y-1.5 flex-1 pr-8">
-                <h3 className="text-[13px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider leading-tight">{title}</h3>
-                {subtitle && <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">{subtitle}</p>}
+        <div className="relative mb-8 pt-2">
+            <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                    <h2 className="text-4xl font-black uppercase tracking-tighter leading-none text-zinc-900 dark:text-white">
+                        {title}
+                    </h2>
+                    {subtitle && (
+                        <p className="text-sm text-zinc-500 font-mono lowercase opacity-70">
+                            {subtitle}
+                        </p>
+                    )}
+                </div>
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                )}
             </div>
-            {onClose && (
-                <button 
-                    onClick={onClose}
-                    className="p-2 -mr-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors group"
-                >
-                    <div className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                    </div>
-                </button>
-            )}
-        </header>
+            <div className="h-[1px] w-full bg-gradient-to-r from-zinc-200 dark:from-zinc-800 to-transparent mt-6" />
+        </div>
     )
 }
 
 interface EditorSectionProps {
-    title?: string
-    subtitle?: string
+    title: string
     children: React.ReactNode
-    className?: string
+    description?: string
 }
 
-export function EditorSection({ title, subtitle, children, className }: EditorSectionProps) {
+export function EditorSection({ title, children, description }: EditorSectionProps) {
     return (
-        <section className={cn("space-y-4", className)}>
-            {(title || subtitle) && (
-                <header className="px-1 space-y-1">
-                    {title && <h4 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">{title}</h4>}
-                    {subtitle && <p className="text-[9px] text-zinc-400 font-medium leading-relaxed">{subtitle}</p>}
-                </header>
-            )}
+        <div className="space-y-4">
+            <div className="flex flex-col gap-1 px-1">
+                <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-600">
+                    {title}
+                </h4>
+                {description && (
+                    <p className="text-[10px] text-zinc-400/60 font-medium leading-relaxed">
+                        {description}
+                    </p>
+                )}
+            </div>
             {children}
-        </section>
+        </div>
     )
 }
 
 interface PillSelectorProps<T> {
-    options: { id: T; label: string; icon?: any }[]
+    options: { id: T, label: string, icon?: any }[]
     activeId: T
     onChange: (id: T) => void
-    columns?: number
-    variant?: 'grid' | 'scroll'
+    variant?: 'standard' | 'scroll'
 }
 
-export function PillSelector<T extends string>({ 
-    options, 
-    activeId, 
-    onChange, 
-    columns = 3,
-    variant = 'grid'
-}: PillSelectorProps<T>) {
-    if (variant === 'scroll') {
-        return (
-            <div className="flex gap-2 overflow-x-auto pb-2 px-1 custom-scrollbar snap-x">
-                {options.map((opt) => {
-                    const isActive = activeId === opt.id
-                    return (
-                        <button
-                            key={opt.id}
-                            onClick={() => onChange(opt.id)}
-                            className={cn(
-                                "px-5 py-2.5 rounded-xl border text-[9px] font-bold uppercase tracking-wider snap-start shrink-0 transition-all",
-                                isActive
-                                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm"
-                                    : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700"
-                            )}
-                        >
-                            {opt.label}
-                        </button>
-                    )
-                })}
-            </div>
-        )
-    }
-
+export function PillSelector<T extends string>({ options, activeId, onChange, variant = 'standard' }: PillSelectorProps<T>) {
     return (
         <div className={cn(
-            "p-1 bg-zinc-100 dark:bg-zinc-900 rounded-2xl grid gap-1",
-            columns === 2 ? "grid-cols-2" : columns === 3 ? "grid-cols-3" : columns === 4 ? "grid-cols-4" : columns === 6 ? "grid-cols-6" : "grid-cols-3"
+            "flex p-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl",
+            variant === 'scroll' ? "overflow-x-auto no-scrollbar" : "w-full"
         )}>
             {options.map((opt) => {
+                const active = activeId === opt.id
                 const Icon = opt.icon
-                const isActive = activeId === opt.id
                 return (
                     <button
                         key={opt.id}
                         onClick={() => onChange(opt.id)}
                         className={cn(
-                            "flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all relative group",
-                            isActive
-                                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-black/5"
-                                : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                            "relative flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                            active ? "text-zinc-900 dark:text-white" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300",
+                            variant === 'scroll' && "flex-none"
                         )}
                     >
-                        {Icon && <Icon className={cn("w-4 h-4 mb-1.5 transition-transform", isActive && "scale-110")} />}
-                        <span className={cn("text-[8px] font-bold uppercase tracking-tight text-center truncate w-full whitespace-nowrap px-1 leading-tight")}>
+                        {active && (
+                            <motion.div
+                                layoutId="pill-active"
+                                className="absolute inset-0 bg-white dark:bg-zinc-800 shadow-sm rounded-xl border border-black/5 dark:border-white/5"
+                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                            />
+                        )}
+                        <span className="relative z-10 flex items-center gap-2">
+                            {Icon && <Icon className="w-3.5 h-3.5" />}
                             {opt.label}
                         </span>
                     </button>
@@ -129,15 +112,17 @@ export function PillSelector<T extends string>({
 }
 
 interface GridSelectorProps<T> {
-    options: { id: T; label?: string; icon?: any; color?: string }[]
+    options: { id: T, label: string, icon: any, color?: string }[]
     activeId: T | T[]
     onChange: (id: T) => void
     columns?: number
-    variant?: 'circle' | 'card'
+    variant?: 'circle' | 'card' | 'ghost'
+    id?: string
 }
 
-export function GridSelector<T extends string>({ options, activeId, onChange, columns = 4, variant = 'card' }: GridSelectorProps<T>) {
+export function GridSelector<T extends string>({ options, activeId, onChange, columns = 4, variant = 'card', id = 'default' }: GridSelectorProps<T>) {
     const isSelected = (id: T) => Array.isArray(activeId) ? activeId.includes(id) : activeId === id
+    const [hoveredId, setHoveredId] = useState<string | null>(null)
 
     return (
         <div className={cn(
@@ -147,6 +132,47 @@ export function GridSelector<T extends string>({ options, activeId, onChange, co
             {options.map((opt) => {
                 const Icon = opt.icon
                 const active = isSelected(opt.id)
+
+                if (variant === 'ghost') {
+                    return (
+                        <div key={opt.id} className="relative flex items-center justify-center">
+                            <button
+                                onClick={() => onChange(opt.id)}
+                                onMouseEnter={() => setHoveredId(opt.id)}
+                                onMouseLeave={() => setHoveredId(null)}
+                                className={cn(
+                                    "flex items-center justify-center p-4 transition-all relative group",
+                                    active ? "scale-110" : "hover:scale-105 opacity-40 hover:opacity-100"
+                                )}
+                            >
+                                {Icon && <Icon 
+                                    className={cn("w-8 h-8 transition-colors", !active && "text-zinc-400")} 
+                                    style={active ? { color: opt.color || '#3b82f6' } : {}}
+                                />}
+                                {active && (
+                                    <motion.div 
+                                        layoutId={`${id}-active`}
+                                        className="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-blue-500" 
+                                    />
+                                )}
+                            </button>
+
+                            <AnimatePresence>
+                                {hoveredId === opt.id && opt.label && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: -45, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className="absolute z-50 pointer-events-none whitespace-nowrap bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-[9px] font-black uppercase tracking-widest py-1.5 px-3 rounded-lg shadow-xl border border-white/10"
+                                    >
+                                        {opt.label}
+                                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-zinc-900 dark:bg-white rotate-45" />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    )
+                }
 
                 if (variant === 'circle') {
                     return (

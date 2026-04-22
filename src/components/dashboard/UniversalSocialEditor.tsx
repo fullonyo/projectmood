@@ -181,14 +181,15 @@ export function UniversalSocialEditor({
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <EditorSection title={t('editors.social.nodes') || "Plataforma"}>
                         <GridSelector
-                            options={PLATFORMS.map(p => ({ id: p.id as any, label: '', icon: p.icon, color: p.color }))}
+                            options={PLATFORMS.map(p => ({ id: p.id as any, label: p.label, icon: p.icon, color: p.color }))}
                             activeId={selectedPlatform.id as any}
                             onChange={(id) => {
                                 const p = PLATFORMS.find(platform => platform.id === id)
                                 if (p) setSelectedPlatform(p)
                             }}
                             columns={5}
-                            variant="circle"
+                            variant="ghost"
+                            id="social-platforms"
                         />
                     </EditorSection>
 

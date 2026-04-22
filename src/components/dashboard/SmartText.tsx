@@ -75,7 +75,13 @@ export function SmartText({
         // Guard: If speed is too low (likely from typewriter behavior), use a sane default
         const tickerDuration = speed < 1 ? 20 : speed
         return (
-            <div className="w-full h-full flex flex-col justify-center overflow-hidden">
+            <div 
+                className="w-full h-full flex flex-col justify-center overflow-hidden"
+                style={{
+                    maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+                    WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)'
+                }}
+            >
                 <motion.div
                     animate={{
                         x: direction === 'right' ? ["-50%", "0%"] : ["0%", "-50%"]
