@@ -10,7 +10,14 @@ import {
     Type, 
     Layers, 
     Feather, 
-    X 
+    X,
+    Square,
+    CloudFog,
+    Grid3x3,
+    Rows,
+    Hash,
+    FileText,
+    CircleDashed
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
@@ -38,14 +45,14 @@ export function UniversalThemeEditor({ currentTheme, currentPrimaryColor, curren
     }
 
     const textures = [
-        { id: 'none', name: t('editors.theme.textures.none'), icon: Palette },
-        { id: 'noise', name: t('editors.theme.textures.noise'), icon: Sparkles },
-        { id: 'dots', name: t('editors.theme.textures.dots'), icon: Layout },
-        { id: 'lines', name: t('editors.theme.textures.lines'), icon: Scroll },
-        { id: 'cross', name: t('editors.theme.textures.cross'), icon: Type },
-        { id: 'museum-paper', name: t('editors.theme.textures.museum_paper'), icon: Scroll },
+        { id: 'none', name: t('editors.theme.textures.none'), icon: Square },
+        { id: 'noise', name: t('editors.theme.textures.noise'), icon: CloudFog },
+        { id: 'dots', name: t('editors.theme.textures.dots'), icon: Grid3x3 },
+        { id: 'lines', name: t('editors.theme.textures.lines'), icon: Rows },
+        { id: 'cross', name: t('editors.theme.textures.cross'), icon: Hash },
+        { id: 'museum-paper', name: t('editors.theme.textures.museum_paper'), icon: FileText },
         { id: 'raw-canvas', name: t('editors.theme.textures.raw_canvas'), icon: Layers },
-        { id: 'fine-sand', name: t('editors.theme.textures.fine_sand'), icon: Feather },
+        { id: 'fine-sand', name: t('editors.theme.textures.fine_sand'), icon: CircleDashed },
     ]
 
     return (
@@ -82,49 +89,46 @@ export function UniversalThemeEditor({ currentTheme, currentPrimaryColor, curren
 
             <EditorSection title={t('editors.theme.textures_title')}>
                 <GridSelector
+                    id="theme-textures"
                     options={textures.map(tInfo => ({ id: tInfo.id as any, label: tInfo.name, icon: tInfo.icon }))}
                     activeId={currentStaticTexture || 'none'}
                     onChange={(id) => handleUpdate({ staticTexture: id })}
                     columns={4}
+                    variant="ghost"
                 />
             </EditorSection>
 
             <EditorSection title={t('editors.theme.node_luminance')}>
-                <div className="flex flex-col gap-6">
-                    <div className="flex flex-wrap gap-3 px-1">
-                        {['#000000', '#FFFFFF', '#A3A3A3', '#F87171', '#34D399', '#60A5FA', '#E879F9', '#FBBF24', '#8B5CF6'].map(color => (
-                            <button
-                                key={color}
-                                onClick={() => handleUpdate({ primaryColor: color })}
-                                disabled={isPending}
-                                className={cn(
-                                    "w-10 h-10 rounded-full border-2 transition-all relative group shadow-sm",
-                                    currentPrimaryColor === color
-                                        ? "border-blue-500 scale-110 ring-4 ring-blue-500/10"
-                                        : "border-white dark:border-zinc-800 hover:scale-110"
-                                )}
-                                style={{ backgroundColor: color }}
-                            >
-                                <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-10 bg-white" />
-                            </button>
-                        ))}
-                    </div>
+                <div className="flex flex-col gap-10">
+                    <GridSelector
+                        id="primary-color"
+                        options={['#000000', '#FFFFFF', '#A3A3A3', '#F87171', '#34D399', '#60A5FA', '#E879F9', '#FBBF24', '#8B5CF6'].map(color => ({
+                            id: color,
+                            label: color === '#000000' ? 'Black' : color === '#FFFFFF' ? 'White' : 'Mood Color',
+                            icon: undefined,
+                            color: color
+                        }))}
+                        activeId={currentPrimaryColor}
+                        onChange={(id) => handleUpdate({ primaryColor: id })}
+                        columns={7}
+                        variant="circle"
+                    />
 
                     <button
                         onClick={() => setShowExtractor(!showExtractor)}
                         className={cn(
-                            "flex items-center justify-center gap-3 w-full h-12 rounded-2xl transition-all text-[9px] font-bold uppercase tracking-[0.2em] border",
+                            "flex items-center justify-center gap-3 w-full h-14 rounded-3xl transition-all text-[10px] font-black uppercase tracking-[0.3em] border",
                             showExtractor
-                                ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20"
-                                : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                                ? "bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-500/20"
+                                : "bg-zinc-50 dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                         )}
                     >
-                        {showExtractor ? <X className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+                        {showExtractor ? <X className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                         {showExtractor ? 'Fechar Smart Color' : 'Smart Color Extractor'}
                     </button>
 
                     {showExtractor && (
-                        <div className="">
+                        <div className="animate-in fade-in slide-in-from-top-4 duration-500">
                             <ColorPaletteExtractor onApplyPalette={(colors) => {
                                 if (colors[0]) {
                                     handleUpdate({ primaryColor: colors[0] })

@@ -83,46 +83,47 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
     }
 
     return (
-        <div className="space-y-6">
-            <header className="flex items-center gap-2 opacity-30 px-1">
-                <Activity className="w-3 h-3 text-black dark:text-white" />
-                <h3 className="text-[9px] font-black uppercase tracking-[0.3em]">{t('editors.palette.title') || "Color Extraction"}</h3>
+        <div className="space-y-10">
+            <header className="flex flex-col gap-1 px-1">
+                <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-600">
+                    {t('editors.palette.title') || "Color Extraction"}
+                </h3>
+                <p className="text-[10px] text-zinc-400/60 font-medium leading-relaxed">
+                    Extraia a atmosfera cromática de uma imagem
+                </p>
             </header>
 
             {!previewUrl ? (
                 <div
                     {...getRootProps()}
                     className={cn(
-                        "border border-dashed p-10 text-center transition-all cursor-pointer group relative overflow-hidden bg-zinc-50/50 dark:bg-zinc-900/10",
-                        isDragActive
-                            ? 'border-black dark:border-white bg-zinc-100 dark:bg-zinc-800/20'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
+                        "border-2 border-dashed p-12 text-center transition-all cursor-pointer rounded-[2rem] bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 hover:bg-blue-50/50 group",
+                        isDragActive && "border-blue-500 bg-blue-50/50"
                     )}
                 >
                     <input {...getInputProps()} />
-                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black dark:border-white opacity-20 group-hover:opacity-100 transition-opacity" />
-                    <Upload className="w-6 h-6 mx-auto mb-4 text-zinc-400 opacity-40 group-hover:scale-110 transition-transform" />
-                    <p className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-500">
+                    <Upload className={cn("w-10 h-10 mx-auto mb-4 text-zinc-400 transition-transform group-hover:scale-110", isDragActive && "text-blue-500")} />
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                         {isDragActive ? t('editors.palette.drop') : t('editors.palette.drag')}
                     </p>
-                    <p className="text-[7px] text-zinc-400 font-mono mt-2 uppercase tracking-widest">{t('editors.palette.hint')}</p>
+                    {loading && <p className="mt-4 animate-pulse text-[10px] text-blue-500 font-black uppercase tracking-widest">Analisando Atmosfera...</p>}
                 </div>
             ) : (
-                <div className="space-y-4 animate-in fade-in zoom-in duration-500">
-                    <div className="relative aspect-video rounded-none overflow-hidden border border-black/10 dark:border-white/10 group shadow-lg">
+                <div className="space-y-8 animate-in fade-in zoom-in duration-500">
+                    <div className="relative aspect-video rounded-[2rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 group shadow-2xl">
                         <img src={previewUrl} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700" alt="Source" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button
                                 onClick={reset}
-                                className="p-2 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all active:scale-95"
+                                className="w-12 h-12 bg-white/90 dark:bg-black/90 rounded-full flex items-center justify-center shadow-xl hover:bg-red-500 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-300"
                             >
-                                <X className="w-3.5 h-3.5 text-white" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
                         {loading && (
                             <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center gap-2">
-                                <Loader2 className="w-4 h-4 text-white animate-spin opacity-50" />
-                                <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/50">
+                                <Loader2 className="w-5 h-5 text-white animate-spin opacity-50" />
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">
                                     {t('editors.palette.analyzing')}
                                 </p>
                             </div>
@@ -130,27 +131,28 @@ export function ColorPaletteExtractor({ onApplyPalette }: ColorPaletteExtractorP
                     </div>
 
                     {extractedColors.length > 0 && (
-                        <div className="space-y-4">
-                            <div className="flex gap-1.5 justify-center">
+                        <div className="space-y-8">
+                            <div className="flex gap-3 justify-center">
                                 {extractedColors.map((color, idx) => (
                                     <div key={idx} className="group relative">
                                         <div
-                                            className="w-8 h-8 border border-black/5 dark:border-white/5 transition-all hover:scale-110 hover:-translate-y-1 shadow-sm active:scale-95"
+                                            className="w-10 h-10 rounded-xl border border-black/5 dark:border-white/5 transition-all hover:scale-110 hover:-translate-y-2 shadow-lg cursor-pointer active:scale-95"
                                             style={{ backgroundColor: color }}
                                         />
-                                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none translate-y-2 group-hover:translate-y-0 z-20">
-                                            <span className="text-[7px] font-black font-mono uppercase bg-black text-white dark:bg-white dark:text-black px-1 py-0.5 whitespace-nowrap">
+                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none translate-y-2 group-hover:translate-y-0 z-20">
+                                            <span className="text-[8px] font-black font-mono uppercase bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 px-2 py-1 rounded-md shadow-xl whitespace-nowrap border border-white/10">
                                                 {color}
                                             </span>
                                         </div>
                                     </div>
                                 ))}
                             </div>
+                            
                             <Button
                                 onClick={() => onApplyPalette(extractedColors)}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-12 rounded-none text-[8px] font-black uppercase tracking-[0.3em] border border-zinc-100 dark:border-zinc-800 transition-all active:scale-[0.98] relative group"
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-3xl h-14 font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] group overflow-hidden"
                             >
-                                <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-black dark:border-white" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                                 {t('editors.palette.apply')}
                             </Button>
                         </div>

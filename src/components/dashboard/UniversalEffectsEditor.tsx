@@ -28,7 +28,7 @@ import {
     Telescope
 } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
-import { EditorHeader, EditorSection, ListSelector } from "./EditorUI"
+import { EditorHeader, EditorSection, ListSelector, GridSelector } from "./EditorUI"
 
 interface EffectsEditorProps {
     profile: any
@@ -53,18 +53,18 @@ export function UniversalEffectsEditor({ profile, onClose }: EffectsEditorProps)
     }
 
     const cursors = [
-        { id: 'auto', name: t('editors.effects.cursors.auto') },
-        { id: 'retro', name: t('editors.effects.cursors.retro') },
-        { id: 'heart', name: t('editors.effects.cursors.heart') },
-        { id: 'pixel', name: t('editors.effects.cursors.pixel') },
-        { id: 'ghost', name: t('editors.effects.cursors.ghost') },
+        { id: 'auto', name: t('editors.effects.cursors.auto'), icon: MousePointer2 },
+        { id: 'retro', name: t('editors.effects.cursors.retro'), icon: ArrowUpRight },
+        { id: 'heart', name: t('editors.effects.cursors.heart'), icon: Heart },
+        { id: 'pixel', name: t('editors.effects.cursors.pixel'), icon: Grid2X2 },
+        { id: 'ghost', name: t('editors.effects.cursors.ghost'), icon: Ghost },
     ]
 
     const trails = [
-        { id: 'none', name: t('editors.effects.trails.none') },
-        { id: 'sparkles', name: t('editors.effects.trails.sparkles') },
-        { id: 'ghost', name: t('editors.effects.trails.ghost') },
-        { id: 'pixel-dust', name: t('editors.effects.trails.pixel-dust') },
+        { id: 'none', name: t('editors.effects.trails.none'), icon: Ban },
+        { id: 'sparkles', name: t('editors.effects.trails.sparkles'), icon: Sparkles },
+        { id: 'ghost', name: t('editors.effects.trails.ghost'), icon: Ghost },
+        { id: 'pixel-dust', name: t('editors.effects.trails.pixel-dust'), icon: Zap },
     ]
 
     const backgrounds = [
@@ -92,20 +92,24 @@ export function UniversalEffectsEditor({ profile, onClose }: EffectsEditorProps)
             />
 
             <EditorSection title={t('editors.effects.cursor_title')}>
-                <ListSelector
+                <GridSelector
                     id="cursor-effects"
-                    options={cursors.map(c => ({ id: c.id, label: c.name }))}
+                    options={cursors.map(c => ({ id: c.id, label: c.name, icon: c.icon }))}
                     activeId={profile.customCursor || 'auto'}
                     onChange={(id) => handleUpdate('customCursor', id)}
+                    variant="ghost"
+                    columns={5}
                 />
             </EditorSection>
 
             <EditorSection title={t('editors.effects.trails_title')}>
-                <ListSelector
+                <GridSelector
                     id="trail-effects"
-                    options={trails.map(tInfo => ({ id: tInfo.id, label: tInfo.name }))}
+                    options={trails.map(tInfo => ({ id: tInfo.id, label: tInfo.name, icon: tInfo.icon }))}
                     activeId={profile.mouseTrails || 'none'}
                     onChange={(id) => handleUpdate('mouseTrails', id)}
+                    variant="ghost"
+                    columns={4}
                 />
             </EditorSection>
 
