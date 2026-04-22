@@ -85,8 +85,8 @@ export const en: Dictionary = {
         },
 
         insight: {
-            atmosphere: "Atmosphere.v1",
-            luminance: "Luminance.Spectrum",
+            atmosphere: "Atmosphere",
+            luminance: "Light Spectrum",
             memories: "Memories",
             released: "Published",
             dynamic_weight: "Dynamic chromatic weight from active nodes"
@@ -353,9 +353,11 @@ export const en: Dictionary = {
             }
         },
         effects: {
+            title: "Motion & Soul",
+            subtitle: "Personalize your space energy",
             cursor_title: "Your cursor",
             trails_title: "Mouse trail",
-            atmosphere_title: "Mood atmosphere",
+            atmosphere_title: "Atmosphere",
             active: "Selected",
             syncing: "Changing atmosphere...",
             deployed: "All ready.",
@@ -447,9 +449,9 @@ export const en: Dictionary = {
             deploy: "Mark quote",
         },
         social: {
-            title: "Connections",
-            add_title: "Add Social Link",
-            subtitle: "Connect your Identity",
+            add_title: "Social Connections",
+            subtitle: "Your links and social networks in one place",
+            title: "Add Social Link",
             nodes: "What link is this?",
             link_protocol: "What's the link?",
             link_placeholder: "https://...",

@@ -86,8 +86,8 @@ export const pt = {
         },
 
         insight: {
-            atmosphere: "Atmosfera.v1",
-            luminance: "Luminance.Spectrum",
+            atmosphere: "Atmosfera",
+            luminance: "Espectro de Luz",
             memories: "Memórias",
             released: "Publicado",
             dynamic_weight: "Peso cromático dinâmico dos nós ativos"
@@ -351,6 +351,8 @@ export const pt = {
             }
         },
         effects: {
+            title: "Movimento & Alma",
+            subtitle: "Personalize a energia do seu espaço",
             cursor_title: "Seu cursor",
             trails_title: "Rastro do mouse",
             atmosphere_title: "Atmosfera do Mood",
@@ -445,6 +447,8 @@ export const pt = {
             deploy: "Marcar citação",
         },
         social: {
+            add_title: "Conexões Sociais",
+            subtitle: "Seus links e redes em um só lugar",
             title: "Adicionar Link Social",
             nodes: "Que link é esse?",
             link_protocol: "Qual é o link?",
