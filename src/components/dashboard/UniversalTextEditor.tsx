@@ -59,7 +59,7 @@ interface UniversalTextEditorProps {
     highlight?: boolean
 }
 
-import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, EditorSlider, EditorSwitch } from "./EditorUI"
+import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, EditorSlider, EditorSwitch, ListSelector } from "./EditorUI"
 
 export function UniversalTextEditor({
     block,
@@ -98,10 +98,10 @@ export function UniversalTextEditor({
     const [isPending, startTransition] = useTransition()
 
     // Real-time Preview
-    useEffect(() => {
+    const triggerUpdate = (updates: any) => {
         if (!block?.id || !onUpdate) return
 
-        const updates = {
+        const currentContent = {
             text,
             behavior,
             frame,
@@ -113,7 +113,8 @@ export function UniversalTextEditor({
             cursorType,
             author,
             showQuotes,
-            icon: statusIcon
+            icon: statusIcon,
+            ...updates
         }
 
         const typeToSave = ['ticker', 'subtitle', 'floating', 'quote', 'mood-status', 'moodStatus'].includes(block.type)
@@ -122,9 +123,9 @@ export function UniversalTextEditor({
 
         onUpdate(block.id, {
             type: typeToSave,
-            content: updates
+            content: currentContent
         })
-    }, [text, behavior, frame, textColor, fontSize, align, speed, direction, cursorType, author, showQuotes, statusIcon])
+    }
 
     const handleSave = () => {
         if (!text.trim() && !block?.id) return
@@ -168,23 +169,43 @@ export function UniversalTextEditor({
             />
 
             <EditorSection title="Comportamento">
-                <PillSelector
+                <GridSelector
+                    id="text-behavior"
                     options={BEHAVIORS}
                     activeId={behavior}
-                    columns={3}
+                    columns={6}
+                    variant="ghost"
                     onChange={(id) => {
-                        setBehavior(id)
-                        if (id === 'ticker') {
+                        const newBehavior = id as TextBehavior
+                        setBehavior(newBehavior)
+                        
+                        let extraUpdates: any = { behavior: newBehavior }
+                        
+                        if (newBehavior === 'ticker') {
                             setFontSize('3xl')
-                            if (speed < 1) setSpeed(20)
+                            extraUpdates.fontSize = '3xl'
+                            if (speed < 1) {
+                                setSpeed(20)
+                                extraUpdates.speed = 20
+                            }
+                        } else if (newBehavior === 'floating') {
+                            if (speed < 0.5) {
+                                setSpeed(4)
+                                extraUpdates.speed = 4
+                            }
+                        } else if (newBehavior === 'typewriter') {
+                            if (speed > 1) {
+                                setSpeed(0.05)
+                                extraUpdates.speed = 0.05
+                            }
                         }
-                        if (id === 'floating') {
-                            if (speed < 0.5) setSpeed(4)
+                        
+                        if (newBehavior === 'status' && frame === 'none') {
+                            setFrame('minimal')
+                            extraUpdates.frame = 'minimal'
                         }
-                        if (id === 'typewriter') {
-                            if (speed > 1) setSpeed(0.05)
-                        }
-                        if (id === 'status' && frame === 'none') setFrame('minimal')
+                        
+                        triggerUpdate(extraUpdates)
                     }}
                 />
             </EditorSection>
@@ -194,8 +215,11 @@ export function UniversalTextEditor({
                     <Textarea
                         placeholder={t('editors.text.placeholder')}
                         value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        className="min-h-[140px] bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-base font-medium resize-none p-5 focus-visible:ring-blue-500/20 shadow-sm transition-all"
+                        onChange={(e) => {
+                            setText(e.target.value)
+                            triggerUpdate({ text: e.target.value })
+                        }}
+                        className="min-h-[140px] bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-3xl text-[14px] font-medium resize-none p-6 focus-visible:ring-blue-500/10 shadow-inner transition-all placeholder:text-zinc-400"
                     />
                 </div>
             </EditorSection>
@@ -203,11 +227,14 @@ export function UniversalTextEditor({
             <EditorSection title="Estética">
                 <div className="space-y-6">
                     <EditorSection title="Moldura">
-                        <PillSelector
-                            variant="scroll"
-                            options={FRAME_OPTIONS.map(f => ({ id: f.id as any, label: f.label }))}
-                            activeId={frame as any}
-                            onChange={(id) => setFrame(id as any)}
+                        <ListSelector
+                            id="text-frame"
+                            options={FRAME_OPTIONS.map(f => ({ id: f.id as string, label: f.label }))}
+                            activeId={frame as string}
+                            onChange={(id) => {
+                                setFrame(id as any)
+                                triggerUpdate({ frame: id as any })
+                            }}
                         />
                     </EditorSection>
 
@@ -215,27 +242,37 @@ export function UniversalTextEditor({
                         {(behavior === 'static' || behavior === 'floating') && (
                             <>
                                 <EditorSection title={t('editors.text.font_scale')}>
-                                    <div className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl">
-                                        {['sm', 'base', 'xl', '3xl'].map((s) => (
-                                            <button
-                                                key={s}
-                                                onClick={() => setFontSize(s as any)}
-                                                className={cn(
-                                                    "flex-1 h-9 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all",
-                                                    fontSize === s ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm" : "text-zinc-400 hover:text-zinc-600"
-                                                )}
-                                            >
-                                                {s === 'sm' ? 'P' : s === 'base' ? 'M' : s === 'xl' ? 'G' : 'GG'}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <PillSelector
+                                        variant="ghost"
+                                        options={[
+                                            { id: 'sm', label: 'P' },
+                                            { id: 'base', label: 'M' },
+                                            { id: 'xl', label: 'G' },
+                                            { id: '3xl', label: 'GG' },
+                                        ]}
+                                        activeId={fontSize as string}
+                                        onChange={(id) => {
+                                            setFontSize(id as any)
+                                            triggerUpdate({ fontSize: id as any })
+                                        }}
+                                    />
                                 </EditorSection>
                                 <EditorSection title={t('editors.text.alignment')}>
-                                    <div className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl">
-                                        <button onClick={() => setAlign("left")} className={cn("flex-1 h-9 rounded-lg flex items-center justify-center transition-all", align === "left" ? "bg-white dark:bg-zinc-800 text-blue-600" : "text-zinc-400")}><AlignLeft className="w-4 h-4" /></button>
-                                        <button onClick={() => setAlign("center")} className={cn("flex-1 h-9 rounded-lg flex items-center justify-center transition-all", align === "center" ? "bg-white dark:bg-zinc-800 text-blue-600" : "text-zinc-400")}><AlignCenter className="w-4 h-4" /></button>
-                                        <button onClick={() => setAlign("right")} className={cn("flex-1 h-9 rounded-lg flex items-center justify-center transition-all", align === "right" ? "bg-white dark:bg-zinc-800 text-blue-600" : "text-zinc-400")}><AlignRight className="w-4 h-4" /></button>
-                                    </div>
+                                    <GridSelector
+                                        id="text-align"
+                                        options={[
+                                            { id: 'left', label: 'Esquerda', icon: AlignLeft },
+                                            { id: 'center', label: 'Centro', icon: AlignCenter },
+                                            { id: 'right', label: 'Direita', icon: AlignRight },
+                                        ]}
+                                        activeId={align as string}
+                                        variant="ghost"
+                                        columns={3}
+                                        onChange={(id) => {
+                                            setAlign(id as any)
+                                            triggerUpdate({ align: id as any })
+                                        }}
+                                    />
                                 </EditorSection>
                             </>
                         )}
@@ -243,17 +280,27 @@ export function UniversalTextEditor({
                         {behavior === 'ticker' && (
                             <>
                                 <EditorSection title="Direção">
-                                    <div className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl">
-                                        <button onClick={() => setDirection('left')} className={cn("flex-1 h-9 rounded-lg text-[9px] font-bold uppercase transition-all", direction === 'left' ? "bg-white dark:bg-zinc-800 text-blue-600" : "text-zinc-400")}>L</button>
-                                        <button onClick={() => setDirection('right')} className={cn("flex-1 h-9 rounded-lg text-[9px] font-bold uppercase transition-all", direction === 'right' ? "bg-white dark:bg-zinc-800 text-blue-600" : "text-zinc-400")}>R</button>
-                                    </div>
+                                    <PillSelector
+                                        options={[
+                                            { id: 'left', label: 'Esquerda' },
+                                            { id: 'right', label: 'Direita' },
+                                        ]}
+                                        activeId={direction as string}
+                                        onChange={(id) => {
+                                            setDirection(id as any)
+                                            triggerUpdate({ direction: id as any })
+                                        }}
+                                    />
                                 </EditorSection>
                                 <EditorSlider
                                     label="Velocidade"
                                     value={speed}
                                     min={5}
                                     max={50}
-                                    onChange={setSpeed}
+                                    onChange={(v) => {
+                                        setSpeed(v)
+                                        triggerUpdate({ speed: v })
+                                    }}
                                 />
                             </>
                         )}
@@ -264,9 +311,12 @@ export function UniversalTextEditor({
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                                     <input
                                         value={author}
-                                        onChange={(e) => setAuthor(e.target.value)}
+                                        onChange={(e) => {
+                                            setAuthor(e.target.value)
+                                            triggerUpdate({ author: e.target.value })
+                                        }}
                                         placeholder={t('editors.text.author_placeholder')}
-                                        className="w-full h-12 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl pl-12 text-base font-medium focus:ring-2 focus:ring-blue-500/20 outline-none shadow-sm"
+                                        className="w-full h-14 bg-zinc-50 dark:bg-zinc-900 border-none rounded-2xl pl-12 text-[12px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none shadow-sm placeholder:text-zinc-400"
                                     />
                                 </div>
                             </div>
@@ -275,9 +325,12 @@ export function UniversalTextEditor({
                         {behavior === 'status' && (
                             <div className="col-span-2">
                                 <GridSelector
-                                    options={STATUS_ICONS.map(s => ({ id: s.id as any, icon: s.icon }))}
+                                    options={STATUS_ICONS.map(s => ({ id: s.id as any, label: '', icon: s.icon }))}
                                     activeId={statusIcon as any}
-                                    onChange={(id) => setStatusIcon(id)}
+                                    onChange={(id) => {
+                                        setStatusIcon(id)
+                                        triggerUpdate({ icon: id })
+                                    }}
                                     columns={5}
                                     variant="card"
                                 />
@@ -287,9 +340,12 @@ export function UniversalTextEditor({
 
                     <EditorSection title="Cor do Texto">
                         <GridSelector
-                            options={COLORS.map(c => ({ id: c.value as any, color: c.value || '#ccc' }))}
+                            options={COLORS.map(c => ({ id: c.value as any, label: '', icon: undefined, color: c.value || '#ccc' }))}
                             activeId={textColor as any}
-                            onChange={(id) => setTextColor(id)}
+                            onChange={(id) => {
+                                setTextColor(id)
+                                triggerUpdate({ textColor: id })
+                            }}
                             columns={7}
                             variant="circle"
                         />
