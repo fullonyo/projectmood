@@ -100,6 +100,31 @@ Lógicas pesadas de renderização foram extraídas do `MoodCanvas.tsx`:
   - **Persistência Debounced**: Sincronização automática com debounce de 800ms e sistema de Epoch para evitar race-conditions entre o cliente e o servidor. Blindagem contra `NaN` e mesclagem profunda de `content` implementada em `use-canvas-manager.ts`.
 - **Command Center (Central de Atalhos)**: Componente flutuante (`CommandCenter.tsx`) que serve como cheatsheet viva. Acessível via `?` ou `Ctrl+K`.
 
+### Ciclo de Vida de uma Interação no Canvas 🖱️✨
+
+Para entender como o sistema processa um movimento desde o clique até a persistência:
+
+1.  **Clique em Área Vazia**:
+    *   **Lasso Selection**: Se o usuário clicar e arrastar no fundo do canvas, o `LassoSelector.tsx` cria uma caixa de seleção. IDs dentro da área são injetados em `selectedIds`.
+    *   **Panning (Câmera)**: Se `Space` estiver pressionado, o `MoodCanvas.tsx` captura o movimento para transladar todo o `motion.div` da câmera (`mvPanX`, `mvPanY`).
+
+2.  **Clique em Bloco (Focus & Drag)**:
+    *   **Alvo**: `CanvasItem.tsx`.
+    *   **Ação**: `onPanStart` (Framer Motion) captura a intenção. Se o bloco não estiver selecionado, ele assume o foco (`onSelect`). O estado `isInteracting` da `stateRef` é ativado para bloquear sincronizações externas durante o movimento.
+    *   **Coordenadas**: Posição inicial (`startX`, `startY`) é gravada na `ref` para cálculos relativos estáveis.
+
+3.  **Movimentação (High-Frequency Drag)**:
+    *   **Alvo**: `handleDragPan`.
+    *   **Cálculo de Precisão**: O deslocamento em pixels (`info.delta`) é convertido em **porcentagem (%)** com base no `getBoundingClientRect` do canvas. Isso garante que o movimento seja idêntico em qualquer nível de Zoom.
+    *   **Zero-Tearing**: O valor é injetado nos `MotionValues` (`mvX`, `mvY`). Isso move o bloco via GPU sem disparar re-renders do React (60 FPS cravados).
+    *   **Magnetic Snapping**: O motor `calculateSnap` projeta as `guidelines` (réguas azuis) e ajusta as coordenadas para alinhar bordas e centros com outros blocos.
+
+4.  **Soltura e Persistência (Commit)**:
+    *   **Alvo**: `handleDragEnd`.
+    *   **Cleanup**: Remove guias visuais e reseta `isInteracting`.
+    *   **Comportamento Alt**: Se `Alt` estiver pressionado, o bloco original volta ao lugar e uma cópia é criada na posição final.
+    *   **Persistência**: Dispara `onUpdate` que sobe até o `useCanvasManager`. A persistência no DB é debounced para evitar sobrecarga em movimentos rápidos.
+
 ### Performance & Viewport Scaling 📏🚀
 - **ScaleProvider (`src/lib/contexts/ScaleProvider.tsx`)**: Centraliza o cálculo de proporção do Canvas. Utiliza um único listener de `resize` para toda a aplicação, injetado no layout raiz.
 - **useViewportScale**: Hook legado mantido para retrocompatibilidade, mas agora otimizado para consumir o `ScaleProvider` global, eliminando gargalos de CPU no redimensionamento.

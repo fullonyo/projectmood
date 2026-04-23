@@ -192,11 +192,7 @@ export const CanvasItem = memo(({
         stateRef.current.isInteracting = true;
         stateRef.current.startX = stateRef.current.x;
         stateRef.current.startY = stateRef.current.y;
-
-        if (!isSelected) {
-            onSelect(false);
-        }
-    }, [block.isLocked, isSelected, onSelect])
+    }, [block.isLocked])
 
     const handleDragEnd = useCallback(() => {
         if (stateRef.current.isInteractiveMode) return;
@@ -366,7 +362,19 @@ export const CanvasItem = memo(({
                 opacity: block.isHidden ? 0 : ((block.content as any).opacity ?? 1),
                 pointerEvents: (block.isHidden || (block.isLocked && !isSelected)) ? 'none' : 'auto',
                 mixBlendMode: (block.content as any).blendMode || 'normal',
-                cursor: block.isLocked ? 'not-allowed' : (isSelected ? 'default' : 'grab')
+                cursor: block.isLocked ? 'not-allowed' : (isDragging ? 'grabbing' : (isSelected ? 'default' : 'grab'))
+            }}
+            onPointerDown={(e) => {
+                if (isInteractiveMode || block.isLocked) return;
+                // Capture pointer to ensure drag doesn't break during state updates
+                try {
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                } catch (err) {}
+                
+                // Pre-select on pointer down to avoid race conditions with pan gestures
+                if (!isSelected && !e.shiftKey) {
+                    onSelect(false);
+                }
             }}
             onClick={(e) => {
                 if (isInteractiveMode || block.isLocked) return;
