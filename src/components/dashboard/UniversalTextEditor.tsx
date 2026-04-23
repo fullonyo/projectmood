@@ -53,8 +53,8 @@ import { MoodBlock, TextContent } from "@/types/database"
 
 interface UniversalTextEditorProps {
     block?: MoodBlock | null
-    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
-    onAdd?: (type: string, content: TextContent) => Promise<void>
+    onUpdate?: (updates: Partial<MoodBlock>) => void
+    onAdd?: (content: TextContent) => Promise<void>
     onClose?: () => void
     highlight?: boolean
 }
@@ -121,7 +121,7 @@ export function UniversalTextEditor({
             ? 'text'
             : block.type
 
-        onUpdate(block.id, {
+        onUpdate({
             type: typeToSave,
             content: currentContent
         })
@@ -149,7 +149,7 @@ export function UniversalTextEditor({
             if (block?.id) {
                 if (onClose) onClose()
             } else if (onAdd) {
-                await onAdd('text', finalContent)
+                await onAdd(finalContent)
                 setText("")
             } else {
                 await addMoodBlock('text', finalContent, { x: 40, y: 40 })

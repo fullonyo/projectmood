@@ -26,8 +26,8 @@ type TabType = 'connection' | 'esthetics'
 
 interface UniversalWeatherEditorProps {
     block?: MoodBlock | null
-    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
-    onAdd?: (type: string, content: any) => Promise<void>
+    onUpdate?: (updates: Partial<MoodBlock>) => void
+    onAdd?: (content: any) => Promise<void>
     onClose?: () => void
 }
 
@@ -54,7 +54,7 @@ export function UniversalWeatherEditor({
 
     const triggerUpdate = (updates: any) => {
         if (!block?.id || !onUpdate) return
-        onUpdate(block.id, {
+        onUpdate({
             content: {
                 location, vibe, temp, icon, mode, opacity, blendMode,
                 ...updates
@@ -96,7 +96,7 @@ export function UniversalWeatherEditor({
             if (block?.id) {
                 if (onClose) onClose()
             } else if (onAdd) {
-                await onAdd('weather', finalContent)
+                await onAdd(finalContent)
                 if (onClose) onClose()
             }
         })

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -10,7 +10,7 @@ import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
 import { MoodBlock, Profile } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
-import { updateMoodBlocksZIndex, addMoodBlock } from "@/actions/profile";
+import { updateMoodBlocksZIndex, addMoodBlock, updateProfile } from "@/actions/profile";
 import { I18nProvider } from "@/i18n/context";
 import { CanvasInteractionProvider, useCanvasInteraction } from "./canvas-interaction-context";
 import { AudioProvider } from "./audio-context";
@@ -48,13 +48,15 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
     const [localProfile, setLocalProfile] = useState(profile);
+    const [isProfilePending, startProfileTransition] = useTransition();
     const { isDrawingMode } = useCanvasInteraction();
 
     const {
         blocks, setBlocks, updateBlock, updateBlocks, removeBlocks,
         isSaving, undo, redo, canUndo, canRedo,
         selectedIds, setSelectedIds, alignSelected, distributeSelected,
-        groupSelected, ungroupSelected
+        groupSelected, ungroupSelected,
+        maxZ, bringToFront, sendToBack, bringForward, sendBackward
     } = useCanvasManager(moodBlocks);
 
     const handleAddNewBlock = useCallback(async (type: string, content: any, shouldSelect = true) => {
@@ -144,9 +146,13 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
         setLocalProfile(profile);
     }, [profile]);
 
-    const handleUpdateLocalProfile = (data: any) => {
+    const handleUpdateProfile = useCallback((data: any) => {
         setLocalProfile((prev: any) => ({ ...prev, ...data }));
-    };
+        
+        startProfileTransition(async () => {
+            await updateProfile(data);
+        });
+    }, []);
 
     const selectedBlocks = blocks.filter(b => selectedIds.includes(b.id));
 
@@ -172,6 +178,11 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                     distributeSelected={distributeSelected}
                     onGroup={groupSelected}
                     onUngroup={ungroupSelected}
+                    maxZ={maxZ}
+                    bringToFront={bringToFront}
+                    sendToBack={sendToBack}
+                    bringForward={bringForward}
+                    sendBackward={sendBackward}
                 />
 
             </div>
@@ -214,7 +225,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                         onAddBlock={handleAddNewBlock}
                         onGroup={groupSelected}
                         onUngroup={ungroupSelected}
-                        onUpdateProfile={handleUpdateLocalProfile}
+                        onUpdateProfile={handleUpdateProfile}
                         systemFlags={systemFlags}
                         publishedAt={publishedAt}
                         onNormalize={normalizeZIndexes}

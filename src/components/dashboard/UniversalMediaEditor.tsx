@@ -21,8 +21,8 @@ import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionBu
 
 interface UniversalMediaEditorProps {
     block?: MoodBlock | null
-    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
-    onAdd?: (type: string, content: any) => Promise<void>
+    onUpdate?: (updates: Partial<MoodBlock>) => void
+    onAdd?: (content: any) => Promise<void>
     onClose?: () => void
 }
 
@@ -136,7 +136,7 @@ export function UniversalMediaEditor({
 
         const typeToSave = ['video', 'music'].includes(block.type) ? 'media' : block.type
 
-        onUpdate(block.id, {
+        onUpdate({
             type: typeToSave,
             content: currentContent
         })
@@ -162,7 +162,7 @@ export function UniversalMediaEditor({
             if (block?.id) {
                 if (onClose) onClose()
             } else if (onAdd) {
-                await onAdd('media', finalContent)
+                await onAdd(finalContent)
                 if (onClose) onClose()
             } else {
                 await addMoodBlock('media', finalContent, { x: 40, y: 40 })

@@ -42,23 +42,17 @@ export function BlockEditorRegistry({
     const selectedIdsString = selectedBlocks.map(b => b.id).join(',')
     
     const firstBlockId = selectedBlocks[0]?.id
-    const handleSingleUpdate = useCallback((idOrUpdates: any, updates?: any) => {
-        const actualId = typeof idOrUpdates === 'string' ? idOrUpdates : firstBlockId
-        const actualUpdates = typeof idOrUpdates === 'string' ? updates : idOrUpdates
-        if (!actualId) return
-        onUpdateBlock(actualId, actualUpdates)
-    }, [firstBlockId, onUpdateBlock])
-
-    const handleBatchUpdate = useCallback((updates: any) => {
-        onUpdateBlocks(selectedBlocks.map(b => b.id), updates)
-    }, [selectedIdsString, onUpdateBlocks])
-
-    // Detect if we are in Multi-Selection Mode
-    const isMultiSelect = selectedBlocks.length > 1
     const firstBlock = selectedBlocks[0]
-    
-    // Check if all selected blocks share the same type
+    const isMultiSelect = selectedBlocks.length > 1
     const allSameType = isMultiSelect && selectedBlocks.every(b => b.type === firstBlock?.type)
+    
+    const handleUpdate = useCallback((updates: Partial<MoodBlock>) => {
+        if (isMultiSelect) {
+            onUpdateBlocks(selectedBlocks.map(b => b.id), updates)
+        } else if (firstBlockId) {
+            onUpdateBlock(firstBlockId, updates)
+        }
+    }, [isMultiSelect, selectedIdsString, firstBlockId, onUpdateBlock, onUpdateBlocks])
 
     if (draftBlockType) {
         // Handle New Block Creation
@@ -66,10 +60,7 @@ export function BlockEditorRegistry({
         if (!Editor) return null
         return (
             <Editor
-                onAdd={onAddBlock}
-                onUpdate={(updates: any) => {
-                    // Logic for draft is handled via addMoodBlock in parent
-                }}
+                onAdd={(content: any) => onAddBlock?.(draftBlockType, content)}
                 onClose={onClose}
             />
         )
@@ -94,7 +85,7 @@ export function BlockEditorRegistry({
                         <Editor
                             block={firstBlock} 
                             selectedBlocks={selectedBlocks} 
-                            onUpdate={handleBatchUpdate}
+                            onUpdate={handleUpdate}
                             onClose={onClose}
                         />
                     </div>
@@ -124,7 +115,7 @@ export function BlockEditorRegistry({
     return (
         <Editor
             block={firstBlock}
-            onUpdate={handleSingleUpdate}
+            onUpdate={handleUpdate}
             onClose={onClose}
         />
     )

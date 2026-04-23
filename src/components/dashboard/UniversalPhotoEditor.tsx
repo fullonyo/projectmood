@@ -103,11 +103,7 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
             if (onClose) onClose()
         } else if (onAdd) {
             await onAdd(content)
-            setImageUrl("")
-            setAlt("")
-            setCaption("")
-            setFilter('none')
-            setFrame('none')
+            if (onClose) onClose()
         }
         setIsPending(false)
     }

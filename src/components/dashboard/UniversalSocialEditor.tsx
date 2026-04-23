@@ -72,7 +72,7 @@ export function UniversalSocialEditor({
     highlight
 }: {
     block?: MoodBlock | null,
-    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void,
+    onUpdate?: (updates: Partial<MoodBlock>) => void,
     onAdd?: (content: SocialContent) => Promise<void>,
     onClose?: () => void,
     highlight?: boolean
@@ -118,7 +118,7 @@ export function UniversalSocialEditor({
         })
 
         if (hasChanged) {
-            onUpdate(block.id, { content: updates })
+            onUpdate({ content: updates })
         }
     }, [selectedPlatform, url, label, subLabel, style, layoutMode, block?.id, onUpdate, block?.content])
 
@@ -143,9 +143,7 @@ export function UniversalSocialEditor({
                 if (onClose) onClose()
             } else if (onAdd) {
                 await onAdd(content)
-                setUrl("")
-                setLabel("")
-                setSubLabel("")
+                if (onClose) onClose()
             } else {
                 const initialWidth = layoutMode === 'bento' ? 50 : 150
                 const initialHeight = layoutMode === 'bento' ? 50 : 45

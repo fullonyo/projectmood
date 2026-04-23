@@ -1,7 +1,6 @@
 "use client"
 
-import { updateProfile } from "@/actions/profile"
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { 
     Palette, 
     Sparkles, 
@@ -33,15 +32,10 @@ interface ThemeEditorProps {
 
 export function UniversalThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTexture, onUpdate }: ThemeEditorProps) {
     const { t } = useTranslation()
-    const [isPending, startTransition] = useTransition()
     const [showExtractor, setShowExtractor] = useState(false)
 
     const handleUpdate = (data: any) => {
-        if (onUpdate) onUpdate(data) // Instant Preview
-
-        startTransition(async () => {
-            await updateProfile(data) // Server Sync
-        })
+        if (onUpdate) onUpdate(data)
     }
 
     const textures = [
@@ -72,7 +66,6 @@ export function UniversalThemeEditor({ currentTheme, currentPrimaryColor, curren
                         <button
                             key={vibe.id}
                             onClick={() => handleUpdate(vibe.data || { theme: vibe.id })}
-                            disabled={isPending}
                             className={cn(
                                 "flex flex-col p-3 transition-all min-w-[140px] snap-start shrink-0 group relative rounded-2xl border",
                                 currentTheme === vibe.id

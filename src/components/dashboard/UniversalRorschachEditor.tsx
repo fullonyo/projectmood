@@ -21,8 +21,8 @@ import {
 
 interface UniversalRorschachEditorProps {
     block?: MoodBlock | null
-    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
-    onAdd?: (type: string, content: any) => Promise<void>
+    onUpdate?: (updates: Partial<MoodBlock>) => void
+    onAdd?: (content: any) => Promise<void>
     onClose?: () => void
 }
 
@@ -48,7 +48,7 @@ export function UniversalRorschachEditor({
 
     const triggerUpdate = (updates: any) => {
         if (!block?.id || !onUpdate) return
-        onUpdate(block.id, {
+        onUpdate({
             content: {
                 seed, color, opacity, blur, symmetry, complexity,
                 ...updates
@@ -66,7 +66,7 @@ export function UniversalRorschachEditor({
             if (block?.id) {
                 if (onClose) onClose()
             } else if (onAdd) {
-                await onAdd('rorschach', finalContent)
+                await onAdd(finalContent)
                 if (onClose) onClose()
             } else {
                 const res = await addMoodBlock('rorschach', finalContent, {

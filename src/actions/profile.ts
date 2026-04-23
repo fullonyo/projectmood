@@ -19,6 +19,7 @@ export async function updateProfile(data: {
     customCursor?: string;
     mouseTrails?: string;
     backgroundEffect?: string;
+    staticTexture?: string;
     avatarUrl?: string;
 }) {
     try {
@@ -82,6 +83,7 @@ export async function updateProfile(data: {
                     customCursor: data.customCursor,
                     mouseTrails: data.mouseTrails,
                     backgroundEffect: data.backgroundEffect,
+                    staticTexture: data.staticTexture,
                     avatarUrl: data.avatarUrl,
                 },
             })

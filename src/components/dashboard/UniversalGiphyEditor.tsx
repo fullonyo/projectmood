@@ -12,7 +12,7 @@ import { MoodBlock } from "@/types/database"
 interface GiphyEditorProps {
     block?: MoodBlock | null
     onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
-    onAdd?: (type: string, content: any) => Promise<void>
+    onAdd?: (content: any) => Promise<void>
     onClose?: () => void
 }
 
@@ -59,7 +59,7 @@ export function UniversalGiphyEditor({ block, onUpdate, onAdd, onClose }: GiphyE
         
         startTransition(async () => {
             if (onAdd) {
-                await onAdd('gif', {
+                await onAdd({
                     imageUrl: gif.url,
                     alt: gif.title,
                     isGif: true

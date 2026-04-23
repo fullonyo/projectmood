@@ -27,8 +27,8 @@ import {
 
 interface UniversalShapeEditorProps {
     block?: MoodBlock | null
-    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
-    onAdd?: (type: string, content: any) => Promise<void>
+    onUpdate?: (updates: Partial<MoodBlock>) => void
+    onAdd?: (content: any) => Promise<void>
     onClose?: () => void
 }
 
@@ -90,7 +90,7 @@ export function UniversalShapeEditor({
         })
 
         if (hasChanged) {
-            onUpdate(block.id, { content: updates })
+            onUpdate({ content: updates })
         }
     }, [shapeType, color, opacity, blur, sides, points, blendMode, gradient, seed, glowIntensity, isFloating, floatSpeed, gradientType, block?.id, onUpdate, block?.content])
 
@@ -106,7 +106,7 @@ export function UniversalShapeEditor({
             if (block?.id) {
                 if (onClose) onClose()
             } else if (onAdd) {
-                await onAdd('shape', finalContent)
+                await onAdd(finalContent)
                 if (onClose) onClose()
             } else {
                 const res = await addMoodBlock('shape', finalContent, {

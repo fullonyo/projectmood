@@ -1,7 +1,6 @@
 "use client"
 
-import { useTransition, useState } from 'react'
-import { updateProfile } from "@/actions/profile"
+import { useState } from 'react'
 import { cn } from "@/lib/utils"
 import {
     MousePointer2,
@@ -32,24 +31,20 @@ import { EditorHeader, EditorSection, ListSelector, GridSelector } from "./Edito
 
 interface EffectsEditorProps {
     profile: any
+    onUpdateProfile?: (data: any) => void
     onClose?: () => void
 }
 
-export function UniversalEffectsEditor({ profile, onClose }: EffectsEditorProps) {
+export function UniversalEffectsEditor({ profile, onUpdateProfile, onClose }: EffectsEditorProps) {
     const { t } = useTranslation()
-    const [isPending, startTransition] = useTransition()
     const [showSuccess, setShowSuccess] = useState(false)
 
     const handleUpdate = (field: string, value: string) => {
-        startTransition(async () => {
-            try {
-                await updateProfile({ [field]: value })
-                setShowSuccess(true)
-                setTimeout(() => setShowSuccess(false), 2000)
-            } catch (error) {
-                console.error("Erro ao atualizar", error)
-            }
-        })
+        if (onUpdateProfile) {
+            onUpdateProfile({ [field]: value })
+            setShowSuccess(true)
+            setTimeout(() => setShowSuccess(false), 2000)
+        }
     }
 
     const cursors = [
@@ -119,14 +114,9 @@ export function UniversalEffectsEditor({ profile, onClose }: EffectsEditorProps)
             </EditorSection>
 
             <div className="h-6 flex items-center justify-center">
-                {isPending && (
-                    <div className="flex items-center justify-center gap-3 text-[9px] font-bold uppercase tracking-widest text-zinc-400 animate-pulse">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        {t('editors.effects.syncing')}
-                    </div>
-                )}
+                {/* Sincronização gerida pelo Layout Central */}
 
-                {showSuccess && !isPending && (
+                {showSuccess && (
                     <div className="flex items-center justify-center gap-3 text-[9px] font-bold uppercase tracking-widest text-emerald-500">
                         <Check className="w-3.5 h-3.5" />
                         {t('editors.effects.deployed')}

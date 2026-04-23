@@ -51,7 +51,7 @@ export function UniversalRoomEditor({ profile, onUpdateProfile, onClearWall }: U
 
                 {activeTab === 'kinetics' && (
                     <div className="space-y-12">
-                        <UniversalEffectsEditor profile={profile} />
+                        <UniversalEffectsEditor profile={profile} onUpdateProfile={onUpdateProfile} />
                     </div>
                 )}
             </div>
