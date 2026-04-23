@@ -309,6 +309,7 @@ export const CanvasItem = memo(({
                 onPanStart={handleResizeStart}
                 onPan={(e, i) => handleResizePan(handle, e, i)}
                 onPanEnd={handleResizeEnd}
+                data-handle="resize"
                 className={cn(
                     "absolute z-[1002] pointer-events-auto bg-white dark:bg-zinc-900 border-2 border-zinc-900 dark:border-white shadow-md hover:scale-[1.3] active:scale-95 transition-transform",
                     positionClasses[handle], handleSize, isCorner ? "rounded-full" : "rounded-full"
@@ -366,12 +367,24 @@ export const CanvasItem = memo(({
             }}
             onPointerDown={(e) => {
                 if (isInteractiveMode || block.isLocked) return;
-                // Capture pointer to ensure drag doesn't break during state updates
+
+                // BLINDAGEM: Não capturamos o ponteiro se o usuário clicar em botões,
+                // handles de resize/rotate ou na barra de ferramentas. Isso permite que
+                // a UI interna receba os eventos de clique sem interferência.
+                const isControl = (e.target as HTMLElement).closest('button, .action-toolbar, [data-handle]');
+                if (isControl) return;
+
+                // ZERO-TEARING DRAG: Capturamos o ponteiro no container principal para 
+                // garantir estabilidade absoluta do gesto de drag desde o primeiro pixel,
+                // mesmo se o React re-renderizar o estado de seleção.
                 try {
                     e.currentTarget.setPointerCapture(e.pointerId);
-                } catch (err) {}
+                } catch (err) {
+                    console.warn("Pointer capture failed", err);
+                }
                 
-                // Pre-select on pointer down to avoid race conditions with pan gestures
+                // Sincronização de Seleção: Selecionamos no 'down' para que a UI 
+                // já esteja pronta quando o 'onPanStart' for avaliado.
                 if (!isSelected && !e.shiftKey) {
                     onSelect(false);
                 }
@@ -530,6 +543,7 @@ export const CanvasItem = memo(({
                                         stateRef.current.isRotating = false
                                         onUpdate({ rotation: stateRef.current.rotation })
                                     }}
+                                    data-handle="rotate"
                                     className={cn(
                                         "absolute w-10 h-10 pointer-events-auto cursor-alias opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center",
                                         corner === 'tl' && "top-0 left-0 -translate-x-1/2 -translate-y-1/2",
