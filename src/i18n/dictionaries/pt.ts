@@ -176,6 +176,11 @@ export const pt = {
             footer: "Sistema de Alocação // MoodSpace",
             establishing: "Criando chaves...",
         },
+        banned: {
+            title: "Acesso Restrito",
+            message: "Esta conta foi suspensa por violar os Termos de Aura da plataforma. O acesso ao seu quarto digital e ao Command Center foram revogados.",
+            logout: "Encerrar Protocolo de Acesso"
+        },
         promotion: {
             title: "Gostou deste Mood?",
             subtitle: "Crie seu próprio espaço de sentimentos.",
@@ -402,25 +407,27 @@ export const pt = {
             label: "Qual é a pergunta ou título?",
             placeholder: "Deixe um recadinho...",
             color_label: "Cor Principal",
-            deploy: "Colar no mural",
+            deploy: "Lançar no Mural",
             update: "Atualizar Mural",
             visit_active: "As pessoas poderão escrever no seu Mood.",
             tabs: {
-                connection: "Conexão",
+                connection: "Configuração",
                 esthetics: "Estética"
             },
             style_label: "Tema Visual",
             layout_label: "Modo de Exibição",
             layouts: {
-                classic: "Clássico (Box)",
-                scattered: "Espalhado (Post-it)",
-                cloud: "Nuvem (Flutuante)"
+                classic: "Grid Clássico",
+                stream: "Neural Stream (Timeline)",
+                float: "Floating Nodes (Zen)",
+                scattered: "Modo Caos (Chaos)"
             },
             styles: {
                 glass: "Studio Glass (Premium)",
+                onyx: "Onyx Dark (Stealth)",
+                silk: "Soft Silk (Editorial)",
                 vhs: "VHS / Retro (Analógico)",
-                cyber: "Cyber / Minimal (Cleaner)",
-                paper: "Paper / Post-it (Físico)"
+                cyber: "Cyber / Minimal"
             }
         },
         mood: {

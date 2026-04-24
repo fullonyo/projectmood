@@ -8,8 +8,26 @@ export default auth((req) => {
     const isRootPage = pathname === "/"
     const isAdminPage = pathname.startsWith("/admin/") || pathname === "/admin"
 
+    const isBanned = (req.auth?.user as any)?.isBanned
+    const isBannedPage = pathname === "/banned"
+
+    // Ban logic: If user is banned and not on the banned page, redirect them.
+    if (isLoggedIn && isBanned && !isBannedPage) {
+        return Response.redirect(new URL("/banned", req.nextUrl))
+    }
+
+    // If user is NOT banned but tries to access the banned page, redirect them to dashboard.
+    if (isLoggedIn && !isBanned && isBannedPage) {
+        return Response.redirect(new URL("/dashboard", req.nextUrl))
+    }
+
     if (isDashboardPage && !isLoggedIn) {
         return Response.redirect(new URL("/auth/login", req.nextUrl))
+    }
+
+    // Redirect logged-in users away from auth pages
+    if (isAuthPage && isLoggedIn) {
+        return Response.redirect(new URL("/dashboard", req.nextUrl))
     }
 
     // Role-based protection for the Admin Panel

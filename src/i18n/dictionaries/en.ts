@@ -176,6 +176,11 @@ export const en: Dictionary = {
             footer: "Allocation System // MoodSpace",
             establishing: "Creating keys...",
         },
+        banned: {
+            title: "Access Restricted",
+            message: "This account has been suspended for violating the platform's Aura Terms. Access to your digital room and the Command Center has been revoked.",
+            logout: "Terminate Access Protocol"
+        },
         promotion: {
             title: "Like this Mood?",
             subtitle: "Create your own space for feelings.",
@@ -402,25 +407,27 @@ export const en: Dictionary = {
             label: "What's the question or title?",
             placeholder: "Leave a little note...",
             color_label: "Main Color",
-            deploy: "Paste on mural",
+            deploy: "Launch to Mural",
             update: "Update Mural",
             visit_active: "People will be able to write in your mood.",
             tabs: {
-                connection: "Connection",
+                connection: "Configuration",
                 esthetics: "Aesthetics"
             },
             style_label: "Visual Theme",
             layout_label: "Display Mode",
             layouts: {
-                classic: "Classic (Box)",
-                scattered: "Scattered (Post-it)",
-                cloud: "Cloud (Floating)"
+                classic: "Classic Grid",
+                stream: "Neural Stream (Timeline)",
+                float: "Floating Nodes (Zen)",
+                scattered: "Chaos Mode"
             },
             styles: {
                 glass: "Studio Glass (Premium)",
+                onyx: "Onyx Dark (Stealth)",
+                silk: "Soft Silk (Editorial)",
                 vhs: "VHS / Retro (Analog)",
-                cyber: "Cyber / Minimal (Cleaner)",
-                paper: "Paper / Post-it (Physical)"
+                cyber: "Cyber / Minimal"
             }
         },
         mood: {

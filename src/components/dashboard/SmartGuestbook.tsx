@@ -2,44 +2,52 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { getGuestbookMessages, addGuestbookMessage } from "@/actions/guestbook"
-import { MessageSquare, Send, User, ShieldCheck, Terminal, Zap, Sparkles, StickyNote } from "lucide-react"
+import { MessageSquare, Send, ShieldCheck, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { useStudioBlock } from "@/hooks/use-studio-block"
 import { motion, AnimatePresence } from "framer-motion"
 
+import { MoodBlock } from "@/types/database"
+
 interface GuestbookTheme {
-    container: string;
-    header: string;
-    message: string;
-    input: string;
     accent: string;
-    icon: any;
-    extra?: string;
+    text: string;
+    secondary: string;
+}
+
+interface GuestbookContent {
+    title?: string;
+    color?: string;
+    style?: string;
+    layoutMode?: string;
+    density?: number;
+    opacity?: number;
 }
 
 /**
- * GuestbookBlock - Studio 3.0 💎🌪️✨
- * Evolução "Além do Container" com suporte a layouts Scattered e Cloud.
+ * SmartGuestbook - Signature Script Edition 🖋️✨
+ * Um layout "Decalque": sem molduras, sem fundos, apenas a essência das mensagens.
  */
-export function SmartGuestbook({ block, isPublic = false }: { block: any, isPublic?: boolean }) {
+export function SmartGuestbook({ block, isPublic = false }: { block: MoodBlock, isPublic?: boolean }) {
     const [messages, setMessages] = useState<any[]>([])
     const [newMessage, setNewMessage] = useState("")
     const [isSending, setIsSending] = useState(false)
+    const [isInputFocused, setIsInputFocused] = useState(false)
 
+    const content = block.content as GuestbookContent
     const {
         title = "Mural de Recados",
-        color = "#000000",
+        color = "#3b82f6",
         style = "glass",
         layoutMode = "classic",
         density = 1,
         opacity = 1
-    } = block.content as any
+    } = content
 
-    // Hook Padronizado Studio + Micro-Aesthetics Calibration
-    const { ref, fluidScale: originalScale, isSmall } = useStudioBlock()
-    const fluidScale = originalScale * density * 0.85 // Redução base para estética minimalista
+    const { ref, fluidScale: originalScale } = useStudioBlock()
+    const fluidScale = originalScale * density
 
     useEffect(() => {
         const loadMessages = async () => {
@@ -63,269 +71,197 @@ export function SmartGuestbook({ block, isPublic = false }: { block: any, isPubl
         setIsSending(false)
     }
 
-    // Deterministic Random helper for Scattered mode
-    const getSeed = (id: string) => {
-        let hash = 0;
-        for (let i = 0; i < id.length; i++) {
-            hash = id.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        return Math.abs(hash);
-    }
+    // Themes focused on direct typography - Memoized for performance
+    const themes: Record<string, GuestbookTheme> = useMemo(() => ({
+        glass: { accent: color!, text: "text-zinc-900 dark:text-white", secondary: "text-zinc-400 dark:text-zinc-500" },
+        onyx: { accent: color || "#ffffff", text: "text-white", secondary: "text-zinc-600" },
+        silk: { accent: "#c2a38a", text: "text-zinc-800", secondary: "text-zinc-400" },
+        vhs: { accent: "#00ff41", text: "text-[#00ff41]", secondary: "text-[#00ff41]/40" },
+        cyber: { accent: "#3b82f6", text: "text-white", secondary: "text-blue-900" }
+    }), [color])
 
-    // Theme Configs
-    const themes: Record<'glass' | 'vhs' | 'cyber' | 'paper', GuestbookTheme> = {
-        glass: {
-            container: "bg-white/10 dark:bg-black/20 backdrop-blur-xl border-white/20 dark:border-white/10",
-            header: "bg-white/5 border-white/10",
-            message: "bg-white/10 border-white/10 text-black dark:text-white backdrop-blur-md",
-            input: "bg-white/10 border-white/20 text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/30",
-            accent: color,
-            icon: Sparkles
-        },
-        vhs: {
-            container: "bg-[#050505] border-[#00ff41]/30 font-mono",
-            header: "bg-[#00ff41]/10 border-[#00ff41]/20",
-            message: "bg-black border-[#00ff41]/10 text-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.05)]",
-            input: "bg-black border-[#00ff41]/30 text-[#00ff41] placeholder:text-[#00ff41]/20",
-            accent: "#00ff41",
-            icon: Terminal,
-            extra: "vhs-scanlines"
-        },
-        cyber: {
-            container: "bg-zinc-950 border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]",
-            header: "bg-zinc-900 border-zinc-800",
-            message: "bg-zinc-900/50 border-zinc-800 text-zinc-300",
-            input: "bg-zinc-800/50 border-zinc-700 text-white",
-            accent: color || "#3b82f6",
-            icon: Zap
-        },
-        paper: {
-            container: "bg-[#fdf6e3] border-[#e6e0d0] shadow-xl",
-            header: "bg-[#eee8d5] border-[#e6e0d0]",
-            message: "bg-white border-[#eee8d5] text-amber-950 shadow-sm",
-            input: "bg-white/50 border-[#eee8d5] text-amber-950",
-            accent: "#859900",
-            icon: StickyNote
-        }
-    }
+    const currentTheme = themes[style!] || themes.glass
+    const isStream = layoutMode === 'stream'
+    const isScattered = layoutMode === 'scattered' || layoutMode === 'float'
 
-    const currentTheme = themes[style as keyof typeof themes] || themes.glass
-    const ThemeIcon = currentTheme.icon
+    // Helper to decode HTML entities like &lt; into <
+    // React's standard rendering {} will still escape these as text, 
+    // so it's safe to decode them here for display.
+    const decodeEntities = (html: string) => {
+        if (typeof document === 'undefined') return html;
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = html;
+        return textarea.value;
+    };
 
-    // Layout Classes
-    const isScattered = layoutMode === 'scattered'
-    const isCloud = layoutMode === 'cloud'
+    // We use a unique key for the message area to force re-render when layout mode changes
+    // ensuring animations and positions reset correctly for the ghost/decal effect
+    const layoutKey = `${layoutMode}-${style}`
 
     return (
         <div
             ref={ref}
-            className={cn(
-                "flex flex-col h-full transition-all duration-700 relative",
-                !isScattered && "rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-xl overflow-hidden",
-                !isScattered && currentTheme.container,
-                currentTheme.extra
-            )}
+            className="flex flex-col h-full transition-all duration-1000 relative group/guestbook bg-transparent border-none shadow-none overflow-visible"
             style={{ opacity }}
         >
-            {/* VHS Effect Overlay - Only if not scattered, or globally if desired */}
-            {style === 'vhs' && !isScattered && (
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(rgba(0,255,65,0.5)_0px,rgba(0,255,65,0.5)_1px,transparent_1px,transparent_2px)] z-50" />
-            )}
-
             {!isPublic && (
                 <div className="absolute inset-0 z-40 bg-transparent cursor-default" />
             )}
 
-            {/* Registry Header - Hidden in Scattered if small, or ultra minimal */}
-            {(layoutMode === 'classic' || !isSmall) && (
-                <div
-                    className={cn(
-                        "flex items-center justify-between shrink-0 transition-colors duration-500",
-                        !isScattered && currentTheme.header,
-                        !isScattered && "border-b"
-                    )}
-                    style={{ padding: `${Math.round(8 * fluidScale)}px ${Math.round(14 * fluidScale)}px` }}
-                >
-                    <div className="flex items-center" style={{ gap: Math.round(8 * fluidScale) }}>
-                        <ThemeIcon
-                            className="transition-all duration-300"
-                            style={{
-                                width: Math.round(10 * fluidScale),
-                                height: Math.round(10 * fluidScale),
-                                color: currentTheme.accent
-                            }}
-                        />
-                        <span
-                            className="font-black uppercase tracking-[0.3em] italic truncate"
-                            style={{
-                                fontSize: Math.round(8 * fluidScale),
-                                color: style === 'vhs' ? currentTheme.accent : 'inherit',
-                                opacity: 0.6
-                            }}
-                        >
-                            {title}
-                        </span>
-                    </div>
+            {/* Ghost Title - Editable in Real-time */}
+            {title && (
+                <div className="px-8 pt-8 pb-2 shrink-0">
+                    <h3 
+                        className={cn("font-black uppercase tracking-[0.4em] opacity-10 italic", currentTheme.text)}
+                        style={{ fontSize: Math.round(10 * fluidScale) }}
+                    >
+                        {title}
+                    </h3>
                 </div>
             )}
 
-            {/* Messages Area */}
+            {/* Messages Area - Free Flow */}
             <div
+                key={layoutKey}
                 className={cn(
-                    "flex-1 custom-scrollbar relative",
-                    isScattered ? "overflow-y-auto" : "overflow-y-auto"
+                    "flex-1 custom-scrollbar relative overflow-y-auto px-8 py-6 animate-in fade-in duration-700",
+                    isStream && "flex flex-col",
+                    isScattered && "flex flex-row flex-wrap justify-center content-start"
                 )}
-                style={{
-                    padding: Math.round(12 * fluidScale),
-                    display: 'flex',
-                    flexDirection: isScattered ? 'row' : 'column',
-                    flexWrap: isScattered ? 'wrap' : 'nowrap',
-                    alignContent: 'flex-start',
-                    justifyContent: isScattered ? 'center' : 'flex-start',
-                    gap: isScattered ? Math.round(20 * fluidScale) : Math.round(12 * fluidScale)
-                }}
+                style={{ gap: Math.round(32 * fluidScale) }}
             >
+                {/* Minimalist Signature Line for Stream Mode - Ultra Faint */}
+                {isStream && messages.length > 0 && (
+                    <div 
+                        className="absolute left-[32px] top-6 bottom-6 w-[0.5px] opacity-10"
+                        style={{ backgroundColor: currentTheme.accent }}
+                    />
+                )}
+
                 <AnimatePresence mode="popLayout">
                     {messages.length === 0 ? (
                         <motion.div
                             key="empty"
                             initial={{ opacity: 0 }}
-                            animate={{ opacity: 0.3 }}
-                            className="w-full h-full flex flex-col items-center justify-center text-zinc-400"
-                            style={{ gap: Math.round(8 * fluidScale) }}
+                            animate={{ opacity: 0.15 }}
+                            className={cn("w-full h-full flex flex-col items-center justify-center gap-4", currentTheme.text)}
                         >
-                            <MessageSquare style={{ width: Math.round(24 * fluidScale), height: Math.round(24 * fluidScale) }} />
-                            <p className="uppercase font-bold tracking-tighter text-center" style={{ fontSize: Math.round(8 * fluidScale) }}>
-                                No signals yet
+                            <MessageSquare style={{ width: Math.round(24 * fluidScale), height: Math.round(24 * fluidScale) }} strokeWidth={1} />
+                            <p className="uppercase font-black tracking-[0.4em] italic" style={{ fontSize: Math.round(7 * fluidScale) }}>
+                                Quiet Wall
                             </p>
                         </motion.div>
                     ) : (
-                        messages.map((msg, idx) => {
-                            const seed = getSeed(msg.id);
-                            const rotation = isScattered ? (seed % 6 - 3) : 0; // -3 to 3 deg
-
-                            return (
-                                <motion.div
-                                    key={msg.id}
-                                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    className={cn(
-                                        "group relative z-10 transition-all duration-500",
-                                        isScattered ? "w-[120px]" : "w-full"
-                                    )}
-                                    style={{
-                                        rotate: `${rotation}deg`,
-                                        width: isScattered ? Math.round(130 * fluidScale) : '100%'
-                                    }}
-                                >
-                                    {/* Scattered Mode Tape 🩹 */}
-                                    {isScattered && (
-                                        <div
-                                            className="absolute top-[-8px] left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
-                                            style={{
-                                                width: Math.round(40 * fluidScale),
-                                                height: Math.round(12 * fluidScale),
-                                                backgroundColor: style === 'paper' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.2)',
-                                                border: '1px solid rgba(0,0,0,0.05)',
-                                                transform: `rotate(${rotation * -2}deg)`
-                                            }}
-                                        />
-                                    )}
-
-                                    <div className="flex items-center" style={{ gap: Math.round(6 * fluidScale), marginBottom: Math.round(4 * fluidScale) }}>
-                                            <div className={cn(
-                                            "rounded-xl font-bold uppercase tracking-widest flex items-center border transition-all duration-500 shadow-sm",
-                                            msg.isAdmin
-                                                ? "bg-zinc-900 text-white dark:bg-white dark:text-black border-transparent"
-                                                : "bg-white dark:bg-zinc-800 text-zinc-400 border-zinc-100 dark:border-zinc-700"
-                                        )} style={{
-                                            padding: `${Math.round(2 * fluidScale)}px ${Math.round(8 * fluidScale)}px`,
-                                            fontSize: Math.max(7, Math.round(8 * fluidScale)),
-                                            gap: Math.round(4 * fluidScale)
-                                        }}>
-                                            {msg.isAdmin ? <ShieldCheck style={{ width: Math.round(10 * fluidScale), height: Math.round(10 * fluidScale) }} /> : <User style={{ width: Math.round(10 * fluidScale), height: Math.round(10 * fluidScale) }} />}
-                                            <span className="truncate max-w-[80px]">{msg.author}</span>
-                                        </div>
+                        messages.map((msg, idx) => (
+                            <motion.div
+                                key={msg.id}
+                                initial={{ opacity: 0, filter: "blur(6px)", y: 10 }}
+                                animate={{ 
+                                    opacity: 1, 
+                                    filter: "blur(0px)",
+                                    y: 0,
+                                    transition: { delay: idx * 0.05, duration: 1, ease: "easeOut" } 
+                                }}
+                                className={cn(
+                                    "relative group/msg transition-all duration-700",
+                                    isScattered ? "w-[160px]" : "w-full max-w-[90%]",
+                                    isStream && "pl-10"
+                                )}
+                                style={layoutMode === 'float' ? {
+                                    y: [0, -12, 0],
+                                    transition: { 
+                                        y: { repeat: Infinity, duration: 5 + (idx % 2), ease: "easeInOut", delay: idx * 0.4 }
+                                    }
+                                } as any : {}}
+                            >
+                                {/* Message Content - Direct Wall Writing */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-baseline gap-2 mb-1">
+                                        <span 
+                                            className={cn("text-[8px] font-black uppercase tracking-[0.2em] opacity-20 italic shrink-0", currentTheme.text)}
+                                        >
+                                            {msg.author}
+                                        </span>
+                                        {msg.isAdmin && (
+                                            <ShieldCheck 
+                                                className="w-2 h-2 opacity-10" 
+                                                style={{ color: currentTheme.accent }}
+                                            />
+                                        )}
                                     </div>
-
+                                    
                                     <div
                                         className={cn(
-                                            "rounded-2xl leading-relaxed transition-all duration-500 shadow-sm",
-                                            isCloud ? "bg-transparent border-none shadow-none" : "border border-zinc-100 dark:border-zinc-800",
-                                            !isCloud && currentTheme.message,
-                                            isScattered && "shadow-md group-hover:shadow-xl",
-                                            isCloud && "text-center blur-[0.2px] hover:blur-0"
+                                            "transition-all duration-1000 relative whitespace-pre-wrap break-words",
+                                            currentTheme.text,
+                                            !isScattered && "hover:translate-x-1"
                                         )}
                                         style={{
-                                            padding: Math.round(12 * fluidScale),
-                                            fontSize: Math.round(11 * fluidScale),
-                                            borderLeft: (msg.isAdmin && !isCloud) ? `4px solid ${currentTheme.accent}` : undefined,
-                                            color: isCloud ? currentTheme.accent : 'inherit',
-                                            textShadow: isCloud ? `0 0 ${Math.round(4 * fluidScale)}px ${currentTheme.accent}44` : 'none'
+                                            fontSize: Math.round(14 * fluidScale),
+                                            lineHeight: 1.6,
+                                            letterSpacing: "-0.01em",
+                                            fontWeight: 400
                                         }}
                                     >
-                                        {msg.content}
+                                        {decodeEntities(msg.content)}
                                     </div>
-
-                                    {isScattered && (
-                                        <div className="mt-1 text-right opacity-20 font-black" style={{ fontSize: Math.round(5 * fluidScale) }}>
-                                            {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: false, locale: ptBR })}
-                                        </div>
-                                    )}
-                                </motion.div>
-                            )
-                        })
+                                    
+                                    <div className="mt-1 text-[6px] font-bold uppercase tracking-widest opacity-0 group-hover/msg:opacity-10 transition-opacity duration-1000">
+                                        {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: false, locale: ptBR })}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))
                     )}
                 </AnimatePresence>
             </div>
 
-            {/* Input Area */}
+            {/* Signature Line - Ultra Minimal Input */}
             {isPublic && (
-                <form
-                    onSubmit={handleSend}
-                    className={cn(
-                        "flex shrink-0 transition-all duration-700",
-                        !isScattered && "border-t",
-                        style === 'vhs' ? "bg-black" : "bg-transparent"
-                    )}
-                    style={{ padding: Math.round(10 * fluidScale), gap: Math.round(8 * fluidScale) }}
-                >
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Deixe seu recado..."
+                <div className="px-6 py-4 shrink-0 relative z-20">
+                    <form
+                        onSubmit={handleSend}
                         className={cn(
-                            "flex-1 border rounded-2xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-500 px-4",
-                            currentTheme.input,
-                            isScattered && "bg-white/50 border-zinc-100 dark:border-zinc-800"
+                            "flex items-center gap-4 transition-all duration-700 border-b",
+                            isInputFocused ? "opacity-100" : "opacity-20",
+                            currentTheme.text
                         )}
-                        style={{
-                            height: Math.round(40 * fluidScale),
-                            fontSize: Math.round(11 * fluidScale),
-                            borderColor: style === 'vhs' ? `${currentTheme.accent}44` : undefined
-                        }}
-                    />
-                    <button
-                        type="submit"
-                        disabled={!newMessage.trim() || isSending}
-                        className="rounded-2xl flex items-center justify-center hover:scale-[1.05] active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all shadow-lg border-none shrink-0"
-                        style={{
-                            width: Math.round(40 * fluidScale),
-                            height: Math.round(40 * fluidScale),
-                            backgroundColor: style === 'vhs' ? 'black' : currentTheme.accent,
-                            color: 'white'
+                        style={{ 
+                            paddingBottom: Math.round(8 * fluidScale),
+                            borderColor: isInputFocused ? currentTheme.accent : 'currentColor'
                         }}
                     >
-                        {isSending ? (
-                            <div className="w-4 h-4 border-2 border-current border-t-transparent animate-spin rounded-full" />
-                        ) : (
-                            <Send style={{ width: Math.round(14 * fluidScale), height: Math.round(14 * fluidScale) }} />
-                        )}
-                    </button>
-                </form>
+                        <span className="text-[11px] font-medium italic opacity-40 shrink-0 tracking-tight">escreva um rastro...</span>
+                        <input
+                            type="text"
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onFocus={() => setIsInputFocused(true)}
+                            onBlur={() => setIsInputFocused(false)}
+                            placeholder=""
+                            className="flex-1 bg-transparent border-none focus:ring-0 outline-none px-0 text-[14px] font-light tracking-wide italic"
+                            style={{ height: Math.round(28 * fluidScale) }}
+                        />
+                        <button
+                            type="submit"
+                            disabled={!newMessage.trim() || isSending}
+                            className={cn(
+                                "flex items-center justify-center transition-all duration-700",
+                                !newMessage.trim() ? "opacity-0 scale-50" : "opacity-100 scale-100"
+                            )}
+                            style={{ color: currentTheme.accent }}
+                        >
+                            {isSending ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Send className="w-4 h-4" />
+                            )}
+                        </button>
+                    </form>
+                </div>
             )}
         </div>
     )
 }
+
+

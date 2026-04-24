@@ -1,11 +1,9 @@
 "use client"
 
-import { useState, useTransition, useEffect } from "react"
+import { useState, useTransition } from "react"
 import { addMoodBlock } from "@/actions/profile"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { MessageSquare, Sparkles, Globe, Palette, Zap, Box, Cloud, LayoutList, LayoutGrid, Activity } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { MessageSquare, Sparkles, Globe, Zap, Box, LayoutList, Cloud, LayoutGrid, Activity, Eye, StickyNote } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
 import { MoodBlock } from "@/types/database"
 import { BLEND_MODES } from "@/lib/editor-constants"
@@ -22,22 +20,24 @@ import {
 
 const GUESTBOOK_THEMES = [
     { id: 'glass', label: 'Studio Glass (Premium)', icon: Sparkles },
+    { id: 'onyx', label: 'Onyx Dark (Stealth)', icon: Eye },
+    { id: 'silk', label: 'Soft Silk (Editorial)', icon: StickyNote },
     { id: 'vhs', label: 'VHS / Retro (Analógico)', icon: Activity },
-    { id: 'cyber', label: 'Cyber / Minimal (Cleaner)', icon: Zap },
-    { id: 'paper', label: 'Paper / Post-it (Físico)', icon: Activity }
+    { id: 'cyber', label: 'Cyber / Minimal', icon: Zap }
 ]
 
 const LAYOUT_MODES = [
     { id: 'classic', icon: Box },
-    { id: 'scattered', icon: LayoutGrid },
-    { id: 'cloud', icon: Cloud }
+    { id: 'stream', icon: LayoutList },
+    { id: 'float', icon: Cloud },
+    { id: 'scattered', icon: LayoutGrid }
 ]
 
 type TabType = 'connection' | 'esthetics'
 
 interface GuestbookEditorProps {
     block?: MoodBlock | null
-    onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
+    onUpdate?: (updates: Partial<MoodBlock>) => void
     onClose?: () => void
 }
 
@@ -55,12 +55,15 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
     const [opacity, setOpacity] = useState(content.opacity ?? 1)
     const [blendMode, setBlendMode] = useState(content.blendMode || 'normal')
 
-    useEffect(() => {
+    const triggerUpdate = (updates: any) => {
         if (!block?.id || !onUpdate) return
-        onUpdate(block.id, {
-            content: { title, color, style, layoutMode, density, opacity, blendMode }
+        onUpdate({
+            content: {
+                title, color, style, layoutMode, density, opacity, blendMode,
+                ...updates
+            }
         })
-    }, [title, color, style, layoutMode, density, opacity, blendMode, block?.id, onUpdate])
+    }
 
     const handleSave = () => {
         const finalContent = { title, color, style, layoutMode, density, opacity, blendMode }
@@ -106,7 +109,10 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                                 <Input
                                     placeholder={t('editors.guestbook.placeholder')}
                                     value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
+                                    onChange={(e) => {
+                                        setTitle(e.target.value)
+                                        triggerUpdate({ title: e.target.value })
+                                    }}
                                     className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl pl-16 h-14 text-[13px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20"
                                 />
                             </div>
@@ -117,7 +123,10 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                         <GridSelector
                             options={LAYOUT_MODES.map(l => ({ id: l.id as any, label: t(`editors.guestbook.layouts.${l.id}`), icon: l.icon }))}
                             activeId={layoutMode}
-                            onChange={(id) => setLayoutMode(id as any)}
+                            onChange={(id) => {
+                                setLayoutMode(id as any)
+                                triggerUpdate({ layoutMode: id })
+                            }}
                             columns={3}
                             variant="ghost"
                             id="guestbook-layouts"
@@ -125,7 +134,10 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                     </EditorSection>
 
                     <EditorSection title="Cor Principal">
-                        <EditorColorPicker value={color} onChange={setColor} variant="ghost" />
+                        <EditorColorPicker value={color} onChange={(val) => {
+                            setColor(val)
+                            triggerUpdate({ color: val })
+                        }} variant="ghost" />
                     </EditorSection>
                 </div>
             ) : (
@@ -138,7 +150,10 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                                 label: t(`editors.guestbook.styles.${th.id}`) || th.label
                             }))}
                             activeId={style}
-                            onChange={setStyle}
+                            onChange={(id) => {
+                                setStyle(id)
+                                triggerUpdate({ style: id })
+                            }}
                         />
                     </EditorSection>
 
@@ -148,7 +163,10 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                         unit="%"
                         min={50}
                         max={150}
-                        onChange={(v) => setDensity(v / 100)}
+                        onChange={(v) => {
+                            setDensity(v / 100)
+                            triggerUpdate({ density: v / 100 })
+                        }}
                         icon={Zap}
                         variant="ghost"
                     />
@@ -159,7 +177,10 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                         unit="%"
                         min={0}
                         max={100}
-                        onChange={(v) => setOpacity(v / 100)}
+                        onChange={(v) => {
+                            setOpacity(v / 100)
+                            triggerUpdate({ opacity: v / 100 })
+                        }}
                         variant="ghost"
                     />
 
@@ -168,7 +189,10 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                             id="guestbook-blend"
                             options={BLEND_MODES.map(m => ({ id: m, label: m.replace('-', ' ') }))}
                             activeId={blendMode}
-                            onChange={(id) => setBlendMode(id as any)}
+                            onChange={(id) => {
+                                setBlendMode(id as any)
+                                triggerUpdate({ blendMode: id })
+                            }}
                         />
                     </EditorSection>
                 </div>

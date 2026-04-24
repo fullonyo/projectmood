@@ -16,6 +16,22 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **Landing Page (`src/app/page.tsx`)**: Entrada imersiva com slogan dinâmico. Redireciona usuários logados diretamente para o Dashboard via Middleware.
 - **Autenticação**: NextAuth com provedor de credenciais. Formulários em `src/components/auth/`.
 
+### Autenticação & Segurança (Auth Flow) 🛡️🔐
+
+O MoodSpace utiliza um fluxo de autenticação otimizado para reduzir a fricção e garantir a proteção de rotas:
+
+1. **Middleware de Acesso**:
+   - **Páginas Protegidas**: `/dashboard` e `/admin` exigem autenticação. Redirecionam para `/auth/login` se o usuário estiver deslogado.
+   - **Páginas de Auth**: `/auth/login` e `/auth/register` são inacessíveis para usuários já logados, redirecionando-os automaticamente para o `/dashboard`.
+   - **Página Inicial**: A Landing Page (`/`) redireciona usuários logados para o `/dashboard`.
+
+2. **Fluxo de Registro (Auto-Login)**:
+   - Após a criação bem-sucedida da conta no `register-form.tsx`, o sistema inicia automaticamente o protocolo de login (`signIn`) com as credenciais fornecidas.
+   - Isso elimina a necessidade de o usuário digitar seus dados duas vezes, levando-o diretamente ao dashboard em menos de 2 segundos após o registro.
+
+3. **Role-Based Access Control (RBAC)**:
+   - A rota `/admin` possui proteção dupla: exige login e valida se o `user.role` é estritamente `ADMIN`. Caso contrário, o usuário é redirecionado para o dashboard padrão.
+
 ### Dashboard Studio
 - **Layout Simétrico**: O dashboard não possui mais header superior. Agora utiliza duas sidebars flutuantes:
 21.   - **Sidebar Esquerda (Ferramentas)**: Criar e editar blocos (Estilo, Escrita, Mídia, Criativo).

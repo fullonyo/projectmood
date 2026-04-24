@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +17,8 @@ export default function LoginForm() {
     const [error, setError] = useState<string | undefined>("")
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const callbackUrl = searchParams.get("callbackUrl")
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -38,7 +40,7 @@ export default function LoginForm() {
                 setError(t('auth.login.protocol_denied'))
                 setLoading(false)
             } else {
-                router.push("/dashboard")
+                router.push(callbackUrl || "/dashboard")
             }
         } catch (err) {
             setError(t('auth.login.protocol_error'))

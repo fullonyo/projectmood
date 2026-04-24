@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { registerUser } from "@/actions/register"
 import { Button } from "@/components/ui/button"
@@ -37,9 +38,23 @@ export default function RegisterForm() {
 
         if (res.success) {
             setSuccess(t('auth.register.identity_established'))
-            setTimeout(() => {
-                router.push("/auth/login")
-            }, 2000)
+            
+            // Auto-login protocol initiation
+            const loginRes = await signIn("credentials", {
+                email: data.email as string,
+                password: data.password as string,
+                redirect: false,
+            })
+
+            if (!loginRes?.error) {
+                setTimeout(() => {
+                    router.push("/dashboard")
+                }, 1500)
+            } else {
+                setTimeout(() => {
+                    router.push("/auth/login")
+                }, 2000)
+            }
         }
     }
 
