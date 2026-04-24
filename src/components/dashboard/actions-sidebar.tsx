@@ -43,11 +43,13 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
     // Estados locais para feedback instantâneo após edição
     const [currentName, setCurrentName] = useState(initialName)
     const [currentUsername, setCurrentUsername] = useState(initialUsername)
-
-    // Sincroniza estado local com props do servidor (importante após router.refresh)
+    const [mounted, setMounted] = useState(false)
+    
+    // Sincroniza estado local com props do servidor e define montagem
     useEffect(() => {
         setCurrentName(initialName)
         setCurrentUsername(initialUsername)
+        setMounted(true)
     }, [initialName, initialUsername])
 
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -230,7 +232,7 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                                 {t('publish.button')}
                             </div>
                             <div className="flex items-center gap-3">
-                                {publishedAt && (
+                                {mounted && publishedAt && (
                                     <span className="text-[8px] font-medium opacity-60 flex items-center gap-1">
                                         {getRelativeTime(publishedAt, t)}
                                     </span>

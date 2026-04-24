@@ -70,6 +70,12 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                     author={content.author}
                     showQuotes={content.showQuotes}
                     icon={content.icon}
+                    dialogueStyle={content.dialogueStyle}
+                    dialogueFormat={content.dialogueFormat}
+                    nameStyle={content.nameStyle}
+                    dialogueLines={content.dialogueLines}
+                    typingRhythm={content.typingRhythm}
+                    revealMode={content.revealMode}
                 />
             </FrameContainer>
         )
