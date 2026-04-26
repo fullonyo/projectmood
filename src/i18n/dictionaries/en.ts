@@ -764,8 +764,8 @@ export const en: Dictionary = {
         history_error: "error loading history"
     },
     multiverse: {
-        control_title: "Multiverse Control",
-        control_subtitle: "Your spaces and connections",
+        control_title: "Your Spaces",
+        control_subtitle: "Manage your spaces",
         active_count: "{count} active spaces",
         create_btn: "Open New Mood Space",
         modal_title: "New Mood Space",
@@ -776,7 +776,7 @@ export const en: Dictionary = {
         type_permanent: "Permanent",
         type_temporary: "Temporary",
         core_identity: "Core Identity",
-        pocket_dimensions: "Pocket Dimensions",
+        pocket_dimensions: "Other Spaces",
         protocol_label: "Existence Protocol",
         protocol_eternal: "Eternal",
         protocol_ephemeral: "Ephemeral",

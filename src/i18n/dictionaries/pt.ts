@@ -764,8 +764,8 @@ export const pt = {
         history_error: "erro ao carregar histórico"
     },
     multiverse: {
-        control_title: "Controle do Multiverso",
-        control_subtitle: "Seus espaços e conexões",
+        control_title: "Seus Espaços",
+        control_subtitle: "Gerencie seus espaços",
         active_count: "{count} espaços ativos",
         create_btn: "Abrir Novo Espaço Mood",
         modal_title: "Novo Espaço Mood",
@@ -776,7 +776,7 @@ export const pt = {
         type_permanent: "Permanente",
         type_temporary: "Temporário",
         core_identity: "Identidade Principal",
-        pocket_dimensions: "Dimensões de Bolso",
+        pocket_dimensions: "Outros Espaços",
         protocol_label: "Protocolo de Existência",
         protocol_eternal: "Eterno",
         protocol_ephemeral: "Efêmero",

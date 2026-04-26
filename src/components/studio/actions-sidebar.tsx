@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useTransition } from "react"
+import { useState, useEffect, useRef, useTransition, memo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
     Upload, 
@@ -13,7 +13,8 @@ import {
     Settings, 
     History,
     Layout,
-    Link2
+    ArrowUpRight,
+    ChevronRight
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -52,42 +53,86 @@ interface ActionsSidebarProps {
 
 // ─── SPACES PANEL ──────────────────────────────────────────────────────────
 
+const RoomItem = memo(({ room, isActive, onSwitch, onDelete, username }: { room: any, isActive: boolean, onSwitch: (id: string) => void, onDelete: (id: string) => void, username: string }) => {
+    return (
+        <div 
+            onClick={() => onSwitch(room.id)}
+            className={cn(
+                "group relative flex items-center justify-between py-3 px-3 rounded-2xl transition-all duration-500 cursor-pointer",
+                isActive 
+                    ? "bg-zinc-50 dark:bg-white/[0.03]" 
+                    : "hover:bg-zinc-50/50 dark:hover:bg-white/[0.01]"
+            )}
+        >
+            <div className="flex items-center gap-4 min-w-0">
+                <div className={cn(
+                    "w-1 h-4 rounded-full transition-all duration-500",
+                    isActive ? "bg-blue-500 scale-y-110" : "bg-transparent group-hover:bg-zinc-200 dark:group-hover:bg-zinc-800"
+                )} />
+                
+                <div className="flex flex-col min-w-0">
+                    <span className={cn(
+                        "text-[11px] font-black uppercase tracking-widest truncate transition-colors",
+                        isActive ? "text-zinc-950 dark:text-white" : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
+                    )}>
+                        {room.title || "Espaço Sem Nome"}
+                    </span>
+                    <span className="text-[7px] font-bold tracking-[0.05em] text-zinc-400/60 truncate italic mt-0.5">
+                        {room.slug ? `/@${username}/${room.slug}` : `/@${username}`}
+                    </span>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                {!room.isPrimary && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onDelete(room.id); }}
+                        className="p-2 text-zinc-400 hover:text-red-500 transition-colors"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                )}
+                <ArrowUpRight className="w-3 h-3 text-zinc-300" />
+            </div>
+        </div>
+    )
+})
+
+RoomItem.displayName = "RoomItem"
+
 function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[], currentRoomId: string, username: string, onClose: () => void }) {
     const { dict } = useTranslation()
     const router = useRouter()
     const [isCreating, startCreateTransition] = useTransition()
+    const [isCreatingForm, setIsCreatingForm] = useState(false)
+    const [roomToDelete, setRoomToDelete] = useState<string | null>(null)
+    const [isDeleting, startDeleteTransition] = useTransition()
+
+    // Form State
+    const [newTitle, setNewTitle] = useState("")
+    const [newType, setNewType] = useState<'PERMANENT' | 'TEMPORARY'>('PERMANENT')
+    const [newExpiresAt, setNewExpiresAt] = useState("")
+    const [newMaxViews, setNewMaxViews] = useState("")
+
+    const primaryRoom = rooms.find(r => r.isPrimary)
+    const secondaryRooms = rooms.filter(r => !r.isPrimary)
 
     const handleSwitchSpace = (roomId: string) => {
         const targetRoom = rooms.find(r => r.id === roomId)
-        if (targetRoom?.isPrimary) {
-            router.push('/studio')
-        } else {
-            router.push(`/studio/${targetRoom.slug}`)
-        }
+        if (targetRoom?.isPrimary) router.push('/studio')
+        else router.push(`/studio/${targetRoom.slug}`)
         onClose()
     }
-
-    const [isCreatingForm, setIsCreatingForm] = useState(false)
-    const [newTitle, setNewTitle] = useState("")
-    const [newType, setNewType] = useState<'PERMANENT' | 'TEMPORARY'>('PERMANENT')
-    const [newExpiresAt, setNewExpiresAt] = useState<string>("")
-    const [newMaxViews, setNewMaxViews] = useState<string>("")
-    const [roomToDelete, setRoomToDelete] = useState<string | null>(null)
-    const [isDeleting, startDeleteTransition] = useTransition()
 
     const handleDeleteRoom = (roomId: string) => {
         startDeleteTransition(async () => {
             const { deleteRoom } = await import("@/actions/profile")
             const res = await deleteRoom(roomId)
             if (res.success) {
-                toast.success(dict.multiverse.destroy_success)
-                if (roomId === currentRoomId) {
-                    router.push('/studio')
-                }
+                toast.success("Espaço removido")
+                if (roomId === currentRoomId) router.push('/studio')
                 router.refresh()
                 setRoomToDelete(null)
-            } else {
-                toast.error(res.error || dict.multiverse.destroy_error)
             }
         })
     }
@@ -117,206 +162,164 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
         })
     }
 
-    const primaryRoom = rooms.find(r => r.isPrimary)
-    const secondaryRooms = rooms.filter(r => !r.isPrimary)
-
-    const RoomCard = ({ room }: { room: any }) => (
-        <div 
-            key={room.id}
-            onClick={() => handleSwitchSpace(room.id)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') handleSwitchSpace(room.id)
-            }}
-            className={cn(
-                "w-full text-left group p-4 rounded-2xl border transition-all relative overflow-hidden cursor-pointer",
-                room.id === currentRoomId 
-                    ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20" 
-                    : "bg-zinc-50 dark:bg-white/5 border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
-            )}
-        >
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    {room.isPrimary ? <ShieldCheck className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
-                    <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[120px]">
-                        {room.title || (room.isPrimary ? dict.multiverse.primary_space : dict.multiverse.pocket_dimension)}
-                    </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    {room.isPrimary && (
-                        <span className={cn(
-                            "text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full",
-                            room.id === currentRoomId 
-                                ? "bg-white/20 text-white" 
-                                : "bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                        )}>
-                            Principal
-                        </span>
-                    )}
-                    {room.type === 'TEMPORARY' && (
-                        <div className="flex items-center gap-1 text-[8px] font-black uppercase tracking-tighter opacity-70">
-                            <span className="w-1 h-1 rounded-full bg-amber-400" />
-                            {dict.multiverse.pocket_dimension}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="flex items-center justify-between mt-4">
-                <span className={cn(
-                    "text-[8px] font-bold tracking-widest uppercase opacity-40",
-                    room.id === currentRoomId ? "text-white opacity-60" : "text-zinc-500"
-                )}>
-                    {room.slug ? `/${room.slug}` : `/@${username}`}
-                </span>
-                {!room.isPrimary && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            setRoomToDelete(room.id)
-                        }}
-                        className={cn(
-                            "p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/10 text-red-500",
-                            room.id === currentRoomId && "text-white hover:bg-white/10"
-                        )}
-                    >
-                        <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                )}
-            </div>
-        </div>
-    )
-
     return (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
             <EditorHeader 
                 title={dict.multiverse.control_title} 
-                onClose={onClose}
+                subtitle={dict.multiverse.control_subtitle}
+                onClose={onClose} 
             />
 
-            <div className="flex-1 overflow-y-auto px-1 pt-6 custom-scrollbar space-y-10">
-                {/* Primary Space */}
+            <div className="flex-1 overflow-y-auto px-4 py-8 custom-scrollbar space-y-16">
+                {/* HERO: PRIMARY SPACE */}
                 {primaryRoom && (
-                    <div className="space-y-4">
-                        <div className="px-1 text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{dict.multiverse.core_identity}</div>
-                        <RoomCard room={primaryRoom} />
-                    </div>
+                    <section className="relative px-2">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <ShieldCheck className={cn("w-4 h-4", primaryRoom.id === currentRoomId ? "text-blue-500" : "text-zinc-300")} />
+                                <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400">Espaço Principal</span>
+                            </div>
+                            {primaryRoom.id === currentRoomId && (
+                                <span className="flex h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                            )}
+                        </div>
+
+                        <div 
+                            onClick={() => handleSwitchSpace(primaryRoom.id)}
+                            className={cn(
+                                "group cursor-pointer transition-all duration-700 relative",
+                                primaryRoom.id === currentRoomId ? "opacity-100" : "opacity-40 hover:opacity-100"
+                            )}
+                        >
+                            <h2 className={cn(
+                                "text-4xl font-black italic tracking-tighter leading-none transition-all duration-700",
+                                primaryRoom.id === currentRoomId ? "text-zinc-950 dark:text-white scale-105 origin-left" : "text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white"
+                            )}>
+                                {primaryRoom.title || "Origem"}
+                            </h2>
+                            <p className="mt-4 text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400 italic">
+                                Sintonizado com a sua Identidade Base
+                            </p>
+                        </div>
+                    </section>
                 )}
 
-                {/* Pocket Dimensions */}
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between pr-2">
-                        <div className="px-1 text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">{dict.multiverse.pocket_dimensions}</div>
+                {/* LIST: SECONDARY SPACES */}
+                <section className="space-y-10 pt-10 border-t border-zinc-50 dark:border-white/[0.03]">
+                    <div className="flex items-center justify-between px-2">
+                        <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400 italic">Espaços Adicionais</span>
                         <button 
                             onClick={() => setIsCreatingForm(true)}
-                            className="p-1.5 rounded-full bg-zinc-100 dark:bg-white/5 hover:bg-blue-500/10 hover:text-blue-500 transition-all active:scale-90"
+                            className="w-8 h-8 rounded-full flex items-center justify-center bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:bg-blue-500 hover:text-white transition-all active:scale-90"
                         >
-                            <Plus className="w-3.5 h-3.5" />
+                            <Plus className="w-4 h-4" />
                         </button>
                     </div>
 
-                    <div className="grid gap-3">
+                    <div className="space-y-2">
                         {secondaryRooms.length > 0 ? (
-                            secondaryRooms.map(room => <RoomCard key={room.id} room={room} />)
+                            secondaryRooms.map(room => (
+                                <RoomItem 
+                                    key={room.id}
+                                    room={room}
+                                    isActive={room.id === currentRoomId}
+                                    onSwitch={handleSwitchSpace}
+                                    onDelete={setRoomToDelete}
+                                    username={username}
+                                />
+                            ))
                         ) : (
-                            <div className="py-12 flex flex-col items-center justify-center border-2 border-dashed border-zinc-100 dark:border-zinc-800/50 rounded-3xl opacity-40">
+                            <div className="py-12 flex flex-col items-center justify-center opacity-20">
                                 <Globe className="w-8 h-8 mb-4 stroke-[1px]" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-center px-8 leading-relaxed">
-                                    {dict.multiverse.pocket_dimensions}
-                                </span>
+                                <span className="text-[9px] font-black uppercase tracking-[0.3em]">Nenhum espaço adicional</span>
                             </div>
                         )}
                     </div>
-                </div>
+                </section>
 
+                <ConfirmModal
+                    isOpen={!!roomToDelete}
+                    onClose={() => setRoomToDelete(null)}
+                    onConfirm={() => roomToDelete && handleDeleteRoom(roomToDelete)}
+                    title="Remover Espaço?"
+                    message="Esta ação não pode ser desfeita. Todo o conteúdo deste espaço será permanentemente deletado."
+                    confirmText="Remover"
+                    cancelText="Manter"
+                    type="danger"
+                    isLoading={isDeleting}
+                />
+                
                 <ConfirmModal
                     isOpen={isCreatingForm}
                     onClose={() => setIsCreatingForm(false)}
                     onConfirm={handleCreateSpace}
                     title={dict.multiverse.modal_title}
                     message={dict.multiverse.modal_message}
-                    confirmText={dict.multiverse.create_btn}
+                    confirmText={isCreating ? "Criando..." : dict.multiverse.create_btn}
                     cancelText={dict.common.cancel}
                     isLoading={isCreating}
                 >
                     <div className="space-y-6 pt-4">
                         <div className="space-y-2">
-                            <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">{dict.multiverse.field_title}</label>
+                            <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Título do Espaço</label>
                             <input 
                                 autoFocus
                                 value={newTitle}
                                 onChange={(e) => setNewTitle(e.target.value)}
-                                placeholder={dict.multiverse.field_title_placeholder}
+                                placeholder="Ex: Galeria, Diário..."
                                 className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border-none text-[12px] font-bold tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none shadow-sm"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">{dict.multiverse.field_type}</label>
+                            <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Tipo de Espaço</label>
                             <div className="grid grid-cols-2 gap-2">
                                 <button 
                                     onClick={() => setNewType('PERMANENT')}
                                     className={cn(
                                         "h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                                        newType === 'PERMANENT' ? "bg-zinc-900 text-white dark:bg-white dark:text-black" : "bg-zinc-50 dark:bg-zinc-900 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                        newType === 'PERMANENT' ? "bg-zinc-900 text-white dark:bg-white dark:text-black" : "bg-zinc-50 dark:bg-zinc-900 text-zinc-400"
                                     )}
                                 >
-                                    {dict.multiverse.type_permanent}
+                                    Permanente
                                 </button>
                                 <button 
                                     onClick={() => setNewType('TEMPORARY')}
                                     className={cn(
                                         "h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                                        newType === 'TEMPORARY' ? "bg-zinc-900 text-white dark:bg-white dark:text-black" : "bg-zinc-50 dark:bg-zinc-900 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                        newType === 'TEMPORARY' ? "bg-zinc-900 text-white dark:bg-white dark:text-black" : "bg-zinc-50 dark:bg-zinc-900 text-zinc-400"
                                     )}
                                 >
-                                    {dict.multiverse.type_temporary}
+                                    Temporário
                                 </button>
                             </div>
                         </div>
 
                         {newType === 'TEMPORARY' && (
-                            <motion.div 
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="space-y-4 pt-2"
-                            >
+                            <div className="space-y-4 pt-2">
                                 <div className="space-y-2">
-                                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">{dict.multiverse.field_expiration}</label>
+                                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Expiração</label>
                                     <input 
                                         type="datetime-local"
                                         value={newExpiresAt}
                                         onChange={(e) => setNewExpiresAt(e.target.value)}
-                                        className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border-none text-[12px] font-bold tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none shadow-sm dark:color-scheme-dark"
+                                        className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border-none text-[12px] font-bold tracking-widest outline-none shadow-sm dark:color-scheme-dark"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">{dict.multiverse.field_max_views}</label>
+                                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Limite de Vistas</label>
                                     <input 
                                         type="number"
                                         value={newMaxViews}
                                         onChange={(e) => setNewMaxViews(e.target.value)}
-                                        placeholder={dict.multiverse.field_max_views_placeholder}
-                                        className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border-none text-[12px] font-bold tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none shadow-sm"
+                                        placeholder="Ilimitado se vazio"
+                                        className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border-none text-[12px] font-bold tracking-widest outline-none shadow-sm"
                                     />
                                 </div>
-                            </motion.div>
+                            </div>
                         )}
                     </div>
                 </ConfirmModal>
-
-                <ConfirmModal
-                    isOpen={!!roomToDelete}
-                    onClose={() => setRoomToDelete(null)}
-                    onConfirm={() => roomToDelete && handleDeleteRoom(roomToDelete)}
-                    title={dict.multiverse.destroy_confirm_title}
-                    message={dict.multiverse.destroy_confirm_message}
-                    confirmText={dict.common.delete}
-                    cancelText={dict.common.cancel}
-                    type="danger"
-                    isLoading={isDeleting}
-                />
             </div>
         </div>
     )
@@ -357,11 +360,6 @@ export function ActionsSidebar({
         setCurrentUsername(initialUsername)
         setMounted(true)
     }, [initialName, initialUsername])
-
-    useEffect(() => {
-        const primaryAvatar = allRooms.find(r => r.isPrimary)?.avatarUrl || userAvatar || null
-        setCurrentAvatar(primaryAvatar)
-    }, [userAvatar, allRooms])
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
@@ -552,7 +550,7 @@ export function ActionsSidebar({
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto overflow-x-hidden px-8 pb-6 custom-scrollbar space-y-10">
+                        <div className="flex-1 overflow-y-auto overflow-x-hidden px-8 pb-6 custom-scrollbar space-y-10 flex flex-col">
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-3">
                                     <button 
@@ -618,9 +616,9 @@ export function ActionsSidebar({
                 isOpen={showPublishModal}
                 onClose={() => setShowPublishModal(false)}
                 onConfirm={handlePublish}
-                title={t('publish.modal_title')}
-                message={t('publish.modal_description')}
-                confirmText={isPending ? t('common.loading') : t('publish.confirm_button')}
+                title={dict.publish.modal_title}
+                message={dict.publish.modal_description}
+                confirmText={isPending ? t('common.loading') : dict.publish.confirm_button}
                 cancelText={dict.common.cancel}
                 isLoading={isPending}
             >
@@ -629,7 +627,7 @@ export function ActionsSidebar({
                         type="text"
                         value={versionLabel}
                         onChange={(e) => setVersionLabel(e.target.value)}
-                        placeholder={t('publish.label_placeholder')}
+                        placeholder={dict.publish.label_placeholder}
                         className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border-none text-[12px] font-bold tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none"
                     />
                 </div>
