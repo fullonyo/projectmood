@@ -75,7 +75,7 @@ export async function addGuestbookMessage(blockId: string, content: string) {
             }
         })
 
-        revalidatePath("/dashboard")
+        revalidatePath("/studio")
         revalidatePath("/[username]", "page")
 
         return { success: true, message }

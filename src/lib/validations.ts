@@ -32,7 +32,8 @@ export const CanvasPositionSchema = z.object({
     x: z.number().min(0).max(100).optional(),
     y: z.number().min(0).max(100).optional(),
     width: z.number().positive().int().max(2000).optional(),
-    height: z.number().positive().int().max(2000).optional()
+    height: z.number().positive().int().max(2000).optional(),
+    roomId: z.string().optional()
 })
 
 // Validação para criar bloco
@@ -136,7 +137,7 @@ export type GuestbookBlockContent = z.infer<typeof GuestbookBlockContentSchema>
 
 const RESERVED_USERNAMES = [
     "admin",
-    "dashboard",
+    "studio",
     "settings",
     "api",
     "auth",

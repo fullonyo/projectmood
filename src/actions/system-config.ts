@@ -116,7 +116,7 @@ export async function toggleFeatureFlag(key: string, field: "isEnabled" | "isPre
         })
         revalidateTag(CACHE_TAGS.systemConfig, 'default')
         revalidatePath("/admin/config")
-        revalidatePath("/dashboard")
+        revalidatePath("/studio")
 
         await prisma.auditLog.create({
             data: {

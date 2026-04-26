@@ -11,7 +11,7 @@ import { BackgroundEffect } from "@/components/effects/background-effect"
 import { StaticTextures } from "@/components/effects/static-textures"
 import { UserPlus, ShieldPlus } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
-import { LanguageSwitcher } from "@/components/dashboard/language-switcher"
+import { LanguageSwitcher } from "@/components/studio/language-switcher"
 
 export default function RegisterForm() {
     const { t } = useTranslation()
@@ -48,7 +48,7 @@ export default function RegisterForm() {
 
             if (!loginRes?.error) {
                 setTimeout(() => {
-                    router.push("/dashboard")
+                    router.push("/studio")
                 }, 1500)
             } else {
                 setTimeout(() => {

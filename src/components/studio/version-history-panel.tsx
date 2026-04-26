@@ -9,7 +9,7 @@ import { toast } from "sonner"
 import { cn, getRelativeTime } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { PreviewData } from "./dashboard-client-layout"
+import { PreviewData } from "./studio-client-layout"
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -17,7 +17,9 @@ interface VersionHistoryPanelProps {
     onRollbackComplete: () => void;
     setPreviewData: (data: PreviewData | null) => void;
     onClose: () => void;
+    roomId: string; // Nova prop
 }
+
 
 interface VersionItemProps {
     version: any;
@@ -126,7 +128,8 @@ VersionItem.displayName = "VersionItem"
 
 // ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
 
-export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClose }: VersionHistoryPanelProps) {
+export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClose, roomId }: VersionHistoryPanelProps) {
+
     const { t } = useTranslation()
     const router = useRouter()
 
@@ -147,7 +150,8 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
         else setLoadingHistory(true)
 
         try {
-            const result = await getVersionHistory(pageToLoad, 10)
+            const result = await getVersionHistory(pageToLoad, 10, roomId)
+
             if (result.error) {
                 toast.error(result.error)
             } else if (result.versions) {

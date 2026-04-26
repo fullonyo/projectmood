@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     },
 };
 
-export default async function AdminDashboardPage() {
+export default async function AdminControlPage() {
     const { metrics, blockUsage, recentUsers, growthData, roleDistribution, verificationDistribution } = await getAdminAnalytics()
 
     const calculateTrend = (current: number, prev: number) => {

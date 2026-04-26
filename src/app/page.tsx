@@ -4,7 +4,7 @@ import Link from "next/link";
 import { BackgroundEffect } from "@/components/effects/background-effect";
 import { StaticTextures } from "@/components/effects/static-textures";
 import { useTranslation } from "@/i18n/context";
-import { LanguageSwitcher } from "@/components/dashboard/language-switcher";
+import { LanguageSwitcher } from "@/components/studio/language-switcher";
 import { motion } from "framer-motion";
 import { Play, Move, Layers, Zap } from "lucide-react";
 

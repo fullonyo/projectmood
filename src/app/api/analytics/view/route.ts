@@ -3,20 +3,20 @@ import prisma from '@/lib/prisma'
 
 export async function POST(req: NextRequest) {
     try {
-        const { profileId } = await req.json()
+        const { roomId } = await req.json()
 
-        if (!profileId) {
-            return NextResponse.json({ error: 'Profile ID required' }, { status: 400 })
+        if (!roomId) {
+            return NextResponse.json({ error: 'Room ID required' }, { status: 400 })
         }
 
-        const analytics = await prisma.profileAnalytics.upsert({
-            where: { profileId },
+        const analytics = await prisma.roomAnalytics.upsert({
+            where: { roomId },
             update: {
                 views: { increment: 1 },
                 lastViewAt: new Date()
             },
             create: {
-                profileId,
+                roomId,
                 views: 1,
                 lastViewAt: new Date()
             }
@@ -32,14 +32,14 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url)
-        const profileId = searchParams.get('profileId')
+        const roomId = searchParams.get('roomId')
 
-        if (!profileId) {
-            return NextResponse.json({ error: 'Profile ID required' }, { status: 400 })
+        if (!roomId) {
+            return NextResponse.json({ error: 'Room ID required' }, { status: 400 })
         }
 
-        const analytics = await prisma.profileAnalytics.findUnique({
-            where: { profileId }
+        const analytics = await prisma.roomAnalytics.findUnique({
+            where: { roomId }
         })
 
         return NextResponse.json({

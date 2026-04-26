@@ -16,7 +16,7 @@ import {
     Guideline,
     DistanceGuide
 } from "@/lib/canvas-transforms"
-import { MoodBlock, Profile, ThemeConfig } from "@/types/database"
+import { MoodBlock, Room, ThemeConfig } from "@/types/database"
 import { useCanvasInteraction } from "./canvas-interaction-context"
 import { getClientPos, isInputActive, CANVAS_EVENTS } from "@/lib/canvas-utils"
 
@@ -26,7 +26,7 @@ interface CanvasItemProps {
     isSelected: boolean
     onSelect: (toggle?: boolean) => void
     onUpdate: (updates: Partial<MoodBlock>) => void
-    profile: Profile
+    profile: Room
     themeConfig: ThemeConfig
     onDeleteRequest: (id: string) => void
     blocks: MoodBlock[]

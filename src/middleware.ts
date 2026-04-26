@@ -4,7 +4,7 @@ export default auth((req) => {
     const isLoggedIn = !!req.auth
     const pathname = req.nextUrl.pathname
     const isAuthPage = pathname.startsWith("/auth/") || pathname === "/auth"
-    const isDashboardPage = pathname.startsWith("/dashboard/") || pathname === "/dashboard"
+    const isStudioPage = pathname.startsWith("/studio/") || pathname === "/studio"
     const isRootPage = pathname === "/"
     const isAdminPage = pathname.startsWith("/admin/") || pathname === "/admin"
 
@@ -16,18 +16,18 @@ export default auth((req) => {
         return Response.redirect(new URL("/banned", req.nextUrl))
     }
 
-    // If user is NOT banned but tries to access the banned page, redirect them to dashboard.
+    // If user is NOT banned but tries to access the banned page, redirect them to studio.
     if (isLoggedIn && !isBanned && isBannedPage) {
-        return Response.redirect(new URL("/dashboard", req.nextUrl))
+        return Response.redirect(new URL("/studio", req.nextUrl))
     }
 
-    if (isDashboardPage && !isLoggedIn) {
+    if (isStudioPage && !isLoggedIn) {
         return Response.redirect(new URL("/auth/login", req.nextUrl))
     }
 
     // Redirect logged-in users away from auth pages
     if (isAuthPage && isLoggedIn) {
-        return Response.redirect(new URL("/dashboard", req.nextUrl))
+        return Response.redirect(new URL("/studio", req.nextUrl))
     }
 
     // Role-based protection for the Admin Panel
@@ -37,12 +37,12 @@ export default auth((req) => {
         }
         const userRole = (req.auth?.user as any)?.role
         if (userRole !== "ADMIN") {
-            return Response.redirect(new URL("/dashboard", req.nextUrl))
+            return Response.redirect(new URL("/studio", req.nextUrl))
         }
     }
 
     if (isRootPage && isLoggedIn) {
-        return Response.redirect(new URL("/dashboard", req.nextUrl))
+        return Response.redirect(new URL("/studio", req.nextUrl))
     }
 })
 

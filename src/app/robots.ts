@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/dashboard/', '/api/', '/auth/'],
+        disallow: ['/admin/', '/studio/', '/api/', '/auth/'],
       },
     ],
     sitemap: 'https://moodspace.com.br/sitemap.xml',

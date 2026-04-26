@@ -13,7 +13,7 @@ export default async function AdminLayout({
     const session = await auth()
 
     if (session?.user?.role !== "ADMIN") {
-        redirect("/dashboard")
+        redirect("/studio")
     }
 
     return (
@@ -46,7 +46,7 @@ export default async function AdminLayout({
                     </div>
 
                     <Link
-                        href="/dashboard"
+                        href="/studio"
                         className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-500 hover:text-white transition-all group"
                     >
                         <ChevronLeft className="w-3.5 h-3.5" />

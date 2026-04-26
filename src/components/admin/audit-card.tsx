@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Trash2, UserX, ExternalLink, Calendar, User as UserIcon } from "lucide-react"
 import Link from "next/link"
-import { BlockRenderer } from "../dashboard/block-renderer"
+import { BlockRenderer } from "../studio/block-renderer"
 import { adminDeleteBlock, adminBanUser } from "@/actions/moderation"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"

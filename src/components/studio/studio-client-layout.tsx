@@ -2,15 +2,16 @@
 
 import { useState, useEffect, useCallback, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
-import { DashboardSidebar } from "./dashboard-sidebar";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { StudioSidebar } from "./studio-sidebar";
 import { ActionsSidebar } from "./actions-sidebar";
 import { MoodCanvas } from "./mood-canvas";
 import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
-import { MoodBlock, Profile } from "@/types/database";
+import { MoodBlock, Room } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
 import { updateMoodBlocksZIndex, addMoodBlock, updateProfile } from "@/actions/profile";
+import { cn } from "@/lib/utils";
 import { I18nProvider } from "@/i18n/context";
 import { CanvasInteractionProvider, useCanvasInteraction } from "./canvas-interaction-context";
 import { AudioProvider } from "./audio-context";
@@ -18,8 +19,8 @@ import { LyricsProvider } from "./lyrics-context";
 import { FullscreenDoodleOverlay } from "./fullscreen-doodle-overlay";
 import { GlobalLyricsOverlay } from "./GlobalLyricsOverlay";
 
-interface DashboardClientLayoutProps {
-    profile: Profile;
+interface StudioClientLayoutProps {
+    profile: Room; // Agora usamos o tipo Room
     moodBlocks: MoodBlock[];
     username: string;
     name: string | null;
@@ -27,20 +28,45 @@ interface DashboardClientLayoutProps {
     hasUnpublishedChanges?: boolean;
     isAdmin?: boolean;
     systemFlags?: Record<string, boolean>;
+    allRooms?: any[]; // Lista para o switcher
+    userAvatar?: string | null;
 }
 
 export interface PreviewData {
     blocks: MoodBlock[];
-    profile: Profile;
+    profile: Room;
 }
 
-export function DashboardClientLayout({ profile, moodBlocks, username, name, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
+export function StudioClientLayout({ 
+    profile, 
+    moodBlocks, 
+    username, 
+    name, 
+    publishedAt, 
+    hasUnpublishedChanges, 
+    isAdmin, 
+    systemFlags,
+    allRooms,
+    userAvatar
+}: StudioClientLayoutProps) {
     return (
         <I18nProvider>
             <AudioProvider>
                 <LyricsProvider>
                     <CanvasInteractionProvider>
-                        <DashboardClientLayoutInner profile={profile} moodBlocks={moodBlocks} username={username} name={name} publishedAt={publishedAt} hasUnpublishedChanges={hasUnpublishedChanges} isAdmin={isAdmin} systemFlags={systemFlags} />
+                        <StudioClientLayoutInner 
+                            key={profile.id}
+                            profile={profile} 
+                            moodBlocks={moodBlocks} 
+                            username={username} 
+                            name={name} 
+                            publishedAt={publishedAt} 
+                            hasUnpublishedChanges={hasUnpublishedChanges} 
+                            isAdmin={isAdmin} 
+                            systemFlags={systemFlags}
+                            allRooms={allRooms}
+                            userAvatar={userAvatar}
+                        />
                     </CanvasInteractionProvider>
                 </LyricsProvider>
             </AudioProvider>
@@ -48,7 +74,18 @@ export function DashboardClientLayout({ profile, moodBlocks, username, name, pub
     )
 }
 
-function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
+function StudioClientLayoutInner({ 
+    profile, 
+    moodBlocks, 
+    username, 
+    name, 
+    publishedAt, 
+    hasUnpublishedChanges, 
+    isAdmin, 
+    systemFlags,
+    allRooms,
+    userAvatar
+}: StudioClientLayoutProps) {
     const [isMobile, setIsMobile] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
@@ -62,31 +99,25 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
         isSaving, undo, redo, canUndo, canRedo,
         selectedIds, setSelectedIds, alignSelected, distributeSelected,
         groupSelected, ungroupSelected,
-        maxZ, bringToFront, sendToBack, bringForward, sendBackward
+        maxZ, bringToFront, sendToBack, bringForward, sendBackward,
+        forceReset
     } = useCanvasManager(moodBlocks);
 
     const handleAddNewBlock = useCallback(async (type: string, content: any, shouldSelect = true) => {
         try {
-            // GIFs por padrão não devem ser selecionados automaticamente para permitir multi-add
             const actualShouldSelect = type === 'gif' ? false : shouldSelect;
-
-            // Definição de dimensões iniciais inteligentes baseadas no tipo
-            let options = { x: Math.random() * 20 + 40, y: Math.random() * 20 + 40, width: 200, height: 200 };
+            let options: any = { x: Math.random() * 20 + 40, y: Math.random() * 20 + 40, width: 200, height: 200, roomId: localProfile.id };
             
             if (type === 'gif' || type === 'photo') {
                 options = { ...options, width: 250, height: 250 };
             } else if (type === 'text' || type === 'quote') {
                 options = { ...options, width: 300, height: 120 };
-            } else if (type === 'social') {
-                options = { ...options, width: 160, height: 50 };
             }
 
             const res = await addMoodBlock(type, content, options);
             
             if (res.success && res.block) {
-                // Adiciona o novo bloco localmente para feedback instantâneo
                 setBlocks(prev => [...prev, res.block]);
-                
                 if (actualShouldSelect) {
                     setSelectedIds([res.block.id]);
                 }
@@ -94,13 +125,11 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
         } catch (error) {
             console.error("Failed to add block:", error);
         }
-    }, []);
+    }, [localProfile.id, setBlocks, setSelectedIds]);
 
     const normalizeZIndexes = useCallback(async () => {
         const sorted = [...blocks].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
         const updates: { id: string, zIndex: number }[] = []
-
-        // Otimização P3: Mapeamento O(1) para evitar busca O(n) dentro do loop
         const idToZ = new Map(sorted.map((b, i) => [b.id, i + 10]))
 
         const newBlocks = blocks.map(block => {
@@ -113,9 +142,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
         })
 
         if (updates.length === 0) return
-
         setBlocks(newBlocks)
-
         try {
             await updateMoodBlocksZIndex(updates)
         } catch (error) {
@@ -123,8 +150,6 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
         }
     }, [blocks, setBlocks])
 
-
-    // 📱 Mobile detection: auto-hide sidebars on small screens
     useEffect(() => {
         const mql = window.matchMedia('(max-width: 767px)');
         const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
@@ -140,7 +165,6 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
         return () => mql.removeEventListener('change', handleChange);
     }, []);
 
-    // Close sidebars when selecting a canvas item on mobile
     const handleMobileClose = useCallback(() => {
         if (isMobile) {
             setIsSidebarOpen(false);
@@ -154,20 +178,23 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
 
     const handleUpdateProfile = useCallback((data: any) => {
         setLocalProfile((prev: any) => ({ ...prev, ...data }));
-        
         startProfileTransition(async () => {
-            await updateProfile(data);
+            await updateProfile(data, localProfile.id); // Passando o ID da sala
         });
-    }, []);
+    }, [localProfile.id]);
 
     const selectedBlocks = blocks.filter(b => selectedIds.includes(b.id));
 
     return (
-        <main className="flex-1 relative overflow-hidden flex flex-col focus:outline-none">
+        <main 
+            className={cn(
+                "flex-1 relative overflow-hidden flex flex-col focus:outline-none",
+                localProfile.theme === 'dark' ? 'dark bg-zinc-950' : 'light bg-white'
+            )}
+        >
             <CustomCursor type={localProfile.customCursor || 'auto'} />
             <MouseTrails type={localProfile.mouseTrails || 'none'} />
 
-            {/* Fullscreen Canvas as Base Layer (layer 0) */}
             <div className="absolute inset-0 z-0">
                 <MoodCanvas
                     blocks={previewData ? previewData.blocks : blocks}
@@ -192,15 +219,12 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                     isPreview={!!previewData}
                     onExitPreview={() => setPreviewData(null)}
                 />
-
             </div>
 
-            {/* Drawing Layer (z-index between Canvas and Sidebars) */}
             <AnimatePresence>
                 {isDrawingMode && <FullscreenDoodleOverlay />}
             </AnimatePresence>
 
-            {/* Mobile Backdrop — closes sidebars on tap */}
             {isMobile && (isSidebarOpen || isRightSidebarOpen) && (
                 <motion.div
                     initial={{ opacity: 0 }}
@@ -211,7 +235,6 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                 />
             )}
 
-            {/* Floating Sidebar Container (layer 20) */}
             <motion.div
                 initial={false}
                 animate={{
@@ -222,8 +245,9 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                 className="absolute top-0 left-0 bottom-0 z-20 pointer-events-none"
             >
                 <div className={`h-full shadow-none relative ${isSidebarOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
-                    <DashboardSidebar
-                        profile={localProfile}
+                    <StudioSidebar
+                        profile={localProfile as any}
+                        username={username}
                         blocks={blocks}
                         selectedBlocks={selectedBlocks}
                         setSelectedIds={setSelectedIds}
@@ -239,8 +263,6 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                         onNormalize={normalizeZIndexes}
                     />
 
-
-                    {/* Ghost Trigger: Collapse Left */}
                     <button
                         onClick={() => setIsSidebarOpen(false)}
                         className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-32 flex items-center justify-center pointer-events-auto group z-50"
@@ -254,7 +276,6 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                 </div>
             </motion.div>
 
-            {/* Ghost Trigger: Expand Left */}
             <AnimatePresence>
                 {!isSidebarOpen && (
                     <motion.button
@@ -273,7 +294,6 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                 )}
             </AnimatePresence>
 
-            {/* Floating Actions Sidebar Container (Right Side - layer 20) */}
             <motion.div
                 initial={false}
                 animate={{
@@ -287,15 +307,17 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                     <ActionsSidebar 
                         username={username} 
                         name={name}
-                        profile={localProfile} 
+                        profile={localProfile as any} 
                         publishedAt={publishedAt} 
                         hasUnpublishedChanges={hasUnpublishedChanges} 
                         isAdmin={isAdmin} 
-                        setPreviewData={setPreviewData}
+                        setPreviewData={setPreviewData as any}
                         isPreview={!!previewData}
+                        allRooms={allRooms}
+                        userAvatar={userAvatar}
+                        onForceReset={forceReset}
                     />
 
-                    {/* Ghost Trigger: Collapse Right */}
                     <button
                         onClick={() => setIsRightSidebarOpen(false)}
                         className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-32 flex items-center justify-center pointer-events-auto group z-50"
@@ -309,7 +331,6 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                 </div>
             </motion.div>
 
-            {/* Ghost Trigger: Expand Right */}
             <AnimatePresence>
                 {!isRightSidebarOpen && (
                     <motion.button
@@ -328,7 +349,6 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                 )}
             </AnimatePresence>
 
-            {/* Global Lyrics // Studio Mode */}
             <GlobalLyricsOverlay />
         </main>
     )

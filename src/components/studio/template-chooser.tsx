@@ -9,17 +9,20 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, Loader2, ArrowRight, Activity } from "lucide-react"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
-export function TemplateChooser() {
+export function TemplateChooser({ roomId }: { roomId?: string }) {
     const { t } = useTranslation()
+    const router = useRouter()
     const [isPending, startTransition] = useTransition()
     const [hoveredId, setHoveredId] = useState<string | null>(null)
 
     const handleApply = (id: string) => {
         startTransition(async () => {
-            const res = await applyTemplateAction(id)
+            const res = await applyTemplateAction(id, roomId)
             if (res.success) {
                 toast.success(t('templates.applying'))
+                router.refresh()
             } else {
                 toast.error(res.error)
             }
@@ -28,9 +31,10 @@ export function TemplateChooser() {
 
     const handleStartFresh = () => {
         startTransition(async () => {
-            const res = await addMoodBlock('text', { text: 'New Mood...', style: 'simple' }, { x: 50, y: 50 })
+            const res = await addMoodBlock('text', { text: 'New Mood...', style: 'simple' }, { x: 50, y: 50, roomId })
             if (res.success) {
                 toast.success(t('templates.start_fresh'))
+                router.refresh()
             } else {
                 toast.error(res.error)
             }

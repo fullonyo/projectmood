@@ -18,7 +18,7 @@ export type BlendMode = typeof BLEND_MODES[number]
 
 // ─── Frames ───────────────────────────────────────────────────────────────────
 
-import type { FrameType } from "@/components/dashboard/FrameContainer"
+import type { FrameType } from "@/components/studio/FrameContainer"
 
 /** Frame completo com label e ícone opcional. */
 export interface FrameOption {

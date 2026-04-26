@@ -35,10 +35,11 @@ import {
 
 type TopLevelTab = 'elements' | 'layers' | 'room'
 
-import { MoodBlock, Profile } from "@/types/database"
+import { MoodBlock, Room } from "@/types/database"
 
-export function DashboardSidebar({
+export function StudioSidebar({
     profile,
+    username,
     selectedBlocks,
     setSelectedIds,
     onUpdateBlock,
@@ -53,7 +54,8 @@ export function DashboardSidebar({
     onNormalize,
     onAddBlock
 }: {
-    profile: Profile;
+    profile: Room;
+    username: string;
     selectedBlocks: MoodBlock[];
     setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void;
     onUpdateBlock: (id: string, updates: Partial<MoodBlock>) => void;
@@ -61,7 +63,7 @@ export function DashboardSidebar({
     removeBlocks: (ids: string[]) => void;
     onGroup: () => void;
     onUngroup: () => void;
-    onUpdateProfile: (data: Partial<Profile>) => void;
+    onUpdateProfile: (data: Partial<Room>) => void;
     blocks: MoodBlock[];
     systemFlags?: Record<string, boolean>;
     publishedAt?: string | null;
@@ -80,7 +82,7 @@ export function DashboardSidebar({
         if (content && onAddBlock) {
             await onAddBlock(type, content);
             // O fechamento do draft e seleção do novo bloco agora é gerido 
-            // pelo DashboardClientLayout para evitar resets de UI.
+            // pelo StudioClientLayout para evitar resets de UI.
         } else {
             setDraftBlockType(type);
             setSelectedIds([]);
@@ -93,6 +95,8 @@ export function DashboardSidebar({
         }
     }, [selectedBlocks.length, draftBlockType])
 
+    // Só muda para 'elements' se o usuário estava em outra aba (room/layers)
+    // e selecionou um bloco. NÃO reseta quando já está em 'elements' editando.
     useEffect(() => {
         if (selectedBlocks.length > 0 && activeTab !== 'elements') {
             setActiveTab('elements')
@@ -105,7 +109,9 @@ export function DashboardSidebar({
                 }
             }, 50)
         }
-    }, [selectedBlocks, activeTab])
+        // ✅ Usa .length em vez do array inteiro — referência do array muda a cada render
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedBlocks.length, activeTab])
 
     const tabs = [
         { id: 'elements', label: t('sidebar.tabs.elements'), icon: Plus, description: t('sidebar.tabs.elements_desc') },
@@ -208,6 +214,7 @@ export function DashboardSidebar({
                 {activeTab === 'room' && (
                     <UniversalRoomEditor
                         profile={profile}
+                        username={username}
                         onUpdateProfile={onUpdateProfile}
                         onClearWall={() => setShowClearConfirm(true)}
                     />
@@ -260,7 +267,7 @@ export function DashboardSidebar({
                 onClose={() => setShowClearConfirm(false)}
                 onConfirm={async () => {
                     setIsClearing(true)
-                    await clearMoodBlocks()
+                    await clearMoodBlocks(profile.id)
                     setIsClearing(false)
                     setShowClearConfirm(false)
                 }}

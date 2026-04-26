@@ -5,45 +5,43 @@ import prisma from "@/lib/prisma"
 import { requireAuth, getUsernameById, revalidateProfile } from "@/lib/action-helpers"
 
 /**
- * Sistema de Publicação — Vercel Deployments Pattern
+ * Sistema de Publicação — Multiverso de Espaços
  * 
- * Cada publicação cria uma ProfileVersion imutável.
- * Apenas uma versão pode estar ativa por perfil (enforced via transaction).
- * A página pública lê exclusivamente da versão ativa.
+ * Cada publicação cria uma RoomVersion imutável vinculada a um Espaço (Room).
  */
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 /**
- * Helper interno para capturar o estado atual e salvar como uma versão.
- * Usado tanto no Publish quanto no Auto-Backup de restauração.
+ * Helper interno para capturar o estado atual e salvar como uma versão de uma Sala.
  */
-async function createVersionSnapshot(tx: any, userId: string, profileId: string, label?: string) {
+async function createVersionSnapshot(tx: any, userId: string, roomId: string, label?: string) {
     const currentBlocks = await tx.moodBlock.findMany({ 
-        where: { userId, deletedAt: null } 
+        where: { roomId, deletedAt: null } 
     })
-    const currentProfile = await tx.profile.findUnique({ 
-        where: { id: profileId } 
+    const currentRoom = await tx.room.findUnique({ 
+        where: { id: roomId } 
     })
 
-    if (!currentProfile) throw new Error("Perfil não encontrado para snapshot")
+    if (!currentRoom) throw new Error("Espaço não encontrado para snapshot")
 
-    return await tx.profileVersion.create({
+    return await tx.roomVersion.create({
         data: {
-            profileId,
+            roomId,
             label: label || null,
             blocks: currentBlocks as any,
             profileData: {
-                theme: currentProfile.theme,
-                backgroundColor: currentProfile.backgroundColor,
-                primaryColor: currentProfile.primaryColor,
-                fontStyle: currentProfile.fontStyle,
-                customCursor: currentProfile.customCursor,
-                mouseTrails: currentProfile.mouseTrails,
-                backgroundEffect: currentProfile.backgroundEffect,
-                customFont: currentProfile.customFont,
-                staticTexture: currentProfile.staticTexture,
-                avatarUrl: currentProfile.avatarUrl
+                theme: currentRoom.theme,
+                backgroundColor: currentRoom.backgroundColor,
+                primaryColor: currentRoom.primaryColor,
+                fontStyle: currentRoom.fontStyle,
+                customCursor: currentRoom.customCursor,
+                mouseTrails: currentRoom.mouseTrails,
+                backgroundEffect: currentRoom.backgroundEffect,
+                customFont: currentRoom.customFont,
+                staticTexture: currentRoom.staticTexture,
+                avatarUrl: currentRoom.avatarUrl,
+                title: currentRoom.title
             } as any,
             isActive: false
         }
@@ -52,67 +50,82 @@ async function createVersionSnapshot(tx: any, userId: string, profileId: string,
 
 // ─── ACTIONS ─────────────────────────────────────────────────────────────────
 
-export async function publishProfile(label?: string) {
+export async function publishRoom(roomId: string, label?: string) {
     try {
         const session = await requireAuth()
         const userId = session.user.id
         const username = await getUsernameById(userId)
 
-        const profile = await prisma.profile.findUnique({
-            where: { userId }
+        const room = await prisma.room.findUnique({
+            where: { id: roomId, userId }
         })
 
-        if (!profile) return { error: "Perfil não encontrado" }
+        if (!room) return { error: "Espaço não encontrado ou sem permissão" }
 
         await prisma.$transaction(async (tx) => {
             // 1. Criar o Snapshot usando o helper
-            const newVersion = await createVersionSnapshot(tx, userId, profile.id, label)
+            const newVersion = await createVersionSnapshot(tx, userId, room.id, label)
 
-            // 2. Marcar como Ativa e desativar as outras
-            await tx.profileVersion.updateMany({
-                where: { profileId: profile.id, isActive: true },
+            // 2. Marcar como Ativa e desativar as outras DAQUELA SALA
+            await tx.roomVersion.updateMany({
+                where: { roomId: room.id, isActive: true },
                 data: { isActive: false }
             })
 
-            await tx.profileVersion.update({
+            await tx.roomVersion.update({
                 where: { id: newVersion.id },
                 data: { isActive: true }
             })
         })
 
-        revalidateProfile(username, username ? [`/${username}`] : [])
+        // Revalidar perfil (se for a sala primária) ou o link da sala
+        revalidateProfile(username, username ? [`/@${username.toLowerCase()}`] : [])
+        if (room.slug) {
+            revalidateProfile(username, [`/@${username?.toLowerCase()}/${room.slug}`])
+        }
+
         return { success: true }
     } catch (error: any) {
-        console.error('[publishProfile]', error)
-        return { error: "Erro ao publicar" }
+        console.error('[publishRoom]', error)
+        return { error: "Erro ao publicar espaço" }
     }
+}
+
+// Retrocompatibilidade para o editor atual (enquanto não temos o switcher)
+export async function publishProfile(label?: string) {
+    const session = await requireAuth()
+    const primaryRoom = await prisma.room.findFirst({
+        where: { userId: session.user.id, isPrimary: true }
+    })
+    if (!primaryRoom) return { error: "Sala primária não encontrada" }
+    return publishRoom(primaryRoom.id, label)
 }
 
 // ─── RESTORE & ROLLBACK ──────────────────────────────────────────────────────
 
-export async function restoreToDraft(versionId: string) {
+export async function restoreRoomToDraft(versionId: string) {
     try {
         const session = await requireAuth()
         const userId = session.user.id
 
-        const version = await prisma.profileVersion.findUnique({
+        const version = await prisma.roomVersion.findUnique({
             where: { id: versionId },
-            include: { profile: true }
+            include: { room: true }
         })
 
-        if (!version || version.profile.userId !== userId) {
+        if (!version || version.room.userId !== userId) {
             return { error: "Versão não encontrada" }
         }
 
         await prisma.$transaction(async (tx) => {
-            // 0. Backup Automático de Segurança usando o helper
-            await createVersionSnapshot(tx, userId, version.profileId, "Backup Automático")
+            // 0. Backup Automático de Segurança
+            await createVersionSnapshot(tx, userId, version.roomId, "Backup Automático")
 
-            // 1. Restaurar metadados do Perfil (Editor/Draft)
+            // 1. Restaurar metadados da Sala (Editor/Draft)
             if (version.profileData) {
                 const pd = version.profileData as any
-                await tx.profile.update({
-                    where: { id: version.profileId },
+                await tx.room.update({
+                    where: { id: version.roomId },
                     data: {
                         theme: pd.theme,
                         backgroundColor: pd.backgroundColor,
@@ -123,18 +136,19 @@ export async function restoreToDraft(versionId: string) {
                         backgroundEffect: pd.backgroundEffect,
                         customFont: pd.customFont,
                         staticTexture: pd.staticTexture,
-                        avatarUrl: pd.avatarUrl
+                        avatarUrl: pd.avatarUrl,
+                        title: pd.title || version.room.title
                     }
                 })
             }
 
-            // 2. Restaurar Blocos (Editor/Draft)
+            // 2. Restaurar Blocos
             const snapshotBlocks = version.blocks as any[]
             if (snapshotBlocks) {
                 const snapshotIds = snapshotBlocks.map(b => b.id).filter(Boolean)
 
                 await tx.moodBlock.deleteMany({
-                    where: { userId, id: { notIn: snapshotIds } }
+                    where: { roomId: version.roomId, id: { notIn: snapshotIds } }
                 })
 
                 for (const b of snapshotBlocks) {
@@ -157,7 +171,7 @@ export async function restoreToDraft(versionId: string) {
                         },
                         create: {
                             id: b.id,
-                            userId,
+                            roomId: version.roomId,
                             type: b.type,
                             content: b.content,
                             x: b.x,
@@ -176,11 +190,19 @@ export async function restoreToDraft(versionId: string) {
             }
         }, { timeout: 15000 })
 
+        const username = await getUsernameById(userId)
+        revalidateProfile(username)
+
         return { success: true }
     } catch (error: any) {
-        console.error('[restoreToDraft]', error)
+        console.error('[restoreRoomToDraft]', error)
         return { error: "Erro ao restaurar rascunho" }
     }
+}
+
+// Alias para manter compatibilidade com a UI atual
+export async function restoreToDraft(versionId: string) {
+    return restoreRoomToDraft(versionId)
 }
 
 export async function makeVersionActive(versionId: string) {
@@ -189,27 +211,31 @@ export async function makeVersionActive(versionId: string) {
         const userId = session.user.id
         const username = await getUsernameById(userId)
 
-        const version = await prisma.profileVersion.findUnique({
+        const version = await prisma.roomVersion.findUnique({
             where: { id: versionId },
-            include: { profile: true }
+            include: { room: true }
         })
 
-        if (!version || version.profile.userId !== userId) {
+        if (!version || version.room.userId !== userId) {
             return { error: "Versão não encontrada" }
         }
 
         await prisma.$transaction([
-            prisma.profileVersion.updateMany({
-                where: { profileId: version.profileId, isActive: true },
+            prisma.roomVersion.updateMany({
+                where: { roomId: version.roomId, isActive: true },
                 data: { isActive: false }
             }),
-            prisma.profileVersion.update({
+            prisma.roomVersion.update({
                 where: { id: versionId },
                 data: { isActive: true }
             })
         ])
 
         revalidateProfile(username, username ? [`/${username}`] : [])
+        if (version.room.slug) {
+            revalidateProfile(username, [`/s/${version.room.slug}`])
+        }
+
         return { success: true }
     } catch (error: any) {
         console.error('[makeVersionActive]', error)
@@ -219,11 +245,15 @@ export async function makeVersionActive(versionId: string) {
 
 export async function rollbackToVersion(versionId: string) {
     try {
-        const resDraft = await restoreToDraft(versionId)
+        const resDraft = await restoreRoomToDraft(versionId)
         if (resDraft.error) return resDraft
 
         const resActive = await makeVersionActive(versionId)
         if (resActive.error) return resActive
+
+        const session = await requireAuth()
+        const username = await getUsernameById(session.user.id)
+        revalidateProfile(username)
 
         return { success: true }
     } catch (error: any) {
@@ -237,12 +267,12 @@ export async function deleteVersion(versionId: string) {
         const session = await requireAuth()
         const userId = session.user.id
 
-        const version = await prisma.profileVersion.findUnique({
+        const version = await prisma.roomVersion.findUnique({
             where: { id: versionId },
-            include: { profile: true }
+            include: { room: true }
         })
 
-        if (!version || version.profile.userId !== userId) {
+        if (!version || version.room.userId !== userId) {
             return { error: "Versão não encontrada" }
         }
 
@@ -250,7 +280,7 @@ export async function deleteVersion(versionId: string) {
             return { error: "Não é possível excluir a versão ativa" }
         }
 
-        await prisma.profileVersion.delete({
+        await prisma.roomVersion.delete({
             where: { id: versionId }
         })
 
@@ -261,21 +291,25 @@ export async function deleteVersion(versionId: string) {
     }
 }
 
-export async function getVersionHistory(page: number = 1, pageSize: number = 10) {
+export async function getVersionHistory(page: number = 1, pageSize: number = 10, roomId?: string) {
     try {
         const session = await requireAuth()
         const skip = (page - 1) * pageSize
 
-        const profile = await prisma.profile.findUnique({
-            where: { userId: session.user.id },
-            select: { id: true }
-        })
+        let targetRoomId = roomId
+        if (!targetRoomId) {
+            const primaryRoom = await prisma.room.findFirst({
+                where: { userId: session.user.id, isPrimary: true },
+                select: { id: true }
+            })
+            targetRoomId = primaryRoom?.id
+        }
 
-        if (!profile) return { error: "Perfil não encontrado", versions: [], hasMore: false }
+        if (!targetRoomId) return { error: "Espaço não encontrado", versions: [], hasMore: false }
 
         const [versions, totalCount] = await Promise.all([
-            prisma.profileVersion.findMany({
-                where: { profileId: profile.id },
+            prisma.roomVersion.findMany({
+                where: { roomId: targetRoomId },
                 select: {
                     id: true,
                     label: true,
@@ -286,8 +320,8 @@ export async function getVersionHistory(page: number = 1, pageSize: number = 10)
                 skip: skip,
                 take: pageSize
             }),
-            prisma.profileVersion.count({
-                where: { profileId: profile.id }
+            prisma.roomVersion.count({
+                where: { roomId: targetRoomId }
             })
         ])
 
@@ -304,19 +338,19 @@ export async function getVersionDetails(versionId: string) {
     try {
         const session = await requireAuth()
 
-        const version = await prisma.profileVersion.findUnique({
+        const version = await prisma.roomVersion.findUnique({
             where: { id: versionId },
             select: {
                 id: true,
                 blocks: true,
                 profileData: true,
-                profile: {
+                room: {
                     select: { userId: true }
                 }
             }
         })
 
-        if (!version || version.profile.userId !== session.user.id) {
+        if (!version || version.room.userId !== session.user.id) {
             return { error: "Versão não encontrada" }
         }
 
@@ -330,19 +364,22 @@ export async function getVersionDetails(versionId: string) {
     }
 }
 
-export async function getActiveVersion() {
+export async function getActiveVersion(roomId?: string) {
     try {
         const session = await requireAuth()
+        let targetRoomId = roomId
+        if (!targetRoomId) {
+            const primaryRoom = await prisma.room.findFirst({
+                where: { userId: session.user.id, isPrimary: true },
+                select: { id: true }
+            })
+            targetRoomId = primaryRoom?.id
+        }
 
-        const profile = await prisma.profile.findUnique({
-            where: { userId: session.user.id },
-            select: { id: true }
-        })
+        if (!targetRoomId) return null
 
-        if (!profile) return null
-
-        return prisma.profileVersion.findFirst({
-            where: { profileId: profile.id, isActive: true },
+        return prisma.roomVersion.findFirst({
+            where: { roomId: targetRoomId, isActive: true },
             select: { id: true, label: true, createdAt: true }
         })
     } catch {
@@ -351,8 +388,9 @@ export async function getActiveVersion() {
 }
 
 export async function computeHasUnpublishedChanges(
-    existingProfile?: any,
-    existingDraftBlocks?: any[]
+    existingRoom?: any,
+    existingDraftBlocks?: any[],
+    roomId?: string
 ) {
     const session = await auth()
     if (!session?.user?.id) return false
@@ -360,8 +398,8 @@ export async function computeHasUnpublishedChanges(
     const userId = session.user.id
 
     try {
-        const profile = existingProfile || await prisma.profile.findUnique({
-            where: { userId },
+        const room = existingRoom || await prisma.room.findFirst({
+            where: roomId ? { id: roomId, userId } : { userId, isPrimary: true },
             select: {
                 id: true,
                 theme: true,
@@ -377,10 +415,10 @@ export async function computeHasUnpublishedChanges(
             }
         })
 
-        if (!profile) return false
+        if (!room) return false
 
         const draftBlocks = existingDraftBlocks || await prisma.moodBlock.findMany({
-            where: { userId, deletedAt: null },
+            where: { roomId: room.id, deletedAt: null },
             orderBy: { order: 'asc' },
             select: {
                 type: true, content: true,
@@ -389,8 +427,8 @@ export async function computeHasUnpublishedChanges(
             }
         })
 
-        const activeVersion = await prisma.profileVersion.findFirst({
-            where: { profileId: profile.id, isActive: true },
+        const activeVersion = await prisma.roomVersion.findFirst({
+            where: { roomId: room.id, isActive: true },
             select: { blocks: true, profileData: true }
         })
 
@@ -405,20 +443,20 @@ export async function computeHasUnpublishedChanges(
             }, {});
         };
 
-        const draftProfileDataStr = JSON.stringify(sortKeys({
-            theme: profile.theme,
-            backgroundColor: profile.backgroundColor,
-            primaryColor: profile.primaryColor,
-            fontStyle: profile.fontStyle,
-            customCursor: profile.customCursor,
-            mouseTrails: profile.mouseTrails,
-            backgroundEffect: profile.backgroundEffect,
-            customFont: profile.customFont,
-            staticTexture: profile.staticTexture,
-            avatarUrl: profile.avatarUrl,
+        const draftRoomDataStr = JSON.stringify(sortKeys({
+            theme: room.theme,
+            backgroundColor: room.backgroundColor,
+            primaryColor: room.primaryColor,
+            fontStyle: room.fontStyle,
+            customCursor: room.customCursor,
+            mouseTrails: room.mouseTrails,
+            backgroundEffect: room.backgroundEffect,
+            customFont: room.customFont,
+            staticTexture: room.staticTexture,
+            avatarUrl: room.avatarUrl,
         }));
 
-        const publishedProfileDataStr = JSON.stringify(sortKeys(activeVersion.profileData));
+        const publishedRoomDataStr = JSON.stringify(sortKeys(activeVersion.profileData));
         
         const normalizedDraftBlocks = draftBlocks.map((b: any) => ({
             type: b.type, content: b.content,
@@ -434,7 +472,7 @@ export async function computeHasUnpublishedChanges(
         })) ?? [];
         const publishedBlocksStr = JSON.stringify(sortKeys(publishedBlocks));
 
-        return draftProfileDataStr !== publishedProfileDataStr || draftBlocksStr !== publishedBlocksStr;
+        return draftRoomDataStr !== publishedRoomDataStr || draftBlocksStr !== publishedBlocksStr;
     } catch (error) {
         console.error('[computeHasUnpublishedChanges]', error)
         return false

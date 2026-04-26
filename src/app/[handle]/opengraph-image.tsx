@@ -11,13 +11,19 @@ export const size = {
 
 export const contentType = 'image/png'
 
-export default async function Image({ params }: { params: { username: string } }) {
-    const { username } = await params
+export default async function Image({ params }: { params: { handle: string } }) {
+    const { handle } = await params
+    
+    // Strip @ if present
+    const username = handle.startsWith('@') ? handle.slice(1).toLowerCase() : handle.toLowerCase()
 
     const user = await prisma.user.findUnique({
         where: { username },
         include: {
-            profile: true
+            rooms: {
+                where: { isPrimary: true },
+                take: 1
+            }
         }
     })
 
@@ -46,7 +52,8 @@ export default async function Image({ params }: { params: { username: string } }
     }
 
     const name = user.name || user.username
-    const avatarUrl = user.profile?.avatarUrl
+    const primaryRoom = user.rooms[0]
+    const avatarUrl = primaryRoom?.avatarUrl
 
     return new ImageResponse(
         (
@@ -147,7 +154,7 @@ export default async function Image({ params }: { params: { username: string } }
                     border: '1px solid rgba(255,255,255,0.2)',
                 }}>
                     <div style={{ fontSize: 18, color: '#fff', fontWeight: 600 }}>Create your board</div>
-                    <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)' }}>— moodproject.vercel.app</div>
+                    <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)' }}>— mood.space</div>
                 </div>
             </div>
         ),

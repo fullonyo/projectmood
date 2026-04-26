@@ -36,9 +36,11 @@ export async function registerUser(values: z.infer<typeof RegisterSchema>) {
                 username,
                 password: hashedPassword,
                 name,
-                profile: {
+                rooms: {
                     create: {
                         theme: "dark",
+                        isPrimary: true,
+                        title: "Espaço Mood Primário"
                     },
                 },
             },

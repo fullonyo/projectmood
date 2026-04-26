@@ -11,16 +11,19 @@ import { EditorHeader } from "./EditorUI"
 
 interface ShareProfileButtonProps {
     username: string
+    isPrimary?: boolean
+    slug?: string
 }
 
-export function ShareProfileButton({ username }: ShareProfileButtonProps) {
+export function ShareProfileButton({ username, isPrimary = true, slug }: ShareProfileButtonProps) {
     const { t } = useTranslation()
     const [showOptions, setShowOptions] = useState(false)
     const [copied, setCopied] = useState(false)
 
+    const path = isPrimary ? `/@${username.toLowerCase()}` : `/@${username.toLowerCase()}/${slug}`
     const profileUrl = typeof window !== 'undefined'
-        ? `${window.location.origin}/${username}`
-        : `https://mood.app/${username}`
+        ? `${window.location.origin}${path}`
+        : `https://mood.space${path}`
 
     const handleCopyLink = async () => {
         try {

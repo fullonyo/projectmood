@@ -4,15 +4,16 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { pt, Dictionary } from './dictionaries/pt';
 import { en } from './dictionaries/en';
 
-type Locale = 'pt' | 'en';
+export type Locale = 'pt' | 'en';
 
 interface I18nContextProps {
     locale: Locale;
     setLocale: (locale: Locale) => void;
     t: (key: string) => string;
+    dict: Dictionary;
 }
 
-const dictionaries: Record<Locale, Dictionary> = { pt, en };
+export const dictionaries: Record<Locale, Dictionary> = { pt, en };
 
 const I18nContext = createContext<I18nContextProps | undefined>(undefined);
 
@@ -59,14 +60,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     // Hydration mismatch prevention helper. We render in Portuguese during SSR.
     if (!isMounted) {
         return (
-            <I18nContext.Provider value={{ locale: 'pt', setLocale, t: (k) => tBase('pt', k) }}>
+            <I18nContext.Provider value={{ locale: 'pt', setLocale, t: (k) => tBase('pt', k), dict: pt }}>
                 {children}
             </I18nContext.Provider>
         )
     }
 
     return (
-        <I18nContext.Provider value={{ locale, setLocale, t }}>
+        <I18nContext.Provider value={{ locale, setLocale, t, dict: dictionaries[locale] }}>
             {children}
         </I18nContext.Provider>
     );
@@ -90,3 +91,4 @@ export function useTranslation() {
     }
     return context;
 }
+

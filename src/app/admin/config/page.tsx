@@ -17,7 +17,7 @@ import { ConfigCategory } from "@/components/admin/config-category"
 
 export default async function AdminConfigPage() {
     const session = await auth()
-    if ((session?.user as any)?.role !== "ADMIN") redirect("/dashboard")
+    if ((session?.user as any)?.role !== "ADMIN") redirect("/studio")
 
     let flags = await getFeatureFlags()
 

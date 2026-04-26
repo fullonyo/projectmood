@@ -1,13 +1,13 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { Profile } from "@/types/database"
+import { Room } from "@/types/database"
 import { themeConfigs } from "@/lib/themes"
 import { BackgroundEffect } from "../effects/background-effect"
 import { getStaticTextureStyle } from "../effects/static-textures"
 
 interface RoomEnvironmentProps {
-    profile: Profile
+    profile: Room
     backgroundEffect: string
     weatherSync?: string | null
 }

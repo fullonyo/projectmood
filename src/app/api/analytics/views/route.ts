@@ -4,14 +4,14 @@ import prisma from '@/lib/prisma'
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url)
-        const profileId = searchParams.get('profileId')
+        const roomId = searchParams.get('roomId') || searchParams.get('profileId')
 
-        if (!profileId) {
-            return NextResponse.json({ error: 'Profile ID required' }, { status: 400 })
+        if (!roomId) {
+            return NextResponse.json({ error: 'Room ID required' }, { status: 400 })
         }
 
-        const analytics = await prisma.profileAnalytics.findUnique({
-            where: { profileId }
+        const analytics = await prisma.roomAnalytics.findUnique({
+            where: { roomId }
         })
 
         return NextResponse.json({

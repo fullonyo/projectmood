@@ -10,7 +10,7 @@ import { BackgroundEffect } from "@/components/effects/background-effect"
 import { StaticTextures } from "@/components/effects/static-textures"
 import { Fingerprint, ShieldEllipsis } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
-import { LanguageSwitcher } from "@/components/dashboard/language-switcher"
+import { LanguageSwitcher } from "@/components/studio/language-switcher"
 
 export default function LoginForm() {
     const { t } = useTranslation()
@@ -40,7 +40,7 @@ export default function LoginForm() {
                 setError(t('auth.login.protocol_denied'))
                 setLoading(false)
             } else {
-                router.push(callbackUrl || "/dashboard")
+                router.push(callbackUrl || "/studio")
             }
         } catch (err) {
             setError(t('auth.login.protocol_error'))

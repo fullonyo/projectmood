@@ -1,6 +1,9 @@
 // Prisma Client Singleton
 import { PrismaClient } from "@prisma/client";
 
+//// Sync: 2026-04-26T17:46:15
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+
 const prismaClientSingleton = () => {
     return new PrismaClient();
 };

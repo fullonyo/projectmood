@@ -353,29 +353,50 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
     }, [isSaving]);
 
     // Smart Sync from Server Props
+    // ⚠️ Merge-only: NÃO limpa seleção nem histórico.
+    // O servidor revalida os dados após cada save, mas a seleção do usuário deve persistir.
+    // Usamos os dados do servidor apenas para sincronizar blocos que o estado local não conhece
+    // (ex: bloco adicionado em outra aba) — blocos que já existem localmente ficam intocados.
     useEffect(() => {
         setBlocks(prev => {
-            return initialBlocks.map(initial => {
-                const current = prev.find(b => b.id === initial.id);
-                if (!current) return initial;
-                const currentEpoch = epochRef.current[initial.id] || 0;
-                if (currentEpoch > 0) return current;
+            const prevIds = new Set(prev.map(b => b.id));
+            const newIds = new Set(initialBlocks.map(b => b.id));
 
-                const hasChanged =
-                    Math.abs(initial.x - current.x) > 0.001 ||
-                    Math.abs(initial.y - current.y) > 0.001 ||
-                    initial.width !== current.width ||
-                    initial.height !== current.height ||
-                    initial.zIndex !== current.zIndex ||
-                    initial.rotation !== current.rotation ||
-                    initial.isLocked !== current.isLocked ||
-                    initial.isHidden !== current.isHidden ||
-                    JSON.stringify(initial.content) !== JSON.stringify(current.content);
+            const hasStructuralChange =
+                prev.length !== initialBlocks.length ||
+                initialBlocks.some(b => !prevIds.has(b.id)) ||
+                prev.some(b => !newIds.has(b.id));
 
-                return hasChanged ? initial : current;
+            if (!hasStructuralChange) {
+                // Sem blocos adicionados/removidos: mantém estado local (otimístico)
+                return prev;
+            }
+
+            // Mudança estrutural: mescla preservando estado local pendente
+            return initialBlocks.map(serverBlock => {
+                const localBlock = prev.find(b => b.id === serverBlock.id);
+                return localBlock ?? serverBlock;
             });
         });
+        // ✅ NÃO limpa selectedIds — a seleção permanece válida após revalidações do servidor.
+        // ✅ NÃO reseta history — o histórico de undo/redo é preservado.
     }, [initialBlocks]);
+
+    /**
+     * forceReset: Reset completo deliberado.
+     * Usar APENAS quando o servidor envia um estado genuinamente novo que o cliente
+     * deve aceitar integralmente — ex: após rollback de versão.
+     * Diferente do sync automático, este zera seleção e histórico intencionalmente.
+     */
+    const forceReset = useCallback((newBlocks: MoodBlock[]) => {
+        setBlocks(newBlocks);
+        setSelectedIds([]);
+        setHistory(createHistory(newBlocks));
+        epochRef.current = {};
+        pendingUpdates.current = {};
+        Object.values(saveTimers.current).forEach(clearTimeout);
+        saveTimers.current = {};
+    }, []);
 
     return {
         blocks,
@@ -384,6 +405,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         updateBlocks,
         moveBlock,
         removeBlocks,
+        forceReset,
         isSaving,
         undo,
         redo,

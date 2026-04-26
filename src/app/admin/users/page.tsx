@@ -15,7 +15,7 @@ export default async function AdminUsersPage({
 }) {
     const { page, search } = await searchParams;
     const session = await auth()
-    if (session?.user?.role !== "ADMIN") redirect("/dashboard")
+    if (session?.user?.role !== "ADMIN") redirect("/studio")
 
     const currentPage = Number(page) || 1
     const pageSize = 20

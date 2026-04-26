@@ -8,142 +8,123 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  USER
-  CURATOR
-  MODERATOR
-  ADMIN
-}
-
 model User {
-  id        String      @id @default(cuid())
-  name      String?
-  email     String      @unique
-  username  String      @unique
-  password  String
-  role      Role        @default(USER)
-  isBanned  Boolean     @default(false)
-  banReason String?
-  
-  // Verification System
-  isVerified      Boolean  @default(false)
-  verificationType String?  // e.g., "verified", "premium", "notable"
-  
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @default(now()) @updatedAt
-  deletedAt DateTime?
-  
-  profile   Profile?
-  moodBlocks MoodBlock[]
-  auditLogs  AuditLog[]  @relation("AdminActions")
+  id               String     @id @default(cuid())
+  name             String?
+  email            String     @unique
+  username         String     @unique
+  password         String
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @default(now()) @updatedAt
+  banReason        String?
+  deletedAt        DateTime?
+  isBanned         Boolean    @default(false)
+  role             Role       @default(USER)
+  isVerified       Boolean    @default(false)
+  verificationType String?
+  auditLogs        AuditLog[] @relation("AdminActions")
+  rooms            Room[]
 
   @@index([username])
 }
 
-model Profile {
-  id              String  @id @default(cuid())
-  userId          String  @unique
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  theme           String  @default("dark")
-  backgroundColor String? @default("#050505")
-  primaryColor    String? @default("#ffffff")
-  fontStyle       String? @default("sans")
-  backgroundImage String?
-  
-  // Personalização Dinâmica
-  customCursor    String?   @default("auto")
-  mouseTrails     String?   @default("none")
-  backgroundEffect String?  @default("none")
-  customFont       String?  @default("Inter")
-  staticTexture    String?  @default("none")
-  avatarUrl        String?  @db.Text
+model Room {
+  id               String         @id @default(cuid())
+  userId           String
+  theme            String         @default("dark")
+  backgroundColor  String?        @default("#050505")
+  primaryColor     String?        @default("#ffffff")
+  fontStyle        String?        @default("sans")
+  backgroundImage  String?
+  backgroundEffect String?        @default("none")
+  customCursor     String?        @default("auto")
+  customFont       String?        @default("Inter")
+  mouseTrails      String?        @default("none")
+  updatedAt        DateTime       @default(now()) @updatedAt
+  staticTexture    String?        @default("none")
+  avatarUrl        String?
+  createdAt        DateTime       @default(now())
+  deletedAt        DateTime?
+  title            String         @default("Meu Espaço")
+  slug             String?        @unique
+  isPrimary        Boolean        @default(true)
+  type             RoomType       @default(PERMANENT)
+  expiresAt        DateTime?
+  maxViews         Int?
+  blocks           MoodBlock[]
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analytics        RoomAnalytics?
+  versions         RoomVersion[]
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now()) @updatedAt
-  deletedAt       DateTime?
-  
-  // Relações
-  analytics       ProfileAnalytics?
-  versions        ProfileVersion[]
+  @@index([userId])
+  @@index([slug])
 }
 
-model ProfileVersion {
+model RoomVersion {
   id          String   @id @default(cuid())
-  profileId   String
-  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  
-  blocks      Json     // Snapshot completo dos blocos (array de MoodBlock serializado)
-  profileData Json?    // Snapshot das configs visuais (tema, cores, efeitos) para rollback completo
-  
+  roomId      String
+  blocks      Json
+  profileData Json?
   isActive    Boolean  @default(false)
-  label       String?  // Ex: "v3", "com foto nova", nome de template
-  
+  label       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
-  @@index([profileId])
-  @@index([profileId, isActive])
+  @@index([roomId])
+  @@index([roomId, isActive])
 }
 
 model MoodBlock {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // text, ticker, subtitle, etc.
+  id        String             @id @default(cuid())
+  type      String
   content   Json
-  order     Int      @default(0)
-  
-  // Canvas positioning
-  x         Float    @default(0)
-  y         Float    @default(0)
-  width     Int?
+  order     Int                @default(0)
   height    Int?
-  zIndex    Int      @default(1)
-  rotation  Float    @default(0)
-  isLocked  Boolean  @default(false)
-  isHidden  Boolean  @default(false)
-  groupId   String?
-
-  
-  messages  GuestbookMessage[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  rotation  Float              @default(0)
+  updatedAt DateTime           @default(now()) @updatedAt
+  width     Int?
+  x         Float              @default(0)
+  y         Float              @default(0)
+  zIndex    Int                @default(1)
+  createdAt DateTime           @default(now())
   deletedAt DateTime?
-  
-  @@index([userId])
-  @@index([userId, type])
+  isHidden  Boolean            @default(false)
+  isLocked  Boolean            @default(false)
+  groupId   String?
+  roomId    String
+  messages  GuestbookMessage[]
+  room      Room               @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+  @@index([roomId, type])
   @@index([groupId])
 }
 
 model GuestbookMessage {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   content   String
-  author    String   // Nome real ou anônimo gerado
-  isAdmin   Boolean  @default(false)
-  
+  author    String
+  isAdmin   Boolean   @default(false)
   blockId   String
+  userId    String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
   block     MoodBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
-  
-  userId    String?  // Opcional: link com usuário logado
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([blockId])
 }
 
-model ProfileAnalytics {
-  id          String    @id @default(cuid())
-  profileId   String    @unique
-  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  views       Int       @default(0)
-  lastViewAt  DateTime?
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+model RoomAnalytics {
+  id         String    @id @default(cuid())
+  roomId     String    @unique
+  views      Int       @default(0)
+  lastViewAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
+  room       Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
-  @@index([profileId])
+  @@index([roomId])
 }
 
 model FeatureFlag {
@@ -153,26 +134,34 @@ model FeatureFlag {
   description String?
   isEnabled   Boolean  @default(true)
   isPremium   Boolean  @default(false)
-  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  adminId   String
-  admin     User     @relation("AdminActions", fields: [adminId], references: [id])
-  
-  action    String   // DELETE_BLOCK, BAN_USER, VERIFY_USER, SYNC_FLAGS, etc.
-  targetId  String?  // ID do recurso afetado
-  targetType String? // User, MoodBlock, System
-  
-  reason    String?  @db.Text
-  metadata  Json?    // Contexto extra (ex: conteúdo do bloco deletado)
-  
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  targetId   String?
+  targetType String?
+  reason     String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  admin      User     @relation("AdminActions", fields: [adminId], references: [id])
 
   @@index([adminId])
   @@index([action])
   @@index([targetId])
+}
+
+enum Role {
+  USER
+  CURATOR
+  MODERATOR
+  ADMIN
+}
+
+enum RoomType {
+  PERMANENT
+  TEMPORARY
 }

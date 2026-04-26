@@ -1,10 +1,9 @@
-
 import { Prisma } from "@prisma/client";
 import type { MoodBlockType } from "@/lib/validations";
 
 // Re-export Prisma types for convenience
 export type User = Prisma.UserGetPayload<{}>;
-export type Profile = Prisma.ProfileGetPayload<{}>;
+export type Room = Prisma.RoomGetPayload<{}>;
 
 // Re-export MoodBlockType da fonte central (Zod schema em validations.ts)
 export type { MoodBlockType };
@@ -78,7 +77,7 @@ export interface ThemeConfig {
     blend?: string;
 }
 
-export interface ProfileVisualConfig {
+export interface RoomVisualConfig {
     theme: string;
     backgroundColor: string | null;
     primaryColor: string | null;
@@ -89,20 +88,21 @@ export interface ProfileVisualConfig {
     customFont: string | null;
     staticTexture: string | null;
     avatarUrl: string | null;
+    title?: string;
 }
 
-export interface ProfileVersion {
+export interface RoomVersion {
     id: string;
-    profileId: string;
+    roomId: string;
     blocks: MoodBlock[];
-    profileData: ProfileVisualConfig | null;
+    profileData: RoomVisualConfig | null;
     isActive: boolean;
     label: string | null;
     createdAt: Date | string;
 }
 
-export interface ProfileWithVersions extends Profile {
-    versions?: ProfileVersion[];
+export interface RoomWithVersions extends Room {
+    versions?: RoomVersion[];
 }
 
 export interface PublicUser {
@@ -110,28 +110,33 @@ export interface PublicUser {
     name: string | null;
     isVerified: boolean;
     verificationType: string | null;
+    /** Avatar da sala primária do criador — fallback para espaços secundários sem avatar */
+    primaryAvatarUrl: string | null;
+    /** Usado pelo servidor para decidir mostrar 404. Não expor ao cliente. */
+    isBanned: boolean;
 }
 
-export type UserProfileData = Prisma.UserGetPayload<{
+export type UserRoomData = Prisma.UserGetPayload<{
     include: {
-        profile: {
+        rooms: {
+            where: { isPrimary: true };
             include: {
                 versions: {
                     where: { isActive: true };
                 };
+                blocks: {
+                    where: { deletedAt: null };
+                    orderBy: { order: "asc" };
+                };
             };
-        };
-        moodBlocks: {
-            where: { deletedAt: null };
-            orderBy: { order: "asc" };
         };
     };
 }>;
 
 export interface PublicMoodPageProps {
     publicUser: PublicUser;
-    profileId: string;
-    profile: Profile;
+    roomId: string;
+    profile: Room;
     moodBlocks: MoodBlock[];
     config: ThemeConfig;
     theme: string;

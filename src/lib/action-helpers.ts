@@ -77,7 +77,7 @@ export async function getUsernameById(userId: string): Promise<string | null> {
 // ─── Revalidation ─────────────────────────────────────────────────────────────
 
 /**
- * Revalida cache do perfil e dashboard.
+ * Revalida cache do perfil e studio.
  * Centraliza o padrão de revalidação que se repete em todas as actions.
  *
  * @param username - Username para revalidar cache específico (opcional)
@@ -86,12 +86,15 @@ export async function getUsernameById(userId: string): Promise<string | null> {
 export function revalidateProfile(username?: string | null, extraPaths?: string[]) {
     if (username) {
         revalidateTag(CACHE_TAGS.profile(username), 'default')
+        revalidatePath(`/@${username}`, "layout")
+        revalidatePath(`/@${username}/[slug]`, "layout")
     }
-    revalidatePath("/dashboard")
+    revalidatePath("/studio", "layout")
+    revalidatePath("/studio/[slug]", "layout")
 
     if (extraPaths) {
         for (const path of extraPaths) {
-            revalidatePath(path)
+            revalidatePath(path, "layout")
         }
     }
 }

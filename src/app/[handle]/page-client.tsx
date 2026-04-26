@@ -3,22 +3,22 @@
 import React, { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { useViewportScale, scaleBlockSize, getBlockFallbackSize } from "@/lib/canvas-scale"
-import { ProfileSignature } from "@/components/dashboard/profile-signature"
-import { AnalyticsDisplay } from "@/components/dashboard/analytics-display"
-import { GuestPromotion } from "@/components/dashboard/guest-promotion"
-import { BoardStage } from "@/components/dashboard/board-stage"
-import { BlockRenderer } from "@/components/dashboard/block-renderer"
-import { StudioCatalogID } from "@/components/dashboard/studio-catalog-id"
-import { SignatureShare } from "@/components/dashboard/signature-share"
-import { RoomEnvironment } from "@/components/dashboard/room-environment"
+import { ProfileSignature } from "@/components/studio/profile-signature"
+import { AnalyticsDisplay } from "@/components/studio/analytics-display"
+import { GuestPromotion } from "@/components/studio/guest-promotion"
+import { BoardStage } from "@/components/studio/board-stage"
+import { BlockRenderer } from "@/components/studio/block-renderer"
+import { StudioCatalogID } from "@/components/studio/studio-catalog-id"
+import { SignatureShare } from "@/components/studio/signature-share"
+import { RoomEnvironment } from "@/components/studio/room-environment"
 import { CustomCursor } from "@/components/effects/custom-cursor"
 import { MouseTrails } from "@/components/effects/mouse-trails"
 import type { PublicMoodPageProps, MoodBlock } from "@/types/database"
-import { ExperienceOverlay } from "@/components/dashboard/ExperienceOverlay"
+import { ExperienceOverlay } from "@/components/studio/ExperienceOverlay"
 import { I18nProvider } from "@/i18n/context"
-import { AudioProvider, useAudio } from "@/components/dashboard/audio-context"
-import { LyricsProvider } from "@/components/dashboard/lyrics-context"
-import { GlobalLyricsOverlay } from "@/components/dashboard/GlobalLyricsOverlay"
+import { AudioProvider, useAudio } from "@/components/studio/audio-context"
+import { LyricsProvider } from "@/components/studio/lyrics-context"
+import { GlobalLyricsOverlay } from "@/components/studio/GlobalLyricsOverlay"
 
 export function PublicMoodPageClient(props: PublicMoodPageProps) {
     return (
@@ -32,7 +32,7 @@ export function PublicMoodPageClient(props: PublicMoodPageProps) {
     )
 }
 
-function PublicMoodPageClientInner({ publicUser, profileId, profile, moodBlocks, config, theme, isGuest }: PublicMoodPageProps) {
+function PublicMoodPageClientInner({ publicUser, roomId, profile, moodBlocks, config, theme, isGuest }: PublicMoodPageProps) {
     const { isGlobalMuted, toggleGlobalMute } = useAudio()
     const [isFocusMode, setIsFocusMode] = useState(false)
     const [views, setViews] = useState<number>(0)
@@ -44,7 +44,7 @@ function PublicMoodPageClientInner({ publicUser, profileId, profile, moodBlocks,
     const viewportScale = useViewportScale()
 
     useEffect(() => {
-        const storageKey = `mood_v_${profileId}`
+        const storageKey = `mood_v_${roomId}`
         const lastView = localStorage.getItem(storageKey)
         const now = Date.now()
 
@@ -52,19 +52,19 @@ function PublicMoodPageClientInner({ publicUser, profileId, profile, moodBlocks,
             fetch(`/api/analytics/view`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ profileId })
+                body: JSON.stringify({ roomId })
             }).catch(console.error)
             localStorage.setItem(storageKey, now.toString())
         }
 
-        fetch(`/api/analytics/views?profileId=${profileId}`)
+        fetch(`/api/analytics/views?roomId=${roomId}`)
             .then(res => res.json())
             .then(data => {
                 setViews(data.views || 0)
                 setLoadingViews(false)
             })
             .catch(() => setLoadingViews(false))
-    }, [profileId])
+    }, [roomId])
 
     return (
         <>
@@ -81,7 +81,7 @@ function PublicMoodPageClientInner({ publicUser, profileId, profile, moodBlocks,
                 <ProfileSignature
                     username={publicUser.username}
                     name={publicUser.name || undefined}
-                    avatarUrl={profile.avatarUrl || undefined}
+                    avatarUrl={profile.avatarUrl || publicUser.primaryAvatarUrl || undefined}
                     isVerified={publicUser.isVerified}
                     verificationType={publicUser.verificationType}
                     isFocusMode={isFocusMode}

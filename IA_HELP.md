@@ -339,13 +339,31 @@ Sistema para reduzir a paralisia do canvas vazio e inspirar novos usuários atra
     - **Atmospheric Zen**: Lavanda, Liquid, Clima de Kyoto, Movimento Ethereal.
 - **Template Chooser**: UI automática renderizada no `MoodCanvas` quando `blocks.length === 0`. Inclui opção de "Start Fresh" para pular o onboarding.
 
-### Arquitetura Smart & Escala Global (Studio 2.1) 💎⚡
-O sistema foi elevado para um novo padrão de performance e organização:
-- **Smart Architecture**: Todos os renderizadores de blocos seguem o padrão `Smart*` (ex: `SmartPhoto`, `SmartReview`, `SmartWeather`).
-    - **SmartReview**: Nome exclusivo para resenhas de mídia, separando a semântica de "Play" (SmartMedia) de "Review".
-- **ScaleProvider (`src/lib/contexts/ScaleProvider.tsx`)**: Sistema centralizado que calcula a escala do viewport (`useGlobalScale`).
-    - **Performance**: Elimina centenas de listeners redundantes de resize, centralizando o controle em um único Context.
-    - **FUS (Fluid Unit Scaling)**: Garante que o canvas seja idêntico em qualquer resolução (1080p, 4K, Mobile).
+### Multiverso & Gestão de Dimensões (Studio 5.0) 🌌🌀✨
+O MoodSpace evoluiu para um sistema de múltiplas dimensões, permitindo que cada usuário possua diversos espaços independentes com URLs e estilos únicos.
+
+#### 1. Arquitetura de Salas (Rooms)
+- **Primary Room**: A sala principal do usuário, acessível via `mood.space/username`. Não possui slug customizável.
+- **Secondary Rooms (Pocket Dimensions)**: Salas adicionais com URLs personalizadas via `/s/[slug]`. Podem ser deletadas ou editadas sem afetar a sala primária.
+- **Isolamento Total**: Temas, blocos, versões e analytics são estritamente isolados por `roomId`. Uma alteração em uma dimensão nunca vaza para outra.
+
+#### 2. Sistema de Slugs & URLs
+- **Slugs Customizáveis**: Salas secundárias permitem a definição de um endereço único (mínimo 3 caracteres, apenas letras, números e traços).
+- **Validação de Unicidade**: O sistema impede a criação de slugs duplicados em todo o ecossistema.
+- **Redirecionamento**: A rota `/s/[slug]` carrega automaticamente a sala correta, incluindo seu histórico de publicação e configurações visuais.
+
+#### 3. Histórico de Versões & Rollback ⏪
+- **Snapshot Automático**: Cada publicação (`publishRoom`) gera uma `RoomVersion` contendo um JSON dos blocos e das configurações visuais (tema, cores, fontes) daquele momento.
+- **Rollback Seguro**: Ao restaurar uma versão, o sistema realiza um "upsert" dos dados de volta para as tabelas principais e dispara a revalidação profunda do cache (`revalidatePath("/dashboard", "layout")`).
+- **Visualização Prévia**: O Studio permite visualizar versões antigas em modo "Read-Only" antes de confirmar a restauração.
+
+#### 4. Templates & Onboarding
+- **Template Chooser**: Se uma sala estiver vazia, o Studio exibe o seletor de templates automaticamente.
+- **Aplicação Profunda**: Ao aplicar um template, o sistema limpa os blocos atuais e injeta a nova configuração visual e o conjunto de blocos do modelo escolhido, forçando a atualização do layout do dashboard.
+
+#### 5. Server Actions (Isolamento de Segurança)
+- Todas as ações de servidor (`addMoodBlock`, `updateProfile`, `clearMoodBlocks`) agora exigem um `roomId` explícito. Se omitido, o sistema assume a **Primary Room** por segurança, mas o padrão recomendado é sempre passar o ID da dimensão ativa.
+
 
 ### User Identity & Aesthetic Metadata (Studio 2.2) 🛡️✨
 

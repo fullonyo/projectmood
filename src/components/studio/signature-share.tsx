@@ -14,7 +14,7 @@ export const SignatureShare = memo(function SignatureShare({ username }: Signatu
     const [status, setStatus] = useState<'idle' | 'copied'>('idle')
 
     const handleCopy = async () => {
-        const url = `${window.location.origin}/${username}`
+        const url = `${window.location.origin}/@${username.toLowerCase()}`
         try {
             await navigator.clipboard.writeText(url)
             setStatus('copied')
@@ -56,7 +56,7 @@ export const SignatureShare = memo(function SignatureShare({ username }: Signatu
                             "text-[10px] font-mono tracking-[0.2em] uppercase transition-all duration-500",
                             status === 'copied' ? "text-green-500 font-black italic" : "opacity-60 group-hover:opacity-100"
                         )}>
-                            {status === 'copied' ? t('public_page.share.copied') : `moodspace.me/${username}`}
+                            {status === 'copied' ? t('public_page.share.copied') : `moodspace.me/@${username.toLowerCase()}`}
                         </span>
                     </div>
 

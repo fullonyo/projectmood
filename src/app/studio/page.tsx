@@ -2,27 +2,31 @@ import { Metadata } from "next";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { DashboardClientLayout } from "@/components/dashboard/dashboard-client-layout";
+import { StudioClientLayout } from "@/components/studio/studio-client-layout";
 import { computeHasUnpublishedChanges } from "@/actions/publish";
 import { getFeatureFlags } from "@/actions/system-config";
 import { MoodBlock } from "@/types/database";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-    title: "studio",
+    title: "Studio",
 };
 
-export default async function DashboardPage() {
+export default async function StudioPage() {
     const session = await auth();
 
     if (!session?.user) {
         redirect("/auth/login");
     }
 
-    const user = await prisma.user.findUnique({
+    const user = (await prisma.user.findUnique({
         where: { id: session.user.id },
-        include: { profile: true }
-    });
+        include: { 
+            rooms: {
+                where: { isPrimary: true },
+            } 
+        }
+    })) as any;
 
     if (!user) {
         redirect("/auth/register");
@@ -32,58 +36,54 @@ export default async function DashboardPage() {
         redirect("/banned");
     }
 
-    let currentProfile = user.profile;
+    // 1. Identificar a sala primária
+    let currentRoom = user.rooms[0];
 
-    if (!currentProfile) {
-        const [newProfile] = await prisma.$transaction(async (tx) => {
-            const profile = await tx.profile.create({
+    // 2. Fallback: Criar sala primária se o usuário for novo (raro chegar aqui sem sala)
+    if (!currentRoom) {
+        currentRoom = await prisma.$transaction(async (tx) => {
+            const room = await tx.room.create({
                 data: {
                     userId: user.id,
                     theme: "light",
+                    isPrimary: true,
+                    title: "Meu Quarto"
                 }
             });
 
-            await tx.profileVersion.create({
+            await tx.roomVersion.create({
                 data: {
-                    profileId: profile.id,
+                    roomId: room.id,
                     blocks: [],
                     profileData: {
-                        theme: profile.theme,
-                        backgroundColor: profile.backgroundColor,
-                        primaryColor: profile.primaryColor,
-                        fontStyle: profile.fontStyle,
-                        customCursor: profile.customCursor,
-                        mouseTrails: profile.mouseTrails,
-                        backgroundEffect: profile.backgroundEffect,
-                        customFont: profile.customFont,
-                        staticTexture: profile.staticTexture,
-                        avatarUrl: profile.avatarUrl,
+                        theme: room.theme,
+                        title: room.title
                     },
                     isActive: true,
                     label: "v1"
                 }
             });
 
-            return [profile];
+            return room;
         });
-        currentProfile = newProfile;
     }
 
     const { username } = user;
-    const profile = currentProfile;
 
+    // 3. Carregar blocos da sala selecionada
     const moodBlocks = (await prisma.moodBlock.findMany({
-        where: { userId: session.user.id, deletedAt: null },
+        where: { roomId: currentRoom.id, deletedAt: null },
         orderBy: { order: 'asc' },
     })) as MoodBlock[];
 
-    const activeVersion = await prisma.profileVersion.findFirst({
-        where: { profileId: profile.id, isActive: true },
+    // 4. Carregar metadados de publicação
+    const activeVersion = await prisma.roomVersion.findFirst({
+        where: { roomId: currentRoom.id, isActive: true },
         select: { createdAt: true }
     });
     const publishedAt = activeVersion?.createdAt?.toISOString() || null;
 
-    const hasUnpublishedChanges = await computeHasUnpublishedChanges(profile, moodBlocks);
+    const hasUnpublishedChanges = await computeHasUnpublishedChanges(currentRoom, moodBlocks);
 
     const isAdmin = (session.user as any)?.role === "ADMIN";
     const rawFlags = await getFeatureFlags();
@@ -92,13 +92,22 @@ export default async function DashboardPage() {
         return acc;
     }, {} as Record<string, boolean>);
 
+    // 5. Carregar lista de todas as salas para o switcher
+    const allRooms = await prisma.room.findMany({
+        where: { userId: session.user.id },
+        select: { id: true, title: true, slug: true, isPrimary: true, type: true, userId: true, avatarUrl: true },
+        orderBy: { createdAt: 'desc' }
+    });
+
+    const userAvatar = allRooms.find(r => r.isPrimary)?.avatarUrl || null;
+
     return (
         <div className={cn(
             "h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden",
-            profile.theme === 'dark' ? 'dark' : ''
+            currentRoom.theme === 'dark' ? 'dark' : ''
         )}>
-            <DashboardClientLayout
-                profile={profile}
+            <StudioClientLayout
+                profile={currentRoom as any}
                 moodBlocks={moodBlocks}
                 username={username}
                 name={user.name}
@@ -106,6 +115,8 @@ export default async function DashboardPage() {
                 hasUnpublishedChanges={hasUnpublishedChanges}
                 isAdmin={isAdmin}
                 systemFlags={systemFlags}
+                allRooms={allRooms}
+                userAvatar={userAvatar}
             />
         </div>
     );
