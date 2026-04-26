@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect, memo } from "react"
-import { History, ChevronLeft, RotateCcw, Loader2, Clock, CheckCircle2, Eye, EyeOff, Trash2 } from "lucide-react"
+import { History, ChevronLeft, RotateCcw, Loader2, Clock, CheckCircle2, Eye, EyeOff, Trash2, Plus } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
 import { getVersionHistory, rollbackToVersion, getVersionDetails, restoreToDraft, makeVersionActive, deleteVersion } from "@/actions/publish"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -31,10 +31,6 @@ interface VersionItemProps {
 
 // ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
 
-/**
- * Componente memorizado para cada item da lista de histórico.
- * Melhora a performance ao evitar re-renderizações desnecessárias da lista.
- */
 const VersionItem = memo(({ version, idx, previewId, isPending, onPreview, onRollback, t }: VersionItemProps) => {
     const v = version
     const isActivePreview = previewId === v.id
@@ -43,7 +39,7 @@ const VersionItem = memo(({ version, idx, previewId, isPending, onPreview, onRol
         <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.03 }}
+            transition={{ delay: (idx % 10) * 0.03 }}
             className={cn(
                 "w-full px-5 py-4 rounded-2xl transition-all flex items-center justify-between group relative border",
                 v.isActive 
@@ -136,6 +132,9 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
 
     const [versions, setVersions] = useState<any[]>([])
     const [loadingHistory, setLoadingHistory] = useState(false)
+    const [loadingMore, setLoadingMore] = useState(false)
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasMore] = useState(false)
     const [previewId, setPreviewId] = useState<string | null>(null)
 
     const [showRollbackModal, setShowRollbackModal] = useState(false)
@@ -143,30 +142,45 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
     const [rollbackType, setRollbackType] = useState<'full' | 'draft' | 'live' | 'delete'>('full')
     const [isPending, startTransition] = useTransition()
 
-    const loadHistory = async () => {
-        setLoadingHistory(true)
+    const loadHistory = async (pageToLoad: number = 1, append: boolean = false) => {
+        if (append) setLoadingMore(true)
+        else setLoadingHistory(true)
+
         try {
-            const result = await getVersionHistory(20)
+            const result = await getVersionHistory(pageToLoad, 10)
             if (result.error) {
                 toast.error(result.error)
             } else if (result.versions) {
-                setVersions(result.versions)
+                if (append) {
+                    setVersions(prev => [...prev, ...result.versions])
+                } else {
+                    setVersions(result.versions)
+                }
+                setHasMore(result.hasMore || false)
+                setPage(pageToLoad)
             }
         } catch (error) {
             console.error('[loadHistory]', error)
             toast.error(t('publish.history_error'))
         } finally {
             setLoadingHistory(false)
+            setLoadingMore(false)
         }
     }
 
     useEffect(() => {
-        loadHistory()
+        loadHistory(1)
         return () => {
             setPreviewId(null)
             setPreviewData(null)
         }
     }, [])
+
+    const handleLoadMore = () => {
+        if (!loadingMore && hasMore) {
+            loadHistory(page + 1, true)
+        }
+    }
 
     const handleRollback = (versionId: string, type: 'full' | 'draft' | 'live' | 'delete' = 'full') => {
         setRollbackTargetId(versionId)
@@ -225,7 +239,7 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
                 toast.success(successMsg)
                 setPreviewId(null)
                 setPreviewData(null)
-                loadHistory()
+                loadHistory(1, false) // Recarrega do início
                 onRollbackComplete()
                 router.refresh()
             }
@@ -249,7 +263,7 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
     return (
         <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-8 shrink-0">
                 <button 
                     onClick={onClose}
                     className="w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:scale-105 transition-transform"
@@ -286,7 +300,7 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
                         </p>
                     </div>
                 ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-2 pb-8">
                         {versions.map((v, idx) => (
                             <VersionItem 
                                 key={v.id}
@@ -299,6 +313,29 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
                                 t={t}
                             />
                         ))}
+
+                        {hasMore && (
+                            <button
+                                onClick={handleLoadMore}
+                                disabled={loadingMore}
+                                className="w-full py-4 rounded-2xl border-2 border-dashed border-zinc-100 dark:border-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-200 dark:hover:border-zinc-700 transition-all flex items-center justify-center gap-2 group mt-4"
+                            >
+                                {loadingMore ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <>
+                                        <Plus className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform" />
+                                        <span className="text-[9px] font-black uppercase tracking-widest">Carregar Mais</span>
+                                    </>
+                                )}
+                            </button>
+                        )}
+
+                        {!hasMore && versions.length > 0 && (
+                            <p className="text-[8px] text-zinc-300 dark:text-zinc-600 text-center uppercase font-bold tracking-widest py-8">
+                                Você chegou ao fim do histórico
+                            </p>
+                        )}
                     </div>
                 )}
             </div>

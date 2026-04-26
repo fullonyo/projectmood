@@ -261,33 +261,42 @@ export async function deleteVersion(versionId: string) {
     }
 }
 
-export async function getVersionHistory(limit: number = 10) {
+export async function getVersionHistory(page: number = 1, pageSize: number = 10) {
     try {
         const session = await requireAuth()
+        const skip = (page - 1) * pageSize
 
         const profile = await prisma.profile.findUnique({
             where: { userId: session.user.id },
             select: { id: true }
         })
 
-        if (!profile) return { error: "Perfil não encontrado", versions: [] }
+        if (!profile) return { error: "Perfil não encontrado", versions: [], hasMore: false }
 
-        const versions = await prisma.profileVersion.findMany({
-            where: { profileId: profile.id },
-            select: {
-                id: true,
-                label: true,
-                isActive: true,
-                createdAt: true
-            },
-            orderBy: { createdAt: 'desc' },
-            take: limit
-        })
+        const [versions, totalCount] = await Promise.all([
+            prisma.profileVersion.findMany({
+                where: { profileId: profile.id },
+                select: {
+                    id: true,
+                    label: true,
+                    isActive: true,
+                    createdAt: true
+                },
+                orderBy: { createdAt: 'desc' },
+                skip: skip,
+                take: pageSize
+            }),
+            prisma.profileVersion.count({
+                where: { profileId: profile.id }
+            })
+        ])
 
-        return { versions }
+        const hasMore = skip + versions.length < totalCount
+
+        return { versions, hasMore }
     } catch (error: any) {
         console.error('[getVersionHistory]', error)
-        return { error: "Erro ao buscar histórico", versions: [] }
+        return { error: "Erro ao buscar histórico", versions: [], hasMore: false }
     }
 }
 
