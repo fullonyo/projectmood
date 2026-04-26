@@ -47,6 +47,7 @@ interface ActionsSidebarProps {
     allRooms?: any[]
     userAvatar?: string | null
     onForceReset?: (blocks: MoodBlock[]) => void
+    blocksCount?: number
 }
 
 // ─── SPACES PANEL ──────────────────────────────────────────────────────────
@@ -334,7 +335,8 @@ export function ActionsSidebar({
     isPreview = false,
     allRooms = [],
     userAvatar,
-    onForceReset
+    onForceReset,
+    blocksCount = 0
 }: ActionsSidebarProps) {
     const { t, dict } = useTranslation()
     const [isUploading, setIsUploading] = useState(false)
@@ -503,39 +505,43 @@ export function ActionsSidebar({
                                 />
                             </div>
 
-                            <div className="flex items-center justify-center gap-2 py-4">
+                            <div className="flex items-center justify-center gap-6 py-6 border-b border-zinc-50 dark:border-zinc-800/50">
                                 <MinimalTooltip content={t('publish.button')}>
                                     <button
                                         onClick={() => setShowPublishModal(true)}
                                         disabled={isPending}
                                         className={cn(
-                                            "relative w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-300 group",
+                                            "relative p-2 transition-all duration-500 group",
                                             isDraft 
-                                                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20" 
-                                                : "bg-zinc-100 dark:bg-white/5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                                                ? "text-amber-500 hover:text-amber-600" 
+                                                : "text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
                                         )}
                                     >
+                                        <div className="absolute inset-0 bg-amber-500/0 group-hover:bg-amber-500/5 rounded-full blur-lg transition-all" />
                                         {isPending ? (
-                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            <Loader2 className="w-5 h-5 animate-spin" />
                                         ) : (
-                                            <Upload className={cn("w-4 h-4", isDraft && "animate-pulse")} />
+                                            <Upload className={cn("w-5 h-5 relative z-10", isDraft && "animate-pulse")} />
                                         )}
                                         {isDraft && (
-                                            <span className="absolute top-3 right-3 w-1.5 h-1.5 bg-amber-500 rounded-full border-2 border-white dark:border-zinc-900" />
+                                            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-500 rounded-full border-2 border-white dark:border-zinc-900 z-20" />
                                         )}
                                     </button>
                                 </MinimalTooltip>
+
+                                <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800" />
 
                                 <MinimalTooltip content={t('common.view')}>
                                     <Link 
                                         href={profile.isPrimary ? `/@${currentUsername.toLowerCase()}` : `/@${currentUsername.toLowerCase()}/${profile.slug}`} 
                                         target="_blank"
+                                        className="p-2 text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-all duration-500 hover:scale-110 active:scale-95"
                                     >
-                                        <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-zinc-100 dark:bg-white/5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all duration-300">
-                                            <ExternalLink className="w-4 h-4" />
-                                        </div>
+                                        <ExternalLink className="w-5 h-5" />
                                     </Link>
                                 </MinimalTooltip>
+
+                                <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800" />
 
                                 <ShareProfileButton 
                                     username={currentUsername} 
@@ -570,6 +576,37 @@ export function ActionsSidebar({
                                         <Layout className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
                                         <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">{dict.multiverse.control_title}</span>
                                     </button>
+                                </div>
+                            </div>
+
+                            {/* Session Insights - Human Edition */}
+                            <div className="mt-auto pt-10 pb-6">
+                                <div className="px-1 space-y-8">
+                                    <div className="flex items-center gap-3 opacity-60">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" />
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">Alterações Salvas</span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-8">
+                                        <div className="space-y-1">
+                                            <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">Total de Itens</p>
+                                            <p className="text-sm font-black text-zinc-900 dark:text-white tabular-nums leading-none italic">
+                                                {blocksCount || 0}
+                                            </p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">Tipo de Espaço</p>
+                                            <p className="text-[9px] font-black uppercase text-zinc-900 dark:text-white leading-none tracking-widest italic">
+                                                {profile.type === 'TEMPORARY' ? 'Efêmero' : 'Permanente'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="pt-4 text-center">
+                                        <span className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-300 dark:text-zinc-700 italic">
+                                            MoodSpace Studio
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

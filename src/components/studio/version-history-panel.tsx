@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect, memo } from "react"
-import { History, ChevronLeft, RotateCcw, Loader2, Clock, CheckCircle2, Eye, EyeOff, Trash2, Plus } from "lucide-react"
+import { History, RotateCcw, Loader2, Clock, CheckCircle2, Eye, EyeOff, Trash2, Plus } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
 import { getVersionHistory, rollbackToVersion, getVersionDetails, restoreToDraft, makeVersionActive, deleteVersion } from "@/actions/publish"
 import { ConfirmModal } from "../ui/confirm-modal"
@@ -10,6 +10,7 @@ import { cn, getRelativeTime } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { PreviewData } from "./studio-client-layout"
+import { EditorHeader } from "./EditorUI"
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -17,9 +18,8 @@ interface VersionHistoryPanelProps {
     onRollbackComplete: () => void;
     setPreviewData: (data: PreviewData | null) => void;
     onClose: () => void;
-    roomId: string; // Nova prop
+    roomId: string;
 }
-
 
 interface VersionItemProps {
     version: any;
@@ -129,7 +129,6 @@ VersionItem.displayName = "VersionItem"
 // ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
 
 export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClose, roomId }: VersionHistoryPanelProps) {
-
     const { t } = useTranslation()
     const router = useRouter()
 
@@ -243,7 +242,7 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
                 toast.success(successMsg)
                 setPreviewId(null)
                 setPreviewData(null)
-                loadHistory(1, false) // Recarrega do início
+                loadHistory(1, false)
                 onRollbackComplete()
                 router.refresh()
             }
@@ -266,25 +265,12 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
 
     return (
         <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
-            {/* Header */}
-            <div className="flex items-center gap-4 mb-8 shrink-0">
-                <button 
-                    onClick={onClose}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:scale-105 transition-transform"
-                >
-                    <ChevronLeft className="w-5 h-5" />
-                </button>
-                <div>
-                    <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white">
-                        {t('publish.version_history')}
-                    </h2>
-                    <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
-                        Gerencie seus estados anteriores
-                    </p>
-                </div>
-            </div>
+            <EditorHeader 
+                title={t('publish.version_history')}
+                subtitle="Gerencie seus estados anteriores"
+                onClose={onClose}
+            />
 
-            {/* List Container */}
             <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
                 {loadingHistory ? (
                     <div className="py-20 flex flex-col items-center justify-center gap-4">

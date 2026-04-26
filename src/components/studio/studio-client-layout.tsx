@@ -316,6 +316,7 @@ function StudioClientLayoutInner({
                         allRooms={allRooms}
                         userAvatar={userAvatar}
                         onForceReset={forceReset}
+                        blocksCount={blocks.length}
                     />
 
                     <button
