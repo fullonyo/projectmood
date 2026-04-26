@@ -101,7 +101,7 @@ function StudioClientLayoutInner({
         groupSelected, ungroupSelected,
         maxZ, bringToFront, sendToBack, bringForward, sendBackward,
         forceReset
-    } = useCanvasManager(moodBlocks);
+    } = useCanvasManager(moodBlocks, profile.id);
 
     const handleAddNewBlock = useCallback(async (type: string, content: any, shouldSelect = true) => {
         try {

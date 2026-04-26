@@ -6,7 +6,7 @@ import { calculateAlignment, calculateDistribution, AlignmentType, DistributionT
 
 import { MoodBlock } from '@/types/database';
 
-export function useCanvasManager(initialBlocks: MoodBlock[]) {
+export function useCanvasManager(initialBlocks: MoodBlock[], roomId: string) {
     const [isSaving, setIsSaving] = useState(false);
 
     // 1. SOVEREIGN STATE: Local state is the absolute master.
@@ -340,6 +340,23 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         toast('Grupos desfeitos');
     }, [selectedIds, blocks, updateBlocks]);
 
+    // 12. AUTO-RESET ON ROOM CHANGE
+    // ⚠️ CRITICAL: Quando mudamos de ambiente, o estado local DEVE ser limpo integralmente.
+    // Isso evita "state leaking" onde blocos de uma sala aparecem em outra.
+    useEffect(() => {
+        setBlocks(initialBlocks);
+        setSelectedIds([]);
+        setHistory(createHistory(initialBlocks));
+        epochRef.current = {};
+        pendingUpdates.current = {};
+        
+        // Limpa timers de salvamento da sala anterior para evitar cross-save
+        Object.values(saveTimers.current).forEach(clearTimeout);
+        saveTimers.current = {};
+        
+        console.log(`[CanvasManager] Room switched to ${roomId}. State purged and re-initialized.`);
+    }, [roomId, initialBlocks]);
+
     // SAFEGUARD (DIRTY TRACKING)
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -352,35 +369,29 @@ export function useCanvasManager(initialBlocks: MoodBlock[]) {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [isSaving]);
 
-    // Smart Sync from Server Props
-    // ⚠️ Merge-only: NÃO limpa seleção nem histórico.
-    // O servidor revalida os dados após cada save, mas a seleção do usuário deve persistir.
-    // Usamos os dados do servidor apenas para sincronizar blocos que o estado local não conhece
-    // (ex: bloco adicionado em outra aba) — blocos que já existem localmente ficam intocados.
+    // 13. SMART SYNC FROM SERVER
+    // Mantém o estado local sincronizado com mudanças externas (ex: outra aba)
+    // ⚠️ Importante: Só age se o roomId for o mesmo da sessão atual.
     useEffect(() => {
         setBlocks(prev => {
             const prevIds = new Set(prev.map(b => b.id));
-            const newIds = new Set(initialBlocks.map(b => b.id));
+            const serverIds = new Set(initialBlocks.map(b => b.id));
 
-            const hasStructuralChange =
-                prev.length !== initialBlocks.length ||
+            // Se as listas de IDs forem idênticas, não há mudança estrutural
+            const isStructuralChange = 
+                prev.length !== initialBlocks.length || 
                 initialBlocks.some(b => !prevIds.has(b.id)) ||
-                prev.some(b => !newIds.has(b.id));
+                prev.some(b => !serverIds.has(b.id));
 
-            if (!hasStructuralChange) {
-                // Sem blocos adicionados/removidos: mantém estado local (otimístico)
-                return prev;
-            }
+            if (!isStructuralChange) return prev;
 
-            // Mudança estrutural: mescla preservando estado local pendente
+            // Se houve mudança estrutural (bloco add/remove), mescla preservando updates locais
             return initialBlocks.map(serverBlock => {
                 const localBlock = prev.find(b => b.id === serverBlock.id);
                 return localBlock ?? serverBlock;
             });
         });
-        // ✅ NÃO limpa selectedIds — a seleção permanece válida após revalidações do servidor.
-        // ✅ NÃO reseta history — o histórico de undo/redo é preservado.
-    }, [initialBlocks]);
+    }, [initialBlocks, roomId]);
 
     /**
      * forceReset: Reset completo deliberado.
