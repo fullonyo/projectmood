@@ -7,15 +7,16 @@ import { ExternalLink, Copy, Download, QrCode, Activity, Link2 } from "lucide-re
 import { useTranslation } from "@/i18n/context"
 
 import { cn } from "@/lib/utils"
-import { EditorHeader } from "./EditorUI"
+import { MinimalTooltip } from "@/components/ui/minimal-tooltip"
 
 interface ShareProfileButtonProps {
     username: string
     isPrimary?: boolean
     slug?: string
+    minimal?: boolean
 }
 
-export function ShareProfileButton({ username, isPrimary = true, slug }: ShareProfileButtonProps) {
+export function ShareProfileButton({ username, isPrimary = true, slug, minimal = false }: ShareProfileButtonProps) {
     const { t } = useTranslation()
     const [showOptions, setShowOptions] = useState(false)
     const [copied, setCopied] = useState(false)
@@ -59,19 +60,29 @@ export function ShareProfileButton({ username, isPrimary = true, slug }: SharePr
         img.src = 'data:image/svg+xml;base64,' + btoa(svgData)
     }
 
+    const buttonElement = (
+        <button
+            onClick={() => setShowOptions(!showOptions)}
+            className={cn(
+                "flex items-center justify-center transition-all duration-300",
+                minimal 
+                    ? "w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                    : "w-full h-12 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-[9px] font-bold uppercase tracking-widest gap-2 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-sm",
+                showOptions && "border-blue-500 text-blue-500 bg-blue-50 dark:bg-blue-900/20"
+            )}
+        >
+            <Link2 className={cn(minimal ? "w-4 h-4" : "w-3.5 h-3.5")} />
+            {!minimal && t('editors.share.link')}
+        </button>
+    )
+
     return (
-        <div className="relative w-full">
-            <Button
-                variant="outline"
-                onClick={() => setShowOptions(!showOptions)}
-                className={cn(
-                    "w-full h-12 rounded-2xl border-zinc-100 dark:border-zinc-800 text-[9px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm",
-                    showOptions && "border-blue-500 text-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                )}
-            >
-                <Link2 className="w-3.5 h-3.5" />
-                {t('editors.share.link')}
-            </Button>
+        <div className={cn("relative", !minimal && "w-full")}>
+            {minimal ? (
+                <MinimalTooltip content={t('editors.share.link')}>
+                    {buttonElement}
+                </MinimalTooltip>
+            ) : buttonElement}
 
             {showOptions && (
                 <div className="absolute bottom-full right-0 mb-4 p-8 bg-white dark:bg-zinc-950 rounded-3xl border border-zinc-100 dark:border-zinc-900 z-[100] shadow-2xl w-[320px] animate-in fade-in slide-in-from-bottom-4 duration-300">
