@@ -35,6 +35,7 @@ interface CanvasItemProps {
     selectedIds: string[]
     onMultiMove?: (dx: number, dy: number) => void
     onMultiMoveEnd?: () => void
+    isPreview?: boolean
 }
 
 export const CanvasItem = memo(({
@@ -51,7 +52,8 @@ export const CanvasItem = memo(({
     onContextMenu,
     selectedIds,
     onMultiMove,
-    onMultiMoveEnd
+    onMultiMoveEnd,
+    isPreview = false
 }: CanvasItemProps) => {
     const { t } = useTranslation()
     const viewportScale = useViewportScale()
@@ -137,7 +139,7 @@ export const CanvasItem = memo(({
     }, [isSelected])
 
     const handleDragPan = useCallback((e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        if (stateRef.current.isInteractiveMode || block.isLocked || stateRef.current.isRotating) return;
+        if (isPreview || stateRef.current.isInteractiveMode || block.isLocked || stateRef.current.isRotating) return;
         if (!canvasRef.current) return;
 
         const canvas = canvasRef.current.getBoundingClientRect();
@@ -187,7 +189,7 @@ export const CanvasItem = memo(({
     }, [block.id, block.isLocked, blocks, canvasRef, mvX, mvY, setGuidelines, isMultiSelect, isSelected, onMultiMove, shiftHeld])
 
     const handleDragStart = useCallback(() => {
-        if (stateRef.current.isInteractiveMode || block.isLocked || stateRef.current.isRotating) return;
+        if (isPreview || stateRef.current.isInteractiveMode || block.isLocked || stateRef.current.isRotating) return;
         setIsDragging(true);
         stateRef.current.isInteracting = true;
         stateRef.current.startX = stateRef.current.x;
@@ -226,7 +228,7 @@ export const CanvasItem = memo(({
     }, [onUpdate, setGuidelines, isMultiSelect, isSelected, onMultiMoveEnd, altHeld, block.type, block.content, unscaleValue])
 
     const handleResizePan = useCallback((handle: ResizeHandle, e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        if (block.isLocked) return;
+        if (isPreview || block.isLocked) return;
         if (!canvasRef.current) return;
         const canvas = canvasRef.current.getBoundingClientRect();
         const result = calculateResize(
@@ -240,7 +242,7 @@ export const CanvasItem = memo(({
     }, [block.isLocked, canvasRef, mvH, mvW, mvX, mvY, shiftHeld])
 
     const handleResizeStart = useCallback((e: any, info: PanInfo) => {
-        if (block.isLocked) return;
+        if (isPreview || block.isLocked) return;
         setIsResizing(true); stateRef.current.isInteracting = true;
     }, [block.isLocked])
 
@@ -366,7 +368,7 @@ export const CanvasItem = memo(({
                 cursor: block.isLocked ? 'not-allowed' : (isDragging ? 'grabbing' : (isSelected ? 'default' : 'grab'))
             }}
             onPointerDown={(e) => {
-                if (isInteractiveMode || block.isLocked) return;
+                if (isPreview || isInteractiveMode || block.isLocked) return;
 
                 // BLINDAGEM: Não capturamos o ponteiro se o usuário clicar em botões,
                 // handles de resize/rotate ou na barra de ferramentas. Isso permite que
@@ -431,7 +433,7 @@ export const CanvasItem = memo(({
             </div>
 
             {/* Selection UI (Simplified as the Aura handles most things) */}
-            {isSelected && !isMultiSelect && (
+            {isSelected && !isMultiSelect && !isPreview && (
                 <>
                     <div className={cn(
                         "absolute -inset-[3px] pointer-events-none z-[1001] transition-all rounded-2xl",

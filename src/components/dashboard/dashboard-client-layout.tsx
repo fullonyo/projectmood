@@ -29,6 +29,11 @@ interface DashboardClientLayoutProps {
     systemFlags?: Record<string, boolean>;
 }
 
+export interface PreviewData {
+    blocks: MoodBlock[];
+    profile: Profile;
+}
+
 export function DashboardClientLayout({ profile, moodBlocks, username, name, publishedAt, hasUnpublishedChanges, isAdmin, systemFlags }: DashboardClientLayoutProps) {
     return (
         <I18nProvider>
@@ -49,6 +54,7 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
     const [localProfile, setLocalProfile] = useState(profile);
     const [isProfilePending, startProfileTransition] = useTransition();
+    const [previewData, setPreviewData] = useState<PreviewData | null>(null);
     const { isDrawingMode } = useCanvasInteraction();
 
     const {
@@ -164,10 +170,10 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
             {/* Fullscreen Canvas as Base Layer (layer 0) */}
             <div className="absolute inset-0 z-0">
                 <MoodCanvas
-                    blocks={blocks}
-                    profile={localProfile}
-                    backgroundEffect={localProfile.backgroundEffect || 'none'}
-                    selectedIds={selectedIds}
+                    blocks={previewData ? previewData.blocks : blocks}
+                    profile={previewData ? previewData.profile : localProfile}
+                    backgroundEffect={previewData ? (previewData.profile.backgroundEffect || 'none') : (localProfile.backgroundEffect || 'none')}
+                    selectedIds={previewData ? [] : selectedIds}
                     setSelectedIds={setSelectedIds}
                     onUpdateBlock={updateBlock}
                     onUpdateBlocks={updateBlocks}
@@ -183,6 +189,8 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                     sendToBack={sendToBack}
                     bringForward={bringForward}
                     sendBackward={sendBackward}
+                    isPreview={!!previewData}
+                    onExitPreview={() => setPreviewData(null)}
                 />
 
             </div>
@@ -283,6 +291,8 @@ function DashboardClientLayoutInner({ profile, moodBlocks, username, name, publi
                         publishedAt={publishedAt} 
                         hasUnpublishedChanges={hasUnpublishedChanges} 
                         isAdmin={isAdmin} 
+                        setPreviewData={setPreviewData}
+                        isPreview={!!previewData}
                     />
 
                     {/* Ghost Trigger: Collapse Right */}

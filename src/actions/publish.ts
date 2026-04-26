@@ -12,98 +12,88 @@ import { requireAuth, getUsernameById, revalidateProfile } from "@/lib/action-he
  * A página pública lê exclusivamente da versão ativa.
  */
 
-// ─── PUBLISH ─────────────────────────────────────────────────────────────────
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-export async function publishProfile() {
+/**
+ * Helper interno para capturar o estado atual e salvar como uma versão.
+ * Usado tanto no Publish quanto no Auto-Backup de restauração.
+ */
+async function createVersionSnapshot(tx: any, userId: string, profileId: string, label?: string) {
+    const currentBlocks = await tx.moodBlock.findMany({ 
+        where: { userId, deletedAt: null } 
+    })
+    const currentProfile = await tx.profile.findUnique({ 
+        where: { id: profileId } 
+    })
+
+    if (!currentProfile) throw new Error("Perfil não encontrado para snapshot")
+
+    return await tx.profileVersion.create({
+        data: {
+            profileId,
+            label: label || null,
+            blocks: currentBlocks as any,
+            profileData: {
+                theme: currentProfile.theme,
+                backgroundColor: currentProfile.backgroundColor,
+                primaryColor: currentProfile.primaryColor,
+                fontStyle: currentProfile.fontStyle,
+                customCursor: currentProfile.customCursor,
+                mouseTrails: currentProfile.mouseTrails,
+                backgroundEffect: currentProfile.backgroundEffect,
+                customFont: currentProfile.customFont,
+                staticTexture: currentProfile.staticTexture,
+                avatarUrl: currentProfile.avatarUrl
+            } as any,
+            isActive: false
+        }
+    })
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+
+export async function publishProfile(label?: string) {
     try {
         const session = await requireAuth()
         const userId = session.user.id
         const username = await getUsernameById(userId)
 
-        const blocks = await prisma.moodBlock.findMany({
-            where: { userId, deletedAt: null },
-            orderBy: { order: 'asc' },
-        })
-        const snapshot = blocks.map((b: any) => ({
-            id: b.id,
-            type: b.type,
-            content: b.content,
-            x: b.x,
-            y: b.y,
-            width: b.width,
-            height: b.height,
-            zIndex: b.zIndex,
-            rotation: b.rotation,
-            order: b.order,
-            isLocked: b.isLocked,
-            isHidden: b.isHidden,
-            groupId: b.groupId
-        }))
-
         const profile = await prisma.profile.findUnique({
-            where: { userId },
-            select: {
-                id: true,
-                theme: true,
-                backgroundColor: true,
-                primaryColor: true,
-                fontStyle: true,
-                customCursor: true,
-                mouseTrails: true,
-                backgroundEffect: true,
-                customFont: true,
-                staticTexture: true,
-                avatarUrl: true
-            }
+            where: { userId }
         })
 
         if (!profile) return { error: "Perfil não encontrado" }
 
-        const versionCount = await prisma.profileVersion.count({
-            where: { profileId: profile.id }
-        })
-        await prisma.$transaction([
-            prisma.profileVersion.updateMany({
+        await prisma.$transaction(async (tx) => {
+            // 1. Criar o Snapshot usando o helper
+            const newVersion = await createVersionSnapshot(tx, userId, profile.id, label)
+
+            // 2. Marcar como Ativa e desativar as outras
+            await tx.profileVersion.updateMany({
                 where: { profileId: profile.id, isActive: true },
                 data: { isActive: false }
-            }),
-            prisma.profileVersion.create({
-                data: {
-                    profileId: profile.id,
-                    blocks: snapshot as any,
-                    profileData: {
-                        theme: profile.theme,
-                        backgroundColor: profile.backgroundColor,
-                        primaryColor: profile.primaryColor,
-                        fontStyle: profile.fontStyle,
-                        customCursor: profile.customCursor,
-                        mouseTrails: profile.mouseTrails,
-                        backgroundEffect: profile.backgroundEffect,
-                        customFont: profile.customFont,
-                        staticTexture: profile.staticTexture,
-                        avatarUrl: profile.avatarUrl
-                    },
-                    isActive: true,
-                    label: `v${versionCount + 1}`
-                }
             })
-        ])
+
+            await tx.profileVersion.update({
+                where: { id: newVersion.id },
+                data: { isActive: true }
+            })
+        })
 
         revalidateProfile(username, username ? [`/${username}`] : [])
-
-        return { success: true, version: versionCount + 1 }
+        return { success: true }
     } catch (error: any) {
-        if (error.name === "ActionError") return { error: error.message }
         console.error('[publishProfile]', error)
-        return { error: "Erro ao publicar diorama" }
+        return { error: "Erro ao publicar" }
     }
 }
 
-export async function rollbackToVersion(versionId: string) {
+// ─── RESTORE & ROLLBACK ──────────────────────────────────────────────────────
+
+export async function restoreToDraft(versionId: string) {
     try {
         const session = await requireAuth()
         const userId = session.user.id
-        const username = await getUsernameById(userId)
 
         const version = await prisma.profileVersion.findUnique({
             where: { id: versionId },
@@ -115,18 +105,10 @@ export async function rollbackToVersion(versionId: string) {
         }
 
         await prisma.$transaction(async (tx) => {
-            // 1. Alternar flag isActive na tabela de versões (Live)
-            await tx.profileVersion.updateMany({
-                where: { profileId: version.profileId, isActive: true },
-                data: { isActive: false }
-            })
+            // 0. Backup Automático de Segurança usando o helper
+            await createVersionSnapshot(tx, userId, version.profileId, "Backup Automático")
 
-            await tx.profileVersion.update({
-                where: { id: versionId },
-                data: { isActive: true }
-            })
-
-            // 2. Restaurar metadados do Perfil (Editor/Draft)
+            // 1. Restaurar metadados do Perfil (Editor/Draft)
             if (version.profileData) {
                 const pd = version.profileData as any
                 await tx.profile.update({
@@ -146,20 +128,15 @@ export async function rollbackToVersion(versionId: string) {
                 })
             }
 
-            // 3. Restaurar Blocos (Editor/Draft)
+            // 2. Restaurar Blocos (Editor/Draft)
             const snapshotBlocks = version.blocks as any[]
             if (snapshotBlocks) {
                 const snapshotIds = snapshotBlocks.map(b => b.id).filter(Boolean)
 
-                // Deletar blocos atuais que não existem no snapshot
                 await tx.moodBlock.deleteMany({
-                    where: { 
-                        userId, 
-                        id: { notIn: snapshotIds } 
-                    }
+                    where: { userId, id: { notIn: snapshotIds } }
                 })
 
-                // Atualizar ou Criar blocos do snapshot
                 for (const b of snapshotBlocks) {
                     await tx.moodBlock.upsert({
                         where: { id: b.id },
@@ -197,17 +174,90 @@ export async function rollbackToVersion(versionId: string) {
                     })
                 }
             }
-        }, {
-            timeout: 15000 // Aumentar timeout para operações complexas de restauração
-        })
-
-        revalidateProfile(username, username ? [`/${username}`] : [])
+        }, { timeout: 15000 })
 
         return { success: true }
     } catch (error: any) {
-        if (error.name === "ActionError") return { error: error.message }
+        console.error('[restoreToDraft]', error)
+        return { error: "Erro ao restaurar rascunho" }
+    }
+}
+
+export async function makeVersionActive(versionId: string) {
+    try {
+        const session = await requireAuth()
+        const userId = session.user.id
+        const username = await getUsernameById(userId)
+
+        const version = await prisma.profileVersion.findUnique({
+            where: { id: versionId },
+            include: { profile: true }
+        })
+
+        if (!version || version.profile.userId !== userId) {
+            return { error: "Versão não encontrada" }
+        }
+
+        await prisma.$transaction([
+            prisma.profileVersion.updateMany({
+                where: { profileId: version.profileId, isActive: true },
+                data: { isActive: false }
+            }),
+            prisma.profileVersion.update({
+                where: { id: versionId },
+                data: { isActive: true }
+            })
+        ])
+
+        revalidateProfile(username, username ? [`/${username}`] : [])
+        return { success: true }
+    } catch (error: any) {
+        console.error('[makeVersionActive]', error)
+        return { error: "Erro ao ativar versão" }
+    }
+}
+
+export async function rollbackToVersion(versionId: string) {
+    try {
+        const resDraft = await restoreToDraft(versionId)
+        if (resDraft.error) return resDraft
+
+        const resActive = await makeVersionActive(versionId)
+        if (resActive.error) return resActive
+
+        return { success: true }
+    } catch (error: any) {
         console.error('[rollbackToVersion]', error)
-        return { error: "Erro ao restaurar versão" }
+        return { error: "Erro ao realizar rollback completo" }
+    }
+}
+
+export async function deleteVersion(versionId: string) {
+    try {
+        const session = await requireAuth()
+        const userId = session.user.id
+
+        const version = await prisma.profileVersion.findUnique({
+            where: { id: versionId },
+            include: { profile: true }
+        })
+
+        if (!version || version.profile.userId !== userId) {
+            return { error: "Versão não encontrada" }
+        }
+
+        if (version.isActive) {
+            return { error: "Não é possível excluir a versão ativa" }
+        }
+
+        await prisma.profileVersion.delete({
+            where: { id: versionId }
+        })
+
+        return { success: true }
+    } catch (error: any) {
+        console.error('[deleteVersion]', error)
+        return { error: "Erro ao excluir versão" }
     }
 }
 
@@ -236,9 +286,38 @@ export async function getVersionHistory(limit: number = 10) {
 
         return { versions }
     } catch (error: any) {
-        if (error.name === "ActionError") return { error: error.message, versions: [] }
         console.error('[getVersionHistory]', error)
         return { error: "Erro ao buscar histórico", versions: [] }
+    }
+}
+
+export async function getVersionDetails(versionId: string) {
+    try {
+        const session = await requireAuth()
+
+        const version = await prisma.profileVersion.findUnique({
+            where: { id: versionId },
+            select: {
+                id: true,
+                blocks: true,
+                profileData: true,
+                profile: {
+                    select: { userId: true }
+                }
+            }
+        })
+
+        if (!version || version.profile.userId !== session.user.id) {
+            return { error: "Versão não encontrada" }
+        }
+
+        return { 
+            blocks: version.blocks as any[], 
+            profile: version.profileData as any 
+        }
+    } catch (error: any) {
+        console.error('[getVersionDetails]', error)
+        return { error: "Erro ao carregar detalhes da versão" }
     }
 }
 
@@ -332,7 +411,6 @@ export async function computeHasUnpublishedChanges(
 
         const publishedProfileDataStr = JSON.stringify(sortKeys(activeVersion.profileData));
         
-        // Normalize draft blocks for comparison (ensure only same fields are compared)
         const normalizedDraftBlocks = draftBlocks.map((b: any) => ({
             type: b.type, content: b.content,
             x: b.x, y: b.y, width: b.width, height: b.height,

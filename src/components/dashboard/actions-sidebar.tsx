@@ -24,6 +24,8 @@ import { EditorHeader, EditorSection, EditorSlider } from "./EditorUI"
 import { Profile } from "@/types/database"
 import { UniversalIdentityEditor } from "./UniversalIdentityEditor"
 
+import { PreviewData } from "./dashboard-client-layout"
+
 interface ActionsSidebarProps {
     username: string
     name: string | null
@@ -31,14 +33,17 @@ interface ActionsSidebarProps {
     publishedAt?: Date | string | null
     hasUnpublishedChanges?: boolean
     isAdmin?: boolean
+    setPreviewData: (data: PreviewData | null) => void
+    isPreview?: boolean
 }
 
-export function ActionsSidebar({ username: initialUsername, name: initialName, profile, publishedAt, hasUnpublishedChanges, isAdmin }: ActionsSidebarProps) {
+export function ActionsSidebar({ username: initialUsername, name: initialName, profile, publishedAt, hasUnpublishedChanges, isAdmin, setPreviewData, isPreview = false }: ActionsSidebarProps) {
     const { t } = useTranslation()
     const [isUploading, setIsUploading] = useState(false)
     const [showPublishModal, setShowPublishModal] = useState(false)
-    const [activeTab, setActiveTab] = useState<'main' | 'identity'>('main')
+    const [activeTab, setActiveTab] = useState<'main' | 'identity' | 'history'>('main')
     const [isPending, startTransition] = useTransition()
+    const [versionLabel, setVersionLabel] = useState("")
     
     // Estados locais para feedback instantâneo após edição
     const [currentName, setCurrentName] = useState(initialName)
@@ -90,11 +95,12 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
 
     const handlePublish = () => {
         startTransition(async () => {
-            const result = await publishProfile()
+            const result = await publishProfile(versionLabel)
             if (result?.error) {
                 toast.error(result.error)
             } else {
                 toast.success(t('publish.success'))
+                setVersionLabel("")
                 router.refresh()
             }
             setShowPublishModal(false)
@@ -107,7 +113,7 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
     return (
         <aside className="relative w-80 h-full bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 flex flex-col shadow-xl z-50 overflow-hidden">
             <AnimatePresence mode="wait">
-                {activeTab === 'identity' ? (
+                {activeTab === 'identity' && (
                     <motion.div
                         key="identity-editor"
                         initial={{ x: 20, opacity: 0 }}
@@ -122,14 +128,33 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                             onClose={() => setActiveTab('main')}
                         />
                     </motion.div>
-                ) : (
+                )}
+
+                {activeTab === 'history' && (
+                    <motion.div
+                        key="history-editor"
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -20, opacity: 0 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="absolute inset-0 z-50 bg-white dark:bg-zinc-900 p-8"
+                    >
+                        <VersionHistoryPanel 
+                            onRollbackComplete={() => router.refresh()} 
+                            setPreviewData={setPreviewData}
+                            onClose={() => setActiveTab('main')}
+                        />
+                    </motion.div>
+                )}
+
+                {activeTab === 'main' && (
                     <motion.div
                         key="main-content"
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: 20, opacity: 0 }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="flex flex-col h-full overflow-hidden"
+                        className={cn("flex flex-col h-full overflow-hidden", isPreview && "opacity-60 pointer-events-none")}
                     >
 
             <div className="absolute top-6 right-6 z-20">
@@ -244,7 +269,8 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                             </div>
                         </Button>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        {/* Actions Grid */}
+                        <div className={cn("grid grid-cols-2 gap-3 mb-10", isPreview && "opacity-50 pointer-events-none")}>
                             <Link href={`/${currentUsername}`} target="_blank" className="w-full">
                                 <Button
                                     variant="outline"
@@ -272,7 +298,22 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                             </Link>
                         )}
 
-                        <VersionHistoryPanel onRollbackComplete={() => router.refresh()} />
+                        <button
+                            onClick={() => setActiveTab('history')}
+                            className={cn(
+                                "w-full h-12 px-6 flex items-center justify-between transition-all rounded-2xl group",
+                                "bg-transparent text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5"
+                            )}
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-8 h-8 rounded-xl flex items-center justify-center transition-all bg-zinc-100 dark:bg-zinc-800">
+                                    <History className="w-4 h-4" />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                                    {t('publish.version_history')}
+                                </span>
+                            </div>
+                        </button>
                     </div>
                 </div>
 
@@ -384,7 +425,19 @@ export function ActionsSidebar({ username: initialUsername, name: initialName, p
                 cancelText={t('common.cancel')}
                 type="info"
                 isLoading={isPending}
-            />
+            >
+                <div className="space-y-2">
+                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Nome da Versão (Opcional)</label>
+                    <input 
+                        type="text"
+                        value={versionLabel}
+                        onChange={(e) => setVersionLabel(e.target.value)}
+                        placeholder="Ex: Layout de Verão, Build com Fotos..."
+                        className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 text-[11px] font-bold text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        autoFocus
+                    />
+                </div>
+            </ConfirmModal>
         </aside>
     )
 }

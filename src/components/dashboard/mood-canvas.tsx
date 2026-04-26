@@ -39,6 +39,8 @@ interface MoodCanvasProps {
     sendToBack: (id: string) => void
     bringForward: (id: string) => void
     sendBackward: (id: string) => void
+    isPreview?: boolean
+    onExitPreview?: () => void
 }
 
 export function MoodCanvas({
@@ -60,7 +62,9 @@ export function MoodCanvas({
     bringToFront,
     sendToBack,
     bringForward,
-    sendBackward
+    sendBackward,
+    isPreview = false,
+    onExitPreview
 }: MoodCanvasProps) {
 
     const { t } = useTranslation()
@@ -182,16 +186,16 @@ export function MoodCanvas({
     useCanvasKeyboard({
         selectedIds,
         setSelectedIds,
-        onUpdateBlock,
-        removeBlocks,
-        duplicateMoodBlock,
-        bringToFront,
-        sendToBack,
+        onUpdateBlock: isPreview ? () => {} : onUpdateBlock,
+        removeBlocks: isPreview ? () => {} : removeBlocks,
+        duplicateMoodBlock: isPreview ? () => {} : duplicateMoodBlock,
+        bringToFront: isPreview ? () => {} : bringToFront,
+        sendToBack: isPreview ? () => {} : sendToBack,
         blocks,
-        undo,
-        redo,
-        onGroup,
-        onUngroup,
+        undo: isPreview ? () => {} : undo,
+        redo: isPreview ? () => {} : redo,
+        onGroup: isPreview ? () => {} : onGroup,
+        onUngroup: isPreview ? () => {} : onUngroup,
         zoomIn: () => setZoom(prev => Math.min(3, prev + 0.1)),
         zoomOut: () => setZoom(prev => Math.max(0.2, prev - 0.1)),
         resetZoom: () => {
@@ -199,8 +203,8 @@ export function MoodCanvas({
             mvPanX.set(0);
             mvPanY.set(0);
         },
-        addMoodBlock,
-        addMoodBlocksBulk
+        addMoodBlock: isPreview ? () => {} : addMoodBlock,
+        addMoodBlocksBulk: isPreview ? () => {} : addMoodBlocksBulk
     })
 
     return (
@@ -284,19 +288,21 @@ export function MoodCanvas({
                                             setSelectedIds([block.id])
                                         }
                                     }}
-                                    onUpdate={(updates) => onUpdateBlock(block.id, updates)}
+                                    onUpdate={(updates) => !isPreview && onUpdateBlock(block.id, updates)}
                                     profile={profile}
                                     themeConfig={themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.dark}
-                                    onDeleteRequest={(id) => removeBlocks([id])}
+                                    onDeleteRequest={(id) => !isPreview && removeBlocks([id])}
                                     blocks={blocks}
                                     setGuidelines={setVisualFeedback}
                                     onContextMenu={(e) => {
+                                        if (isPreview) return
                                         e.preventDefault()
                                         setContextMenu({ x: e.clientX, y: e.clientY, blockId: block.id })
                                         setSelectedIds([block.id])
                                     }}
                                     selectedIds={selectedIds}
                                     onMultiMove={handleMultiMove}
+                                    isPreview={isPreview}
                                 />
                             ))}
                         </AnimatePresence>
@@ -371,6 +377,31 @@ export function MoodCanvas({
             />
 
             <CommandCenter />
+            
+            <AnimatePresence>
+                {isPreview && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[5000] flex flex-col items-center gap-4"
+                    >
+                        <div className="px-8 py-4 bg-blue-600/90 dark:bg-blue-500/90 backdrop-blur-xl border border-white/20 shadow-[0_0_50px_rgba(59,130,246,0.3)] flex items-center gap-8 rounded-3xl">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Visualização de Histórico</span>
+                                <span className="text-[9px] font-bold text-white/70 uppercase tracking-widest">Modo Somente Leitura</span>
+                            </div>
+                            <div className="h-8 w-px bg-white/20" />
+                            <button 
+                                onClick={onExitPreview}
+                                className="px-6 h-10 bg-white text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-100 transition-all active:scale-95"
+                            >
+                                Sair da Visualização
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

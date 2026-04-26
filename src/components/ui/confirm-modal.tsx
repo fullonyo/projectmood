@@ -16,6 +16,7 @@ interface ConfirmModalProps {
     cancelText?: string
     type?: "danger" | "info"
     isLoading?: boolean
+    children?: React.ReactNode
 }
 
 export function ConfirmModal({
@@ -27,7 +28,8 @@ export function ConfirmModal({
     confirmText = "Confirmar",
     cancelText = "Cancelar",
     type = "info",
-    isLoading = false
+    isLoading = false,
+    children
 }: ConfirmModalProps) {
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
@@ -89,6 +91,12 @@ export function ConfirmModal({
                                     {message}
                                 </p>
                             </div>
+
+                            {children && (
+                                <div className="w-full mb-8">
+                                    {children}
+                                </div>
+                            )}
 
                             {/* Actions Group */}
                             <div className="flex flex-col w-full gap-3">
