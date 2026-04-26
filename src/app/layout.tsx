@@ -21,6 +21,7 @@ const geistMono = Geist_Mono({
 });
 //teste
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://moodspace.com.br'),
   title: {
     default: "moodspace — curate your reality",
     template: "%s — moodspace"

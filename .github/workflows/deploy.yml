@@ -5,13 +5,37 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  validate:
+    name: Build & Validate
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Prisma Generate & Build Check
+        run: npx prisma generate && npm run build
+        env:
+          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          NEXTAUTH_SECRET: mock_secret_for_build
+          NEXTAUTH_URL: http://localhost:3000
+          GIPHY_API_KEY: mock
+          SPOTIFY_CLIENT_ID: mock
+          SPOTIFY_CLIENT_SECRET: mock
 
-      - name: Deploy to EC2
+  deploy:
+    name: Production Deploy
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -19,41 +43,23 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           command_timeout: 45m
           script: |
-            # Garantir que a pasta do projeto existe
-            if [ ! -d "~/moodproject" ]; then
-              mkdir -p ~/moodproject
-            fi
-            
             cd ~/moodproject
+            git pull origin main
             
-            # Inicializar ou atualizar o repositório
-            if [ ! -d ".git" ]; then
-              git clone https://github.com/fullonyo/projectmood.git .
-            else
-              git pull origin main
-            fi
-            
-            # Criar arquivo .env de produção
-            cat <<EOF > .env
-            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-            NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
-            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            GIPHY_API_KEY=${{ secrets.GIPHY_API_KEY }}
-            SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}
-            SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}
-            EOF
-
-            # Build e Deploy com BuildKit e Cache Inline
+            # Build e Deploy
             export DOCKER_BUILDKIT=1
             export COMPOSE_DOCKER_CLI_BUILD=1
             docker compose -f docker-compose.prod.yml up -d --build
             
-            # Roda as migrações/push do Prisma dentro do container do app
-            # --skip-generate: Não tenta gerar o client de novo (já foi gerado no build), evitando erro de module not found
-            docker exec moodspace_app npx prisma@5.22.0 db push --skip-generate
+            # Aguardar inicialização
+            echo "Aguardando containers..."
+            sleep 10
             
-            # Limpeza inteligente: remove imagens 'dangling' (sem tag) e containers parados.
-            # O parâmetro -a remove imagens não usadas, mas isso mataria o cache. Usamos sem -a para manter cache.
+            # Migração oficial e segura
+            echo "Aplicando migrations..."
+            docker exec moodspace_app npx prisma migrate deploy
+            
+            # Limpeza
             docker system prune -f
+            echo "Deploy concluído com sucesso!"
+
