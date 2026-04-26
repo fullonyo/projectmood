@@ -34,7 +34,10 @@ export async function publishProfile() {
             height: b.height,
             zIndex: b.zIndex,
             rotation: b.rotation,
-            order: b.order
+            order: b.order,
+            isLocked: b.isLocked,
+            isHidden: b.isHidden,
+            groupId: b.groupId
         }))
 
         const profile = await prisma.profile.findUnique({
@@ -99,27 +102,104 @@ export async function publishProfile() {
 export async function rollbackToVersion(versionId: string) {
     try {
         const session = await requireAuth()
-        const username = await getUsernameById(session.user.id)
+        const userId = session.user.id
+        const username = await getUsernameById(userId)
 
         const version = await prisma.profileVersion.findUnique({
             where: { id: versionId },
             include: { profile: true }
         })
 
-        if (!version || version.profile.userId !== session.user.id) {
+        if (!version || version.profile.userId !== userId) {
             return { error: "Versão não encontrada" }
         }
 
-        await prisma.$transaction([
-            prisma.profileVersion.updateMany({
+        await prisma.$transaction(async (tx) => {
+            // 1. Alternar flag isActive na tabela de versões (Live)
+            await tx.profileVersion.updateMany({
                 where: { profileId: version.profileId, isActive: true },
                 data: { isActive: false }
-            }),
-            prisma.profileVersion.update({
+            })
+
+            await tx.profileVersion.update({
                 where: { id: versionId },
                 data: { isActive: true }
             })
-        ])
+
+            // 2. Restaurar metadados do Perfil (Editor/Draft)
+            if (version.profileData) {
+                const pd = version.profileData as any
+                await tx.profile.update({
+                    where: { id: version.profileId },
+                    data: {
+                        theme: pd.theme,
+                        backgroundColor: pd.backgroundColor,
+                        primaryColor: pd.primaryColor,
+                        fontStyle: pd.fontStyle,
+                        customCursor: pd.customCursor,
+                        mouseTrails: pd.mouseTrails,
+                        backgroundEffect: pd.backgroundEffect,
+                        customFont: pd.customFont,
+                        staticTexture: pd.staticTexture,
+                        avatarUrl: pd.avatarUrl
+                    }
+                })
+            }
+
+            // 3. Restaurar Blocos (Editor/Draft)
+            const snapshotBlocks = version.blocks as any[]
+            if (snapshotBlocks) {
+                const snapshotIds = snapshotBlocks.map(b => b.id).filter(Boolean)
+
+                // Deletar blocos atuais que não existem no snapshot
+                await tx.moodBlock.deleteMany({
+                    where: { 
+                        userId, 
+                        id: { notIn: snapshotIds } 
+                    }
+                })
+
+                // Atualizar ou Criar blocos do snapshot
+                for (const b of snapshotBlocks) {
+                    await tx.moodBlock.upsert({
+                        where: { id: b.id },
+                        update: {
+                            type: b.type,
+                            content: b.content,
+                            x: b.x,
+                            y: b.y,
+                            width: b.width,
+                            height: b.height,
+                            zIndex: b.zIndex,
+                            rotation: b.rotation,
+                            order: b.order,
+                            isLocked: b.isLocked,
+                            isHidden: b.isHidden,
+                            groupId: b.groupId,
+                            deletedAt: null 
+                        },
+                        create: {
+                            id: b.id,
+                            userId,
+                            type: b.type,
+                            content: b.content,
+                            x: b.x,
+                            y: b.y,
+                            width: b.width,
+                            height: b.height,
+                            zIndex: b.zIndex,
+                            rotation: b.rotation,
+                            order: b.order,
+                            isLocked: b.isLocked,
+                            isHidden: b.isHidden,
+                            groupId: b.groupId
+                        }
+                    })
+                }
+            }
+        }, {
+            timeout: 15000 // Aumentar timeout para operações complexas de restauração
+        })
 
         revalidateProfile(username, username ? [`/${username}`] : [])
 
@@ -127,7 +207,7 @@ export async function rollbackToVersion(versionId: string) {
     } catch (error: any) {
         if (error.name === "ActionError") return { error: error.message }
         console.error('[rollbackToVersion]', error)
-        return { error: "Erro ao reverter versão" }
+        return { error: "Erro ao restaurar versão" }
     }
 }
 
