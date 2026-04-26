@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, ExternalLink, User, Camera, Loader2, Upload, History, RotateCcw, Sparkles, Volume2, VolumeX, Globe, Plus, Clock, ShieldCheck, Trash2, Link as LinkIcon } from "lucide-react"
+import { LogOut, ExternalLink, User, Camera, Loader2, Upload, History, RotateCcw, Sparkles, Volume2, VolumeX, Globe, Plus, Clock, ShieldCheck, Trash2, Link as LinkIcon, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "../ui/button"
 import { ShareProfileButton } from "./share-profile-button"
@@ -109,107 +109,159 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
         })
     }
 
-    return (
-        <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
-            <div className="flex items-center justify-between mb-8">
-                <div className="space-y-1 mb-10">
-                    <h2 className="text-xl font-black uppercase tracking-widest text-zinc-900 dark:text-white">
-                        {dict.multiverse.control_title}
-                    </h2>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                        {dict.multiverse.active_count.replace('{count}', rooms.length.toString())}
-                    </p>
+    const primaryRoom = rooms.find(r => r.isPrimary)
+    const secondaryRooms = rooms.filter(r => !r.isPrimary)
+
+    const RoomCard = ({ room }: { room: any }) => (
+        <div 
+            key={room.id}
+            onClick={() => handleSwitchSpace(room.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') handleSwitchSpace(room.id)
+            }}
+            className={cn(
+                "w-full text-left group p-4 rounded-2xl border transition-all relative overflow-hidden cursor-pointer",
+                room.id === currentRoomId 
+                    ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20" 
+                    : "bg-zinc-50 dark:bg-white/5 border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
+            )}
+        >
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    {room.isPrimary ? <ShieldCheck className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+                    <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[120px]">
+                        {room.title || (room.isPrimary ? dict.multiverse.primary_space : dict.multiverse.pocket_dimension)}
+                    </span>
                 </div>
-                <button 
-                    onClick={onClose}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
-                >
-                    <Plus className="w-4 h-4 rotate-45" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                    {room.isPrimary && (
+                        <span className={cn(
+                            "text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full",
+                            room.id === currentRoomId 
+                                ? "bg-white/20 text-white" 
+                                : "bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        )}>
+                            Principal
+                        </span>
+                    )}
+                    {room.type === 'TEMPORARY' && (
+                        <div className="flex items-center gap-1 text-[8px] font-black uppercase tracking-tighter opacity-70">
+                            <Clock className="w-3 h-3" />
+                            Temp
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-2 -mr-2">
-                {rooms.map((room) => (
-                    <div 
-                        key={room.id}
-                        onClick={() => handleSwitchSpace(room.id)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                handleSwitchSpace(room.id)
-                            }
+            <div className="flex items-center justify-between">
+                <span className={cn(
+                    "text-[9px] font-bold opacity-60",
+                    room.id === currentRoomId ? "text-white" : "text-zinc-400"
+                )}>
+                    /@{username.toLowerCase()}{room.isPrimary ? '' : `/${room.slug || '...'}`}
+                </span>
+                
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {!room.isPrimary && (
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                setRoomToDelete(room.id)
+                            }}
+                            className={cn(
+                                "p-1.5 rounded-lg transition-all",
+                                room.id === currentRoomId 
+                                    ? "bg-white/10 hover:bg-red-500" 
+                                    : "bg-zinc-100 dark:bg-zinc-800 hover:bg-red-500 hover:text-white"
+                            )}
+                        >
+                            <Trash2 className="w-3 h-3" />
+                        </button>
+                    )}
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            const path = room.isPrimary ? `/@${username.toLowerCase()}` : `/@${username.toLowerCase()}/${room.slug}`
+                            window.open(path, '_blank')
                         }}
                         className={cn(
-                            "w-full text-left group p-4 rounded-2xl border transition-all relative overflow-hidden cursor-pointer",
+                            "p-1.5 rounded-lg transition-all",
                             room.id === currentRoomId 
-                                ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20" 
-                                : "bg-zinc-50 dark:bg-white/5 border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
+                                ? "bg-white/10 hover:bg-white/20" 
+                                : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                         )}
                     >
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                                {room.isPrimary ? <ShieldCheck className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
-                                <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[120px]">
-                                    {room.title || (room.isPrimary ? dict.multiverse.primary_space : dict.multiverse.pocket_dimension)}
-                                </span>
-                            </div>
-                            {room.type === 'TEMPORARY' && (
-                                <div className="flex items-center gap-1 text-[8px] font-black uppercase tracking-tighter opacity-70">
-                                    <Clock className="w-3 h-3" />
-                                    Temp
-                                </div>
-                            )}
-                        </div>
+                        <ExternalLink className="w-3 h-3" />
+                    </button>
+                </div>
+            </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1">
-                                <span className={cn(
-                                    "text-[9px] font-bold opacity-60",
-                                    room.id === currentRoomId ? "text-white" : "text-zinc-400"
-                                )}>
-                                    mood.space/@{username.toLowerCase()}/{room.isPrimary ? '' : room.slug || '...'}
-                                </span>
-                            </div>
-                            
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {!room.isPrimary && (
-                                    <button 
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            setRoomToDelete(room.id)
-                                        }}
-                                        className={cn(
-                                            "p-1.5 rounded-lg transition-all",
-                                            room.id === currentRoomId ? "bg-white/10 hover:bg-red-500" : "bg-zinc-100 dark:bg-zinc-800 hover:bg-red-500 hover:text-white"
-                                        )}
-                                    >
-                                        <Trash2 className="w-3 h-3" />
-                                    </button>
-                                )}
-                                <button 
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        const path = room.isPrimary ? `/@${username.toLowerCase()}` : `/@${username.toLowerCase()}/${room.slug}`
-                                        window.open(path, '_blank')
-                                    }}
-                                    className={cn(
-                                        "p-1.5 rounded-lg transition-all",
-                                        room.id === currentRoomId ? "bg-white/10 hover:bg-white/20" : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                                    )}
-                                >
-                                    <ExternalLink className="w-3 h-3" />
-                                </button>
-                            </div>
-                        </div>
+            {room.id === currentRoomId && (
+                <div className="absolute top-2 right-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                </div>
+            )}
+        </div>
+    )
 
-                        {room.id === currentRoomId && (
-                            <div className="absolute top-0 right-0 p-1">
-                                <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
-                            </div>
-                        )}
+    return (
+        <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
+            {/* ── Header: padrão EditorHeader ─────────────────────────── */}
+            <div className="relative mb-8 pt-2">
+                <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1 min-w-0">
+                        <h2 className="text-3xl font-black uppercase tracking-tighter leading-[0.9] text-zinc-900 dark:text-white break-words">
+                            {dict.multiverse.control_title}
+                        </h2>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-400 dark:text-zinc-500 truncate">
+                            {dict.multiverse.active_count.replace('{count}', rooms.length.toString())}
+                        </p>
                     </div>
-                ))}
+                    <button 
+                        onClick={onClose}
+                        className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all shrink-0"
+                    >
+                        <ChevronRight className="w-4 h-4" />
+                    </button>
+                </div>
+                <div className="h-[1px] w-full bg-gradient-to-r from-zinc-200 dark:from-zinc-800 to-transparent mt-6" />
+            </div>
+
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2 -mr-2">
+
+                {/* ── Sala Primária — Pinada no topo ──────────────────────── */}
+                {primaryRoom && (
+                    <div className="space-y-1.5">
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">
+                            Identidade Principal
+                        </span>
+                        <RoomCard room={primaryRoom} />
+                    </div>
+                )}
+
+                {/* ── Espaços Secundários ──────────────────────────────────── */}
+                {secondaryRooms.length > 0 && (
+                    <div className="space-y-1.5 pt-3">
+                        <div className="flex items-center gap-2 pl-1">
+                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                Portais Dimensionais
+                            </span>
+                            <div className="flex-1 h-px bg-zinc-100 dark:bg-zinc-800" />
+                            <span className="text-[8px] font-bold text-zinc-300 dark:text-zinc-600">
+                                {secondaryRooms.length}
+                            </span>
+                        </div>
+                        <div className="space-y-2">
+                            {secondaryRooms.map(room => (
+                                <RoomCard key={room.id} room={room} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
 
                 <button 
                     onClick={() => setIsCreatingForm(true)}
