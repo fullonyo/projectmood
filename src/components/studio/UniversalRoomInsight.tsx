@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslation } from "@/i18n/context"
-import { MoodBlock, Profile } from "@/types/database"
+import { MoodBlock, Room } from "@/types/database"
 import { motion } from "framer-motion"
 import {
     Activity,
@@ -16,7 +16,7 @@ import { ptBR, enUS } from "date-fns/locale"
 
 interface SidebarRoomInsightProps {
     blocks: MoodBlock[]
-    profile: Profile
+    profile: Room
     publishedAt?: string | null
 }
 
@@ -53,25 +53,27 @@ export function UniversalRoomInsight({ blocks, profile, publishedAt }: SidebarRo
                     </h3>
                 </header>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-sm group">
-                        <div className="flex items-center gap-2 mb-3 text-zinc-400">
-                            <Layers className="w-3.5 h-3.5" />
-                            <span className="text-[9px] font-bold uppercase tracking-widest">{t('sidebar.insight.memories')}</span>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="p-6 bg-zinc-50/50 dark:bg-zinc-800/20 border border-transparent rounded-[2rem] hover:bg-white dark:hover:bg-zinc-800 hover:border-zinc-100 dark:hover:border-zinc-700 hover:shadow-xl hover:shadow-black/5 transition-all duration-500 group relative overflow-hidden">
+                        <div className="flex items-center gap-2 mb-3 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">
+                            <Layers className="w-4 h-4" />
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em]">{t('sidebar.insight.memories')}</span>
                         </div>
-                        <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+                        <div className="text-3xl font-black text-zinc-900 dark:text-white tracking-tighter">
                             {stats.count.toString().padStart(2, '0')}
                         </div>
+                        <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-zinc-200 dark:border-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
 
-                    <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-sm group">
-                        <div className="flex items-center gap-2 mb-3 text-zinc-400">
-                            <History className="w-3.5 h-3.5" />
-                            <span className="text-[9px] font-bold uppercase tracking-widest">{t('sidebar.insight.released')}</span>
+                    <div className="p-6 bg-zinc-50/50 dark:bg-zinc-800/20 border border-transparent rounded-[2rem] hover:bg-white dark:hover:bg-zinc-800 hover:border-zinc-100 dark:hover:border-zinc-700 hover:shadow-xl hover:shadow-black/5 transition-all duration-500 group relative overflow-hidden">
+                        <div className="flex items-center gap-2 mb-3 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">
+                            <History className="w-4 h-4" />
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em]">{t('sidebar.insight.released')}</span>
                         </div>
-                        <div className="text-[10px] font-bold text-zinc-900 dark:text-zinc-200 uppercase tracking-tight leading-tight truncate">
+                        <div className="text-[10px] font-black text-zinc-900 dark:text-zinc-200 uppercase tracking-tight leading-tight truncate">
                             {stats.lastRelease}
                         </div>
+                        <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-zinc-200 dark:border-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                 </div>
             </section>

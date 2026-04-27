@@ -2,19 +2,21 @@
 
 import { useState, useEffect, useRef, useTransition, memo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { 
-    Upload, 
-    ExternalLink, 
-    Loader2, 
-    ShieldCheck, 
-    Globe, 
-    Trash2, 
-    Plus, 
-    Settings, 
+import {
+    Upload,
+    ExternalLink,
+    Loader2,
+    ShieldCheck,
+    Globe,
+    Trash2,
+    Plus,
+    Settings,
     History,
     Layout,
     ArrowUpRight,
-    ChevronRight
+    ChevronRight,
+    Fingerprint,
+    Boxes
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -55,13 +57,14 @@ interface ActionsSidebarProps {
 
 const RoomItem = memo(({ room, isActive, onSwitch, onDelete, username }: { room: any, isActive: boolean, onSwitch: (id: string) => void, onDelete: (id: string) => void, username: string }) => {
     return (
-        <div 
+        <div
             onClick={() => onSwitch(room.id)}
             className={cn(
-                "group relative flex items-center justify-between py-3 px-3 rounded-2xl transition-all duration-500 cursor-pointer",
-                isActive 
-                    ? "bg-zinc-50 dark:bg-white/[0.03]" 
-                    : "hover:bg-zinc-50/50 dark:hover:bg-white/[0.01]"
+                "group relative flex items-center justify-between py-4 px-4 rounded-2xl transition-all duration-300 cursor-pointer mb-2",
+                "bg-zinc-100/50 dark:bg-black/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5)] border border-transparent",
+                isActive
+                    ? "bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 shadow-none"
+                    : "hover:bg-white/50 dark:hover:bg-zinc-800/40"
             )}
         >
             <div className="flex items-center gap-4 min-w-0">
@@ -69,7 +72,7 @@ const RoomItem = memo(({ room, isActive, onSwitch, onDelete, username }: { room:
                     "w-1 h-4 rounded-full transition-all duration-500",
                     isActive ? "bg-blue-500 scale-y-110" : "bg-transparent group-hover:bg-zinc-200 dark:group-hover:bg-zinc-800"
                 )} />
-                
+
                 <div className="flex flex-col min-w-0">
                     <span className={cn(
                         "text-[11px] font-black uppercase tracking-widest truncate transition-colors",
@@ -145,8 +148,8 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
 
         startCreateTransition(async () => {
             const { createRoom } = await import("@/actions/profile")
-            const res = await createRoom({ 
-                title: newTitle, 
+            const res = await createRoom({
+                title: newTitle,
                 type: newType,
                 expiresAt: newExpiresAt ? new Date(newExpiresAt) : undefined,
                 maxViews: newMaxViews ? parseInt(newMaxViews) : undefined
@@ -164,10 +167,10 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
 
     return (
         <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
-            <EditorHeader 
-                title={dict.multiverse.control_title} 
+            <EditorHeader
+                title={dict.multiverse.control_title}
                 subtitle={dict.multiverse.control_subtitle}
-                onClose={onClose} 
+                onClose={onClose}
             />
 
             <div className="flex-1 overflow-y-auto px-4 py-8 custom-scrollbar space-y-16">
@@ -184,22 +187,20 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
                             )}
                         </div>
 
-                        <div 
+                        <div
                             onClick={() => handleSwitchSpace(primaryRoom.id)}
                             className={cn(
-                                "group cursor-pointer transition-all duration-700 relative",
-                                primaryRoom.id === currentRoomId ? "opacity-100" : "opacity-40 hover:opacity-100"
+                                "group cursor-pointer transition-all duration-300 relative p-8 rounded-[2rem]",
+                                "bg-zinc-100/50 dark:bg-black/30 shadow-[inset_0_2px_8px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_4px_20px_rgba(0,0,0,0.5)] border border-transparent",
+                                primaryRoom.id === currentRoomId ? "bg-white dark:bg-zinc-800 shadow-none border-zinc-100 dark:border-zinc-700" : "opacity-40 hover:opacity-100"
                             )}
                         >
                             <h2 className={cn(
-                                "text-4xl font-black italic tracking-tighter leading-none transition-all duration-700",
+                                "text-4xl font-black italic tracking-tighter leading-none transition-all duration-300",
                                 primaryRoom.id === currentRoomId ? "text-zinc-950 dark:text-white scale-105 origin-left" : "text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white"
                             )}>
                                 {primaryRoom.title || "Origem"}
                             </h2>
-                            <p className="mt-4 text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400 italic">
-                                Sintonizado com a sua Identidade Base
-                            </p>
                         </div>
                     </section>
                 )}
@@ -208,7 +209,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
                 <section className="space-y-10 pt-10 border-t border-zinc-50 dark:border-white/[0.03]">
                     <div className="flex items-center justify-between px-2">
                         <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400 italic">Espaços Adicionais</span>
-                        <button 
+                        <button
                             onClick={() => setIsCreatingForm(true)}
                             className="w-8 h-8 rounded-full flex items-center justify-center bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:bg-blue-500 hover:text-white transition-all active:scale-90"
                         >
@@ -219,7 +220,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
                     <div className="space-y-2">
                         {secondaryRooms.length > 0 ? (
                             secondaryRooms.map(room => (
-                                <RoomItem 
+                                <RoomItem
                                     key={room.id}
                                     room={room}
                                     isActive={room.id === currentRoomId}
@@ -248,7 +249,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
                     type="danger"
                     isLoading={isDeleting}
                 />
-                
+
                 <ConfirmModal
                     isOpen={isCreatingForm}
                     onClose={() => setIsCreatingForm(false)}
@@ -262,7 +263,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
                     <div className="space-y-6 pt-4">
                         <div className="space-y-2">
                             <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Título do Espaço</label>
-                            <input 
+                            <input
                                 autoFocus
                                 value={newTitle}
                                 onChange={(e) => setNewTitle(e.target.value)}
@@ -274,7 +275,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
                         <div className="space-y-2">
                             <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Tipo de Espaço</label>
                             <div className="grid grid-cols-2 gap-2">
-                                <button 
+                                <button
                                     onClick={() => setNewType('PERMANENT')}
                                     className={cn(
                                         "h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
@@ -283,7 +284,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
                                 >
                                     Permanente
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setNewType('TEMPORARY')}
                                     className={cn(
                                         "h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
@@ -299,7 +300,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-2">
                                     <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Expiração</label>
-                                    <input 
+                                    <input
                                         type="datetime-local"
                                         value={newExpiresAt}
                                         onChange={(e) => setNewExpiresAt(e.target.value)}
@@ -308,7 +309,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Limite de Vistas</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         value={newMaxViews}
                                         onChange={(e) => setNewMaxViews(e.target.value)}
@@ -327,14 +328,14 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
 
 // ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
 
-export function ActionsSidebar({ 
-    username: initialUsername, 
-    name: initialName, 
-    profile, 
-    publishedAt, 
-    hasUnpublishedChanges, 
-    isAdmin, 
-    setPreviewData, 
+export function ActionsSidebar({
+    username: initialUsername,
+    name: initialName,
+    profile,
+    publishedAt,
+    hasUnpublishedChanges,
+    isAdmin,
+    setPreviewData,
     isPreview = false,
     allRooms = [],
     userAvatar,
@@ -347,14 +348,14 @@ export function ActionsSidebar({
     const [activeTab, setActiveTab] = useState<'main' | 'identity' | 'history' | 'spaces'>('main')
     const [isPending, startTransition] = useTransition()
     const [versionLabel, setVersionLabel] = useState("")
-    
+
     const [currentName, setCurrentName] = useState(initialName)
     const [currentUsername, setCurrentUsername] = useState(initialUsername)
     const [mounted, setMounted] = useState(false)
     const [currentAvatar, setCurrentAvatar] = useState<string | null>(
         allRooms.find(r => r.isPrimary)?.avatarUrl || userAvatar || null
     )
-    
+
     useEffect(() => {
         setCurrentName(initialName)
         setCurrentUsername(initialUsername)
@@ -415,7 +416,7 @@ export function ActionsSidebar({
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
                         className="absolute inset-0 z-50 bg-white dark:bg-zinc-900 p-8"
                     >
-                        <UniversalIdentityEditor 
+                        <UniversalIdentityEditor
                             currentName={currentName || ""}
                             currentUsername={currentUsername}
                             onClose={() => setActiveTab('main')}
@@ -432,7 +433,7 @@ export function ActionsSidebar({
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
                         className="absolute inset-0 z-50 bg-white dark:bg-zinc-900 p-8"
                     >
-                        <VersionHistoryPanel 
+                        <VersionHistoryPanel
                             onRollbackComplete={() => router.refresh()}
                             setPreviewData={setPreviewData}
                             onClose={() => setActiveTab('main')}
@@ -450,11 +451,11 @@ export function ActionsSidebar({
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
                         className="absolute inset-0 z-50 bg-white dark:bg-zinc-900 p-8"
                     >
-                        <SpacesPanel 
-                            rooms={allRooms} 
+                        <SpacesPanel
+                            rooms={allRooms}
                             currentRoomId={profile.id}
                             username={currentUsername}
-                            onClose={() => setActiveTab('main')} 
+                            onClose={() => setActiveTab('main')}
                         />
                     </motion.div>
                 )}
@@ -491,7 +492,7 @@ export function ActionsSidebar({
                             </div>
 
                             <div className="relative group transition-all duration-500 py-4 mb-2">
-                                <IdentitySection 
+                                <IdentitySection
                                     currentName={currentName}
                                     currentUsername={currentUsername}
                                     profile={profile}
@@ -510,8 +511,8 @@ export function ActionsSidebar({
                                         disabled={isPending}
                                         className={cn(
                                             "relative p-2 transition-all duration-500 group",
-                                            isDraft 
-                                                ? "text-amber-500 hover:text-amber-600" 
+                                            isDraft
+                                                ? "text-amber-500 hover:text-amber-600"
                                                 : "text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
                                         )}
                                     >
@@ -530,8 +531,8 @@ export function ActionsSidebar({
                                 <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800" />
 
                                 <MinimalTooltip content={t('common.view')}>
-                                    <Link 
-                                        href={profile.isPrimary ? `/@${currentUsername.toLowerCase()}` : `/@${currentUsername.toLowerCase()}/${profile.slug}`} 
+                                    <Link
+                                        href={profile.isPrimary ? `/@${currentUsername.toLowerCase()}` : `/@${currentUsername.toLowerCase()}/${profile.slug}`}
                                         target="_blank"
                                         className="p-2 text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-all duration-500 hover:scale-110 active:scale-95"
                                     >
@@ -541,8 +542,8 @@ export function ActionsSidebar({
 
                                 <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800" />
 
-                                <ShareProfileButton 
-                                    username={currentUsername} 
+                                <ShareProfileButton
+                                    username={currentUsername}
                                     isPrimary={profile.isPrimary}
                                     slug={profile.slug || undefined}
                                     minimal
@@ -553,26 +554,38 @@ export function ActionsSidebar({
                         <div className="flex-1 overflow-y-auto overflow-x-hidden px-8 pb-6 custom-scrollbar space-y-10 flex flex-col">
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-3">
-                                    <button 
+                                    <button
                                         onClick={() => setActiveTab('identity')}
-                                        className="h-14 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-1 group hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
+                                        className={cn(
+                                            "h-16 rounded-[1.5rem] flex flex-col items-center justify-center gap-1.5 group transition-all duration-300 ease-out",
+                                            "bg-zinc-100/50 dark:bg-black/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5)] border border-transparent",
+                                            "hover:bg-white dark:hover:bg-zinc-800 hover:border-zinc-100 dark:hover:border-zinc-700 hover:shadow-xl hover:shadow-black/5 hover:scale-[1.02] active:scale-[0.98]"
+                                        )}
                                     >
-                                        <Settings className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
-                                        <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">{t('leftSidebar.identity_tab')}</span>
+                                        <Fingerprint className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">{t('leftSidebar.identity_tab')}</span>
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setActiveTab('history')}
-                                        className="h-14 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-1 group hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
+                                        className={cn(
+                                            "h-16 rounded-[1.5rem] flex flex-col items-center justify-center gap-1.5 group transition-all duration-300 ease-out",
+                                            "bg-zinc-100/50 dark:bg-black/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5)] border border-transparent",
+                                            "hover:bg-white dark:hover:bg-zinc-800 hover:border-zinc-100 dark:hover:border-zinc-700 hover:shadow-xl hover:shadow-black/5 hover:scale-[1.02] active:scale-[0.98]"
+                                        )}
                                     >
                                         <History className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
-                                        <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">{t('leftSidebar.history_tab')}</span>
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">{t('leftSidebar.history_tab')}</span>
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setActiveTab('spaces')}
-                                        className="h-14 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-1 group hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all col-span-2"
+                                        className={cn(
+                                            "h-16 rounded-[1.5rem] flex flex-col items-center justify-center gap-1.5 group transition-all duration-300 ease-out col-span-2",
+                                            "bg-zinc-100/50 dark:bg-black/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5)] border border-transparent",
+                                            "hover:bg-white dark:hover:bg-zinc-800 hover:border-zinc-100 dark:hover:border-zinc-700 hover:shadow-xl hover:shadow-black/5 hover:scale-[1.02] active:scale-[0.98]"
+                                        )}
                                     >
-                                        <Layout className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
-                                        <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">{dict.multiverse.control_title}</span>
+                                        <Boxes className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">{dict.multiverse.control_title}</span>
                                     </button>
                                 </div>
                             </div>
@@ -599,7 +612,7 @@ export function ActionsSidebar({
                                             </p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="pt-4 text-center">
                                         <span className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-300 dark:text-zinc-700 italic">
                                             MoodSpace Studio
