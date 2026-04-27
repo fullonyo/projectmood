@@ -91,6 +91,7 @@ Toda a lógica de mutação de blocos deve passar por este hook.
 - **Z-Index Intelligence**: Gerenciamento automático de camadas (`bringToFront`, `sendToBack`).
 - **Smart Selection**: Inclusão automática de membros de grupo e normalização de IDs.
 - **Epoch System**: Proteção contra race conditions entre Server Actions e atualizações locais.
+- **Sidebar Resilience**: O reset total do estado do canvas (limpeza de seleção e histórico) é acoplado estritamente à mudança de `roomId`. Atualizações nos blocos vindas do servidor (`initialBlocks`) NÃO resetam a seleção, garantindo que o editor permaneça aberto durante a edição em tempo real.
 
 #### 3. Modular Canvas UI
 Lógicas pesadas de renderização foram extraídas do `MoodCanvas.tsx`:

@@ -196,7 +196,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[], roomId: string) {
             if (!currBlock) {
                 await safeRestore(nextBlock.id);
             } else if (JSON.stringify(nextBlock) !== JSON.stringify(currBlock)) {
-                const { id, userId, createdAt, updatedAt, deletedAt, ...updates } = nextBlock;
+                const { id, createdAt, updatedAt, deletedAt, ...updates } = nextBlock;
                 pendingUpdates.current[nextBlock.id] = updates;
                 epochRef.current[nextBlock.id] = (epochRef.current[nextBlock.id] || 0) + 1;
                 scheduleBackendSave(nextBlock.id);
@@ -355,7 +355,8 @@ export function useCanvasManager(initialBlocks: MoodBlock[], roomId: string) {
         saveTimers.current = {};
         
         console.log(`[CanvasManager] Room switched to ${roomId}. State purged and re-initialized.`);
-    }, [roomId, initialBlocks]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [roomId]); // 🚀 Fix: Depende apenas do roomId para não resetar seleção em updates de props.
 
     // SAFEGUARD (DIRTY TRACKING)
     useEffect(() => {
