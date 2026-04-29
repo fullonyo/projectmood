@@ -24,13 +24,13 @@ import { ColorPaletteExtractor } from "./color-palette-extractor"
 import { EditorSection, GridSelector } from "./EditorUI"
 
 interface ThemeEditorProps {
-    currentTheme: string
+    currentBackgroundColor: string
     currentPrimaryColor: string
     currentStaticTexture: string
     onUpdate?: (data: any) => void
 }
 
-export function UniversalThemeEditor({ currentTheme, currentPrimaryColor, currentStaticTexture, onUpdate }: ThemeEditorProps) {
+export function UniversalThemeEditor({ currentBackgroundColor, currentPrimaryColor, currentStaticTexture, onUpdate }: ThemeEditorProps) {
     const { t } = useTranslation()
     const [showExtractor, setShowExtractor] = useState(false)
 
@@ -54,21 +54,21 @@ export function UniversalThemeEditor({ currentTheme, currentPrimaryColor, curren
             <EditorSection title={t('editors.theme.title_desc')}>
                 <div className="flex gap-4 overflow-x-auto pb-4 pt-1 -mx-1 px-1 custom-scrollbar snap-x">
                     {[
-                        { id: 'light', label: t('editors.theme.light'), colors: 'bg-white border-zinc-200', data: { theme: 'light', backgroundColor: '#fafafa', primaryColor: '#18181b' } },
-                        { id: 'dark', label: t('editors.theme.dark'), colors: 'bg-zinc-900 border-zinc-800', data: { theme: 'dark', backgroundColor: '#050505', primaryColor: '#ffffff' } },
-                        { id: 'vintage', label: t('editors.theme.vintage'), colors: 'bg-[#f4ead5] border-[#d3c4a1]', data: { theme: 'vintage', backgroundColor: '#f4ead5', primaryColor: '#5d4037' } },
-                        { id: 'notebook', label: t('editors.theme.notebook'), colors: 'bg-[#fafafa] border-blue-100', data: { theme: 'notebook', backgroundColor: '#fafafa', primaryColor: '#1e3a8a' } },
-                        { id: 'blueprint', label: t('editors.theme.blueprint'), colors: 'bg-[#1a3a5f] border-[#2d5a8e]', data: { theme: 'blueprint', backgroundColor: '#1a3a5f', primaryColor: '#ffffff' } },
-                        { id: 'canvas', label: t('editors.theme.canvas'), colors: 'bg-[#e7e5e4] border-[#d6d3d1]', data: { theme: 'canvas', backgroundColor: '#e7e5e4', primaryColor: '#44403c' } },
-                        { id: 'cyberpunk', label: t('editors.theme.cyberpunk'), colors: 'bg-black border-pink-500/30', data: { theme: 'cyberpunk', backgroundColor: '#000000', primaryColor: '#ff00ff' } },
-                        { id: 'neobrutalism', label: t('editors.theme.neobrutalism'), colors: 'bg-[#fdf0d5] border-[#111111]', data: { theme: 'neobrutalism', backgroundColor: '#fdf0d5', primaryColor: '#111111' } },
+                        { id: 'light', label: t('editors.theme.light'), colors: 'bg-white border-zinc-200', data: { backgroundColor: '#fafafa', primaryColor: '#18181b' } },
+                        { id: 'dark', label: t('editors.theme.dark'), colors: 'bg-zinc-900 border-zinc-800', data: { backgroundColor: '#050505', primaryColor: '#ffffff' } },
+                        { id: 'vintage', label: t('editors.theme.vintage'), colors: 'bg-[#f4ead5] border-[#d3c4a1]', data: { backgroundColor: '#f4ead5', primaryColor: '#5d4037' } },
+                        { id: 'notebook', label: t('editors.theme.notebook'), colors: 'bg-[#fafafa] border-blue-100', data: { backgroundColor: '#fafafa', primaryColor: '#1e3a8a' } },
+                        { id: 'blueprint', label: t('editors.theme.blueprint'), colors: 'bg-[#1a3a5f] border-[#2d5a8e]', data: { backgroundColor: '#1a3a5f', primaryColor: '#ffffff' } },
+                        { id: 'canvas', label: t('editors.theme.canvas'), colors: 'bg-[#e7e5e4] border-[#d6d3d1]', data: { backgroundColor: '#e7e5e4', primaryColor: '#44403c' } },
+                        { id: 'cyberpunk', label: t('editors.theme.cyberpunk'), colors: 'bg-black border-pink-500/30', data: { backgroundColor: '#000000', primaryColor: '#ff00ff' } },
+                        { id: 'neobrutalism', label: t('editors.theme.neobrutalism'), colors: 'bg-[#fdf0d5] border-[#111111]', data: { backgroundColor: '#fdf0d5', primaryColor: '#111111' } },
                     ].map((vibe) => (
                         <button
                             key={vibe.id}
-                            onClick={() => handleUpdate(vibe.data || { theme: vibe.id })}
+                            onClick={() => handleUpdate(vibe.data)}
                             className={cn(
                                 "flex flex-col p-3 transition-all min-w-[140px] snap-start shrink-0 group relative rounded-2xl border",
-                                currentTheme === vibe.id
+                                (currentBackgroundColor === vibe.data.backgroundColor && currentPrimaryColor === vibe.data.primaryColor)
                                     ? "bg-white dark:bg-zinc-800 border-blue-500 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/20"
                                     : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm"
                             )}

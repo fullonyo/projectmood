@@ -317,6 +317,7 @@ function StudioClientLayoutInner({
                         userAvatar={userAvatar}
                         onForceReset={forceReset}
                         blocksCount={blocks.length}
+                        onUpdateProfile={handleUpdateProfile}
                     />
 
                     <button

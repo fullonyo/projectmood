@@ -365,6 +365,14 @@ O MoodSpace evoluiu para um sistema de múltiplas dimensões, permitindo que cad
 #### 5. Server Actions (Isolamento de Segurança)
 - Todas as ações de servidor (`addMoodBlock`, `updateProfile`, `clearMoodBlocks`) agora exigem um `roomId` explícito. Se omitido, o sistema assume a **Primary Room** por segurança, mas o padrão recomendado é sempre passar o ID da dimensão ativa.
 
+#### 6. Protocolo de Existência (Eterno vs Efêmero)
+- **Configuração Imutável**: O tipo de ambiente (Eterno/Efêmero) e suas regras de expiração são configurados exclusivamente no momento da criação da Dimensão.
+- **Remoção do Editor**: Para simplificar a interface e evitar alterações acidentais em protocolos críticos, estes campos foram removidos da aba "Mood" do Studio Sidebar.
+
+#### 7. Desacoplamento de Tema (UI) vs Atmosfera (Mural)
+- **Tema da Interface**: Controlado por um seletor de Sol/Lua na sidebar de ações. Alterna entre os modos Claro e Escuro para sidebars e HUDs.
+- **Atmosfera (Vibes)**: A aba "Mood" agora altera apenas as propriedades visuais do mural (cor de fundo, cores primárias, texturas), sem afetar o esquema de cores da interface do Studio.
+
 
 ### User Identity & Aesthetic Metadata (Studio 2.2) 🛡️✨
 
@@ -388,7 +396,7 @@ Para garantir segurança, SEO e a estética minimalista da plataforma, o tratame
     - **Admin Hub**: Título absoluto `admin ✦ moodspace`.
 
 ---
-*Documentação atualizada por Antigravity em 22/04/2026. User Identity & Aesthetic Metadata integrados.*
+*Documentação atualizada por Antigravity em 29/04/2026. Remoção do Protocolo de Existência e desacoplamento de Tema/Atmosfera.*
 
 ### 📐 Canvas Architecture 2.2 (Referência Rápida)
 Para detalhes profundos, consulte: `docs/CANVAS_ARCHITECTURE.md`

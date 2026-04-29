@@ -1,7 +1,7 @@
 import { useTranslation } from "@/i18n/context"
 import { UniversalThemeEditor } from "./UniversalThemeEditor"
 import { UniversalEffectsEditor } from "./UniversalEffectsEditor"
-import { Palette, Bomb, Activity, Clock, Eye, Shield } from "lucide-react"
+import { Palette, Bomb, Activity } from "lucide-react"
 import { useState, useTransition } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { EditorSection, PillSelector, EditorActionButton } from "./EditorUI"
@@ -104,68 +104,13 @@ export function UniversalRoomEditor({ profile, username, onUpdateProfile, onClea
                     </div>
                 </EditorSection>
 
-                <div className="h-8" />
-
-                <EditorSection title={dict.multiverse.protocol_label}>
-                    <div className="space-y-6">
-                        <PillSelector
-                            options={[
-                                { id: 'PERMANENT', label: dict.multiverse.protocol_eternal, icon: Shield },
-                                { id: 'TEMPORARY', label: dict.multiverse.protocol_ephemeral, icon: Clock },
-                            ]}
-                            activeId={profile.type}
-                            onChange={(id) => onUpdateProfile({ type: id })}
-                        />
-
-                        {profile.type === 'TEMPORARY' && (
-                            <motion.div 
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="space-y-6 pt-2"
-                            >
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 mb-1 pl-1">
-                                        <Clock className="w-3 h-3 text-zinc-400" />
-                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400">{dict.multiverse.field_expiration}</label>
-                                    </div>
-                                    <input 
-                                        type="datetime-local"
-                                        value={profile.expiresAt ? new Date(new Date(profile.expiresAt).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""}
-                                        onChange={(e) => onUpdateProfile({ expiresAt: e.target.value ? new Date(e.target.value).toISOString() : null })}
-                                        className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-none text-[12px] font-bold tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none shadow-sm dark:color-scheme-dark"
-                                    />
-                                    <p className="text-[8px] font-bold text-zinc-400/50 uppercase tracking-widest pl-1">
-                                        {dict.multiverse.existence_protocol_desc}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 mb-1 pl-1">
-                                        <Eye className="w-3 h-3 text-zinc-400" />
-                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400">{dict.multiverse.field_max_views}</label>
-                                    </div>
-                                    <input 
-                                        type="number"
-                                        value={profile.maxViews || ""}
-                                        onChange={(e) => onUpdateProfile({ maxViews: e.target.value ? parseInt(e.target.value) : null })}
-                                        placeholder={dict.multiverse.field_max_views_placeholder}
-                                        className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-none text-[12px] font-bold tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none shadow-sm"
-                                    />
-                                    <p className="text-[8px] font-bold text-zinc-400/50 uppercase tracking-widest pl-1">
-                                        {dict.multiverse.view_limit_desc}
-                                    </p>
-                                </div>
-                            </motion.div>
-                        )}
-                    </div>
-                </EditorSection>
-
                 <div className="h-10" />
+
 
                 {activeTab === 'vibe' && (
                     <div className="space-y-12">
                         <UniversalThemeEditor
-                            currentTheme={profile.theme}
+                            currentBackgroundColor={profile.backgroundColor || '#050505'}
                             currentPrimaryColor={profile.primaryColor || '#000'}
                             currentStaticTexture={profile.staticTexture || 'none'}
                             onUpdate={onUpdateProfile}

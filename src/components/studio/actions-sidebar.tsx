@@ -16,7 +16,9 @@ import {
     ArrowUpRight,
     ChevronRight,
     Fingerprint,
-    Boxes
+    Boxes,
+    Sun,
+    Moon
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -51,6 +53,7 @@ interface ActionsSidebarProps {
     userAvatar?: string | null
     onForceReset?: (blocks: MoodBlock[]) => void
     blocksCount?: number
+    onUpdateProfile?: (data: Partial<Room>) => void
 }
 
 // ─── SPACES PANEL ──────────────────────────────────────────────────────────
@@ -340,7 +343,8 @@ export function ActionsSidebar({
     allRooms = [],
     userAvatar,
     onForceReset,
-    blocksCount = 0
+    blocksCount = 0,
+    onUpdateProfile
 }: ActionsSidebarProps) {
     const { t, dict } = useTranslation()
     const [isUploading, setIsUploading] = useState(false)
@@ -469,7 +473,14 @@ export function ActionsSidebar({
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
                         className={cn("flex flex-col h-full overflow-hidden", isPreview && "opacity-60 pointer-events-none")}
                     >
-                        <div className="absolute top-6 right-6 z-20">
+                        <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
+                            <button
+                                onClick={() => onUpdateProfile?.({ theme: profile.theme === 'dark' ? 'light' : 'dark' })}
+                                className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-50 dark:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all active:scale-90"
+                                title={profile.theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+                            >
+                                {profile.theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                            </button>
                             <LanguageSwitcher />
                         </div>
 
