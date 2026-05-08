@@ -51,6 +51,7 @@ model Room {
   type             RoomType       @default(PERMANENT)
   expiresAt        DateTime?
   maxViews         Int?
+  uiTheme          String         @default("dark")
   blocks           MoodBlock[]
   user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   analytics        RoomAnalytics?

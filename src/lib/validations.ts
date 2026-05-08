@@ -67,6 +67,7 @@ export const GuestbookMessageSchema = z.object({
 // Validação de perfil
 export const ProfileUpdateSchema = z.object({
     theme: z.enum(Object.keys(themeConfigs) as [string, ...string[]]).optional(),
+    uiTheme: z.enum(['dark', 'light']).optional(),
     primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor inválida").optional(),
     backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor inválida").optional(),
     fontStyle: z.enum(['sans', 'serif', 'mono']).optional(),

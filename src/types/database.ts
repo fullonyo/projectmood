@@ -79,6 +79,7 @@ export interface ThemeConfig {
 
 export interface RoomVisualConfig {
     theme: string;
+    uiTheme: string | null;
     backgroundColor: string | null;
     primaryColor: string | null;
     fontStyle: string | null;

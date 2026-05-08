@@ -475,11 +475,11 @@ export function ActionsSidebar({
                     >
                         <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
                             <button
-                                onClick={() => onUpdateProfile?.({ theme: profile.theme === 'dark' ? 'light' : 'dark' })}
+                                onClick={() => onUpdateProfile?.({ uiTheme: (profile as any).uiTheme === 'dark' ? 'light' : 'dark' } as any)}
                                 className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-50 dark:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all active:scale-90"
-                                title={profile.theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+                                title={(profile as any).uiTheme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
                             >
-                                {profile.theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                                {(profile as any).uiTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                             </button>
                             <LanguageSwitcher />
                         </div>

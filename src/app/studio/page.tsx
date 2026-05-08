@@ -29,7 +29,7 @@ export default async function StudioPage() {
     })) as any;
 
     if (!user) {
-        redirect("/auth/register");
+        redirect("/auth/login");
     }
 
     if (user.isBanned) {
@@ -104,7 +104,7 @@ export default async function StudioPage() {
     return (
         <div className={cn(
             "h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden",
-            currentRoom.theme === 'dark' ? 'dark' : ''
+            (currentRoom as any).uiTheme === 'dark' ? 'dark' : ''
         )}>
             <StudioClientLayout
                 profile={currentRoom as any}

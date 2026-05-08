@@ -12,11 +12,11 @@ export const themeConfigs: Record<string, {
         primary: '#18181b',
         grid: 'radial-gradient(currentColor 1px, transparent 1px)',
         bgSize: '40px 40px',
-        gridOpacity: 'opacity-[0.06] dark:opacity-[0.12]',
+        gridOpacity: 'opacity-[0.06]',
         blend: 'mix-blend-normal'
     },
     dark: {
-        bg: '#050505',
+        bg: '#0a0a0c',
         primary: '#ffffff',
         grid: 'radial-gradient(currentColor 1px, transparent 1px)',
         bgSize: '40px 40px',
@@ -34,9 +34,9 @@ export const themeConfigs: Record<string, {
     notebook: {
         bg: '#ffffff',
         primary: '#1e3a8a',
-        grid: 'linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, transparent 79px, #fca5a5 1px, #fca5a5 2px, transparent 81px)',
+        grid: 'linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, transparent 79px, rgba(252,165,165,0.5) 1px, rgba(252,165,165,0.5) 2px, transparent 81px)',
         bgSize: '100% 30px',
-        gridOpacity: 'opacity-100'
+        gridOpacity: 'opacity-20'
     },
     blueprint: {
         bg: '#1a3a5f',
@@ -48,23 +48,23 @@ export const themeConfigs: Record<string, {
     canvas: {
         bg: '#e7e5e4',
         primary: '#44403c',
-        grid: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h20L0 20z\' fill=\'%23000\' fill-opacity=\'.03\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
+        grid: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h20L0 20z\' fill=\'currentColor\' fill-opacity=\'.05\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
         bgSize: '40px 40px',
         gridOpacity: 'opacity-100'
     },
     cyberpunk: {
         bg: '#000000',
         primary: '#ff00ff',
-        grid: 'linear-gradient(to right, #1a1a1a 1px, transparent 1px), linear-gradient(to bottom, #1a1a1a 1px, transparent 1px), linear-gradient(0deg, rgba(255,0,255,0.03) 50%, transparent 50%)',
+        grid: 'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px), linear-gradient(0deg, currentColor 50%, transparent 50%)',
         bgSize: '40px 40px, 40px 40px, 100% 4px',
-        gridOpacity: 'opacity-100'
+        gridOpacity: 'opacity-[0.05]'
     },
     neobrutalism: {
         bg: '#fdf0d5',
         primary: '#111111',
-        grid: 'linear-gradient(#111111 2px, transparent 2px)',
+        grid: 'linear-gradient(currentColor 2px, transparent 2px)',
         bgSize: '100% 40px',
-        gridOpacity: 'opacity-100'
+        gridOpacity: 'opacity-[0.08]'
     },
     botanical: {
         bg: '#e6e9e1',

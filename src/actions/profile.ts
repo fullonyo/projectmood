@@ -27,6 +27,7 @@ export async function updateProfile(data: {
     staticTexture?: string;
     avatarUrl?: string;
     slug?: string;
+    uiTheme?: string;
 }, roomId?: string) {
     try {
         const session = await requireAuth();
@@ -94,8 +95,9 @@ export async function updateProfile(data: {
                     backgroundEffect: data.backgroundEffect,
                     staticTexture: data.staticTexture,
                     avatarUrl: data.avatarUrl,
-                    slug: data.slug
-                },
+                    slug: data.slug,
+                    uiTheme: data.uiTheme
+                } as any,
             });
         });
 

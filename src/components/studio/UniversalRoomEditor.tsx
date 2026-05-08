@@ -110,6 +110,7 @@ export function UniversalRoomEditor({ profile, username, onUpdateProfile, onClea
                 {activeTab === 'vibe' && (
                     <div className="space-y-12">
                         <UniversalThemeEditor
+                            currentTheme={profile.theme}
                             currentBackgroundColor={profile.backgroundColor || '#050505'}
                             currentPrimaryColor={profile.primaryColor || '#000'}
                             currentStaticTexture={profile.staticTexture || 'none'}

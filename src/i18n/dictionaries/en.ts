@@ -460,6 +460,7 @@ export const en: Dictionary = {
             add_title: "Social Connections",
             subtitle: "Your links and social networks in one place",
             title: "Add Social Link",
+            edit_title: "Edit Social Link",
             nodes: "What link is this?",
             link_protocol: "What's the link?",
             link_placeholder: "https://...",

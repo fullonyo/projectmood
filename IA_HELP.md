@@ -243,10 +243,11 @@ O bloco **Rorschach** (`SmartRorschach.tsx`) é um motor de arte abstrata proced
 - **Micro-animações**: Os caminhos SVG possuem transições de escala e opacidade via `framer-motion` para um efeito de "respiração".
 - **Seed Determinística**: A mesma semente gera exatamente a mesma mancha artística, permitindo persistência total no mural público.
 
-### Infraestrutura & Deploy
-- **Docker Standalone**: Configuração otimizada para baixo consumo de recursos em instâncias AWS EC2.
-- **CI/CD (GitHub Actions)**: Deploy automático via SSH. O pipeline realiza `git pull`, rebuild de containers e migrações Prisma (`db push`) automaticamente ao dar push na branch `main`.
-- **Reverse Proxy**: Recomendado uso de Nginx no host da EC2 para SSL (Certbot) e encaminhamento para a porta 3000.
+### Troubleshooting: Erros de Conexão com o Banco 🛠️
+- **Erro: `Can't reach database server at localhost:5432`**: 
+    - Geralmente ocorre quando o container do banco de dados não está rodando.
+    - **Solução**: Execute `docker-compose up -d db` para iniciar o serviço de banco de dados.
+    - **Sincronia**: Após subir o banco, execute `npx prisma db push` para garantir que o schema esteja aplicado.
 
 ### Blindagem Técnica & Hardening (React 19 / Next.js 15)
 - **Geometria Desacoplada**: A renderização de réguas e guias no Canvas deve usar **coordenadas 100% baseadas em porcentagem**. NUNCA acesse `.getBoundingClientRect()` ou propriedades de Refs durante o ciclo de renderização (React Ref Anti-pattern).
@@ -365,13 +366,17 @@ O MoodSpace evoluiu para um sistema de múltiplas dimensões, permitindo que cad
 #### 5. Server Actions (Isolamento de Segurança)
 - Todas as ações de servidor (`addMoodBlock`, `updateProfile`, `clearMoodBlocks`) agora exigem um `roomId` explícito. Se omitido, o sistema assume a **Primary Room** por segurança, mas o padrão recomendado é sempre passar o ID da dimensão ativa.
 
-#### 6. Protocolo de Existência (Eterno vs Efêmero)
-- **Configuração Imutável**: O tipo de ambiente (Eterno/Efêmero) e suas regras de expiração são configurados exclusivamente no momento da criação da Dimensão.
-- **Remoção do Editor**: Para simplificar a interface e evitar alterações acidentais em protocolos críticos, estes campos foram removidos da aba "Mood" do Studio Sidebar.
+#### 6. Sistema de Temas e Vibes (Arquitetura Desacoplada)
+A plataforma separa a **Interface (UI)** da **Atmosfera (Vibe)** do mural para garantir que a escolha estética do mural não interfira na usabilidade do Studio:
+- **uiTheme**: Controla o esquema de cores das sidebars, menus e HUD. Valores: `dark` | `light`. Persistido no campo `uiTheme` da tabela `Room`.
+- **theme (Vibe)**: Controla o grid, filtros e comportamento visual do mural. Valores: `blueprint`, `vintage`, `cyberpunk`, etc. Persistido no campo `theme` da tabela `Room`.
 
-#### 7. Desacoplamento de Tema (UI) vs Atmosfera (Mural)
-- **Tema da Interface**: Controlado por um seletor de Sol/Lua na sidebar de ações. Alterna entre os modos Claro e Escuro para sidebars e HUDs.
-- **Atmosfera (Vibes)**: A aba "Mood" agora altera apenas as propriedades visuais do mural (cor de fundo, cores primárias, texturas), sem afetar o esquema de cores da interface do Studio.
+#### 7. Configurações de Fundo (Backgrounds)
+As vibes do mural são configuradas em `src/lib/themes.ts`. Elas definem:
+- **Grid Patterns**: Padrões SVG ou gradientes que devem usar `currentColor` para reagir à `primaryColor`.
+- **CSS Filters**: Filtros de iluminação aplicados à camada base do mural.
+- **Texturas Estáticas**: Gerenciadas em `src/components/effects/static-textures.tsx` (ex: Papel, Ruído).
+- **Background Effects**: Gerenciados em `src/components/effects/background-effect.tsx` (Shaders WebGL).
 
 
 ### User Identity & Aesthetic Metadata (Studio 2.2) 🛡️✨

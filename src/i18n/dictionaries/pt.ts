@@ -460,6 +460,7 @@ export const pt = {
             add_title: "Conexões Sociais",
             subtitle: "Seus links e redes em um só lugar",
             title: "Adicionar Link Social",
+            edit_title: "Editar Conexão Social",
             nodes: "Que link é esse?",
             link_protocol: "Qual é o link?",
             link_placeholder: "https://...",
@@ -555,7 +556,7 @@ export const pt = {
             },
         },
         weather: {
-            title: "Weather Studio",
+            title: "Estúdio de Clima",
             subtitle: "Atmosfera em Tempo Real",
             location_label: "Cidade / Local",
             vibe_label: "Mensagem do Momento (Vibe)",
@@ -569,7 +570,7 @@ export const pt = {
             }
         },
         shape: {
-            title: "Smart Shapes",
+            title: "Formas Inteligentes",
             add_title: "Geometria Artística & Mesclagem",
             edit_title: "Editar Forma",
             subtitle: "Geometria Artística & Mesclagem",
@@ -638,11 +639,11 @@ export const pt = {
         identity: {
             title: "identidade",
             subtitle: "metadados pessoais",
-            display_name_label: "display name",
+            display_name_label: "nome de exibição",
             display_name_hint: "como você aparece dentro do mural.",
-            username_label: "username",
+            username_label: "nome de usuário",
             username_hint: "seu identificador único (alias).",
-            tab_view_label: "browser tab",
+            tab_view_label: "aba do navegador",
             sync_btn: "sincronizar identidade",
             syncing: "sincronizando...",
             success: "identidade atualizada com sucesso",
@@ -814,7 +815,7 @@ export const pt = {
         empty_state: "O seu mural está vazio",
         items: {
             focus: {
-                title: "Deep Work",
+                title: "Foco Total",
                 vibe: "Aurora • Spotify Lo-fi • Focus",
                 desc: "Estação de trabalho imersiva: cronômetro POMODORO, trilha sonora Lo-fi e links rápidos para produção."
             },
@@ -829,7 +830,7 @@ export const pt = {
                 desc: "Interface tech-noir: logs de rede em tempo real, ambientação Glitch de vídeo e curadoria neon."
             },
             zen: {
-                title: "Atmospheric Zen",
+                title: "Zen Atmosférico",
                 vibe: "Líquido • Kyoto • Fluidez",
                 desc: "Paz etérea: clima síncrono, meditação fluida e frases que flutuam para acalmar a mente."
             }

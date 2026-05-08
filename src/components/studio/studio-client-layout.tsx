@@ -189,7 +189,7 @@ function StudioClientLayoutInner({
         <main 
             className={cn(
                 "flex-1 relative overflow-hidden flex flex-col focus:outline-none",
-                localProfile.theme === 'dark' ? 'dark bg-zinc-950' : 'light bg-white'
+                (localProfile as any).uiTheme === 'light' ? 'light bg-white' : 'dark bg-zinc-950'
             )}
         >
             <CustomCursor type={localProfile.customCursor || 'auto'} />
