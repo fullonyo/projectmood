@@ -18,8 +18,11 @@ import {
     Fingerprint,
     Boxes,
     Sun,
-    Moon
+    Moon,
+    LogOut,
+    Shield
 } from "lucide-react"
+import { signOut } from "next-auth/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -625,6 +628,25 @@ export function ActionsSidebar({
                                     </div>
 
                                     <div className="pt-4 text-center">
+                                        <div className="flex flex-col gap-2 mb-6">
+                                            {isAdmin && (
+                                                <Link
+                                                    href="/admin"
+                                                    className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white transition-all text-[9px] font-black uppercase tracking-widest border border-transparent hover:shadow-xl hover:shadow-blue-500/20"
+                                                >
+                                                    <Shield className="w-3.5 h-3.5" />
+                                                    Painel Admin
+                                                </Link>
+                                            )}
+                                            <button
+                                                onClick={() => signOut({ callbackUrl: "/" })}
+                                                className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 hover:bg-red-500 hover:text-white transition-all text-[9px] font-black uppercase tracking-widest border border-transparent hover:shadow-xl hover:shadow-red-500/20"
+                                            >
+                                                <LogOut className="w-3.5 h-3.5" />
+                                                Desconectar
+                                            </button>
+                                        </div>
+
                                         <span className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-300 dark:text-zinc-700 italic">
                                             MoodSpace Studio
                                         </span>
