@@ -46,20 +46,12 @@ jobs:
             cd ~/moodproject
             git pull origin main
             
-            # Build e Deploy
+            # Deploy Blindado e Limpeza de Órfãos
             export DOCKER_BUILDKIT=1
-            export COMPOSE_DOCKER_CLI_BUILD=1
-            docker compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
             
-            # Aguardar inicialização
-            echo "Aguardando containers..."
-            sleep 10
+            # Limpeza de recursos não utilizados
+            docker image prune -f
             
-            # Migração oficial e segura
-            echo "Aplicando migrations..."
-            docker exec moodspace_app npx prisma migrate deploy
-            
-            # Limpeza
-            docker system prune -f
-            echo "Deploy concluído com sucesso!"
+            echo "✦ MoodSpace Studio: Deploy Automático e Blindado Concluído!"
 
