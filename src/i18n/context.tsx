@@ -1,10 +1,8 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { pt, Dictionary } from './dictionaries/pt';
-import { en } from './dictionaries/en';
-
-export type Locale = 'pt' | 'en';
+import { Locale, dictionaries, defaultLocale } from './config';
+import { Dictionary, pt } from './dictionaries/pt';
 
 interface I18nContextProps {
     locale: Locale;
@@ -12,8 +10,6 @@ interface I18nContextProps {
     t: (key: string) => string;
     dict: Dictionary;
 }
-
-export const dictionaries: Record<Locale, Dictionary> = { pt, en };
 
 const I18nContext = createContext<I18nContextProps | undefined>(undefined);
 

@@ -7,19 +7,23 @@ import { useTranslation } from "@/i18n/context";
 import { LanguageSwitcher } from "@/components/studio/language-switcher";
 import { motion } from "framer-motion";
 import { Play, Move, Layers, Zap } from "lucide-react";
+import { STUDIO_THEME } from "@/lib/studio-theme";
 
 export default function Home() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-950 text-white selection:bg-white selection:text-black overflow-x-hidden relative font-sans">
+    <div className={`min-h-screen flex flex-col bg-zinc-950 text-white selection:bg-white selection:text-black overflow-x-hidden relative ${STUDIO_THEME.typography.fontSans}`}>
 
       <section className="relative min-h-[90vh] flex flex-col border-b border-white/5">
         <div className="absolute inset-0 z-0">
-          <BackgroundEffect type="aurora" primaryColor="#18181b" />
+          <BackgroundEffect 
+            type={STUDIO_THEME.effects.background.type} 
+            primaryColor={STUDIO_THEME.effects.background.primaryColor} 
+          />
         </div>
-        <div className="absolute inset-0 z-[1] opacity-30">
-          <StaticTextures type="cross" />
+        <div className="absolute inset-0 z-[1] pointer-events-none" style={{ opacity: STUDIO_THEME.effects.texture.opacity }}>
+          <StaticTextures type={STUDIO_THEME.effects.texture.type} />
         </div>
         <nav className="relative z-50 flex items-center justify-between px-6 py-8 md:px-12">
           <motion.div

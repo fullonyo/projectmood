@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { dictionaries, Locale } from './context';
+import { dictionaries, Locale } from './config';
 
 export async function getServerTranslation() {
     const cookieStore = await cookies();

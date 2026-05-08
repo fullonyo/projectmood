@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { I18nProvider } from "@/i18n/context";
 import { ScaleProvider } from "@/lib/contexts/ScaleProvider";
+import { GoogleOneTap } from "@/components/auth/google-one-tap";
+import { SessionProvider } from "@/components/auth/session-provider";
 
 import ReactDOM from "react-dom";
 
@@ -59,6 +61,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { STUDIO_THEME } from "@/lib/studio-theme";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -69,30 +73,33 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <I18nProvider>
-          <ScaleProvider>
-            {children}
-          </ScaleProvider>
-          <Toaster
-            position="bottom-right"
-            theme="dark"
-            toastOptions={{
-              style: {
-                background: 'rgba(9, 9, 11, 0.95)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#ffffff',
-                borderRadius: '0px',
-                fontFamily: 'var(--font-geist-mono)',
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
-              },
-              className: "font-mono",
-            }}
-          />
-        </I18nProvider>
+        <SessionProvider>
+          <GoogleOneTap />
+          <I18nProvider>
+            <ScaleProvider>
+              {children}
+            </ScaleProvider>
+            <Toaster
+              position="bottom-right"
+              theme="dark"
+              toastOptions={{
+                style: {
+                  background: STUDIO_THEME.colors.background,
+                  backdropFilter: 'blur(16px)',
+                  border: `${STUDIO_THEME.ui.borderWidth} solid ${STUDIO_THEME.colors.border}`,
+                  color: STUDIO_THEME.colors.foreground,
+                  borderRadius: '0px',
+                  fontFamily: 'var(--font-geist-mono)',
+                  fontSize: '10px',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+                },
+                className: STUDIO_THEME.typography.fontMono,
+              }}
+            />
+          </I18nProvider>
+        </SessionProvider>
       </body>
     </html>
   );

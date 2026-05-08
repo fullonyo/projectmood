@@ -12,6 +12,24 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
   - **Fonte Inter**: O sistema é padronizado com a fonte **Inter** globalmente para garantir clareza e consistência.
   - **Estilos Específicos de Bloco**: Alguns estilos do `SmartText` (como `vhs`, `typewriter` e `quote`) utilizam fontes específicas (`font-mono`, `font-serif`) para preservar sua identidade artística.
 
+## Modern Standards & Studio Design Tokens 🪐✨
+
+Para garantir que o MoodSpace seja escalável e mantenha uma estética premium constante, seguimos rigorosamente estes padrões:
+
+### 1. Design Tokens (`src/lib/studio-theme.ts`)
+Qualquer novo componente ou página deve consumir o objeto **`STUDIO_THEME`**.
+- **Cores**: Use `STUDIO_THEME.colors` para background, foreground e borders. Evite valores hardcoded no Tailwind (como `bg-zinc-950`) para cores estruturais.
+- **Efeitos**: As definições de `aurora` e texturas de grid são centralizadas aqui.
+- **UI Patterns**: Use `STUDIO_THEME.ui.radius` (atualmente `rounded-none`) para manter a estética cortante e técnica do estúdio.
+
+### 2. Arquitetura de Layouts Centralizada
+- **Auth Layout (`src/app/auth/layout.tsx`)**: Centraliza o Header, Footer e Background imersivo. Isso garante performance e elimina o "piscar" de shaders na navegação entre login e registro.
+- **Root Layout**: O `Toaster` (notificações) é sincronizado com os tokens de design para garantir que até os alertas sigam a estética do sistema.
+
+### 3. i18n — Configuração Compartilhada
+- **Shared Config (`src/i18n/config.ts`)**: Dicionários e tipos de idioma são isolados aqui.
+- **Estabilidade**: NUNCA importe dicionários de arquivos com `"use client"` dentro de Server Components. Use sempre o helper `getServerTranslation` que consome a config pura.
+
 ## Arquitetura de Telas
 
 ### Landing Page & Auth

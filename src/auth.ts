@@ -1,49 +1,54 @@
 import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import authConfig from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    providers: [
-        Credentials({
-            async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) return null;
-
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email as string },
-                });
-
-                if (!user || !user.password) return null;
-
-                const passwordsMatch = await bcrypt.compare(
-                    credentials.password as string,
-                    user.password
-                );
-
-                if (passwordsMatch) return user;
-
-                return null;
-            },
-        }),
-    ],
+    adapter: PrismaAdapter(prisma),
+    session: { strategy: "jwt" },
+    ...authConfig,
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
-                token.username = user.username;
-                token.role = user.role;
-                token.isBanned = user.isBanned;
+                token.username = (user as any).username;
+                token.role = (user as any).role;
+                token.isBanned = (user as any).isBanned;
+            }
+            if (trigger === "update" && session) {
+                return { ...token, ...session.user };
             }
             return token;
         },
         async session({ session, token }) {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
-                session.user.username = token.username;
-                session.user.role = token.role;
-                session.user.isBanned = token.isBanned;
+                (session.user as any).username = token.username;
+                (session.user as any).role = token.role;
+                (session.user as any).isBanned = token.isBanned;
             }
             return session;
         },
+    },
+    events: {
+        async createUser({ user }) {
+            const baseUsername = user.email?.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") || "user";
+            const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+            const username = `${baseUsername}${randomSuffix}`;
+
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    username,
+                    rooms: {
+                        create: {
+                            theme: "dark",
+                            isPrimary: true,
+                            title: "Espaço Mood Primário"
+                        }
+                    }
+                }
+            });
+        }
     },
     pages: {
         signIn: "/auth/login",
