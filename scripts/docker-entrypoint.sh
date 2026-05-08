@@ -4,8 +4,8 @@ set -e
 echo "✦ MoodSpace Studio — Initializing Environment..."
 
 # 1. Wait for Database to be ready
-echo "✦ Check: Waiting for database connectivity (moodspace_db:5432)..."
-until nc -z moodspace_db 5432; do
+echo "✦ Check: Waiting for database connectivity (db:5432)..."
+until nc -z db 5432; do
   echo "✦ Wait: Database node is not reachable yet. Retrying in 2s..."
   sleep 2
 done

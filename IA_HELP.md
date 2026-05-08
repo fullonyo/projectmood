@@ -422,13 +422,32 @@ Para garantir segurança, SEO e a estética minimalista da plataforma, o tratame
 
 ---
 
+### 🛡️ Autenticação Social & Google One Tap
+O MoodSpace utiliza o **NextAuth v5** com integração profunda ao Google Identity Services:
+- **Google One Tap**: Componente global (`GoogleOneTap.tsx`) que detecta sessões ativas do Google.
+- **Segurança Federada (FedCM)**: Desativado localmente (`use_fedcm_for_prompt: false`) para evitar erros de rede em ambiente de desenvolvimento.
+- **Configuração de Produção**:
+    - **Nginx**: Exige `proxy_set_header X-Forwarded-Proto $scheme;` para que o callback do Google funcione via HTTPS.
+    - **.env**: `NEXT_PUBLIC_GOOGLE_CLIENT_ID` deve ser idêntico ao `GOOGLE_CLIENT_ID` (NUNCA use o Secret em variáveis `NEXT_PUBLIC`).
+
+### 🏗️ Infraestrutura de Produção (EC2)
+A plataforma é orquestrada via Docker na AWS (EC2):
+- **Nomenclatura Padrão**: Os containers em produção são obrigatoriamente prefixados como **`moodproject_app`** e **`moodproject_db`**.
+- **Volume Persistente**: O banco de dados utiliza o volume `moodproject_postgres_data`.
+- **Limpeza de Cache**: Em caso de erros de "Módulo não encontrado" ou portas presas, o comando soberano é:
+  ```bash
+  docker compose down -v && docker compose up -d --build
+  ```
+
+---
+
 ### Workflow de Deploy Blindado 🛡️🚀
 Para garantir que o sistema suba sem erros de banco ou containers órfãos, utilize sempre:
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+docker compose up -d --build --remove-orphans
 ```
 O sistema agora possui um **Entrypoint Resiliente** (`scripts/docker-entrypoint.sh`) que:
-1.  **Aguarda o Banco**: Só inicia o app quando o Postgres estiver 100% pronto.
+1.  **Aguarda o Banco**: Monitora o host `db:5432` antes de iniciar.
 2.  **Sincroniza Schema**: Roda `prisma db push` automaticamente no boot.
 3.  **Auto-Reparo**: Regera o Prisma Client se houver inconsistências no ambiente.
 
