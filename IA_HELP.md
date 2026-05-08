@@ -453,6 +453,26 @@ O sistema agora possui um **Entrypoint Resiliente** (`scripts/docker-entrypoint.
 
 ---
 *Documentação atualizada por Antigravity em 08/05/2026. Implementação de Deploy Blindado e Tom de Voz Studio.*
+## 🏗️ Infraestrutura & Docker (Padrão Studio)
+
+### 📦 Estratégia de Build
+Utilizamos **Multi-stage Builds** para garantir imagens leves e seguras.
+1. **base**: Configuração comum (Node 20-slim + OpenSSL).
+2. **deps**: Instalação de dependências com cache mount (`--mount=type=cache`).
+3. **builder**: Geração do Prisma Client e build Standalone do Next.js.
+4. **runner**: Imagem final minimalista contendo apenas os artefatos compilados.
+
+### 🚀 Resiliência de Inicialização (`docker-entrypoint.sh`)
+O script de entrada é projetado para ser agnóstico ao ambiente:
+- **Host Dinâmico**: Extrai o host do banco diretamente da `DATABASE_URL`.
+- **Health Check**: Aguarda a conectividade via `nc -z` antes de qualquer operação Prisma.
+- **Sincronização Automática**: Executa `prisma db push` e `prisma generate` no boot para garantir integridade do schema.
+
+### 🔧 Configurações de Produção
+- **Arquivo**: `docker-compose.prod.yml`.
+- **Nomenclatura**: Prefixo `moodspace_` para containers, redes e volumes.
+- **Injeção de Vars**: Todas as chaves (Google, Spotify, Auth) devem ser mapeadas no bloco `environment`.
+- **Standalone**: `next.config.ts` deve manter `output: 'standalone'`.
 
 ### 📐 Canvas Architecture 2.2 (Referência Rápida)
 Para detalhes profundos, consulte: `docs/CANVAS_ARCHITECTURE.md`
