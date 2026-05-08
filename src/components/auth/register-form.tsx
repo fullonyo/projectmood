@@ -144,14 +144,16 @@ export default function RegisterForm() {
                             </div>
 
                             {error && (
-                                <div className="p-4 text-[9px] font-bold uppercase tracking-widest text-red-400 bg-red-400/5 border border-red-500/20 italic transition-all animate-in fade-in slide-in-from-top-2">
-                                    // {error}
+                                <div className="p-4 text-[9px] font-bold uppercase tracking-widest text-red-400 bg-red-400/5 border border-red-500/20 flex items-center gap-3 transition-all animate-in fade-in slide-in-from-top-2">
+                                    <div className="w-1 h-1 bg-red-400 rounded-full animate-pulse" />
+                                    {error}
                                 </div>
                             )}
 
                             {success && (
-                                <div className="p-4 text-[9px] font-bold uppercase tracking-widest text-green-400 bg-green-400/5 border border-green-500/20 italic transition-all animate-in fade-in slide-in-from-top-2">
-                                    // {success}
+                                <div className="p-4 text-[9px] font-bold uppercase tracking-widest text-green-400 bg-green-400/5 border border-green-500/20 flex items-center gap-3 transition-all animate-in fade-in slide-in-from-top-2">
+                                    <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse" />
+                                    {success}
                                 </div>
                             )}
 

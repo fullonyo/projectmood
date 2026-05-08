@@ -6,6 +6,8 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **Marca**: O projeto chama-se oficialmente **MoodSpace**. Evite referências a "MOOD Project" ou "Project Mood".
 - **Ícones**: NUNCA usar emojis para ícones de interface. Use sempre `lucide-react`.
 - **Estética**: Design "Studio" premium, minimalista, com alto uso de Glassmorphism (backdrop-blur) e tipografia fluida.
+- **Tom de Voz**: Amigável, acolhedor e artístico. Evitar termos industriais ou "hackers" (ex: Protocolo, Essência, Cidadão, Nó, Infraestrutura, Manifesto). Use termos como Espaço, Mural, Elementos, Vibe e Sincronia.
+- **Símbolos de Status**: Travessão (—) como separador, evite barras duplas (//) que remetem a código de programação na interface final.
 - **Tipografia Padronizada**:
   - **Fonte Inter**: O sistema é padronizado com a fonte **Inter** globalmente para garantir clareza e consistência.
   - **Estilos Específicos de Bloco**: Alguns estilos do `SmartText` (como `vhs`, `typewriter` e `quote`) utilizam fontes específicas (`font-mono`, `font-serif`) para preservar sua identidade artística.

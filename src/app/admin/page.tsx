@@ -37,11 +37,11 @@ export default async function AdminControlPage() {
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3">
                         <Activity className="w-3 h-3 text-emerald-500" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-500">Live Infrastructure Monitoring</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-500">Live Ecosystem Monitoring</span>
                     </div>
-                    <h1 className="text-4xl font-black uppercase tracking-tighter">Command Center</h1>
+                    <h1 className="text-4xl font-black uppercase tracking-tighter">Studio Admin</h1>
                     <p className="text-sm text-zinc-500 font-mono mt-1 max-w-xl">
-                        Real-time ecosystem intelligence. Monitor civilian growth, system health, and enforce global standards from a single authority node.
+                        Real-time ecosystem intelligence. Monitor community growth, system health, and manage global standards from a single node.
                     </p>
                 </div>
 
@@ -59,13 +59,13 @@ export default async function AdminControlPage() {
             {/* 1. Primary Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <MetricCard
-                    title="Active Citizens"
+                    title="Active Users"
                     value={metrics.totalUsers}
                     icon={Users}
                     description="Total non-deleted accounts"
                 />
                 <MetricCard
-                    title="New Residents (24h)"
+                    title="New Users (24h)"
                     value={metrics.newUsers24h.current}
                     icon={Zap}
                     trend={userTrend}
@@ -104,7 +104,7 @@ export default async function AdminControlPage() {
                 <div className="p-8 border border-zinc-900 bg-[#0a0a0a] flex flex-col">
                     <header className="flex items-center gap-3 mb-8">
                         <ShieldAlert className="w-4 h-4 text-zinc-400" />
-                        <h3 className="text-sm font-black uppercase tracking-widest">Civilian Distribution</h3>
+                        <h3 className="text-sm font-black uppercase tracking-widest">User Distribution</h3>
                     </header>
 
                     <div className="space-y-4 flex-1">
@@ -175,7 +175,7 @@ export default async function AdminControlPage() {
                                         </span>
                                         {user.isBanned && (
                                             <span className="text-[7px] font-black bg-red-500/10 text-red-500 border border-red-500/20 px-1 py-0 uppercase tracking-widest">
-                                                Isolated
+                                                Banned
                                             </span>
                                         )}
                                     </div>
@@ -200,14 +200,14 @@ export default async function AdminControlPage() {
             {/* Subtle Footer status */}
             <footer className="pt-10 flex items-center justify-between border-t border-zinc-900 opacity-30">
                 <div className="flex items-center gap-4 text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
-                    <span>Protocol: v2.2-ALC</span>
+                    <span>Build: v2.2-STUDIO</span>
                     <span className="w-1 h-1 bg-zinc-800 rounded-full" />
-                    <span>Scale: HIGH_RELIABILITY</span>
+                    <span>Stability: HIGH_RELIABILITY</span>
                     <span className="w-1 h-1 bg-zinc-800 rounded-full" />
                     <span>{new Date().toISOString()}</span>
                 </div>
                 <div className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">
-                    &copy; 96E46887 COMMAND CENTER
+                    &copy; 96E46887 STUDIO ADMIN
                 </div>
             </footer>
         </div>
