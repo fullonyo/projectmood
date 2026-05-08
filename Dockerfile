@@ -28,8 +28,8 @@ RUN NODE_OPTIONS="--max-old-space-size=2048" npm run build
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# Install OpenSSL for Prisma
-RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+# Install OpenSSL and Netcat for Prisma and Healthchecks
+RUN apt-get update -y && apt-get install -y openssl ca-certificates netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
