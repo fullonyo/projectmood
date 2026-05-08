@@ -403,7 +403,19 @@ Para garantir segurança, SEO e a estética minimalista da plataforma, o tratame
     - **Admin Hub**: Título absoluto `admin ✦ moodspace`.
 
 ---
-*Documentação atualizada por Antigravity em 29/04/2026. Remoção do Protocolo de Existência e desacoplamento de Tema/Atmosfera.*
+
+### Workflow de Deploy Blindado 🛡️🚀
+Para garantir que o sistema suba sem erros de banco ou containers órfãos, utilize sempre:
+```bash
+docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+```
+O sistema agora possui um **Entrypoint Resiliente** (`scripts/docker-entrypoint.sh`) que:
+1.  **Aguarda o Banco**: Só inicia o app quando o Postgres estiver 100% pronto.
+2.  **Sincroniza Schema**: Roda `prisma db push` automaticamente no boot.
+3.  **Auto-Reparo**: Regera o Prisma Client se houver inconsistências no ambiente.
+
+---
+*Documentação atualizada por Antigravity em 08/05/2026. Implementação de Deploy Blindado e Tom de Voz Studio.*
 
 ### 📐 Canvas Architecture 2.2 (Referência Rápida)
 Para detalhes profundos, consulte: `docs/CANVAS_ARCHITECTURE.md`
