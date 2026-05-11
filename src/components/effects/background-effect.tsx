@@ -9,6 +9,8 @@ import {
     UNIVERSE_SHADER,
     createProgram
 } from "@/lib/shaders"
+import DotField from "@/components/react-bits/DotField"
+import { STUDIO_THEME } from "@/lib/studio-theme"
 
 const SHADER_MAP: Record<string, string> = {
     aurora: AURORA_SHADER,
@@ -21,14 +23,13 @@ const SHADER_MAP: Record<string, string> = {
 interface BackgroundEffectProps {
     type: string
     primaryColor?: string
+    showDots?: boolean
 }
 
 // Utility to convert hex to RGB for shaders
 const hexToRgb = (hex: string) => {
-    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
     const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
     const fullHex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
-
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
     return result ? {
         r: parseInt(result[1], 16) / 255,
@@ -37,7 +38,11 @@ const hexToRgb = (hex: string) => {
     } : { r: 0, g: 0, b: 0 };
 }
 
-export function BackgroundEffect({ type, primaryColor = '#000000' }: BackgroundEffectProps) {
+export function BackgroundEffect({ 
+    type, 
+    primaryColor = '#000000',
+    showDots = true 
+}: BackgroundEffectProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const mousePos = useRef({ x: 0, y: 0 })
 
@@ -95,7 +100,6 @@ export function BackgroundEffect({ type, primaryColor = '#000000' }: BackgroundE
         const render = (time: number) => {
             if (!canvasRef.current) return
 
-            // Handle resizing
             const rect = canvas.getBoundingClientRect()
             if (canvas.width !== rect.width || canvas.height !== rect.height) {
                 canvas.width = rect.width
@@ -126,90 +130,33 @@ export function BackgroundEffect({ type, primaryColor = '#000000' }: BackgroundE
 
     if (!type || type === 'none') return null
 
-    // Legacy CSS Effects (or Fallback)
-    if (type === 'grid-move') {
-        return (
-            <div className="absolute inset-0 z-0 perspective-[500px] pointer-events-none" style={{ color: primaryColor }}>
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.15] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] animate-grid-flow" />
-                <style jsx>{`
-                    @keyframes grid-flow {
-                        0% { transform: translateY(0); }
-                        100% { transform: translateY(40px); }
-                    }
-                    .animate-grid-flow { animation: grid-flow 2s linear infinite; }
-                `}</style>
-            </div>
-        )
-    }
-
-    if (type === 'noise') {
-        return (
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-[0.15]">
-                <div className="absolute -inset-[200%] animate-noise"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                        backgroundSize: '256px 256px',
-                        backgroundRepeat: 'repeat'
-                    }}
-                />
-                <style jsx>{`
-                    @keyframes noise-anim {
-                        0%, 100% { transform: translate(0, 0); }
-                        10% { transform: translate(-5%, -10%); }
-                        20% { transform: translate(-15%, 5%); }
-                        30% { transform: translate(7%, -25%); }
-                        40% { transform: translate(-5%, 25%); }
-                        50% { transform: translate(-15%, 10%); }
-                        60% { transform: translate(15%, 0%); }
-                        70% { transform: translate(0%, 15%); }
-                        80% { transform: translate(3%, 35%); }
-                        90% { transform: translate(-10%, 10%); }
-                    }
-                    .animate-noise { animation: noise-anim 0.5s steps(2) infinite; }
-                `}</style>
-            </div>
-        )
-    }
-
-    if (type === 'vintage') {
-        return (
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none mix-blend-normal">
-                {/* Sepia tone base */}
-                <div className="absolute inset-0 bg-[#5d4037] mix-blend-color opacity-50" />
-                {/* Vignette */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_150%)] mix-blend-multiply" />
-                {/* Grain */}
-                <div className="absolute -inset-[200%] animate-noise opacity-30 mix-blend-overlay"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                        backgroundSize: '256px 256px',
-                        backgroundRepeat: 'repeat'
-                    }}
-                />
-                <style jsx>{`
-                    @keyframes noise-anim {
-                        0%, 100% { transform: translate(0, 0); }
-                        10% { transform: translate(-5%, -10%); }
-                        20% { transform: translate(-15%, 5%); }
-                        30% { transform: translate(7%, -25%); }
-                        40% { transform: translate(-5%, 25%); }
-                        50% { transform: translate(-15%, 10%); }
-                        60% { transform: translate(15%, 0%); }
-                        70% { transform: translate(0%, 15%); }
-                        80% { transform: translate(3%, 35%); }
-                        90% { transform: translate(-10%, 10%); }
-                    }
-                    .animate-noise { animation: noise-anim 0.5s steps(2) infinite; }
-                `}</style>
-            </div>
-        )
-    }
-
-    // WebGL Canvas Effects
     return (
-        <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none z-0 mix-blend-normal"
-        />
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+            <canvas
+                ref={canvasRef}
+                className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-80"
+            />
+
+            {showDots && (
+                <div className="absolute inset-0 z-10 pointer-events-none">
+                    <DotField 
+                        dotRadius={1.6}
+                        dotSpacing={22}
+                        cursorRadius={400}
+                        bulgeStrength={60}
+                        glowRadius={180}
+                        gradientFrom="#A855F7"
+                        gradientTo="#B497CF"
+                        glowColor="rgba(168, 85, 247, 0.15)"
+                    />
+                </div>
+            )}
+
+            {type === 'grid-move' && (
+                <div className="absolute inset-0 z-0 perspective-[500px] pointer-events-none" style={{ color: primaryColor }}>
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.15] animate-grid-flow" />
+                </div>
+            )}
+        </div>
     )
 }
