@@ -10,9 +10,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     callbacks: {
         async jwt({ token, user, trigger, session }) {
             if (user) {
-                token.username = (user as any).username;
-                token.role = (user as any).role;
-                token.isBanned = (user as any).isBanned;
+                token.id = user.id;
+                token.username = user.username;
+                token.role = user.role;
+                token.isBanned = user.isBanned;
             }
             if (trigger === "update" && session) {
                 return { ...token, ...session.user };
@@ -20,11 +21,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return token;
         },
         async session({ session, token }) {
-            if (token.sub && session.user) {
-                session.user.id = token.sub;
-                (session.user as any).username = token.username;
-                (session.user as any).role = token.role;
-                (session.user as any).isBanned = token.isBanned;
+            if (token.id && session.user) {
+                session.user.id = token.id;
+                session.user.username = token.username ?? null;
+                session.user.role = token.role || "USER";
+                session.user.isBanned = !!token.isBanned;
             }
             return session;
         },
