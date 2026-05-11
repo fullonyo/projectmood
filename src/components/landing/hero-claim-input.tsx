@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/i18n/context"
 
 export function HeroClaimInput() {
+    const { t } = useTranslation()
     const [username, setUsername] = useState("")
     const router = useRouter()
 
@@ -34,7 +36,7 @@ export function HeroClaimInput() {
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="seu-nome"
+                        placeholder={t('landing.claim_username_placeholder')}
                         className="flex-1 bg-transparent border-none outline-none text-white font-mono text-sm tracking-tighter placeholder:text-zinc-700"
                     />
                 </div>
@@ -43,7 +45,7 @@ export function HeroClaimInput() {
                     type="submit"
                     className="px-8 py-4 bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 active:scale-95"
                 >
-                    Reservar
+                    {t('landing.claim_username_btn')}
                     <ArrowRight className="w-3 h-3" />
                 </button>
             </div>

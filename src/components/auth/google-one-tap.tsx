@@ -5,15 +5,18 @@ import { signIn, useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import Script from "next/script"
 
+// Variável global para evitar re-inicialização no HMR/Turbopack
+let gsiInitialized = false;
+
 export function GoogleOneTap() {
     const { status } = useSession()
     const pathname = usePathname()
-    const initialized = useRef(false)
 
     const initializeGSI = () => {
-        if (typeof window === "undefined" || !window.google || initialized.current) return
+        if (typeof window === "undefined" || !window.google || gsiInitialized) return
         
-        const isAuthRoute = pathname.startsWith("/auth") || pathname === "/"
+        // Só ativamos o One Tap dentro das páginas de autenticação para evitar erros na Landing
+        const isAuthRoute = pathname.startsWith("/auth")
         if (status !== "unauthenticated" || !isAuthRoute) return
 
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
@@ -23,32 +26,31 @@ export function GoogleOneTap() {
             window.google.accounts.id.initialize({
                 client_id: clientId,
                 callback: async (response: any) => {
-                    console.log("Google One Tap: Autenticando...");
                     await signIn("google", {
                         id_token: response.credential,
                         callbackUrl: "/studio",
                     })
                 },
+                auto_select: false,
+                use_fedcm_for_prompt: false, // Forçamos false para evitar o NetworkError do FedCM
                 itp_support: true,
-                use_fedcm_for_prompt: true, // Mantemos true, mas tratamos o erro silenciosamente
             })
 
-            window.google.accounts.id.prompt((notification: any) => {
-                if (notification.isNotDisplayed()) {
-                    // Silenciamos o log comum se não houver erro crítico
-                    if (notification.getNotDisplayedReason() !== "suppressed_by_user") {
+            // Pequeno delay para garantir que o DOM está pronto e evitar conflitos de renderização
+            setTimeout(() => {
+                window.google.accounts.id.prompt((notification: any) => {
+                    if (notification.isNotDisplayed()) {
                         console.log("GSI Status:", notification.getNotDisplayedReason());
                     }
-                }
-            })
+                });
+            }, 1000);
             
-            initialized.current = true
+            gsiInitialized = true;
         } catch (error) {
             console.error("GSI Init Error:", error)
         }
     }
 
-    // Reinicializa se a rota mudar (importante para SPAs)
     useEffect(() => {
         if (window.google) {
             initializeGSI()

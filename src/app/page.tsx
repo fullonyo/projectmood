@@ -1,235 +1,174 @@
 "use client"
 
-import Link from "next/link";
-import { BackgroundEffect } from "@/components/effects/background-effect";
-import { HeroClaimInput } from "@/components/landing/hero-claim-input";
-import { StaticTextures } from "@/components/effects/static-textures";
-import { useTranslation } from "@/i18n/context";
-import { LanguageSwitcher } from "@/components/studio/language-switcher";
-import { motion } from "framer-motion";
-import { Play, Move, Layers, Zap } from "lucide-react";
-import { STUDIO_THEME } from "@/lib/studio-theme";
+import { useState } from "react"
+import { motion } from "framer-motion"
+import Link from "next/link"
+import { HeroClaimInput } from "@/components/landing/hero-claim-input"
+import { BlockShowcase } from "@/components/landing/block-showcase"
+import { BackgroundEffect } from "@/components/effects/background-effect"
+import { STUDIO_THEME } from "@/lib/studio-theme"
+import { useTranslation } from "@/i18n/context"
 
-export default function Home() {
-  const { t } = useTranslation();
+export default function LandingPage() {
+  const { t } = useTranslation()
 
   return (
-    <div className={`min-h-screen flex flex-col bg-zinc-950 text-white selection:bg-white selection:text-black overflow-x-hidden relative ${STUDIO_THEME.typography.fontSans}`}>
+    <main className="min-h-screen bg-zinc-950 text-white selection:bg-purple-500/30 overflow-x-hidden">
+      {/* Background Unificado - Única Instância WebGL para Performance Máxima */}
+      <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
+        <BackgroundEffect 
+          type={STUDIO_THEME.effects.background.type} 
+          primaryColor={STUDIO_THEME.effects.background.primaryColor} 
+          showDots={true}
+        />
+      </div>
 
-      <section className="relative min-h-[90vh] flex flex-col border-b border-white/5">
-        <div className="absolute inset-0 z-0">
-          <BackgroundEffect 
-            type={STUDIO_THEME.effects.background.type} 
-            primaryColor={STUDIO_THEME.effects.background.primaryColor} 
-          />
-        </div>
-        <div className="absolute inset-0 z-[1] pointer-events-none" style={{ opacity: STUDIO_THEME.effects.texture.opacity }}>
-          <StaticTextures type={STUDIO_THEME.effects.texture.type} />
-        </div>
-        <nav className="relative z-50 flex items-center justify-between px-6 py-8 md:px-12">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex flex-col"
-          >
-            <span className="text-[8px] font-black uppercase tracking-[0.5em] opacity-40 leading-none mb-1">{t('landing.studio_platform')}</span>
-            <div className="text-2xl font-black tracking-tighter uppercase italic">MoodSpace</div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex gap-4 sm:gap-8 items-center"
-          >
-            <LanguageSwitcher className="opacity-50 hover:opacity-100 transition-opacity" />
-            <Link href="/auth/login" className="group hidden sm:block">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 group-hover:opacity-100 transition-opacity">{t('landing.login_btn')}</span>
+      <div className="relative z-10">
+        {/* Navigation */}
+        <nav className="fixed top-0 w-full z-50 px-6 py-8 md:px-12 flex justify-between items-center mix-blend-difference">
+          <div className="text-xl font-black tracking-tighter uppercase italic">MoodSpace</div>
+          <div className="flex gap-8 items-center">
+            <Link href="/auth/login" className="text-[10px] font-black uppercase tracking-widest hover:text-zinc-400 transition-colors">
+              {t('landing.login_btn')}
             </Link>
-            <Link href="/auth/register">
-              <div className="px-6 py-2 border border-white/20 hover:border-white transition-all duration-500 bg-white/5 backdrop-blur-sm">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">{t('landing.btn_create_studio')}</span>
-              </div>
+            <Link href="/auth/register" className="bg-white text-black px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-colors">
+              {t('landing.btn_create_studio')}
             </Link>
-          </motion.div>
+          </div>
         </nav>
 
-        <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 md:px-12 py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-8 max-w-5xl"
-          >
-            <div className="flex items-center justify-center gap-4 opacity-30 mb-8">
-              <div className="h-[1px] w-12 bg-white" />
-              <span className="text-[10px] font-mono tracking-[0.4em] uppercase">{t('landing.curator_access_only')}</span>
-              <div className="h-[1px] w-12 bg-white" />
-            </div>
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20">
+          <div className="max-w-5xl w-full text-center space-y-12">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-center gap-3 mb-8">
+                <div className="w-8 h-[1px] bg-white/20" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">{t('landing.studio_platform')}</span>
+                <div className="w-8 h-[1px] bg-white/20" />
+              </div>
+              
+              <h1 className="text-6xl md:text-[120px] font-black tracking-tighter leading-[0.8] uppercase">
+                {t('landing.hero_title_curate')} <br /> 
+                <span className="text-zinc-500 italic serif font-light lowercase">{t('landing.hero_title_your')}</span> <br />
+                {t('landing.hero_title_reality')}
+              </h1>
+            </motion.div>
 
-            <h1 className="text-5xl sm:text-7xl md:text-[min(12vw,160px)] font-black tracking-tighter leading-[0.8] uppercase mb-12">
-              {t('landing.hero_title_curate')} <br />
-              <span className="italic text-zinc-500">{t('landing.hero_title_your')}</span> <br />
-              {t('landing.hero_title_reality')}
-            </h1>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="max-w-xl mx-auto text-zinc-400 text-sm md:text-base font-medium tracking-tight leading-relaxed uppercase"
+            >
+              {t('landing.hero_subtitle')}
+            </motion.p>
 
-            <div className="flex flex-col items-center gap-10">
-              <p className="text-lg md:text-xl text-zinc-400 max-w-xl mx-auto font-medium tracking-tight">
-                {t('landing.hero_subtitle')}
-              </p>
-
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex justify-center pt-8"
+            >
               <HeroClaimInput />
-            </div>
-          </motion.div>
-
-          <div className="mt-24 relative w-full max-w-6xl aspect-[16/9] hidden lg:block">
-            <div className="absolute inset-0 border border-white/10 grid grid-cols-12 grid-rows-6 opacity-20 pointer-events-none">
-              {Array.from({ length: 72 }).map((_, i) => (
-                <div key={i} className="border-[0.5px] border-white/5" />
-              ))}
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, rotateX: 20 }}
-              whileInView={{ opacity: 1, scale: 1, rotateX: 0 }}
-              transition={{ duration: 1 }}
-              className="absolute inset-0 flex items-center justify-center perspective-[1000px]"
-            >
-              {/* Bloco 1: Grayscale Image */}
-              <motion.div 
-                animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-[10%] left-[20%] w-72 h-80 bg-zinc-900 border border-white/20 p-2 shadow-2xl rotate-2"
-              >
-                <div className="w-full h-[85%] bg-zinc-800 grayscale" />
-                <div className="h-[15%] flex items-center px-2">
-                  <div className="w-12 h-1 bg-white/20 rounded-full" />
-                </div>
-              </motion.div>
-
-              {/* Bloco 2: Player/Glassmorphism */}
-              <motion.div 
-                animate={{ y: [0, 15, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute top-[40%] right-[15%] w-80 h-32 bg-zinc-900/80 backdrop-blur-xl border border-white/20 p-4 flex items-center gap-4 -rotate-3"
-              >
-                <div className="w-20 h-20 bg-zinc-800 flex items-center justify-center">
-                  <Play className="w-8 h-8 opacity-20" />
-                </div>
-                <div className="space-y-2">
-                  <div className="w-32 h-2 bg-white/40" />
-                  <div className="w-20 h-1 bg-white/20" />
-                </div>
-              </motion.div>
-
-              {/* Bloco 3: Paper/Analog */}
-              <motion.div 
-                animate={{ y: [0, -10, 0], rotate: [-6, -4, -6] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute bottom-[15%] left-[30%] w-64 h-64 bg-zinc-100 p-6 flex flex-col justify-between -rotate-6 shadow-[-20px_20px_50px_rgba(0,0,0,0.5)]"
-              >
-                <div className="space-y-3">
-                  <div className="w-full h-[1px] bg-black/10" />
-                  <div className="w-[80%] h-[1px] bg-black/10" />
-                  <div className="w-[90%] h-[1px] bg-black/10" />
-                </div>
-                <span className="text-[10px] font-mono text-black opacity-40 uppercase tracking-[0.2em]">{t('landing.visuals')}</span>
-              </motion.div>
             </motion.div>
           </div>
-        </main>
-      </section>
 
-      <section className="relative bg-white text-black py-32 overflow-hidden border-t border-black/5">
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <StaticTextures type="cross" />
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="mb-20 text-center md:text-left"
-          >
-            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6">
-              Infraestrutura <br /> <span className="italic text-zinc-400">para o Criativo Digital</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="space-y-6 group"
-            >
-              <div className="w-12 h-12 bg-black text-white flex items-center justify-center mb-8 rotate-3 transition-transform group-hover:rotate-0">
-                <Move className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter">
-                {t('landing.showcase.structure_title')}
-              </h3>
-              <p className="text-zinc-500 font-medium leading-relaxed">
-                {t('landing.showcase.structure_desc')}
-              </p>
-              <div className="h-[1px] w-12 bg-black/10 transition-all group-hover:w-full" />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="space-y-6 group"
-            >
-              <div className="w-12 h-12 border-2 border-black flex items-center justify-center mb-8 -rotate-6 transition-transform group-hover:rotate-0">
-                <Zap className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter">
-                {t('landing.showcase.atmosphere_title')}
-              </h3>
-              <p className="text-zinc-500 font-medium leading-relaxed">
-                {t('landing.showcase.atmosphere_desc')}
-              </p>
-              <div className="h-[1px] w-12 bg-black/10 transition-all group-hover:w-full" />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="space-y-6 group"
-            >
-              <div className="w-12 h-12 bg-white border border-black/10 flex items-center justify-center mb-8 rotate-12 transition-transform group-hover:rotate-0 shadow-xl">
-                <Layers className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter">
-                {t('landing.showcase.connection_title')}
-              </h3>
-              <p className="text-zinc-500 font-medium leading-relaxed">
-                {t('landing.showcase.connection_desc')}
-              </p>
-              <div className="h-[1px] w-12 bg-black/10 transition-all group-hover:w-full" />
-            </motion.div>
+          {/* Floating Details */}
+          <div className="absolute bottom-12 left-12 hidden md:block">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-800 rotate-90 origin-left">
+              v2.0.4 — STUDIO_READY
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <footer className="relative z-10 py-12 px-6 sm:px-12 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6 bg-zinc-950 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 border-t border-white/5">
-        <div className="flex flex-col items-center sm:items-start gap-2">
-          <span className="opacity-20 flex items-center gap-2">
-            <div className="w-1 h-1 bg-zinc-600 rounded-full" />
-            {t('landing.version_deployment')}
-          </span>
-          <div>© {new Date().getFullYear()} MOODSPACE_SYSTEMS</div>
-        </div>
+        <BlockShowcase />
 
-        <div className="flex gap-8">
-          <span className="opacity-20 hover:opacity-100 transition-opacity cursor-pointer">{t('landing.privacy')}</span>
-          <span className="opacity-20 hover:opacity-100 transition-opacity cursor-pointer">{t('landing.terms')}</span>
-        </div>
-      </footer>
-    </div>
-  );
+        {/* Seção de Essência */}
+        <section className="relative py-40 overflow-hidden border-t border-white/5">
+          <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 text-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="max-w-3xl mx-auto mb-32"
+            >
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 leading-[0.9]">
+                {t('landing.essence_title')} <br /> 
+                <span className="italic serif font-light text-zinc-500 lowercase">{t('landing.essence_title_italic')}</span>
+              </h2>
+              <p className="text-zinc-400 text-lg font-medium tracking-tight leading-relaxed">
+                {t('landing.essence_subtitle')}
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-24 md:gap-12 text-left">
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="space-y-6"
+              >
+                  <div className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-600 mb-4">{t('landing.essence_feature_1_label')}</div>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter italic">{t('landing.essence_feature_1_title')}</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed font-medium">
+                      {t('landing.essence_feature_1_desc')}
+                  </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="space-y-6"
+              >
+                  <div className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-600 mb-4">{t('landing.essence_feature_2_label')}</div>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter">{t('landing.essence_feature_2_title')}</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed font-medium">
+                      {t('landing.essence_feature_2_desc')}
+                  </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="space-y-6"
+              >
+                  <div className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-600 mb-4">{t('landing.essence_feature_3_label')}</div>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter italic">{t('landing.essence_feature_3_title')}</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed font-medium">
+                      {t('landing.essence_feature_3_desc')}
+                  </p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        <footer className="relative z-10 py-24 px-6 sm:px-12 bg-zinc-950/50 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto flex flex-col items-center gap-12">
+              <div className="w-12 h-[1px] bg-white/10" />
+              
+              <div className="flex flex-col items-center text-center gap-4">
+                  <div className="text-2xl font-black tracking-tighter uppercase italic opacity-80">MoodSpace</div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">{t('landing.claim_username_btn')} your soul, reserve your space.</p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-between w-full pt-12 border-t border-white/5 text-[9px] font-black uppercase tracking-[0.3em] text-zinc-700">
+                  <div className="flex gap-8">
+                      <Link href="#" className="hover:text-zinc-400 transition-colors">{t('landing.privacy')}</Link>
+                      <Link href="#" className="hover:text-zinc-400 transition-colors">{t('landing.terms')}</Link>
+                  </div>
+                  <div className="mt-4 sm:mt-0 opacity-40">© {new Date().getFullYear()} MOODSPACE STUDIO</div>
+              </div>
+          </div>
+        </footer>
+      </div>
+    </main>
+  )
 }
