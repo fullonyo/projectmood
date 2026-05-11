@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { registerUser } from "@/actions/register"
@@ -15,6 +15,9 @@ import { LanguageSwitcher } from "@/components/studio/language-switcher"
 
 export default function RegisterForm() {
     const { t } = useTranslation()
+    const searchParams = useSearchParams()
+    const initialUsername = searchParams.get("username") || ""
+    
     const [error, setError] = useState<string | undefined>("")
     const [success, setSuccess] = useState<string | undefined>("")
     const [loading, setLoading] = useState(false)
@@ -85,6 +88,7 @@ export default function RegisterForm() {
                         </label>
                         <Input
                             name="username"
+                            defaultValue={initialUsername}
                             placeholder={t('auth.register.placeholder_username')}
                             className="h-11 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 font-mono text-[10px] placeholder:text-zinc-700"
                             required

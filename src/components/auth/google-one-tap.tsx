@@ -3,70 +3,67 @@
 import { useEffect, useRef } from "react"
 import { signIn, useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
+import Script from "next/script"
 
 export function GoogleOneTap() {
     const { status } = useSession()
     const pathname = usePathname()
     const initialized = useRef(false)
 
-    useEffect(() => {
-        // Só mostramos o One Tap se o usuário estiver deslogado e em rotas de auth ou landing
+    const initializeGSI = () => {
+        if (typeof window === "undefined" || !window.google || initialized.current) return
+        
         const isAuthRoute = pathname.startsWith("/auth") || pathname === "/"
-        if (status !== "unauthenticated" || !isAuthRoute || initialized.current) {
-            return
-        }
+        if (status !== "unauthenticated" || !isAuthRoute) return
 
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-        if (!clientId) {
-            console.warn("Google One Tap: NEXT_PUBLIC_GOOGLE_CLIENT_ID não encontrado no .env")
-            return
-        }
+        if (!clientId) return
 
-        const script = document.createElement("script")
-        script.src = "https://accounts.google.com/gsi/client"
-        script.async = true
-        script.defer = true
-        script.onload = () => {
-            if (!window.google) return
-
+        try {
             window.google.accounts.id.initialize({
                 client_id: clientId,
                 callback: async (response: any) => {
-                    console.log("Google One Tap: Token recebido, iniciando signIn...");
+                    console.log("Google One Tap: Autenticando...");
                     await signIn("google", {
                         id_token: response.credential,
                         callbackUrl: "/studio",
                     })
                 },
-                auto_select: false,
-                use_fedcm_for_prompt: false, // Desativa FedCM para evitar NetworkError local
-                itp_support: true,           // Melhora suporte a Intelligent Tracking Prevention
-                cancel_on_tap_outside: false,
+                itp_support: true,
+                use_fedcm_for_prompt: true, // Mantemos true, mas tratamos o erro silenciosamente
             })
 
-            // Exibe a bolha
             window.google.accounts.id.prompt((notification: any) => {
                 if (notification.isNotDisplayed()) {
-                    console.log("One Tap não exibido:", notification.getNotDisplayedReason())
+                    // Silenciamos o log comum se não houver erro crítico
+                    if (notification.getNotDisplayedReason() !== "suppressed_by_user") {
+                        console.log("GSI Status:", notification.getNotDisplayedReason());
+                    }
                 }
             })
             
             initialized.current = true
+        } catch (error) {
+            console.error("GSI Init Error:", error)
         }
+    }
 
-        document.body.appendChild(script)
-
-        return () => {
-            if (document.body.contains(script)) {
-                document.body.removeChild(script)
-            }
+    // Reinicializa se a rota mudar (importante para SPAs)
+    useEffect(() => {
+        if (window.google) {
+            initializeGSI()
         }
-    }, [status, pathname])
+    }, [pathname, status])
 
-    return null
+    return (
+        <Script
+            src="https://accounts.google.com/gsi/client"
+            strategy="afterInteractive"
+            onLoad={initializeGSI}
+        />
+    )
 }
 
-// Tipagem para o objeto global do Google
 declare global {
     interface Window {
         google: any

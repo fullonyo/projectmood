@@ -10,7 +10,7 @@ import {
     createProgram
 } from "@/lib/shaders"
 import DotField from "@/components/react-bits/DotField"
-import { STUDIO_THEME } from "@/lib/studio-theme"
+import { REACT_BITS_CONFIG } from "@/lib/react-bits"
 
 const SHADER_MAP: Record<string, string> = {
     aurora: AURORA_SHADER,
@@ -26,7 +26,6 @@ interface BackgroundEffectProps {
     showDots?: boolean
 }
 
-// Utility to convert hex to RGB for shaders
 const hexToRgb = (hex: string) => {
     const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
     const fullHex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
@@ -132,26 +131,22 @@ export function BackgroundEffect({
 
     return (
         <div className="absolute inset-0 w-full h-full overflow-hidden">
+            {/* Camada 0: WebGL (Aurora, Liquid, etc) */}
             <canvas
                 ref={canvasRef}
                 className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-80"
             />
 
+            {/* Camada 1: Interação Física (ReactBits DotField) */}
             {showDots && (
                 <div className="absolute inset-0 z-10 pointer-events-none">
                     <DotField 
-                        dotRadius={1.6}
-                        dotSpacing={22}
-                        cursorRadius={400}
-                        bulgeStrength={60}
-                        glowRadius={180}
-                        gradientFrom="#A855F7"
-                        gradientTo="#B497CF"
-                        glowColor="rgba(168, 85, 247, 0.15)"
+                        {...REACT_BITS_CONFIG.dotField.defaults}
                     />
                 </div>
             )}
 
+            {/* Efeitos Legados */}
             {type === 'grid-move' && (
                 <div className="absolute inset-0 z-0 perspective-[500px] pointer-events-none" style={{ color: primaryColor }}>
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.15] animate-grid-flow" />

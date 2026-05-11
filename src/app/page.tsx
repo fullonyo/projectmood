@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BackgroundEffect } from "@/components/effects/background-effect";
+import { HeroClaimInput } from "@/components/landing/hero-claim-input";
 import { StaticTextures } from "@/components/effects/static-textures";
 import { useTranslation } from "@/i18n/context";
 import { LanguageSwitcher } from "@/components/studio/language-switcher";
@@ -76,12 +77,7 @@ export default function Home() {
                 {t('landing.hero_subtitle')}
               </p>
 
-              <Link href="/auth/register" className="group">
-                <div className="bg-white text-black px-10 sm:px-20 py-5 sm:py-7 transition-all duration-500 hover:scale-105 relative overflow-hidden">
-                  <span className="text-sm sm:text-xl font-black uppercase tracking-widest relative z-10">{t('landing.btn_create_studio')}</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                </div>
-              </Link>
+              <HeroClaimInput />
             </div>
           </motion.div>
 
@@ -98,14 +94,24 @@ export default function Home() {
               transition={{ duration: 1 }}
               className="absolute inset-0 flex items-center justify-center perspective-[1000px]"
             >
-              <div className="absolute top-[10%] left-[20%] w-72 h-80 bg-zinc-900 border border-white/20 p-2 shadow-2xl rotate-2">
+              {/* Bloco 1: Grayscale Image */}
+              <motion.div 
+                animate={{ y: [0, -15, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-[10%] left-[20%] w-72 h-80 bg-zinc-900 border border-white/20 p-2 shadow-2xl rotate-2"
+              >
                 <div className="w-full h-[85%] bg-zinc-800 grayscale" />
                 <div className="h-[15%] flex items-center px-2">
                   <div className="w-12 h-1 bg-white/20 rounded-full" />
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="absolute top-[40%] right-[15%] w-80 h-32 bg-zinc-900/80 backdrop-blur-xl border border-white/20 p-4 flex items-center gap-4 -rotate-3">
+              {/* Bloco 2: Player/Glassmorphism */}
+              <motion.div 
+                animate={{ y: [0, 15, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="absolute top-[40%] right-[15%] w-80 h-32 bg-zinc-900/80 backdrop-blur-xl border border-white/20 p-4 flex items-center gap-4 -rotate-3"
+              >
                 <div className="w-20 h-20 bg-zinc-800 flex items-center justify-center">
                   <Play className="w-8 h-8 opacity-20" />
                 </div>
@@ -113,16 +119,21 @@ export default function Home() {
                   <div className="w-32 h-2 bg-white/40" />
                   <div className="w-20 h-1 bg-white/20" />
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="absolute bottom-[15%] left-[30%] w-64 h-64 bg-zinc-100 p-6 flex flex-col justify-between -rotate-6">
+              {/* Bloco 3: Paper/Analog */}
+              <motion.div 
+                animate={{ y: [0, -10, 0], rotate: [-6, -4, -6] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute bottom-[15%] left-[30%] w-64 h-64 bg-zinc-100 p-6 flex flex-col justify-between -rotate-6 shadow-[-20px_20px_50px_rgba(0,0,0,0.5)]"
+              >
                 <div className="space-y-3">
                   <div className="w-full h-[1px] bg-black/10" />
                   <div className="w-[80%] h-[1px] bg-black/10" />
                   <div className="w-[90%] h-[1px] bg-black/10" />
                 </div>
                 <span className="text-[10px] font-mono text-black opacity-40 uppercase tracking-[0.2em]">{t('landing.visuals')}</span>
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </main>
@@ -134,6 +145,17 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="mb-20 text-center md:text-left"
+          >
+            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6">
+              Infraestrutura <br /> <span className="italic text-zinc-400">para o Criativo Digital</span>
+            </h2>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
