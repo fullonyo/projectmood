@@ -43,6 +43,7 @@ export function RoomEnvironment({ profile, backgroundEffect, weatherSync }: Room
                 <BackgroundEffect
                     type={activeAtmosphere}
                     primaryColor={resolvedPrimaryColor}
+                    showDots={false}
                 />
             </div>
 

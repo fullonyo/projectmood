@@ -23,6 +23,7 @@ export default async function AuthLayout({
                 <BackgroundEffect 
                     type={STUDIO_THEME.effects.background.type} 
                     primaryColor={STUDIO_THEME.effects.background.primaryColor} 
+                    showDots={true}
                 />
             </div>
             <div className="absolute inset-0 z-[1] pointer-events-none" style={{ opacity: STUDIO_THEME.effects.texture.opacity }}>
