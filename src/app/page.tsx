@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { HeroClaimInput } from "@/components/landing/hero-claim-input"
 import { BlockShowcase } from "@/components/landing/block-showcase"
+import { LiveCurators } from "@/components/landing/live-curators"
 import { BackgroundEffect } from "@/components/effects/background-effect"
 import { STUDIO_THEME } from "@/lib/studio-theme"
 import { useTranslation } from "@/i18n/context"
@@ -150,22 +151,78 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <footer className="relative z-10 py-24 px-6 sm:px-12 bg-zinc-950/50 backdrop-blur-md">
-          <div className="max-w-7xl mx-auto flex flex-col items-center gap-12">
-              <div className="w-12 h-[1px] bg-white/10" />
-              
-              <div className="flex flex-col items-center text-center gap-4">
-                  <div className="text-2xl font-black tracking-tighter uppercase italic opacity-80">MoodSpace</div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">{t('landing.claim_username_btn')} your soul, reserve your space.</p>
+        <footer className="relative z-10 pt-16 pb-12 px-6 md:px-12 border-t border-white/5 bg-zinc-950/30 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto">
+            {/* CTA Final - Mais Compacto */}
+            <div className="mb-16 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-8">
+              <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none max-w-md text-white">
+                Pronto para <br /> sintonizar sua <span className="italic serif font-light text-zinc-500 lowercase">realidade?</span>
+              </h2>
+              <Link href="/auth/register" className="bg-white text-black px-8 py-4 font-black uppercase tracking-[0.2em] text-[10px] hover:bg-zinc-200 transition-all active:scale-95 whitespace-nowrap">
+                {t('landing.btn_create_studio')}
+              </Link>
+            </div>
+
+            {/* Grid de Links - Mais Denso */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+              <div className="space-y-4">
+                <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-600">Plataforma</h4>
+                <ul className="space-y-2 text-[10px] font-medium uppercase tracking-tight text-zinc-400">
+                  <li><Link href="#" className="hover:text-white transition-colors">O Estúdio</Link></li>
+                  <li><Link href="#" className="hover:text-white transition-colors">Mural Global</Link></li>
+                  <li><Link href="#" className="hover:text-white transition-colors">Marketplace</Link></li>
+                </ul>
               </div>
 
-              <div className="flex flex-col sm:flex-row justify-between w-full pt-12 border-t border-white/5 text-[9px] font-black uppercase tracking-[0.3em] text-zinc-700">
-                  <div className="flex gap-8">
-                      <Link href="#" className="hover:text-zinc-400 transition-colors">{t('landing.privacy')}</Link>
-                      <Link href="#" className="hover:text-zinc-400 transition-colors">{t('landing.terms')}</Link>
-                  </div>
-                  <div className="mt-4 sm:mt-0 opacity-40">© {new Date().getFullYear()} MOODSPACE STUDIO</div>
+              <div className="space-y-4">
+                <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-600">Ecossistema</h4>
+                <ul className="space-y-2 text-[10px] font-medium uppercase tracking-tight text-zinc-400">
+                  <li><Link href="#" className="hover:text-white transition-colors">Manifesto</Link></li>
+                  <li><Link href="#" className="hover:text-white transition-colors">Comunidade</Link></li>
+                  <li><Link href="#" className="hover:text-white transition-colors">Labs</Link></li>
+                </ul>
               </div>
+
+              <div className="space-y-4">
+                <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-600">Suporte</h4>
+                <ul className="space-y-2 text-[10px] font-medium uppercase tracking-tight text-zinc-400">
+                  <li><Link href="#" className="hover:text-white transition-colors">Central de Ajuda</Link></li>
+                  <li><a href="mailto:desenvolvimento@moodspace.com.br" className="hover:text-white transition-colors lowercase font-mono text-zinc-500">desenvolvimento@moodspace.com.br</a></li>
+                  <li><div className="flex items-center gap-2 text-emerald-500/60">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[9px] uppercase font-black tracking-widest opacity-60">Systems: Online</span>
+                  </div></li>
+                  <li className="pt-1"><LiveCurators /></li>
+                </ul>
+              </div>
+
+              <div className="space-y-4 text-right md:text-left">
+                <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-600">Social</h4>
+                <ul className="space-y-2 text-[10px] font-medium uppercase tracking-tight text-zinc-400">
+                  <li><Link href="#" className="hover:text-white transition-colors">Instagram</Link></li>
+                  <li><Link href="#" className="hover:text-white transition-colors">Twitter (X)</Link></li>
+                  <li><Link href="#" className="hover:text-white transition-colors">TikTok</Link></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Bar - Slim */}
+            <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5 gap-6">
+              <div className="flex flex-col md:flex-row items-center gap-6 text-[9px] font-black uppercase tracking-[0.1em] text-zinc-700">
+                <div className="text-white/60 text-sm italic tracking-tighter uppercase font-black">MoodSpace</div>
+                <div className="hidden md:block w-px h-3 bg-white/5" />
+                <div>© {new Date().getFullYear()} STUDIO SYSTEMS</div>
+                <div className="flex gap-4">
+                  <Link href="#" className="hover:text-zinc-400 transition-colors">{t('landing.privacy')}</Link>
+                  <Link href="#" className="hover:text-zinc-400 transition-colors">{t('landing.terms')}</Link>
+                </div>
+              </div>
+              
+              <div className="text-[8px] font-mono text-zinc-800 flex gap-4">
+                <span>V2.0.4</span>
+                <span>BR_EST_01</span>
+              </div>
+            </div>
           </div>
         </footer>
       </div>
