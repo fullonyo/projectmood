@@ -13,16 +13,16 @@ export function GoogleOneTap() {
     const pathname = usePathname()
 
     const initializeGSI = () => {
-        if (typeof window === "undefined" || !window.google || gsiInitialized) return
-        
-        // Só ativamos o One Tap dentro das páginas de autenticação para evitar erros na Landing
-        const isAuthRoute = pathname.startsWith("/auth")
-        if (status !== "unauthenticated" || !isAuthRoute) return
+        if (typeof window === "undefined" || !window.google) return
+        if (status !== "unauthenticated") return
 
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
         if (!clientId) return
 
         try {
+            // Limpa prompts anteriores para evitar sobreposição no ciclo de vida
+            window.google.accounts.id.cancel()
+
             window.google.accounts.id.initialize({
                 client_id: clientId,
                 callback: async (response: any) => {
@@ -32,27 +32,30 @@ export function GoogleOneTap() {
                     })
                 },
                 auto_select: false,
-                use_fedcm_for_prompt: false, // Forçamos false para evitar o NetworkError do FedCM
+                use_fedcm_for_prompt: false,
                 itp_support: true,
             })
 
-            // Pequeno delay para garantir que o DOM está pronto e evitar conflitos de renderização
             setTimeout(() => {
-                window.google.accounts.id.prompt((notification: any) => {
-                    if (notification.isNotDisplayed()) {
-                        console.log("GSI Status:", notification.getNotDisplayedReason());
-                    }
-                });
-            }, 1000);
+                if (status === "unauthenticated") {
+                    window.google.accounts.id.prompt((notification: any) => {
+                        // Se o bubble foi suprimido pelo Google (ex: muitos cancelamentos),
+                        // podemos forçar a exibição em certas condições ou apenas logar
+                        if (notification.isNotDisplayed()) {
+                            console.warn("One Tap suprimido pelo Google:", notification.getNotDisplayedReason())
+                        }
+                    })
+                }
+            }, 3000)
             
-            gsiInitialized = true;
         } catch (error) {
-            console.error("GSI Init Error:", error)
+            console.error("GSI Lifecycle Error:", error)
         }
     }
 
     useEffect(() => {
-        if (window.google) {
+        // Reinicializamos sempre que o status de autenticação mudar ou a rota mudar
+        if (window.google && status === "unauthenticated") {
             initializeGSI()
         }
     }, [pathname, status])
