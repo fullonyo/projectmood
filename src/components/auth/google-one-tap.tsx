@@ -13,16 +13,15 @@ export function GoogleOneTap() {
     const pathname = usePathname()
 
     const initializeGSI = () => {
-        if (typeof window === "undefined" || !window.google) return
-        if (status !== "unauthenticated") return
-
+        if (typeof window === "undefined" || !window.google || gsiInitialized) return
+        
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-        if (!clientId) return
+        if (!clientId) {
+            console.warn("GSI: NEXT_PUBLIC_GOOGLE_CLIENT_ID não encontrado.");
+            return
+        }
 
         try {
-            // Limpa prompts anteriores para evitar sobreposição no ciclo de vida
-            window.google.accounts.id.cancel()
-
             window.google.accounts.id.initialize({
                 client_id: clientId,
                 callback: async (response: any) => {
@@ -31,33 +30,46 @@ export function GoogleOneTap() {
                         callbackUrl: "/studio",
                     })
                 },
+                // Tentativa de compatibilidade máxima:
                 auto_select: false,
                 use_fedcm_for_prompt: false,
+                context: 'signin',
                 itp_support: true,
             })
-
-            setTimeout(() => {
-                if (status === "unauthenticated") {
-                    window.google.accounts.id.prompt((notification: any) => {
-                        // Se o bubble foi suprimido pelo Google (ex: muitos cancelamentos),
-                        // podemos forçar a exibição em certas condições ou apenas logar
-                        if (notification.isNotDisplayed()) {
-                            console.warn("One Tap suprimido pelo Google:", notification.getNotDisplayedReason())
-                        }
-                    })
-                }
-            }, 3000)
             
+            gsiInitialized = true;
         } catch (error) {
-            console.error("GSI Lifecycle Error:", error)
+            console.error("GSI Init Error:", error)
+        }
+    }
+
+    const showPrompt = () => {
+        if (typeof window !== "undefined" && window.google && status === "unauthenticated") {
+            console.log("GSI: Solicitando prompt...");
+            window.google.accounts.id.prompt((notification: any) => {
+                if (notification.isNotDisplayed()) {
+                    console.warn("GSI Bubble não exibido. Motivo:", notification.getNotDisplayedReason());
+                    console.info("Dica: Se você fechou o bubble recentemente, limpe o cookie 'g_state' para ele reaparecer.");
+                }
+                if (notification.isSkippedMoment()) {
+                    console.log("GSI Bubble pulado. Motivo:", notification.getSkippedReason());
+                }
+            });
         }
     }
 
     useEffect(() => {
-        // Reinicializamos sempre que o status de autenticação mudar ou a rota mudar
-        if (window.google && status === "unauthenticated") {
+        // 1. Garante que está inicializado
+        if (window.google) {
             initializeGSI()
         }
+        
+        // 2. Tenta mostrar o prompt (com delay para suavidade)
+        const timer = setTimeout(() => {
+            showPrompt()
+        }, 2000)
+
+        return () => clearTimeout(timer)
     }, [pathname, status])
 
     return (
