@@ -1,14 +1,7 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import type { ComponentProps } from "react"
 import { useViewportScale } from "@/lib/canvas-scale"
-import { motion } from "framer-motion"
-import {
-    DiscordIcon, TikTokIcon, SteamIcon,
-    SpotifyIcon, TwitchIcon, PinterestIcon
-} from "../icons"
-
-import dynamic from "next/dynamic"
 
 import { FrameContainer, FrameType } from "./FrameContainer"
 import { SmartText, TextBehavior } from "./SmartText"
@@ -18,7 +11,6 @@ import { SmartRorschach } from "./SmartRorschach"
 
 import { SmartPhoto } from "./SmartPhoto"
 import { SmartCountdown } from "./SmartCountdown"
-import { SmartReview } from "./SmartReview"
 import { SmartSocial } from "./SmartSocial"
 import { SmartWeather } from "./SmartWeather"
 import { SmartGuestbook } from "./SmartGuestbook"
@@ -34,10 +26,48 @@ import {
     RorschachContent, 
     DoodleContent, 
     TapeContent, 
-    UniversalMediaContent,
-    GuestbookContent
+    UniversalMediaContent
 } from "@/types/database"
 import { BlockErrorBoundary } from "./block-error-boundary"
+
+type SmartTextProps = ComponentProps<typeof SmartText>
+type SmartTextFontSize = NonNullable<SmartTextProps['fontSize']>
+type SmartTextAlign = NonNullable<SmartTextProps['align']>
+type SmartTextCursorType = NonNullable<SmartTextProps['cursorType']>
+type SmartTextDialogueStyle = NonNullable<SmartTextProps['dialogueStyle']>
+type SmartTextDialogueFormat = NonNullable<SmartTextProps['dialogueFormat']>
+type SmartTextNameStyle = NonNullable<SmartTextProps['nameStyle']>
+type SmartTextTypingRhythm = NonNullable<SmartTextProps['typingRhythm']>
+type SmartTextRevealMode = NonNullable<SmartTextProps['revealMode']>
+type SmartSocialStyle = ComponentProps<typeof SmartSocial>['content']['style']
+
+const FRAME_TYPES = ['none', 'polaroid', 'polaroid-dark', 'frame', 'minimal', 'round', 'glass', 'border', 'shadow'] as const
+const TEXT_FONT_SIZES = ['sm', 'base', 'xl', '3xl'] as const
+const TEXT_ALIGNS = ['left', 'center', 'right'] as const
+const TEXT_CURSOR_TYPES = ['block', 'bar', 'underline', 'none'] as const
+const TEXT_DIALOGUE_STYLES = ['novel', 'script', 'minimal'] as const
+const TEXT_DIALOGUE_FORMATS = ['alternating', 'classic'] as const
+const TEXT_NAME_STYLES = ['bold', 'italic', 'none'] as const
+const TEXT_TYPING_RHYTHMS = ['steady', 'organic'] as const
+const TEXT_REVEAL_MODES = ['char', 'word'] as const
+const SOCIAL_STYLES = ['tag', 'glass', 'minimal', 'neon', 'pill', 'brutalist', 'ghost', 'clay', 'retro', 'aura'] as const
+
+function isOneOf<T extends readonly string[]>(options: T, value: unknown): value is T[number] {
+    return typeof value === 'string' && options.includes(value)
+}
+
+function getFrameType(value: unknown, fallback: FrameType = 'none'): FrameType {
+    return isOneOf(FRAME_TYPES, value) ? value : fallback
+}
+
+function getTextFontSize(value: TextContent['fontSize']): SmartTextFontSize | undefined {
+    if (typeof value === 'number') return value
+    return isOneOf(TEXT_FONT_SIZES, value) ? value : undefined
+}
+
+function getOpacity(content: MoodBlock['content']): number {
+    return typeof content.opacity === 'number' ? content.opacity : 1
+}
 
 interface BlockRendererProps {
     block: MoodBlock
@@ -59,7 +89,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
 
     const renderText = () => {
         const textContent = content as TextContent
-        const behavior = textContent.behavior || (
+        const behavior: TextBehavior = textContent.behavior || (
             block.type === 'ticker' ? 'ticker' :
                 block.type === 'floating' ? 'floating' :
                     block.type === 'subtitle' ? 'typewriter' :
@@ -67,29 +97,30 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                             (block.type === 'moodStatus' || block.type === 'mood-status') ? 'status' :
                                 'static'
         )
-        const frame = textContent.frame || (textContent.style === 'simple' ? 'none' : textContent.style as any) || (['ticker', 'subtitle', 'floating'].includes(block.type) ? 'minimal' : 'none')
+        const fallbackFrame = ['ticker', 'subtitle', 'floating'].includes(block.type) ? 'minimal' : 'none'
+        const frame = getFrameType(textContent.frame, textContent.style === 'simple' ? 'none' : getFrameType(textContent.style, fallbackFrame))
         
         return (
             <FrameContainer frame={frame}>
                 <SmartText
                     text={textContent.text}
-                    behavior={behavior as TextBehavior}
-                    style={textContent.style as any}
+                    behavior={behavior}
+                    style={textContent.style}
                     textColor={textContent.textColor}
-                    fontSize={textContent.fontSize as any}
-                    align={textContent.align as any}
+                    fontSize={getTextFontSize(textContent.fontSize)}
+                    align={isOneOf(TEXT_ALIGNS, textContent.align) ? textContent.align as SmartTextAlign : undefined}
                     speed={textContent.speed}
-                    direction={textContent.direction as "left" | "right"}
-                    cursorType={textContent.cursorType as any}
+                    direction={textContent.direction}
+                    cursorType={isOneOf(TEXT_CURSOR_TYPES, textContent.cursorType) ? textContent.cursorType as SmartTextCursorType : undefined}
                     author={textContent.author}
                     showQuotes={textContent.showQuotes}
                     icon={textContent.icon}
-                    dialogueStyle={textContent.dialogueStyle as any}
-                    dialogueFormat={textContent.dialogueFormat as any}
-                    nameStyle={textContent.nameStyle as any}
+                    dialogueStyle={isOneOf(TEXT_DIALOGUE_STYLES, textContent.dialogueStyle) ? textContent.dialogueStyle as SmartTextDialogueStyle : undefined}
+                    dialogueFormat={isOneOf(TEXT_DIALOGUE_FORMATS, textContent.dialogueFormat) ? textContent.dialogueFormat as SmartTextDialogueFormat : undefined}
+                    nameStyle={isOneOf(TEXT_NAME_STYLES, textContent.nameStyle) ? textContent.nameStyle as SmartTextNameStyle : undefined}
                     dialogueLines={textContent.dialogueLines}
-                    typingRhythm={textContent.typingRhythm as any}
-                    revealMode={textContent.revealMode as any}
+                    typingRhythm={isOneOf(TEXT_TYPING_RHYTHMS, textContent.typingRhythm) ? textContent.typingRhythm as SmartTextTypingRhythm : undefined}
+                    revealMode={isOneOf(TEXT_REVEAL_MODES, textContent.revealMode) ? textContent.revealMode as SmartTextRevealMode : undefined}
                 />
             </FrameContainer>
         )
@@ -98,10 +129,10 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
     const renderMedia = () => {
         const mediaContent = content as UniversalMediaContent
         const mediaType = mediaContent.mediaType || (block.type === 'music' ? 'music' : 'video')
-        const frame = mediaContent.frame || (mediaType === 'music' ? 'minimal' : 'none')
+        const frame = getFrameType(mediaContent.frame, mediaType === 'music' ? 'minimal' : 'none')
         
         return (
-            <FrameContainer frame={frame as any}>
+            <FrameContainer frame={frame}>
                 <SmartMedia
                     mediaType={mediaType as MediaType}
                     videoId={mediaContent.videoId}
@@ -231,7 +262,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                 return <SmartSocial content={{
                     ...socialContent,
                     label: socialContent.label || '',
-                    style: (socialContent.style as any) || 'minimal'
+                    style: isOneOf(SOCIAL_STYLES, socialContent.style) ? socialContent.style as SmartSocialStyle : 'minimal'
                 }} isPublic={isPublic} isInsideFrame={Boolean(socialContent.frame && socialContent.frame !== 'none')} />
 
             case 'guestbook':
@@ -253,10 +284,10 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         }
     })()
 
-    const opacity = (content as any).opacity ?? 1
+    const opacity = getOpacity(content)
 
     return (
-        <div className="w-full h-full" style={{ opacity: opacity as number }}>
+        <div className="w-full h-full" style={{ opacity }}>
             {element}
         </div>
     )

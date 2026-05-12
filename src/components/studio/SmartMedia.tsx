@@ -34,7 +34,7 @@ interface LyricLine {
 
 const AudioPlayer = ({ 
     audioUrl, isPlaying, togglePlay, progress, setProgress, scale = 1, audioMetadata, 
-    renderLyricsOverlay, isGlobalMuted, audioRef, handleTimeUpdate, setIsPlaying
+    renderLyricsOverlay, isGlobalMuted, audioRef, handleTimeUpdate, currentTime, setCurrentTime, setIsPlaying
 }: {
     audioUrl: string;
     isPlaying: boolean;
@@ -47,6 +47,8 @@ const AudioPlayer = ({
     isGlobalMuted: boolean;
     audioRef: React.RefObject<HTMLAudioElement | null>;
     handleTimeUpdate: () => void;
+    currentTime: number;
+    setCurrentTime: (time: number) => void;
     setIsPlaying: (p: boolean) => void;
 }) => {
     // Generate static heights for waveform - more striking and organic variations
@@ -64,8 +66,6 @@ const AudioPlayer = ({
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
-    const currentTime = audioRef.current?.currentTime || 0
-
     // SEEKING LOGIC
     const handleScrub = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation()
@@ -75,6 +75,7 @@ const AudioPlayer = ({
             const percentage = Math.max(0, Math.min(1, x / rect.width))
             const seekTime = percentage * audioRef.current.duration
             audioRef.current.currentTime = seekTime
+            setCurrentTime(seekTime)
             setProgress(percentage * 100)
         }
     }
@@ -93,6 +94,8 @@ const AudioPlayer = ({
                 src={audioUrl}
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={() => setIsPlaying(false)}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
                 loop
             />
 
@@ -254,6 +257,7 @@ export function SmartMedia({
 
     const [isPlaying, setIsPlaying] = useState(false)
     const [progress, setProgress] = useState(0)
+    const [currentTime, setCurrentTime] = useState(0)
     const [currentLyric, setCurrentLyric] = useState<string>("")
     const audioRef = useRef<HTMLAudioElement>(null)
 
@@ -290,7 +294,6 @@ export function SmartMedia({
                 audioRef.current.pause()
             } else {
                 audioRef.current.play().catch(e => console.log("Autoplay blocked", e))
-                setIsPlaying(true)
             }
         }
     }, [hasInteracted, isPublic, audioUrl, mediaType, isGlobalMuted])
@@ -308,9 +311,8 @@ export function SmartMedia({
             if (isPlaying) {
                 audioRef.current.pause()
             } else {
-                audioRef.current.play()
+                audioRef.current.play().catch(e => console.log("Playback blocked", e))
             }
-            setIsPlaying(!isPlaying)
         }
     }
 
@@ -318,6 +320,7 @@ export function SmartMedia({
         if (audioRef.current) {
             const current = audioRef.current.currentTime
             const duration = audioRef.current.duration || 1
+            setCurrentTime(current)
             setProgress((current / duration) * 100)
 
             if (parsedLyrics.current.length > 0) {
@@ -414,7 +417,7 @@ export function SmartMedia({
         content = <AudioPlayer 
             audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} setProgress={setProgress} scale={scale} 
             audioMetadata={audioMetadata} renderLyricsOverlay={renderLyricsOverlay} isGlobalMuted={isGlobalMuted} 
-            audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} setIsPlaying={setIsPlaying}
+            audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} currentTime={currentTime} setCurrentTime={setCurrentTime} setIsPlaying={setIsPlaying}
         />
     } else if (mediaType === 'video' && videoId) {
         content = <VideoPlayer videoId={videoId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} renderLyricsOverlay={renderLyricsOverlay} />
