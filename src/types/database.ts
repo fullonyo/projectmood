@@ -34,8 +34,17 @@ export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<Prisma.MoodBl
     content: MoodBlockContent;
 }
 
+export interface BlockContentBase {
+    customName?: string;
+    opacity?: number;
+    blendMode?: string;
+    frame?: 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'border' | 'shadow' | 'glass';
+    groupName?: string;
+    [key: string]: unknown;
+}
+
 // Specific Content Interfaces
-export interface TextContent {
+export interface TextContent extends BlockContentBase {
     text: string;
     style?: string;
     fontSize?: string;
@@ -55,36 +64,28 @@ export interface TextContent {
     nameStyle?: string;
     dialogueLines?: { name: string; text: string }[];
     typingRhythm?: string;
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    revealMode?: string;
 }
 
-export interface PhotoContent {
+export interface PhotoContent extends BlockContentBase {
     imageUrl: string;
     caption?: string;
-    frame?: 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'border' | 'shadow' | 'glass';
     filter?: 'none' | 'vintage' | 'bw' | 'warm' | 'cool';
     alt?: string;
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface VideoContent {
+export interface VideoContent extends BlockContentBase {
     url: string;
     autoplay?: boolean;
     muted?: boolean;
     loop?: boolean;
     platform?: 'youtube' | 'vimeo' | 'custom';
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface MusicContent {
+export interface MusicContent extends BlockContentBase {
     url: string;
     platform?: 'spotify' | 'soundcloud' | 'apple-music';
     displayMode?: 'compact' | 'card';
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface ThemeConfig {
@@ -167,7 +168,7 @@ export interface PublicMoodPageProps {
     isGuest: boolean;
 }
 
-export interface SocialContent {
+export interface SocialContent extends BlockContentBase {
     platform: string;
     url: string;
     label?: string;
@@ -175,39 +176,29 @@ export interface SocialContent {
     style?: string;
     isGrid?: boolean;
     showBg?: boolean;
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface CountdownContent {
+export interface CountdownContent extends BlockContentBase {
     title: string;
     targetDate: string;
     emoji?: string;
     style?: 'minimal' | 'bold' | 'neon';
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface GuestbookContent {
+export interface GuestbookContent extends BlockContentBase {
     title: string;
     color?: string;
     style?: 'glass' | 'onyx' | 'silk' | 'vhs' | 'cyber' | 'paper';
     layoutMode?: 'classic' | 'stream' | 'float' | 'scattered' | 'cloud';
     density?: number;
-    opacity?: number;
-    blendMode?: string;
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface MoodStatusContent {
+export interface MoodStatusContent extends BlockContentBase {
     emoji: string;
     text?: string;
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface WeatherContent {
+export interface WeatherContent extends BlockContentBase {
     state?: string;
     location?: string;
     temperature?: string;
@@ -215,13 +206,9 @@ export interface WeatherContent {
     temp?: number;
     icon?: string;
     mode?: 'auto' | 'manual';
-    opacity?: number;
-    blendMode?: string;
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface ShapeContent {
+export interface ShapeContent extends BlockContentBase {
     shapeType: 'circle' | 'rect' | 'triangle' | 'polygon' | 'blob' | 'star' | 'line' | 'grid' | 'flower' | 'mesh' | 'wave' | 'spiral';
     color: string;
     opacity: number;
@@ -235,38 +222,28 @@ export interface ShapeContent {
     isFloating?: boolean;
     floatSpeed?: number;
     gradientType?: 'linear' | 'radial';
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface RorschachContent {
+export interface RorschachContent extends BlockContentBase {
     seed: number;
     color: string;
     opacity: number;
     blur: number;
     symmetry: 'vertical' | 'horizontal' | 'quad';
     complexity: number;
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface DoodleContent {
+export interface DoodleContent extends BlockContentBase {
     image: string;
     color?: string;
-    opacity?: number;
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface TapeContent {
+export interface TapeContent extends BlockContentBase {
     color: string;
     pattern?: string;
-    opacity?: number;
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export interface UniversalMediaContent {
+export interface UniversalMediaContent extends BlockContentBase {
     mediaType: 'video' | 'music' | 'audio' | 'media';
     videoId?: string;
     trackId?: string;
@@ -274,10 +251,8 @@ export interface UniversalMediaContent {
     name?: string;
     artist?: string;
     albumArt?: string;
-    frame?: string;
     caption?: string;
     lyrics?: string;
     lyricsDisplay?: 'integrated' | 'fullscreen';
-    customName?: string;
-    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    trackName?: string;
 }

@@ -84,6 +84,8 @@ export function MoodCanvas({
     const panOffset = useRef({ x: 0, y: 0 });
     const mvPanX = useMotionValue(0);
     const mvPanY = useMotionValue(0);
+    const weatherIcon = blocks.find(b => b.type === 'weather')?.content?.icon;
+    const weatherSync = typeof weatherIcon === 'string' ? weatherIcon : null;
 
     // Pan & Space detection
     useEffect(() => {
@@ -247,7 +249,7 @@ export function MoodCanvas({
             <RoomEnvironment
                 profile={profile}
                 backgroundEffect={backgroundEffect}
-                weatherSync={blocks.find(b => b.type === 'weather')?.content?.icon}
+                weatherSync={weatherSync}
             />
 
             {/* CAMERA CONTEXT */}

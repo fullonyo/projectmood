@@ -20,6 +20,19 @@ import { MoodBlock, MoodBlockContent, Room, RoomVisualConfig, ThemeConfig } from
 import { useCanvasInteraction } from "./canvas-interaction-context"
 import { getClientPos, isInputActive, CANVAS_EVENTS } from "@/lib/canvas-utils"
 
+const MIX_BLEND_MODES = [
+    'normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten',
+    'color-dodge', 'color-burn', 'hard-light', 'soft-light',
+    'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity',
+    'plus-darker', 'plus-lighter'
+] as const
+
+const getBlendMode = (content: MoodBlockContent): React.CSSProperties['mixBlendMode'] => {
+    return typeof content.blendMode === 'string' && MIX_BLEND_MODES.includes(content.blendMode as typeof MIX_BLEND_MODES[number])
+        ? content.blendMode as React.CSSProperties['mixBlendMode']
+        : 'normal'
+}
+
 interface CanvasItemProps {
     block: MoodBlock
     canvasRef: React.RefObject<HTMLDivElement | null>
@@ -366,7 +379,7 @@ export const CanvasItem = memo(({
                 display: block.isHidden ? 'none' : 'block',
                 opacity: block.isHidden ? 0 : ((block.content as MoodBlockContent).opacity ?? 1),
                 pointerEvents: (block.isHidden || (block.isLocked && !isSelected)) ? 'none' : 'auto',
-                mixBlendMode: (block.content as MoodBlockContent).blendMode || 'normal',
+                mixBlendMode: getBlendMode(block.content),
                 cursor: block.isLocked ? 'not-allowed' : (isDragging ? 'grabbing' : (isSelected ? 'default' : 'grab'))
             }}
             onPointerDown={(e) => {

@@ -39,7 +39,8 @@ function PublicMoodPageClientInner({ publicUser, roomId, profile, moodBlocks, co
     const [loadingViews, setLoadingViews] = useState(true)
     const [hasInteracted, setHasInteracted] = useState(false)
 
-    const activeWeather = moodBlocks.find(b => b.type === 'weather')?.content?.icon || null
+    const weatherIcon = moodBlocks.find(b => b.type === 'weather')?.content?.icon
+    const activeWeather = typeof weatherIcon === 'string' ? weatherIcon : null
 
     const viewportScale = useViewportScale()
 
