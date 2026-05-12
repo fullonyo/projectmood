@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, RefObject } from "react"
+import { useState, useEffect, useRef } from "react"
 import { computeStudioNormalization, useViewportScale } from "@/lib/canvas-scale"
 
 interface StudioBlockState {

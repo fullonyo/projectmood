@@ -1,8 +1,8 @@
-import { Box, LayoutGrid, Cloud, Sparkles, Terminal, Zap, StickyNote, Book, Sun, Palette, Moon, Wind } from "lucide-react"
+import { Sparkles, Terminal, StickyNote, Wind } from "lucide-react"
 
 export interface TemplateBlock {
     type: string;
-    content: any;
+    content: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
     x: number;
     y: number;
     width?: number;
@@ -13,7 +13,7 @@ export interface TemplateBlock {
 export interface MoodTemplate {
     id: string;
     tk: string; // Translation key
-    icon: any;
+    icon: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     profile: {
         backgroundEffect: string;
         backgroundColor: string;

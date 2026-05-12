@@ -2,8 +2,8 @@ import { Prisma } from "@prisma/client";
 import type { MoodBlockType } from "@/lib/validations";
 
 // Re-export Prisma types for convenience
-export type User = Prisma.UserGetPayload<{}>;
-export type Room = Prisma.RoomGetPayload<{}>;
+export type User = Prisma.UserGetPayload<Prisma.UserDefaultArgs>;
+export type Room = Prisma.RoomGetPayload<Prisma.RoomDefaultArgs>;
 
 // Re-export MoodBlockType da fonte central (Zod schema em validations.ts)
 export type { MoodBlockType };
@@ -24,7 +24,7 @@ export type MoodBlockContent =
     | TapeContent
     | UniversalMediaContent;
 
-export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content'> {
+export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<Prisma.MoodBlockDefaultArgs>, 'content'> {
     type: string;
     zIndex: number;
     rotation: number;
@@ -56,7 +56,7 @@ export interface TextContent {
     dialogueLines?: { name: string; text: string }[];
     typingRhythm?: string;
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface PhotoContent {
@@ -66,7 +66,7 @@ export interface PhotoContent {
     filter?: 'none' | 'vintage' | 'bw' | 'warm' | 'cool';
     alt?: string;
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface VideoContent {
@@ -76,7 +76,7 @@ export interface VideoContent {
     loop?: boolean;
     platform?: 'youtube' | 'vimeo' | 'custom';
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface MusicContent {
@@ -84,7 +84,7 @@ export interface MusicContent {
     platform?: 'spotify' | 'soundcloud' | 'apple-music';
     displayMode?: 'compact' | 'card';
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface ThemeConfig {
@@ -176,7 +176,7 @@ export interface SocialContent {
     isGrid?: boolean;
     showBg?: boolean;
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface CountdownContent {
@@ -185,7 +185,7 @@ export interface CountdownContent {
     emoji?: string;
     style?: 'minimal' | 'bold' | 'neon';
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface GuestbookContent {
@@ -197,14 +197,14 @@ export interface GuestbookContent {
     opacity?: number;
     blendMode?: string;
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface MoodStatusContent {
     emoji: string;
     text?: string;
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface WeatherContent {
@@ -218,7 +218,7 @@ export interface WeatherContent {
     opacity?: number;
     blendMode?: string;
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface ShapeContent {
@@ -236,7 +236,7 @@ export interface ShapeContent {
     floatSpeed?: number;
     gradientType?: 'linear' | 'radial';
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface RorschachContent {
@@ -247,7 +247,7 @@ export interface RorschachContent {
     symmetry: 'vertical' | 'horizontal' | 'quad';
     complexity: number;
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface DoodleContent {
@@ -255,7 +255,7 @@ export interface DoodleContent {
     color?: string;
     opacity?: number;
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface TapeContent {
@@ -263,7 +263,7 @@ export interface TapeContent {
     pattern?: string;
     opacity?: number;
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface UniversalMediaContent {
@@ -279,5 +279,5 @@ export interface UniversalMediaContent {
     lyrics?: string;
     lyricsDisplay?: 'integrated' | 'fullscreen';
     customName?: string;
-    [key: string]: any;
+    [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }

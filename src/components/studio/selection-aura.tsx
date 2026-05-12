@@ -16,13 +16,21 @@ export function SelectionAura({ selectedIds, blocks, onUpdateBlocks, canvasRef }
     const [auraRotation, setAuraRotation] = useState(0)
     const dragPivot = useRef<{ x: number, y: number, angle?: number, initialMouseAngle?: number, initialRotation?: number } | null>(null)
 
+    const [canvasSize, setCanvasSize] = useState<{ width: number, height: number } | null>(null);
+    
+    useEffect(() => {
+        if (canvasRef.current) {
+            const rect = canvasRef.current.getBoundingClientRect();
+            setCanvasSize({ width: rect.width, height: rect.height });
+        }
+    }, [canvasRef]);
+
     const selectionBounds = useMemo(() => {
         const selectedBlocks = blocks.filter(b => selectedIds.includes(b.id));
-        if (selectedBlocks.length === 0 || !canvasRef.current) return null;
+        if (selectedBlocks.length === 0 || !canvasSize) return null;
         
-        const canvas = canvasRef.current.getBoundingClientRect();
-        return calculateSelectionBounds(selectedBlocks, canvas.width, canvas.height);
-    }, [selectedIds, blocks, canvasRef]);
+        return calculateSelectionBounds(selectedBlocks, canvasSize.width, canvasSize.height);
+    }, [selectedIds, blocks, canvasSize]);
 
     useEffect(() => {
         if (selectedIds.length > 1) {

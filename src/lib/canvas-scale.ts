@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+// No imports needed from react here anymore
 
 /**
  * Sistema de Escala Proporcional — Canvas WYSIWYG
@@ -19,7 +19,7 @@ import { useState, useEffect } from "react"
 export const DESIGN_VIEWPORT_WIDTH = 1920
 
 /** Tamanho mínimo de scale para prevenir blocos invisíveis */
-const MIN_SCALE = 0.25
+// const MIN_SCALE = 0.25
 
 /** Unidade de design base para blocos complexos (FUS - Fluid Unit Scaling) */
 export const STUDIO_BASE_UNIT = 200

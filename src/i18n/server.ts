@@ -8,10 +8,11 @@ export async function getServerTranslation() {
 
     const t = (path: string): string => {
         const keys = path.split('.');
-        let current: any = dict;
+        let current: Record<string, unknown> | string = dict as unknown as Record<string, unknown>;
         for (const key of keys) {
-            if (!current || current[key] === undefined) return path;
-            current = current[key];
+            const obj = current as Record<string, unknown>;
+            if (!obj || obj[key] === undefined) return path;
+            current = obj[key] as Record<string, unknown> | string;
         }
         return current as string;
     };

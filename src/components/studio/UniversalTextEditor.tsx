@@ -73,8 +73,7 @@ export function UniversalTextEditor({
     onClose,
     highlight
 }: UniversalTextEditorProps) {
-    const { t } = useTranslation()
-    const content = block?.content as TextContent || {}
+    const content = (block?.content as TextContent) || ({} as TextContent)
 
     // Determine initial behavior
     const initialBehavior: TextBehavior = content.behavior || 'static'

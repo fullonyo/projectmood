@@ -3,7 +3,7 @@ import type { MoodBlock } from "@/types/database"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface UseEditorSyncOptions<T = any> {
+interface UseEditorSyncOptions<T = unknown> {
     /** Bloco existente (modo edição) ou null (modo criação) */
     block?: MoodBlock | null
     /** Callback para live-preview (atualiza canvas em tempo real) */
@@ -14,7 +14,7 @@ interface UseEditorSyncOptions<T = any> {
     onClose?: () => void
 }
 
-interface UseEditorSyncReturn<T = any> {
+interface UseEditorSyncReturn<T = unknown> {
     /** Indica se uma ação assíncrona está em andamento */
     isPending: boolean
     /** Envolve chamadas assíncronas com estado de loading */
@@ -65,7 +65,7 @@ interface UseEditorSyncReturn<T = any> {
  * </Button>
  * ```
  */
-export function useEditorSync<T = any>({
+export function useEditorSync<T = unknown>({
     block,
     onUpdate,
     onAdd,
@@ -80,7 +80,7 @@ export function useEditorSync<T = any>({
      */
     const syncPreview = useCallback((content: T) => {
         if (!block?.id || !onUpdate) return
-        onUpdate(block.id, { content: content as any })
+        onUpdate(block.id, { content: content as any }) // eslint-disable-line @typescript-eslint/no-explicit-any
     }, [block?.id, onUpdate])
 
     /**
@@ -100,7 +100,7 @@ export function useEditorSync<T = any>({
                 if (addOptions) {
                     // Para editores que usam addMoodBlock diretamente
                     const { addMoodBlock } = await import("@/actions/profile")
-                    await addMoodBlock(type, content as any, addOptions)
+                    await addMoodBlock(type, content as any, addOptions) // eslint-disable-line @typescript-eslint/no-explicit-any
                 } else {
                     await onAdd(type, content)
                 }

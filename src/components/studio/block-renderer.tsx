@@ -253,10 +253,10 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         }
     })()
 
-    const opacity = content.opacity ?? 1
+    const opacity = (content as any).opacity ?? 1
 
     return (
-        <div className="w-full h-full" style={{ opacity }}>
+        <div className="w-full h-full" style={{ opacity: opacity as number }}>
             {element}
         </div>
     )

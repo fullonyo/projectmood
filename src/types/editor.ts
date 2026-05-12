@@ -20,7 +20,7 @@ import type { MoodBlock } from "./database"
 export interface BaseEditorProps {
     block?: MoodBlock | null
     onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
-    onAdd?: (type: string, content: any) => Promise<void>
+    onAdd?: (type: string, content: unknown) => Promise<void>
     onClose?: () => void
 }
 
@@ -31,7 +31,7 @@ export interface BaseEditorProps {
  * @example
  * interface CountdownEditorProps extends TypedEditorProps<CountdownContent> {}
  */
-export interface TypedEditorProps<TContent = any> {
+export interface TypedEditorProps<TContent = unknown> {
     block?: MoodBlock | null
     onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
     onAdd?: (content: TContent) => Promise<void>

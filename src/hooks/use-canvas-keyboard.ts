@@ -211,7 +211,7 @@ export function useCanvasKeyboard({
                 break;
         }
 
-    }, [selectedIds, onUpdateBlock, removeBlocks, duplicateMoodBlock, bringToFront, sendToBack, setSelectedIds, undo, redo, onGroup, onUngroup, zoomIn, zoomOut, resetZoom]);
+    }, [selectedIds, onUpdateBlock, removeBlocks, duplicateMoodBlock, bringToFront, sendToBack, setSelectedIds, undo, redo, onGroup, onUngroup, zoomIn, zoomOut, resetZoom, addMoodBlock, addMoodBlocksBulk]);
 
 
     useEffect(() => {

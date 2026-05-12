@@ -54,7 +54,7 @@ export async function requireAuth() {
  */
 export async function requireAdmin() {
     const session = await requireAuth()
-    if ((session.user as any)?.role !== "ADMIN") {
+    if (session.user.role !== "ADMIN") {
         throw new ActionError("Unauthorized Access: Admin role required.")
     }
     return session
@@ -115,13 +115,13 @@ type ActionResult<T> = T | { error: string }
  *     return { success: true }
  * })
  */
-export function withAuth<TArgs extends any[], TResult>(
-    fn: (session: Awaited<ReturnType<typeof auth>> & { user: { id: string } }, ...args: TArgs) => Promise<TResult>
+export function withAuth<TArgs extends unknown[], TResult>(
+    fn: (session: Awaited<ReturnType<typeof requireAuth>>, ...args: TArgs) => Promise<TResult>
 ) {
     return async (...args: TArgs): Promise<ActionResult<TResult>> => {
         try {
             const session = await requireAuth()
-            return await fn(session as any, ...args)
+            return await fn(session, ...args)
         } catch (e) {
             if (e instanceof ActionError) {
                 return { error: e.message }

@@ -10,12 +10,12 @@ import { MoodBlock } from "@/types/database";
 /**
  * Extrai coordenadas absolutas do viewport de forma confiável entre mouse, touch e pointer events.
  */
-export const getClientPos = (e: MouseEvent | TouchEvent | PointerEvent | any) => {
+export const getClientPos = (e: MouseEvent | TouchEvent | PointerEvent) => {
     const isTouch = 'touches' in e && e.touches.length > 0;
-    return {
-        x: isTouch ? e.touches[0].clientX : e.clientX,
-        y: isTouch ? e.touches[0].clientY : e.clientY
-    };
+    const clientX = isTouch ? e.touches[0].clientX : (e as MouseEvent).clientX;
+    const clientY = isTouch ? e.touches[0].clientY : (e as MouseEvent).clientY;
+    
+    return { x: clientX, y: clientY };
 };
 
 /**
@@ -78,7 +78,7 @@ export function calculateSelectionBounds(
 /**
  * Sistema de Eventos Customizados de Alta Performance
  */
-export const dispatchCanvasEvent = (name: string, detail: any) => {
+export const dispatchCanvasEvent = (name: string, detail: unknown) => {
     if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent(name, { detail }));
     }

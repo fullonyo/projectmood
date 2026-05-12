@@ -8,6 +8,8 @@
  * Separar lógica matemática da UI é padrão em editores profissionais —
  * facilita testes, centraliza regras e evita bugs de estado.
  */
+ 
+import { MoodBlock } from "@/types/database";
 
 // ─── Constantes ─────────────────────────────────────────────────────────────
 
@@ -420,7 +422,7 @@ export function calculateSnap(
     };
 }
 
-function hHPercent(block: any, canvasHeight: number) {
+function hHPercent(block: { height: number | 'auto' | null }, canvasHeight: number) {
     return typeof block.height === 'number' ? (block.height / canvasHeight) * 100 : 0;
 }
 

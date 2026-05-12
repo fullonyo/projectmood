@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Locale, dictionaries, defaultLocale } from './config';
+import { Locale, dictionaries } from './config';
 import { Dictionary, pt } from './dictionaries/pt';
 
 interface I18nContextProps {
@@ -19,6 +19,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         // Run only on client
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         setIsMounted(true);
         const storedLocale = localStorage.getItem('mood_locale') as Locale;
         if (storedLocale && dictionaries[storedLocale]) {
@@ -40,14 +41,15 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     // Helper to resolve nested keys like "sidebar.header_title"
     const t = (path: string): string => {
         const keys = path.split('.');
-        let current: any = dictionaries[locale];
+        let current: Record<string, unknown> | string = dictionaries[locale] as unknown as Record<string, unknown>;
 
         for (const key of keys) {
-            if (current[key] === undefined) {
+            const obj = current as Record<string, unknown>;
+            if (obj[key] === undefined) {
                 console.warn(`Translation key missing: ${path} for locale: ${locale}`);
-                return path; // Fallback to path if missing
+                return path;
             }
-            current = current[key];
+            current = obj[key] as Record<string, unknown> | string;
         }
 
         return current as string;
@@ -72,10 +74,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 // SSR helper
 function tBase(locale: 'pt', path: string): string {
     const keys = path.split('.');
-    let current: any = dictionaries[locale];
+    let current: Record<string, unknown> | string = dictionaries[locale] as unknown as Record<string, unknown>;
     for (const key of keys) {
-        if (current[key] === undefined) return path;
-        current = current[key];
+        const obj = current as Record<string, unknown>;
+        if (obj[key] === undefined) return path;
+        current = obj[key] as Record<string, unknown> | string;
     }
     return current as string;
 }

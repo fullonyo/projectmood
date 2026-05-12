@@ -316,7 +316,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[], roomId: string) {
             height: b.height || 100,
             x: b.x,
             y: b.y
-        })) as any, type, w, h));
+        })) , type, w, h));
     }, [applyTransform]);
 
     const distributeSelected = useCallback((axis: DistributionType) => {
@@ -326,7 +326,7 @@ export function useCanvasManager(initialBlocks: MoodBlock[], roomId: string) {
             height: b.height || 100,
             x: b.x,
             y: b.y
-        })) as any, axis, w, h));
+        })) , axis, w, h));
     }, [applyTransform]);
 
     const groupSelected = useCallback(() => {

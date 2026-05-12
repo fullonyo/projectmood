@@ -24,7 +24,7 @@ import type { FrameType } from "@/components/studio/FrameContainer"
 export interface FrameOption {
     id: FrameType
     label: string
-    icon?: any
+    icon?: React.ComponentType | any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 /**

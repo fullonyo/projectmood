@@ -47,7 +47,7 @@ export async function registerUser(values: z.infer<typeof RegisterSchema>) {
         });
 
         return { success: "Usuário criado com sucesso!", user };
-    } catch (error) {
+    } catch (_error) {
         return { error: "Ocorreu um erro ao criar a conta." };
     }
 }

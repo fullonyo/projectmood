@@ -162,7 +162,7 @@ export async function restoreRoomToDraft(versionId: string) {
                         where: { id: b.id },
                         update: {
                             type: b.type,
-                            content: b.content,
+                            content: b.content as Prisma.InputJsonValue,
                             x: b.x,
                             y: b.y,
                             width: b.width,
@@ -179,7 +179,7 @@ export async function restoreRoomToDraft(versionId: string) {
                             id: b.id,
                             roomId: version.roomId,
                             type: b.type,
-                            content: b.content,
+                            content: b.content as Prisma.InputJsonValue,
                             x: b.x,
                             y: b.y,
                             width: b.width,

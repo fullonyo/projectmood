@@ -91,6 +91,7 @@ export function StudioSidebar({
 
     useEffect(() => {
         if (selectedBlocks.length > 0 && draftBlockType) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setDraftBlockType(null)
         }
     }, [selectedBlocks.length, draftBlockType])
@@ -99,6 +100,7 @@ export function StudioSidebar({
     // e selecionou um bloco. NÃO reseta quando já está em 'elements' editando.
     useEffect(() => {
         if (selectedBlocks.length > 0 && activeTab !== 'elements') {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setActiveTab('elements')
             setTimeout(() => {
                 if (scrollContainerRef.current) {

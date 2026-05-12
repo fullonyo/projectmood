@@ -11,7 +11,7 @@ export default auth((req) => {
     const isRootPage = pathname === "/"
     const isAdminPage = pathname.startsWith("/admin/") || pathname === "/admin"
 
-    const isBanned = (req.auth?.user as any)?.isBanned
+    const isBanned = req.auth?.user?.isBanned
     const isBannedPage = pathname === "/banned"
 
     // Ban logic: If user is banned and not on the banned page, redirect them.
@@ -38,7 +38,7 @@ export default auth((req) => {
         if (!isLoggedIn) {
             return Response.redirect(new URL("/auth/login", req.nextUrl))
         }
-        const userRole = (req.auth?.user as any)?.role
+        const userRole = req.auth?.user?.role
         if (userRole !== "ADMIN") {
             return Response.redirect(new URL("/studio", req.nextUrl))
         }

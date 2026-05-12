@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { PreviewData } from "./studio-client-layout"
 import { EditorHeader } from "./EditorUI"
+import { MoodBlock, RoomVisualConfig } from "@/types/database"
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -20,8 +21,8 @@ export interface RoomVersion {
     isActive: boolean;
     createdAt: string | Date;
     roomId?: string;
-    blocks?: any;
-    profileData?: any;
+    blocks?: MoodBlock[];
+    profileData?: RoomVisualConfig | null;
     updatedAt?: string | Date;
 }
 

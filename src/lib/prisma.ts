@@ -2,7 +2,7 @@
 import { PrismaClient } from "@prisma/client";
 
 //// Sync: 2026-04-26T17:46:15
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+// globalForPrisma removed as it was unused
 
 const prismaClientSingleton = () => {
     return new PrismaClient();
