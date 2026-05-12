@@ -1,8 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useState, useEffect, useMemo } from "react"
-import { cn } from "@/lib/utils"
+import { useMemo } from "react"
 
 interface SmartRorschachProps {
     seed?: number
@@ -31,34 +30,29 @@ export function SmartRorschach({
     // Unique ID for SVG filters to avoid collisions
     const filterId = useMemo(() => `rorschach-filter-${seed}`, [seed]);
 
-    const [mounted, setMounted] = useState(false);
-    useEffect(() => setMounted(true), []);
-
     const paths = useMemo(() => {
         const generatedPaths: string[] = [];
         const numShapes = Math.floor(complexity * 1.5) + 3;
 
-        let localSeed = seed;
-        const getRand = () => {
-            localSeed += 1;
-            return seededRandom(localSeed);
+        const getRand = (shapeIndex: number, channel: number, pointIndex = 0) => {
+            return seededRandom(seed + shapeIndex * 101 + channel * 17 + pointIndex * 29);
         };
 
         const r = (n: number) => Math.round(n * 100) / 100;
 
         for (let i = 0; i < numShapes; i++) {
             const points: [number, number][] = [];
-            const numPoints = Math.floor(getRand() * 3) + 3; 
+            const numPoints = Math.floor(getRand(i, 0) * 3) + 3; 
 
             const maxX = symmetry === 'vertical' || symmetry === 'quad' ? 50 : 100;
             const maxY = symmetry === 'horizontal' || symmetry === 'quad' ? 50 : 100;
 
-            const centerX = getRand() * maxX;
-            const centerY = getRand() * maxY;
+            const centerX = getRand(i, 1) * maxX;
+            const centerY = getRand(i, 2) * maxY;
 
             for (let j = 0; j < numPoints; j++) {
                 const angle = (j / numPoints) * Math.PI * 2;
-                const dist = getRand() * 20 + 5;
+                const dist = getRand(i, 3, j) * 20 + 5;
                 const px = r(centerX + Math.cos(angle) * dist);
                 const py = r(centerY + Math.sin(angle) * dist);
                 points.push([px, py]);
@@ -80,8 +74,6 @@ export function SmartRorschach({
 
         return generatedPaths;
     }, [seed, complexity, symmetry]);
-
-    if (!mounted) return <div className="w-full h-full" />;
 
     return (
         <div className="w-full h-full relative group overflow-hidden">
