@@ -8,12 +8,16 @@ import { Search, Loader2, Activity } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
-import { MoodBlock } from "@/types/database"
+type GifResult = {
+    id: string
+    url: string
+    title: string
+}
 
 export function GifPicker({ highlight }: { highlight?: boolean }) {
     const { t } = useTranslation()
     const [query, setQuery] = useState("")
-    const [gifs, setGifs] = useState<{ id: string, url: string, title: string }[]>([])
+    const [gifs, setGifs] = useState<GifResult[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [isAdding, startTransition] = useTransition()
 
@@ -36,7 +40,7 @@ export function GifPicker({ highlight }: { highlight?: boolean }) {
         setIsLoading(false)
     }
 
-    const handleAddGif = (gif: any) => {
+    const handleAddGif = (gif: GifResult) => {
         startTransition(async () => {
             await addMoodBlock('gif', {
                 url: gif.url,

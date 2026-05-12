@@ -2,6 +2,19 @@ import { useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { MoodBlock } from '@/types/database';
 
+type CanvasBlockOptions = {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    roomId?: string;
+}
+
+type BulkCanvasBlockOptions = CanvasBlockOptions & {
+    x: number;
+    y: number;
+}
+
 interface UseCanvasKeyboardProps {
     selectedIds: string[];
     setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void;
@@ -18,8 +31,8 @@ interface UseCanvasKeyboardProps {
     zoomIn?: () => void;
     zoomOut?: () => void;
     resetZoom?: () => void;
-    addMoodBlock: (type: string, content: MoodBlock['content'], options?: Partial<MoodBlock>) => void;
-    addMoodBlocksBulk: (blocks: { type: string; content: MoodBlock['content']; options?: any }[]) => void;
+    addMoodBlock: (type: string, content: MoodBlock['content'], options?: CanvasBlockOptions) => void | Promise<unknown>;
+    addMoodBlocksBulk: (blocks: { type: string; content: MoodBlock['content']; options: BulkCanvasBlockOptions }[]) => void | Promise<unknown>;
 }
 
 export function useCanvasKeyboard({
@@ -168,10 +181,10 @@ export function useCanvasKeyboard({
                                 options: {
                                     x: Math.min(98, (b.x || 0) + 5),
                                     y: Math.min(98, (b.y || 0) + 5),
-                                    width: b.width,
-                                    height: b.height
-                                }
-                            }));
+	                                    width: b.width ?? undefined,
+	                                    height: b.height ?? undefined
+	                                }
+	                            }));
                             
                             addMoodBlocksBulk(blocksToCreate);
                             toast(`${copiedBlocks.length} bloco(s) colado(s)`);

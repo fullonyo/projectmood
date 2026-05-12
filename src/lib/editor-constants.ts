@@ -18,13 +18,14 @@ export type BlendMode = typeof BLEND_MODES[number]
 
 // ─── Frames ───────────────────────────────────────────────────────────────────
 
+import type { ComponentType } from "react"
 import type { FrameType } from "@/components/studio/FrameContainer"
 
 /** Frame completo com label e ícone opcional. */
 export interface FrameOption {
     id: FrameType
     label: string
-    icon?: React.ComponentType | any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    icon?: ComponentType
 }
 
 /**
