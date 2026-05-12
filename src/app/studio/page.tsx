@@ -19,14 +19,14 @@ export default async function StudioPage() {
         redirect("/auth/login");
     }
 
-    const user = (await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
         where: { id: session.user.id },
         include: { 
             rooms: {
                 where: { isPrimary: true },
             } 
         }
-    })) as any;
+    });
 
     if (!user) {
         redirect("/auth/login");
@@ -85,7 +85,7 @@ export default async function StudioPage() {
 
     const hasUnpublishedChanges = await computeHasUnpublishedChanges(currentRoom, moodBlocks);
 
-    const isAdmin = (session.user as any)?.role === "ADMIN";
+    const isAdmin = session.user.role === "ADMIN";
     const rawFlags = await getFeatureFlags();
     const systemFlags = rawFlags.reduce((acc: Record<string, boolean>, flag: { key: string, isEnabled: boolean }) => {
         acc[flag.key] = flag.isEnabled;
@@ -103,12 +103,12 @@ export default async function StudioPage() {
     return (
         <div className={cn(
             "h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-hidden",
-            (currentRoom as any).uiTheme === 'dark' ? 'dark' : ''
+            currentRoom.uiTheme === 'dark' ? 'dark' : ''
         )}>
             <StudioClientLayout
                 profile={currentRoom as any}
                 moodBlocks={moodBlocks}
-                username={username}
+                username={username || ''}
                 name={user.name}
                 publishedAt={publishedAt}
                 hasUnpublishedChanges={hasUnpublishedChanges}

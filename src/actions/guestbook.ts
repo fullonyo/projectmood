@@ -35,7 +35,7 @@ export async function addGuestbookMessage(blockId: string, content: string) {
         where: {
             blockId,
             OR: [
-                userId ? { userId } : { author: (session?.user as any)?.name || (session?.user as any)?.username },
+                userId ? { userId } : { author: (session?.user?.name || session?.user?.username || "Anonymous") as string },
                 // Fallback para anônimos (se não houver userId, checa pelo nome gerado ou autor)
             ],
             createdAt: { gte: thirtySecondsAgo }
@@ -65,7 +65,7 @@ export async function addGuestbookMessage(blockId: string, content: string) {
 
     if (!block) return { error: "Bloco não encontrado" }
 
-    const author = (session?.user as any)?.name || (session?.user as any)?.username || generateAnonymousName()
+    const author = session?.user?.name || session?.user?.username || generateAnonymousName()
     const isAdmin = session?.user?.id === block.room.userId
 
     try {

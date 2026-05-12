@@ -410,8 +410,9 @@ export function UniversalTextEditor({
                                         ]}
                                         activeId={fontSize as string}
                                         onChange={(id) => {
-                                            setFontSize(id as any)
-                                            triggerUpdate({ fontSize: id as any })
+                                            const val = id as 'sm' | 'base' | 'xl' | '3xl'
+                                            setFontSize(val)
+                                            triggerUpdate({ fontSize: val })
                                         }}
                                     />
                                 </EditorSection>
@@ -427,8 +428,9 @@ export function UniversalTextEditor({
                                         variant="ghost"
                                         columns={3}
                                         onChange={(id) => {
-                                            setAlign(id as any)
-                                            triggerUpdate({ align: id as any })
+                                            const val = id as 'left' | 'center' | 'right'
+                                            setAlign(val)
+                                            triggerUpdate({ align: val })
                                         }}
                                     />
                                 </EditorSection>

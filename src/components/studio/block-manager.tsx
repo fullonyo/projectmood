@@ -60,7 +60,7 @@ export function BlockManager({ blocks }: BlockManagerProps) {
 
     const getContentLabel = (block: MoodBlock) => {
         const type = block.type
-        const content = block.content as any // Fallback temporário para propriedades dinâmicas, mas tipado por caso
+        const content = block.content
 
         switch (type) {
             case 'text': return (content as TextContent).text || t('editors.block_manager.labels.text')
@@ -68,7 +68,7 @@ export function BlockManager({ blocks }: BlockManagerProps) {
             case 'photo': return t('editors.block_manager.labels.photo')
             case 'video': return t('editors.block_manager.labels.video')
             case 'quote': return (content as TextContent).text || t('editors.block_manager.labels.quote')
-            case 'moodStatus': return `${t('editors.block_manager.labels.moodStatus')} ${(content as any).status || ''}`
+            case 'moodStatus': return `${t('editors.block_manager.labels.moodStatus')} ${(content as any).text || ''}`
             case 'countdown': return (content as CountdownContent).title || t('editors.block_manager.labels.countdown')
             case 'social': return `${(content as SocialContent).platform || ''} ${t('editors.block_manager.labels.social')}`
             case 'weather': return `${t('editors.block_manager.labels.weather')} ${(content as WeatherContent).vibe || ''}`

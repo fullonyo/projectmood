@@ -440,7 +440,7 @@ export async function computeHasUnpublishedChanges(
 
         if (!activeVersion) return draftBlocks.length > 0
 
-        const sortKeys = (obj: unknown): any => {
+        const sortKeys = (obj: unknown): unknown => {
             if (obj === null || typeof obj !== 'object') return obj;
             if (Array.isArray(obj)) return obj.map(sortKeys);
             const record = obj as Record<string, unknown>;
@@ -465,7 +465,7 @@ export async function computeHasUnpublishedChanges(
 
         const publishedRoomDataStr = JSON.stringify(sortKeys(activeVersion.profileData));
         
-        const normalizedDraftBlocks = draftBlocks.map((b: any) => ({
+        const normalizedDraftBlocks = draftBlocks.map((b) => ({
             type: b.type, content: b.content,
             x: b.x, y: b.y, width: b.width, height: b.height,
             zIndex: b.zIndex, rotation: b.rotation, order: b.order,

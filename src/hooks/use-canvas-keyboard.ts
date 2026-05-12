@@ -18,8 +18,8 @@ interface UseCanvasKeyboardProps {
     zoomIn?: () => void;
     zoomOut?: () => void;
     resetZoom?: () => void;
-    addMoodBlock: (type: string, content: any, options?: any) => void;
-    addMoodBlocksBulk: (blocks: any[]) => void;
+    addMoodBlock: (type: string, content: MoodBlock['content'], options?: Partial<MoodBlock>) => void;
+    addMoodBlocksBulk: (blocks: { type: string; content: MoodBlock['content']; options?: any }[]) => void;
 }
 
 export function useCanvasKeyboard({
@@ -162,12 +162,12 @@ export function useCanvasKeyboard({
                     if (rawData) {
                         try {
                             const copiedBlocks = JSON.parse(rawData);
-                            const blocksToCreate = copiedBlocks.map((b: any) => ({
+                            const blocksToCreate = copiedBlocks.map((b: MoodBlock & { _isCopy?: boolean }) => ({
                                 type: b.type,
                                 content: b.content,
                                 options: {
-                                    x: Math.min(98, b.x + 5),
-                                    y: Math.min(98, b.y + 5),
+                                    x: Math.min(98, (b.x || 0) + 5),
+                                    y: Math.min(98, (b.y || 0) + 5),
                                     width: b.width,
                                     height: b.height
                                 }

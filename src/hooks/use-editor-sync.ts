@@ -3,30 +3,30 @@ import type { MoodBlock } from "@/types/database"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface UseEditorSyncOptions {
+interface UseEditorSyncOptions<T = any> {
     /** Bloco existente (modo edição) ou null (modo criação) */
     block?: MoodBlock | null
     /** Callback para live-preview (atualiza canvas em tempo real) */
     onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
     /** Callback para adicionar novo bloco */
-    onAdd?: (type: string, content: any) => Promise<void>
+    onAdd?: (type: string, content: T) => Promise<void>
     /** Callback para fechar o editor */
     onClose?: () => void
 }
 
-interface UseEditorSyncReturn {
+interface UseEditorSyncReturn<T = any> {
     /** Indica se uma ação assíncrona está em andamento */
     isPending: boolean
     /** Envolve chamadas assíncronas com estado de loading */
     startTransition: ReturnType<typeof useTransition>[1]
     /** Executa live-preview: atualiza o bloco no canvas em tempo real */
-    syncPreview: (content: Record<string, any>) => void
+    syncPreview: (content: T) => void
     /**
      * Salva/fecha o editor:
      * - Se bloco existente: fecha o editor (preview já foi aplicado via syncPreview)
      * - Se bloco novo: chama onAdd e fecha
      */
-    handleSave: (type: string, content: Record<string, any>, addOptions?: { width?: number; height?: number }) => void
+    handleSave: (type: string, content: T, addOptions?: { width?: number; height?: number }) => void
     /** Se está editando um bloco existente */
     isEditing: boolean
 }
@@ -65,12 +65,12 @@ interface UseEditorSyncReturn {
  * </Button>
  * ```
  */
-export function useEditorSync({
+export function useEditorSync<T = any>({
     block,
     onUpdate,
     onAdd,
     onClose
-}: UseEditorSyncOptions): UseEditorSyncReturn {
+}: UseEditorSyncOptions<T>): UseEditorSyncReturn<T> {
     const [isPending, startTransition] = useTransition()
     const isEditing = Boolean(block?.id)
 
@@ -78,9 +78,9 @@ export function useEditorSync({
      * Executa live-preview: atualiza o bloco no canvas em tempo real.
      * Só executa se existir um bloco com ID e um callback onUpdate.
      */
-    const syncPreview = useCallback((content: Record<string, any>) => {
+    const syncPreview = useCallback((content: T) => {
         if (!block?.id || !onUpdate) return
-        onUpdate(block.id, { content })
+        onUpdate(block.id, { content: content as any })
     }, [block?.id, onUpdate])
 
     /**
@@ -90,7 +90,7 @@ export function useEditorSync({
      */
     const handleSave = useCallback((
         type: string,
-        content: Record<string, any>,
+        content: T,
         addOptions?: { width?: number; height?: number }
     ) => {
         startTransition(async () => {
@@ -100,7 +100,7 @@ export function useEditorSync({
                 if (addOptions) {
                     // Para editores que usam addMoodBlock diretamente
                     const { addMoodBlock } = await import("@/actions/profile")
-                    await addMoodBlock(type, content, addOptions)
+                    await addMoodBlock(type, content as any, addOptions)
                 } else {
                     await onAdd(type, content)
                 }

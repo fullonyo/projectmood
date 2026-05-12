@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { PublicUser, Room, MoodBlock, RoomVersion } from "@/types/database";
+import { Prisma } from "@prisma/client";
 
 export interface PublicRoomData {
     /** Dados do criador — usa PublicUser como fonte única de verdade */
@@ -17,7 +18,7 @@ export interface PublicRoomData {
  * Usado para o link principal mood.space/username
  */
 export const getPrimaryRoomByUsername = async (username: string): Promise<PublicRoomData | null> => {
-    const user = await prisma.user.findFirst({
+    const user = (await prisma.user.findFirst({
         where: { username: { equals: username, mode: 'insensitive' } },
         include: {
             rooms: {
@@ -29,11 +30,21 @@ export const getPrimaryRoomByUsername = async (username: string): Promise<Public
                 }
             }
         }
-    });
+    })) as (Prisma.UserGetPayload<{
+        include: {
+            rooms: {
+                include: {
+                    versions: true,
+                    blocks: true,
+                    analytics: true
+                }
+            }
+        }
+    }>) | null;
 
-    if (!user || !(user as any).rooms[0]) return null;
+    if (!user || !user.rooms[0]) return null;
 
-    const room = (user as any).rooms[0];
+    const room = user.rooms[0];
     return {
         user: {
             username: user.username || "",
@@ -44,10 +55,10 @@ export const getPrimaryRoomByUsername = async (username: string): Promise<Public
             // Sala primária = esta mesma sala buscada
             primaryAvatarUrl: room.avatarUrl || null
         },
-        room,
+        room: room as unknown as Room,
         activeVersion: (room.versions?.[0] as unknown as RoomVersion) || null,
         moodBlocks: room.blocks as unknown as MoodBlock[],
-        analytics: (room as any).analytics ? { views: (room as any).analytics.views } : null
+        analytics: room.analytics ? { views: room.analytics.views } : null
     };
 };
 
@@ -84,9 +95,9 @@ export const getRoomBySlug = async (slug: string): Promise<PublicRoomData | null
             isBanned: room.user.isBanned,
             primaryAvatarUrl
         },
-        room,
+        room: room as unknown as Room,
         activeVersion: (room.versions?.[0] as unknown as RoomVersion) || null,
         moodBlocks: room.blocks as unknown as MoodBlock[],
-        analytics: (room as any).analytics ? { views: (room as any).analytics.views } : null
+        analytics: room.analytics ? { views: room.analytics.views } : null
     };
 };

@@ -96,7 +96,10 @@ export function useCanvasManager(initialBlocks: MoodBlock[], roomId: string) {
                 const newPending = { ...currentPending, ...blockUpdates };
 
                 if (blockUpdates.content && currentPending.content) {
-                    newPending.content = { ...(currentPending.content as any), ...(blockUpdates.content as any) };
+                    newPending.content = { 
+                        ...(currentPending.content as Record<string, unknown>), 
+                        ...(blockUpdates.content as Record<string, unknown>) 
+                    };
                 }
 
                 pendingUpdates.current[block.id] = newPending;
@@ -307,11 +310,23 @@ export function useCanvasManager(initialBlocks: MoodBlock[], roomId: string) {
     }, [selectedIds, blocks, getCanvasDimensions, updateBlocks]);
 
     const alignSelected = useCallback((type: AlignmentType) => {
-        applyTransform(2, (selected, w, h) => calculateAlignment(selected as any, type, w, h));
+        applyTransform(2, (selected, w, h) => calculateAlignment(selected.map(b => ({
+            ...b,
+            width: b.width || 100,
+            height: b.height || 100,
+            x: b.x,
+            y: b.y
+        })) as any, type, w, h));
     }, [applyTransform]);
 
     const distributeSelected = useCallback((axis: DistributionType) => {
-        applyTransform(3, (selected, w, h) => calculateDistribution(selected as any, axis, w, h));
+        applyTransform(3, (selected, w, h) => calculateDistribution(selected.map(b => ({
+            ...b,
+            width: b.width || 100,
+            height: b.height || 100,
+            x: b.x,
+            y: b.y
+        })) as any, axis, w, h));
     }, [applyTransform]);
 
     const groupSelected = useCallback(() => {

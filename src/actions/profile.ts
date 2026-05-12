@@ -87,19 +87,19 @@ export async function updateProfile(data: {
             await tx.room.update({
                 where: { id: targetRoom.id },
                 data: {
-                    title: data.title,
-                    theme: data.theme,
-                    primaryColor: data.primaryColor,
-                    backgroundColor: data.backgroundColor,
-                    fontStyle: data.fontStyle,
-                    customCursor: data.customCursor,
-                    mouseTrails: data.mouseTrails,
-                    backgroundEffect: data.backgroundEffect,
-                    staticTexture: data.staticTexture,
-                    avatarUrl: data.avatarUrl,
-                    slug: data.slug,
-                    uiTheme: data.uiTheme
-                } as any,
+                    title: data.title ?? undefined,
+                    theme: data.theme ?? undefined,
+                    primaryColor: data.primaryColor ?? undefined,
+                    backgroundColor: data.backgroundColor ?? undefined,
+                    fontStyle: data.fontStyle ?? undefined,
+                    customCursor: data.customCursor ?? undefined,
+                    mouseTrails: data.mouseTrails ?? undefined,
+                    backgroundEffect: data.backgroundEffect ?? undefined,
+                    staticTexture: data.staticTexture ?? undefined,
+                    avatarUrl: data.avatarUrl ?? undefined,
+                    slug: data.slug ?? undefined,
+                    uiTheme: data.uiTheme ?? undefined
+                },
             });
         });
 
@@ -142,7 +142,7 @@ export async function createRoom(data: { title: string, type: 'PERMANENT' | 'TEM
                 profileData: {
                     theme: room.theme,
                     title: room.title,
-                } as any,
+                } as Prisma.InputJsonValue,
                 isActive: true,
                 label: 'v1'
             }
@@ -261,7 +261,7 @@ export async function addMoodBlocksBulk(blocks: { type: string, content: MoodBlo
     }
 }
 
-export async function updateMoodBlockLayout(blockId: string, data: { x?: number, y?: number, width?: number, height?: number, zIndex?: number, rotation?: number, isLocked?: boolean, isHidden?: boolean, content?: any }) {
+export async function updateMoodBlockLayout(blockId: string, data: { x?: number, y?: number, width?: number, height?: number, zIndex?: number, rotation?: number, isLocked?: boolean, isHidden?: boolean, content?: MoodBlockContent }) {
     try {
         const session = await requireAuth();
         const userId = session.user.id;
@@ -269,7 +269,7 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
         const validation = UpdateMoodBlockLayoutSchema.safeParse(data);
         if (!validation.success) return { error: "Dados inválidos" };
 
-        const validatedData: any = { ...validation.data };
+        const validatedData = { ...validation.data };
         if (typeof validatedData.x === 'number') validatedData.x = Math.max(0, Math.min(100, validatedData.x));
         if (typeof validatedData.y === 'number') validatedData.y = Math.max(0, Math.min(100, validatedData.y));
 
