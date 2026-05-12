@@ -14,6 +14,16 @@ const STATUS_ICONS = {
     Smile, Meh, Frown, Sparkles, Flame, Coffee, PartyPopper, Moon, Heart, Ghost
 }
 
+function seededUnit(seed: string, index: number) {
+    let hash = 2166136261
+    const input = `${seed}:${index}`
+    for (let i = 0; i < input.length; i++) {
+        hash ^= input.charCodeAt(i)
+        hash = Math.imul(hash, 16777619)
+    }
+    return (hash >>> 0) / 4294967295
+}
+
 interface SmartTextProps {
     text: string
     behavior?: TextBehavior
@@ -93,6 +103,23 @@ export function SmartText({
         color: textColor,
     }
 
+    const typewriterSpeed = speed > 1 ? 0.05 : speed
+    const isOrganicTyping = typingRhythm === 'organic'
+    const typewriterBaseDelay = typewriterSpeed * (isOrganicTyping ? 0.8 : 1)
+    const revealUnits = useMemo(() => {
+        if (revealMode === 'word') {
+            return text.split(/(\s+)/).filter(unit => unit.length > 0)
+        }
+
+        return text.split("")
+    }, [revealMode, text])
+    const revealDelays = useMemo(() => {
+        return revealUnits.map((_, i) => {
+            const organicOffset = isOrganicTyping ? seededUnit(`${text}:${typingRhythm}:${revealMode}`, i) * typewriterSpeed : 0
+            return i * (typewriterBaseDelay + organicOffset)
+        })
+    }, [isOrganicTyping, revealMode, revealUnits, text, typewriterBaseDelay, typewriterSpeed, typingRhythm])
+
     // --- BEHAVIORS ---
 
     if (behavior === 'ticker') {
@@ -125,25 +152,21 @@ export function SmartText({
     }
 
     if (behavior === 'typewriter') {
-        const typewriterSpeed = speed > 1 ? 0.05 : speed
-        const isOrganic = typingRhythm === 'organic'
-        const baseDelay = typewriterSpeed * (isOrganic ? 0.8 : 1)
-
         const content = (
             <p className={baseClasses} style={textStyle}>
                 {mounted ? (
                     <motion.span>
-                        {text.split("").map((char, i) => (
+                        {revealUnits.map((unit, i) => (
                             <motion.span
                                 key={i}
                                 initial={{ display: "none" }}
                                 animate={{ display: "inline" }}
                                 transition={{
-                                    delay: i * (isOrganic ? (baseDelay + Math.random() * typewriterSpeed) : baseDelay),
+                                    delay: revealDelays[i],
                                     duration: 0
                                 }}
                             >
-                                {char}
+                                {unit}
                             </motion.span>
                         ))}
                         
