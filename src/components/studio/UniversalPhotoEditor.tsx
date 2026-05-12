@@ -10,6 +10,7 @@ import { MoodBlock, PhotoContent } from "@/types/database"
 import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, ListSelector } from "./EditorUI"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { getUploadUrl } from "@/actions/upload"
 
 interface PhotoEditorProps {
     block?: MoodBlock | null
@@ -60,18 +61,26 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
 
             const compressedFile = await imageCompression(file, options)
 
-            const reader = new FileReader()
-            reader.onload = () => {
-                const result = reader.result as string
-                setImageUrl(result)
-                triggerUpdate({ imageUrl: result })
-                setIsUploading(false)
+            const res = await getUploadUrl(compressedFile.type, "photos")
+            if (res.error || !res.uploadUrl || !res.publicUrl) {
+                throw new Error(res.error || "Erro ao obter URL de upload")
             }
-            reader.onerror = () => {
-                toast.error(t('editors.photo.error_load'))
-                setIsUploading(false)
+
+            const uploadResponse = await fetch(res.uploadUrl, {
+                method: "PUT",
+                body: compressedFile,
+                headers: {
+                    "Content-Type": compressedFile.type,
+                },
+            })
+
+            if (!uploadResponse.ok) {
+                throw new Error("Falha no upload para o R2")
             }
-            reader.readAsDataURL(compressedFile)
+
+            setImageUrl(res.publicUrl)
+            triggerUpdate({ imageUrl: res.publicUrl })
+            setIsUploading(false)
         } catch (error) {
             console.error("Erro na compressão:", error)
             toast.error(t('editors.photo.error_process'))

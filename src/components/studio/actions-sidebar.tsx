@@ -34,6 +34,7 @@ import { PreviewData } from "./studio-client-layout"
 import { cn } from "@/lib/utils"
 import { updateProfile } from "@/actions/profile"
 import { publishRoom } from "@/actions/publish"
+import { getUploadUrl } from "@/actions/upload"
 
 import { LanguageSwitcher } from "./language-switcher"
 import { ShareProfileButton } from "./share-profile-button"
@@ -381,18 +382,37 @@ export function ActionsSidebar({
         try {
             const options = { maxSizeMB: 0.5, maxWidthOrHeight: 400, useWebWorker: true }
             const compressedFile = await imageCompression(file, options)
-            const reader = new FileReader()
-            reader.onload = async () => {
-                const base64 = reader.result as string
-                const primaryRoom = allRooms.find(r => r.isPrimary)
-                const targetRoomId = primaryRoom?.id || profile.id
-                await updateProfile({ avatarUrl: base64 }, targetRoomId)
-                setCurrentAvatar(base64)
-                setIsUploading(false)
+            
+            // Requisita URL segura do Cloudflare R2
+            const res = await getUploadUrl(compressedFile.type, "avatars")
+            if (res.error || !res.uploadUrl || !res.publicUrl) {
+                throw new Error(res.error || "Erro ao obter URL de upload")
             }
-            reader.readAsDataURL(compressedFile)
+
+            // Faz o upload direto pro R2
+            const uploadResponse = await fetch(res.uploadUrl, {
+                method: "PUT",
+                body: compressedFile,
+                headers: {
+                    "Content-Type": compressedFile.type,
+                },
+            })
+
+            if (!uploadResponse.ok) {
+                throw new Error("Falha no upload para o R2")
+            }
+
+            // Atualiza o perfil com a URL pública
+            const primaryRoom = allRooms.find(r => r.isPrimary)
+            const targetRoomId = primaryRoom?.id || profile.id
+            await updateProfile({ avatarUrl: res.publicUrl }, targetRoomId)
+            setCurrentAvatar(res.publicUrl)
+            
+            toast.success("Avatar atualizado com sucesso!")
+            setIsUploading(false)
         } catch (error) {
             console.error(error)
+            toast.error("Erro ao atualizar o avatar")
             setIsUploading(false)
         }
     }

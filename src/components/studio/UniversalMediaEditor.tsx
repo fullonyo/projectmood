@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { useState, useTransition, useEffect } from "react"
 import { searchSpotifyTracks } from "@/actions/spotify"
 import { addMoodBlock } from "@/actions/profile"
+import { getUploadUrl } from "@/actions/upload"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -96,7 +97,7 @@ export function UniversalMediaEditor({
         }
     }
 
-    const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
 
@@ -113,16 +114,34 @@ export function UniversalMediaEditor({
         setError(null)
         setIsLoading(true)
 
-        const reader = new FileReader()
-        reader.onload = (event) => {
-            const base64 = event.target?.result as string
+        try {
+            const res = await getUploadUrl(file.type, "audio")
+            if (res.error || !res.uploadUrl || !res.publicUrl) {
+                throw new Error(res.error || "Erro ao obter URL de upload")
+            }
+
+            const uploadResponse = await fetch(res.uploadUrl, {
+                method: "PUT",
+                body: file,
+                headers: {
+                    "Content-Type": file.type,
+                },
+            })
+
+            if (!uploadResponse.ok) {
+                throw new Error("Falha no upload de áudio para o R2")
+            }
+
             const name = file.name.replace(/\.[^/.]+$/, "")
-            setAudioUrl(base64)
+            setAudioUrl(res.publicUrl)
             setTrackName(name)
             setIsLoading(false)
-            triggerUpdate({ audioUrl: base64, name })
+            triggerUpdate({ audioUrl: res.publicUrl, name })
+        } catch (error) {
+            console.error(error)
+            setError("Erro ao fazer upload do áudio")
+            setIsLoading(false)
         }
-        reader.readAsDataURL(file)
     }
 
     const triggerUpdate = (updates: Partial<UniversalMediaContent>) => {

@@ -61,7 +61,7 @@ O MoodSpace utiliza um fluxo de autenticação otimizado para reduzir a fricçã
     - **Room Insight**: Quando ociosos, exibe estatísticas atmosféricas como Dominância Cromática (Luminance Spectrum) e tempo desde a última publicação (Release Stats).
     - **Estética HUD (Studio 2.0)**: Uso de grades ultra-finas (0.5px), tipografia mono-espaçada para metadados e animações de layout fluido (`layoutId`).
     - **Standardization**: Todos os seletores nativos (`select`) foram removidos em favor de grades técnicas HUD com marcadores de canto e estados reativos de alta precisão.
-27. - **Avatar Personalizado**: Sistema de upload no cliente com compressão automática (`browser-image-compression`) e armazenamento em Base64 no banco de dados. Clique no avatar na sidebar direita para trocar.
+27. - **Avatar Personalizado**: Sistema de upload no cliente com compressão automática (`browser-image-compression`) e envio direto ao **Cloudflare R2** via *Presigned URLs*. Apenas o link público é salvo no banco de dados. Clique no avatar na sidebar direita para trocar.
 
 ## Smart Architecture & Universal Editors 🏗️✨
 
@@ -91,6 +91,12 @@ Localizados em `src/components/dashboard/`, os editores centralizam toda a lógi
 - **Mural (`src/components/dashboard/mood-canvas.tsx`)**: Sistema de Drag & Drop estabilizado com `framer-motion`. 
 - **Sincronia Total**: O editor e a página pública são visualmente idênticos, respeitando uma **Safe Area de 40px** nas bordas para evitar cortes de conteúdo.
 - **WebGL Backgrounds**: Efeitos de fundo (Aurora, Liquid, Universe, etc.) renderizados via Shaders para máxima performance (60 FPS).
+
+### ☁️ Storage Architecture (Cloudflare R2)
+Para garantir máxima performance, escalabilidade e evitar Database Bloat, o MoodSpace utiliza o **Cloudflare R2** com Egress Zero.
+- **Upload Direto (Presigned URLs)**: Ao enviar imagens ou áudios, o frontend requisita uma URL de tempo limitado via Server Action (`getUploadUrl`). O arquivo é enviado pelo navegador diretamente para o R2 (método `PUT`), sem onerar a rede ou memória do servidor Node.js.
+- **Compressão Híbrida**: Imagens e avatares continuam sendo comprimidas nativamente no navegador (via `browser-image-compression`) antes de serem enviadas ao bucket.
+- **Integração no Banco**: Apenas a **URL Pública (R2_PUBLIC_URL)** é armazenada nas tabelas `Room` e `MoodBlock`, mantendo as queries extremamente rápidas e os backups leves.
 
 ### Sistema de Redimensionamento (Figma-like)
 - **Módulo de cálculos**: `src/lib/canvas-transforms.ts` — funções puras para resize, separadas da UI.
@@ -198,7 +204,7 @@ O MoodSpace utiliza um motor de precisão para manipulação de blocos:
       - **Autoplay Inteligente**: Depende do estado global `hasInteracted` (capturado pelo `ExperienceOverlay.tsx`) para iniciar com áudio (em loop).
       - **YouTube Loop**: Utiliza o parâmetro `playlist` do iFrame para forçar o loop infinito.
     - **UniversalMediaEditor (`src/components/dashboard/UniversalMediaEditor.tsx`)**: Interface modular com abas.
-      - **Upload Local**: Suporta arquivos MP3/WAV até **5MB** via Base64.
+      - **Upload Local**: Suporta arquivos MP3/WAV até **10MB**, enviados diretamente ao **Cloudflare R2** via Presigned URLs.
       - **Metadados Manuais**: Permite editar Título e Artista para áudios locais.
       - **Ghost Migration**: Blocos legados são convertidos para o tipo `media` ao serem editados.
     - **Unificação de Catálogo**: Botões individuais consolidados no componente `media` unificado.
@@ -504,4 +510,8 @@ A contagem de visualizações em page.tsx agora ocorre apenas se a sala não est
 - **Typecheck**: O projeto agora passa integralmente em `npx tsc --noEmit`. 
 - **Username Safety**: Tratamento de username nulo e normalização para lowercase implementados em todo o fluxo de autenticação e perfil.
 
-*Documentação atualizada por Antigravity em 12/05/2026.*
+### 4. Storage Architecture Migration
+- **Base64 para Cloudflare R2**: Todos os fluxos de upload de mídias pesadas (Avatares, Fotos no mural, Áudios de SmartMedia) foram migrados de in-database Base64 para envio direto ao bucket R2 utilizando **Presigned URLs**.
+- **Segurança**: Endpoint protegido `/actions/upload.ts` via `auth()` garante que apenas usuários autenticados gerem tokens de PUT temporários para o S3.
+
+*Documentação atualizada por Antigravity em 12/05/2026. Implementação de Cloudflare R2 Presigned URLs.*
