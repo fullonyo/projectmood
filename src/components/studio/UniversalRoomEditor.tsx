@@ -9,11 +9,12 @@ import { deleteRoom } from "@/actions/profile"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { ConfirmModal } from "../ui/confirm-modal"
+import { Room, RoomVisualConfig } from "@/types/database"
 
 interface UniversalRoomEditorProps {
-    profile: any
+    profile: Room
     username: string
-    onUpdateProfile: (data: any) => void
+    onUpdateProfile: (data: Partial<RoomVisualConfig>) => void
     onClearWall: () => void
 }
 
@@ -49,7 +50,7 @@ export function UniversalRoomEditor({ profile, username, onUpdateProfile, onClea
                             { id: 'kinetics', label: 'MOTION', icon: Activity },
                         ]}
                         activeId={activeTab}
-                        onChange={(id) => setActiveTab(id as any)}
+                        onChange={(id) => setActiveTab(id as 'vibe' | 'kinetics')}
                     />
                 </div>
                 <button

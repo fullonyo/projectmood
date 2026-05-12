@@ -12,7 +12,7 @@ import { CommandCenter } from "./command-center"
 import { useCanvasKeyboard } from "@/hooks/use-canvas-keyboard"
 import { Guideline, DistanceGuide } from "@/lib/canvas-transforms"
 import { CanvasItem } from "./canvas-item"
-import { MoodBlock, Room } from "@/types/database"
+import { MoodBlock, Room, RoomVisualConfig } from "@/types/database"
 import { TemplateChooser } from "./template-chooser"
 import { SelectionAura } from "./selection-aura"
 import { LassoSelector } from "./lasso-selector"
@@ -21,7 +21,7 @@ import { RoomEnvironment } from "./room-environment"
 
 interface MoodCanvasProps {
     blocks: MoodBlock[]
-    profile: Room
+    profile: Room | (RoomVisualConfig & { id: string })
     backgroundEffect: string
     selectedIds: string[]
     setSelectedIds: (ids: string[] | ((prev: string[]) => string[])) => void

@@ -62,7 +62,7 @@ export default async function PublicMoodPage({ params }: Props) {
         const user = await prisma.user.findFirst({
             where: { username: { equals: handle, mode: 'insensitive' } },
         });
-        if (user) {
+        if (user && user.username) {
             redirect(`/@${user.username.toLowerCase()}`);
         }
         notFound();

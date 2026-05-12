@@ -107,7 +107,7 @@ export function SelectionAura({ selectedIds, blocks, onUpdateBlocks, canvasRef }
                             if (deltaAngle > 180) deltaAngle -= 360
                             if (deltaAngle < -180) deltaAngle += 360
                             
-                            let angleDeg = (dragPivot.current.initialRotation || 0) + deltaAngle
+                            const angleDeg = (dragPivot.current.initialRotation || 0) + deltaAngle
                             setAuraRotation(angleDeg)
                             
                             if (dragPivot.current.angle !== angleDeg) {

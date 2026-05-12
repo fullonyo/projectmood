@@ -5,7 +5,6 @@ import { addMoodBlock } from "@/actions/profile"
 import { Input } from "@/components/ui/input"
 import { MessageSquare, Sparkles, Globe, Zap, Box, LayoutList, Cloud, LayoutGrid, Activity, Eye, StickyNote } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
-import { MoodBlock } from "@/types/database"
 import { BLEND_MODES } from "@/lib/editor-constants"
 import { 
     EditorHeader, 
@@ -18,7 +17,7 @@ import {
     ListSelector 
 } from "./EditorUI"
 
-const GUESTBOOK_THEMES = [
+const GUESTBOOK_THEMES: { id: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'glass', label: 'Studio Glass (Premium)', icon: Sparkles },
     { id: 'onyx', label: 'Onyx Dark (Stealth)', icon: Eye },
     { id: 'silk', label: 'Soft Silk (Editorial)', icon: StickyNote },
@@ -26,7 +25,7 @@ const GUESTBOOK_THEMES = [
     { id: 'cyber', label: 'Cyber / Minimal', icon: Zap }
 ]
 
-const LAYOUT_MODES = [
+const LAYOUT_MODES: { id: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'classic', icon: Box },
     { id: 'stream', icon: LayoutList },
     { id: 'float', icon: Cloud },
@@ -34,6 +33,8 @@ const LAYOUT_MODES = [
 ]
 
 type TabType = 'connection' | 'esthetics'
+
+import { MoodBlock, GuestbookContent } from "@/types/database"
 
 interface GuestbookEditorProps {
     block?: MoodBlock | null
@@ -46,22 +47,22 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
     const [isPending, startTransition] = useTransition()
     const [activeTab, setActiveTab] = useState<TabType>('connection')
 
-    const content = (block?.content as any) || {}
+    const content = (block?.content as GuestbookContent) || {}
     const [title, setTitle] = useState(content.title || "")
     const [color, setColor] = useState(content.color || "#000000")
-    const [style, setStyle] = useState(content.style || 'glass')
+    const [style, setStyle] = useState<GuestbookContent['style']>(content.style || 'glass')
     const [layoutMode, setLayoutMode] = useState(content.layoutMode || 'classic')
     const [density, setDensity] = useState(content.density ?? 1)
     const [opacity, setOpacity] = useState(content.opacity ?? 1)
     const [blendMode, setBlendMode] = useState(content.blendMode || 'normal')
 
-    const triggerUpdate = (updates: any) => {
+    const triggerUpdate = (updates: Partial<GuestbookContent>) => {
         if (!block?.id || !onUpdate) return
         onUpdate({
             content: {
                 title, color, style, layoutMode, density, opacity, blendMode,
                 ...updates
-            }
+            } as GuestbookContent
         })
     }
 
@@ -121,11 +122,12 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
 
                     <EditorSection title="Modo de Exibição">
                         <GridSelector
-                            options={LAYOUT_MODES.map(l => ({ id: l.id as any, label: t(`editors.guestbook.layouts.${l.id}`), icon: l.icon }))}
+                            options={LAYOUT_MODES.map(l => ({ id: l.id, label: t(`editors.guestbook.layouts.${l.id}`), icon: l.icon }))}
                             activeId={layoutMode}
                             onChange={(id) => {
-                                setLayoutMode(id as any)
-                                triggerUpdate({ layoutMode: id })
+                                const newLayout = id as 'classic' | 'stream' | 'float' | 'scattered'
+                                setLayoutMode(newLayout)
+                                triggerUpdate({ layoutMode: newLayout })
                             }}
                             columns={3}
                             variant="ghost"
@@ -147,12 +149,13 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                             id="guestbook-themes"
                             options={GUESTBOOK_THEMES.map(th => ({ 
                                 id: th.id, 
-                                label: t(`editors.guestbook.styles.${th.id}`) || th.label
+                                label: (t(`editors.guestbook.styles.${th.id}`) || th.label) as string
                             }))}
-                            activeId={style}
+                            activeId={style as string}
                             onChange={(id) => {
-                                setStyle(id)
-                                triggerUpdate({ style: id })
+                                const newStyle = id as GuestbookContent['style']
+                                setStyle(newStyle)
+                                triggerUpdate({ style: newStyle })
                             }}
                         />
                     </EditorSection>
@@ -190,8 +193,9 @@ export function UniversalGuestbookEditor({ block, onUpdate, onClose }: Guestbook
                             options={BLEND_MODES.map(m => ({ id: m, label: m.replace('-', ' ') }))}
                             activeId={blendMode}
                             onChange={(id) => {
-                                setBlendMode(id as any)
-                                triggerUpdate({ blendMode: id })
+                                const newBlend = id as string
+                                setBlendMode(newBlend)
+                                triggerUpdate({ blendMode: newBlend })
                             }}
                         />
                     </EditorSection>

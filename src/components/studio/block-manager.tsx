@@ -22,8 +22,10 @@ import {
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 
+import { MoodBlock, TextContent, CountdownContent, SocialContent, WeatherContent, UniversalMediaContent } from "@/types/database"
+
 interface BlockManagerProps {
-    blocks: any[]
+    blocks: MoodBlock[]
 }
 
 export function BlockManager({ blocks }: BlockManagerProps) {
@@ -56,21 +58,24 @@ export function BlockManager({ blocks }: BlockManagerProps) {
         }
     }
 
-    const getContentLabel = (block: any) => {
+    const getContentLabel = (block: MoodBlock) => {
         const type = block.type
-        const content = block.content as any
+        const content = block.content as any // Fallback temporário para propriedades dinâmicas, mas tipado por caso
 
         switch (type) {
-            case 'text': return content.text || t('editors.block_manager.labels.text')
+            case 'text': return (content as TextContent).text || t('editors.block_manager.labels.text')
             case 'music': return t('editors.block_manager.labels.music')
             case 'photo': return t('editors.block_manager.labels.photo')
             case 'video': return t('editors.block_manager.labels.video')
-            case 'quote': return content.text || t('editors.block_manager.labels.quote')
-            case 'moodStatus': return `${t('editors.block_manager.labels.moodStatus')} ${content.status}`
-            case 'countdown': return content.title || t('editors.block_manager.labels.countdown')
-            case 'social': return `${content.platform} ${t('editors.block_manager.labels.social')}`
-            case 'weather': return `${t('editors.block_manager.labels.weather')} ${content.vibe}`
-            case 'media': return `${content.category === 'book' ? t('editors.block_manager.labels.book') : t('editors.block_manager.labels.movie')}: ${content.title}`
+            case 'quote': return (content as TextContent).text || t('editors.block_manager.labels.quote')
+            case 'moodStatus': return `${t('editors.block_manager.labels.moodStatus')} ${(content as any).status || ''}`
+            case 'countdown': return (content as CountdownContent).title || t('editors.block_manager.labels.countdown')
+            case 'social': return `${(content as SocialContent).platform || ''} ${t('editors.block_manager.labels.social')}`
+            case 'weather': return `${t('editors.block_manager.labels.weather')} ${(content as WeatherContent).vibe || ''}`
+            case 'media': {
+                const media = content as UniversalMediaContent
+                return `${media.mediaType === 'audio' ? t('editors.block_manager.labels.book') : t('editors.block_manager.labels.movie')}: ${media.name || ''}`
+            }
             case 'gif': return t('editors.block_manager.labels.gif')
             case 'doodle': return t('editors.block_manager.labels.doodle')
             case 'guestbook': return t('editors.block_manager.labels.guestbook')

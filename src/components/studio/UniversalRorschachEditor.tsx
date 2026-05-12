@@ -6,7 +6,6 @@ import {
     Droplets, Maximize2, Split, Activity
 } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
-import { MoodBlock } from "@/types/database"
 import { addMoodBlock } from "@/actions/profile"
 import { toast } from "sonner"
 import { 
@@ -19,10 +18,12 @@ import {
     EditorColorPicker 
 } from "./EditorUI"
 
+import { MoodBlock, RorschachContent } from "@/types/database"
+
 interface UniversalRorschachEditorProps {
     block?: MoodBlock | null
     onUpdate?: (updates: Partial<MoodBlock>) => void
-    onAdd?: (content: any) => Promise<void>
+    onAdd?: (content: RorschachContent) => Promise<void>
     onClose?: () => void
 }
 
@@ -37,7 +38,7 @@ export function UniversalRorschachEditor({
     const { t } = useTranslation()
     const [isPending, setIsPending] = useState(false)
 
-    const content = block?.content || {}
+    const content = block?.content as RorschachContent || {}
     const [seed, setSeed] = useState(content.seed ?? Math.floor(Math.random() * 10000))
     const [color, setColor] = useState(content.color || '#000000')
     const [opacity, setOpacity] = useState(content.opacity ?? 1)
@@ -46,13 +47,13 @@ export function UniversalRorschachEditor({
     const [complexity, setComplexity] = useState(content.complexity ?? 5)
     const [activeTab, setActiveTab] = useState<TabType>('geometry')
 
-    const triggerUpdate = (updates: any) => {
+    const triggerUpdate = (updates: Partial<RorschachContent>) => {
         if (!block?.id || !onUpdate) return
         onUpdate({
             content: {
                 seed, color, opacity, blur, symmetry, complexity,
                 ...updates
-            }
+            } as RorschachContent
         })
     }
 
@@ -113,8 +114,9 @@ export function UniversalRorschachEditor({
                             ]}
                             activeId={symmetry}
                             onChange={(id) => {
-                                setSymmetry(id as any)
-                                triggerUpdate({ symmetry: id as any })
+                                const newSym = id as 'vertical' | 'horizontal' | 'quad'
+                                setSymmetry(newSym)
+                                triggerUpdate({ symmetry: newSym })
                             }}
                             columns={3}
                             variant="ghost"

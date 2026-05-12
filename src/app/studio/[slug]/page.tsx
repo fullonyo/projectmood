@@ -76,7 +76,6 @@ export default async function StudioRoomPage({ params }: StudioRoomProps) {
     // 4. Carregar lista de todas as salas para o switcher
     const allRooms = await prisma.room.findMany({
         where: { userId: session.user.id },
-        select: { id: true, title: true, slug: true, isPrimary: true, type: true, userId: true, avatarUrl: true },
         orderBy: { createdAt: 'desc' }
     });
 
@@ -88,9 +87,9 @@ export default async function StudioRoomPage({ params }: StudioRoomProps) {
             currentRoom.theme === 'dark' ? 'dark' : ''
         )}>
             <StudioClientLayout
-                profile={currentRoom as any}
+                profile={currentRoom}
                 moodBlocks={moodBlocks}
-                username={username}
+                username={username || "anon"}
                 name={user.name}
                 publishedAt={publishedAt}
                 hasUnpublishedChanges={hasUnpublishedChanges}

@@ -9,7 +9,6 @@ import {
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { ShapeType } from "./SmartShape"
-import { MoodBlock } from "@/types/database"
 import { BLEND_MODES } from "@/lib/editor-constants"
 import { addMoodBlock } from "@/actions/profile"
 import { toast } from "sonner"
@@ -25,16 +24,18 @@ import {
     ListSelector
 } from "./EditorUI"
 
+import { MoodBlock, ShapeContent } from "@/types/database"
+
 interface UniversalShapeEditorProps {
     block?: MoodBlock | null
     onUpdate?: (updates: Partial<MoodBlock>) => void
-    onAdd?: (content: any) => Promise<void>
+    onAdd?: (content: ShapeContent) => Promise<void>
     onClose?: () => void
 }
 
 type TabType = 'geometry' | 'style' | 'effects'
 
-const SHAPE_OPTIONS: { id: ShapeType; icon: any; tk: string }[] = [
+const SHAPE_OPTIONS: { id: ShapeType; icon: React.ComponentType<{ className?: string }>; tk: string }[] = [
     { id: 'circle', icon: Circle, tk: 'circle' },
     { id: 'rect', icon: Square, tk: 'rect' },
     { id: 'triangle', icon: Triangle, tk: 'triangle' },
@@ -58,7 +59,7 @@ export function UniversalShapeEditor({
     const { t } = useTranslation()
     const [isPending, setIsPending] = useState(false)
 
-    const content = block?.content || {}
+    const content = block?.content as ShapeContent || {}
     const [shapeType, setShapeType] = useState<ShapeType>(content.shapeType || 'circle')
     const [color, setColor] = useState(content.color || '#3b82f6')
     const [opacity, setOpacity] = useState(content.opacity ?? 1)
@@ -84,13 +85,13 @@ export function UniversalShapeEditor({
         }
 
         // Deep check to prevent infinite loops: only update if something actually changed
-        const currentContent = block.content || {}
+        const currentContent = block.content as ShapeContent || {}
         const hasChanged = Object.entries(updates).some(([key, value]) => {
-            return currentContent[key] !== value
+            return (currentContent as unknown as Record<string, unknown>)[key] !== value
         })
 
         if (hasChanged) {
-            onUpdate({ content: updates })
+            onUpdate({ content: updates as ShapeContent })
         }
     }, [shapeType, color, opacity, blur, sides, points, blendMode, gradient, seed, glowIntensity, isFloating, floatSpeed, gradientType, block?.id, onUpdate, block?.content])
 
@@ -147,8 +148,8 @@ export function UniversalShapeEditor({
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <EditorSection title="Tipo de Forma">
                         <GridSelector
-                            options={SHAPE_OPTIONS.map(s => ({ id: s.id as any, label: t(`editors.shape.shapes.${s.tk}`), icon: s.icon }))}
-                            activeId={shapeType as any}
+                            options={SHAPE_OPTIONS.map(s => ({ id: s.id, label: t(`editors.shape.shapes.${s.tk}`), icon: s.icon }))}
+                            activeId={shapeType}
                             onChange={(id) => setShapeType(id as ShapeType)}
                             columns={4}
                             variant="ghost"
@@ -201,7 +202,7 @@ export function UniversalShapeEditor({
                         <ListSelector
                             options={BLEND_MODES.map(m => ({ id: m, label: m.replace('-', ' ') }))}
                             activeId={blendMode}
-                            onChange={(id) => setBlendMode(id as any)}
+                            onChange={(id) => setBlendMode(id as string)}
                         />
                     </EditorSection>
 
@@ -221,7 +222,7 @@ export function UniversalShapeEditor({
                                         { id: 'radial', label: 'Radial', icon: Activity },
                                     ]}
                                     activeId={gradientType}
-                                    onChange={(id) => setGradientType(id as any)}
+                                    onChange={(id) => setGradientType(id as 'linear' | 'radial')}
                                 />
                             )}
                         </div>

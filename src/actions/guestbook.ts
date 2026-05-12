@@ -56,13 +56,17 @@ export async function addGuestbookMessage(blockId: string, content: string) {
     })
     const block = await prisma.moodBlock.findUnique({
         where: { id: validation.data.blockId },
-        select: { userId: true }
+        select: {
+            room: {
+                select: { userId: true }
+            }
+        }
     })
 
     if (!block) return { error: "Bloco não encontrado" }
 
     const author = (session?.user as any)?.name || (session?.user as any)?.username || generateAnonymousName()
-    const isAdmin = session?.user?.id === block.userId
+    const isAdmin = session?.user?.id === block.room.userId
 
     try {
         const message = await prisma.guestbookMessage.create({

@@ -14,7 +14,7 @@ import { Slider } from "@/components/ui/slider"
 import { BLEND_MODES } from "@/lib/editor-constants"
 import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, EditorSlider, ListSelector } from "./EditorUI"
 
-const WEATHER_ICONS: Record<string, any> = {
+const WEATHER_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
     sun: Sun,
     rain: CloudRain,
     snow: Snowflake,
@@ -24,10 +24,12 @@ const WEATHER_ICONS: Record<string, any> = {
 
 type TabType = 'connection' | 'esthetics'
 
+import { WeatherContent } from "@/types/database"
+
 interface UniversalWeatherEditorProps {
     block?: MoodBlock | null
     onUpdate?: (updates: Partial<MoodBlock>) => void
-    onAdd?: (content: any) => Promise<void>
+    onAdd?: (content: WeatherContent) => Promise<void>
     onClose?: () => void
 }
 
@@ -43,7 +45,7 @@ export function UniversalWeatherEditor({
     const [error, setError] = useState<string | null>(null)
     const [activeTab, setActiveTab] = useState<TabType>('connection')
 
-    const content = block?.content || {}
+    const content = block?.content as WeatherContent || {}
     const [location, setLocation] = useState(content.location || "")
     const [vibe, setVibe] = useState(content.vibe || "")
     const [temp, setTemp] = useState(content.temp || 25)
@@ -52,13 +54,13 @@ export function UniversalWeatherEditor({
     const [opacity, setOpacity] = useState(content.opacity ?? 1)
     const [blendMode, setBlendMode] = useState(content.blendMode || 'normal')
 
-    const triggerUpdate = (updates: any) => {
+    const triggerUpdate = (updates: Partial<WeatherContent>) => {
         if (!block?.id || !onUpdate) return
         onUpdate({
             content: {
                 location, vibe, temp, icon, mode, opacity, blendMode,
                 ...updates
-            }
+            } as WeatherContent
         })
     }
 
@@ -128,8 +130,9 @@ export function UniversalWeatherEditor({
                             ]}
                             activeId={mode}
                             onChange={(id) => {
-                                setMode(id as any)
-                                triggerUpdate({ mode: id as any })
+                                const newMode = id as 'auto' | 'manual'
+                                setMode(newMode)
+                                triggerUpdate({ mode: newMode })
                             }}
                         />
                     </EditorSection>
@@ -225,8 +228,9 @@ export function UniversalWeatherEditor({
                             options={BLEND_MODES.map(m => ({ id: m, label: m.replace('-', ' ') }))}
                             activeId={blendMode}
                             onChange={(id) => {
-                                setBlendMode(id as any)
-                                triggerUpdate({ blendMode: id as any })
+                                const newBlend = id as string
+                                setBlendMode(newBlend)
+                                triggerUpdate({ blendMode: newBlend })
                             }}
                         />
                     </EditorSection>

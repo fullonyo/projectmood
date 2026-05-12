@@ -37,7 +37,7 @@ export default async function AdminUsersPage({
             where: whereClause,
             include: {
                 _count: {
-                    select: { moodBlocks: true }
+                    select: { rooms: true }
                 }
             },
             orderBy: { createdAt: "desc" },
@@ -91,7 +91,7 @@ export default async function AdminUsersPage({
                         <tr className="border-b border-zinc-900 text-[9px] font-black uppercase tracking-[0.25em] text-zinc-600 bg-zinc-950">
                             <th className="px-6 py-5">Status & Access</th>
                             <th className="px-6 py-5">Civilian Identity</th>
-                            <th className="px-6 py-5 text-right">Blocks</th>
+                            <th className="px-6 py-5 text-right">Rooms</th>
                             <th className="px-6 py-5">Registration Date</th>
                             <th className="px-6 py-5 text-right">Protocols</th>
                         </tr>
@@ -127,7 +127,7 @@ export default async function AdminUsersPage({
                                     <div className="text-[10px] text-zinc-600 font-mono mt-0.5 uppercase tracking-tighter">{user.email}</div>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <span className="font-mono text-xs font-black tabular-nums text-zinc-400">{user._count.moodBlocks}</span>
+                                    <span className="font-mono text-xs font-black tabular-nums text-zinc-400">{user._count.rooms}</span>
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="text-[10px] font-mono uppercase text-zinc-500">

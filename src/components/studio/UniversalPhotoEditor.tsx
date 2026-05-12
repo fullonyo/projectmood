@@ -192,8 +192,9 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                                 ]}
                                 activeId={filter}
                                 onChange={(id) => {
-                                    setFilter(id as any)
-                                    triggerUpdate({ filter: id as any })
+                                    const newFilter = id as PhotoContent['filter']
+                                    setFilter(newFilter || 'none')
+                                    triggerUpdate({ filter: newFilter })
                                 }}
                             />
                         </EditorSection>
@@ -213,8 +214,9 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                                 ]}
                                 activeId={frame}
                                 onChange={(id) => {
-                                    setFrame(id as any)
-                                    triggerUpdate({ frame: id as any })
+                                    const newFrame = id as PhotoContent['frame']
+                                    setFrame(newFrame || 'none')
+                                    triggerUpdate({ frame: newFrame })
                                 }}
                             />
                         </EditorSection>

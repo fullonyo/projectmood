@@ -18,12 +18,11 @@ export type MoodBlockContent =
     | GuestbookContent
     | MoodStatusContent
     | WeatherContent
-    | { mediaType: 'video' | 'music' | 'audio' | 'media'; videoId?: string; trackId?: string; audioUrl?: string; name?: string; artist?: string; albumArt?: string; frame?: string; caption?: string;[key: string]: any }
     | ShapeContent
     | RorschachContent
     | DoodleContent
     | TapeContent
-    | any;
+    | UniversalMediaContent;
 
 export interface MoodBlock extends Omit<Prisma.MoodBlockGetPayload<{}>, 'content'> {
     type: string;
@@ -43,6 +42,21 @@ export interface TextContent {
     align?: string;
     color?: string;
     font?: string;
+    behavior?: 'static' | 'ticker' | 'typewriter' | 'dialogue' | 'floating' | 'quote' | 'status';
+    textColor?: string;
+    speed?: number;
+    direction?: 'left' | 'right';
+    cursorType?: string;
+    author?: string;
+    showQuotes?: boolean;
+    icon?: string;
+    dialogueStyle?: string;
+    dialogueFormat?: string;
+    nameStyle?: string;
+    dialogueLines?: { name: string; text: string }[];
+    typingRhythm?: string;
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface PhotoContent {
@@ -51,6 +65,8 @@ export interface PhotoContent {
     frame?: 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'border' | 'shadow' | 'glass';
     filter?: 'none' | 'vintage' | 'bw' | 'warm' | 'cool';
     alt?: string;
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface VideoContent {
@@ -59,12 +75,16 @@ export interface VideoContent {
     muted?: boolean;
     loop?: boolean;
     platform?: 'youtube' | 'vimeo' | 'custom';
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface MusicContent {
     url: string;
     platform?: 'spotify' | 'soundcloud' | 'apple-music';
     displayMode?: 'compact' | 'card';
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface ThemeConfig {
@@ -78,18 +98,21 @@ export interface ThemeConfig {
 }
 
 export interface RoomVisualConfig {
-    theme: string;
-    uiTheme: string | null;
-    backgroundColor: string | null;
-    primaryColor: string | null;
-    fontStyle: string | null;
-    customCursor: string | null;
-    mouseTrails: string | null;
-    backgroundEffect: string | null;
-    customFont: string | null;
-    staticTexture: string | null;
-    avatarUrl: string | null;
+    theme?: string;
+    uiTheme?: string;
+    backgroundColor?: string | null;
+    primaryColor?: string | null;
+    fontStyle?: string | null;
+    customCursor?: string | null;
+    mouseTrails?: string | null;
+    backgroundEffect?: string | null;
+    customFont?: string | null;
+    staticTexture?: string | null;
+    avatarUrl?: string | null;
     title?: string;
+    slug?: string | null;
+    name?: string | null;
+    username?: string | null;
 }
 
 export interface RoomVersion {
@@ -152,34 +175,50 @@ export interface SocialContent {
     style?: string;
     isGrid?: boolean;
     showBg?: boolean;
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface CountdownContent {
     title: string;
     targetDate: string;
     emoji?: string;
-    style?: string;
+    style?: 'minimal' | 'bold' | 'neon';
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface GuestbookContent {
     title: string;
     color?: string;
-    style?: 'glass' | 'vhs' | 'cyber' | 'paper';
-    layoutMode?: 'classic' | 'scattered' | 'cloud';
+    style?: 'glass' | 'onyx' | 'silk' | 'vhs' | 'cyber' | 'paper';
+    layoutMode?: 'classic' | 'stream' | 'float' | 'scattered' | 'cloud';
     density?: number;
     opacity?: number;
     blendMode?: string;
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface MoodStatusContent {
     emoji: string;
     text?: string;
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface WeatherContent {
-    state: string;
+    state?: string;
     location?: string;
     temperature?: string;
+    vibe?: string;
+    temp?: number;
+    icon?: string;
+    mode?: 'auto' | 'manual';
+    opacity?: number;
+    blendMode?: string;
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface ShapeContent {
@@ -191,26 +230,54 @@ export interface ShapeContent {
     points?: number;
     blendMode?: string;
     gradient?: boolean;
+    seed?: number;
+    glowIntensity?: number;
+    isFloating?: boolean;
+    floatSpeed?: number;
+    gradientType?: 'linear' | 'radial';
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface RorschachContent {
-    seed: string;
-    axes: number;
-    density: number;
-    smoothness: number;
+    seed: number;
     color: string;
-    blendMode: string;
     opacity: number;
+    blur: number;
+    symmetry: 'vertical' | 'horizontal' | 'quad';
+    complexity: number;
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface DoodleContent {
     image: string;
     color?: string;
     opacity?: number;
+    customName?: string;
+    [key: string]: any;
 }
 
 export interface TapeContent {
     color: string;
     pattern?: string;
     opacity?: number;
+    customName?: string;
+    [key: string]: any;
+}
+
+export interface UniversalMediaContent {
+    mediaType: 'video' | 'music' | 'audio' | 'media';
+    videoId?: string;
+    trackId?: string;
+    audioUrl?: string;
+    name?: string;
+    artist?: string;
+    albumArt?: string;
+    frame?: string;
+    caption?: string;
+    lyrics?: string;
+    lyricsDisplay?: 'integrated' | 'fullscreen';
+    customName?: string;
+    [key: string]: any;
 }

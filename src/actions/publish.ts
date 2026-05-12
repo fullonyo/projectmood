@@ -1,5 +1,7 @@
 "use server"
 
+import { Prisma } from "@prisma/client"
+import { MoodBlock, RoomVersion, RoomVisualConfig, Room } from "@/types/database"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { requireAuth, getUsernameById, revalidateProfile } from "@/lib/action-helpers"
@@ -15,7 +17,7 @@ import { requireAuth, getUsernameById, revalidateProfile } from "@/lib/action-he
 /**
  * Helper interno para capturar o estado atual e salvar como uma versão de uma Sala.
  */
-async function createVersionSnapshot(tx: any, userId: string, roomId: string, label?: string) {
+async function createVersionSnapshot(tx: Prisma.TransactionClient, userId: string, roomId: string, label?: string) {
     const currentBlocks = await tx.moodBlock.findMany({ 
         where: { roomId, deletedAt: null } 
     })
@@ -25,24 +27,27 @@ async function createVersionSnapshot(tx: any, userId: string, roomId: string, la
 
     if (!currentRoom) throw new Error("Espaço não encontrado para snapshot")
 
+    const profileData: RoomVisualConfig = {
+        theme: currentRoom.theme,
+        uiTheme: currentRoom.uiTheme,
+        backgroundColor: currentRoom.backgroundColor,
+        primaryColor: currentRoom.primaryColor,
+        fontStyle: currentRoom.fontStyle,
+        customCursor: currentRoom.customCursor,
+        mouseTrails: currentRoom.mouseTrails,
+        backgroundEffect: currentRoom.backgroundEffect,
+        customFont: currentRoom.customFont,
+        staticTexture: currentRoom.staticTexture,
+        avatarUrl: currentRoom.avatarUrl,
+        title: currentRoom.title
+    }
+
     return await tx.roomVersion.create({
         data: {
             roomId,
             label: label || null,
-            blocks: currentBlocks as any,
-            profileData: {
-                theme: currentRoom.theme,
-                backgroundColor: currentRoom.backgroundColor,
-                primaryColor: currentRoom.primaryColor,
-                fontStyle: currentRoom.fontStyle,
-                customCursor: currentRoom.customCursor,
-                mouseTrails: currentRoom.mouseTrails,
-                backgroundEffect: currentRoom.backgroundEffect,
-                customFont: currentRoom.customFont,
-                staticTexture: currentRoom.staticTexture,
-                avatarUrl: currentRoom.avatarUrl,
-                title: currentRoom.title
-            } as any,
+            blocks: currentBlocks as unknown as Prisma.InputJsonValue,
+            profileData: profileData as unknown as Prisma.InputJsonValue,
             isActive: false
         }
     })
@@ -85,7 +90,7 @@ export async function publishRoom(roomId: string, label?: string) {
         }
 
         return { success: true }
-    } catch (error: any) {
+    } catch (error) {
         console.error('[publishRoom]', error)
         return { error: "Erro ao publicar espaço" }
     }
@@ -123,27 +128,28 @@ export async function restoreRoomToDraft(versionId: string) {
 
             // 1. Restaurar metadados da Sala (Editor/Draft)
             if (version.profileData) {
-                const pd = version.profileData as any
+                const pd = version.profileData as unknown as RoomVisualConfig
                 await tx.room.update({
                     where: { id: version.roomId },
                     data: {
                         theme: pd.theme,
-                        backgroundColor: pd.backgroundColor,
-                        primaryColor: pd.primaryColor,
-                        fontStyle: pd.fontStyle,
-                        customCursor: pd.customCursor,
-                        mouseTrails: pd.mouseTrails,
-                        backgroundEffect: pd.backgroundEffect,
-                        customFont: pd.customFont,
-                        staticTexture: pd.staticTexture,
-                        avatarUrl: pd.avatarUrl,
+                        uiTheme: (pd.uiTheme ?? undefined) as string | undefined,
+                        backgroundColor: (pd.backgroundColor ?? undefined) as string | undefined,
+                        primaryColor: (pd.primaryColor ?? undefined) as string | undefined,
+                        fontStyle: (pd.fontStyle ?? undefined) as string | undefined,
+                        customCursor: (pd.customCursor ?? undefined) as string | undefined,
+                        mouseTrails: (pd.mouseTrails ?? undefined) as string | undefined,
+                        backgroundEffect: (pd.backgroundEffect ?? undefined) as string | undefined,
+                        customFont: (pd.customFont ?? undefined) as string | undefined,
+                        staticTexture: (pd.staticTexture ?? undefined) as string | undefined,
+                        avatarUrl: (pd.avatarUrl ?? undefined) as string | undefined,
                         title: pd.title || version.room.title
                     }
                 })
             }
 
             // 2. Restaurar Blocos
-            const snapshotBlocks = version.blocks as any[]
+            const snapshotBlocks = version.blocks as unknown as MoodBlock[]
             if (snapshotBlocks) {
                 const snapshotIds = snapshotBlocks.map(b => b.id).filter(Boolean)
 
@@ -194,7 +200,7 @@ export async function restoreRoomToDraft(versionId: string) {
         revalidateProfile(username)
 
         return { success: true }
-    } catch (error: any) {
+    } catch (error) {
         console.error('[restoreRoomToDraft]', error)
         return { error: "Erro ao restaurar rascunho" }
     }
@@ -237,7 +243,7 @@ export async function makeVersionActive(versionId: string) {
         }
 
         return { success: true }
-    } catch (error: any) {
+    } catch (error) {
         console.error('[makeVersionActive]', error)
         return { error: "Erro ao ativar versão" }
     }
@@ -256,7 +262,7 @@ export async function rollbackToVersion(versionId: string) {
         revalidateProfile(username)
 
         return { success: true }
-    } catch (error: any) {
+    } catch (error) {
         console.error('[rollbackToVersion]', error)
         return { error: "Erro ao realizar rollback completo" }
     }
@@ -285,7 +291,7 @@ export async function deleteVersion(versionId: string) {
         })
 
         return { success: true }
-    } catch (error: any) {
+    } catch (error) {
         console.error('[deleteVersion]', error)
         return { error: "Erro ao excluir versão" }
     }
@@ -328,7 +334,7 @@ export async function getVersionHistory(page: number = 1, pageSize: number = 10,
         const hasMore = skip + versions.length < totalCount
 
         return { versions, hasMore }
-    } catch (error: any) {
+    } catch (error) {
         console.error('[getVersionHistory]', error)
         return { error: "Erro ao buscar histórico", versions: [], hasMore: false }
     }
@@ -355,10 +361,10 @@ export async function getVersionDetails(versionId: string) {
         }
 
         return { 
-            blocks: version.blocks as any[], 
-            profile: version.profileData as any 
+            blocks: version.blocks as unknown as MoodBlock[], 
+            profile: version.profileData as unknown as RoomVisualConfig 
         }
-    } catch (error: any) {
+    } catch (error) {
         console.error('[getVersionDetails]', error)
         return { error: "Erro ao carregar detalhes da versão" }
     }
@@ -388,8 +394,8 @@ export async function getActiveVersion(roomId?: string) {
 }
 
 export async function computeHasUnpublishedChanges(
-    existingRoom?: any,
-    existingDraftBlocks?: any[],
+    existingRoom?: Partial<Room>,
+    existingDraftBlocks?: Partial<MoodBlock>[],
     roomId?: string
 ) {
     const session = await auth()
@@ -434,11 +440,12 @@ export async function computeHasUnpublishedChanges(
 
         if (!activeVersion) return draftBlocks.length > 0
 
-        const sortKeys = (obj: any): any => {
+        const sortKeys = (obj: unknown): any => {
             if (obj === null || typeof obj !== 'object') return obj;
             if (Array.isArray(obj)) return obj.map(sortKeys);
-            return Object.keys(obj).sort().reduce((acc: any, key) => {
-                acc[key] = sortKeys(obj[key]);
+            const record = obj as Record<string, unknown>;
+            return Object.keys(record).sort().reduce((acc: Record<string, unknown>, key) => {
+                acc[key] = sortKeys(record[key]);
                 return acc;
             }, {});
         };
@@ -465,7 +472,7 @@ export async function computeHasUnpublishedChanges(
         }));
         const draftBlocksStr = JSON.stringify(sortKeys(normalizedDraftBlocks));
 
-        const publishedBlocks = (activeVersion.blocks as any[])?.map((b: any) => ({
+        const publishedBlocks = (activeVersion.blocks as unknown as MoodBlock[])?.map((b) => ({
             type: b.type, content: b.content,
             x: b.x, y: b.y, width: b.width, height: b.height,
             zIndex: b.zIndex, rotation: b.rotation, order: b.order,

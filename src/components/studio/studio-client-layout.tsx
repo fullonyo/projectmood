@@ -8,7 +8,7 @@ import { ActionsSidebar } from "./actions-sidebar";
 import { MoodCanvas } from "./mood-canvas";
 import { CustomCursor } from "../effects/custom-cursor";
 import { MouseTrails } from "../effects/mouse-trails";
-import { MoodBlock, Room } from "@/types/database";
+import { MoodBlock, Room, MoodBlockContent, RoomVisualConfig } from "@/types/database";
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
 import { updateMoodBlocksZIndex, addMoodBlock, updateProfile } from "@/actions/profile";
 import { cn } from "@/lib/utils";
@@ -28,13 +28,13 @@ interface StudioClientLayoutProps {
     hasUnpublishedChanges?: boolean;
     isAdmin?: boolean;
     systemFlags?: Record<string, boolean>;
-    allRooms?: any[]; // Lista para o switcher
+    allRooms?: Room[]; // Lista para o switcher
     userAvatar?: string | null;
 }
 
 export interface PreviewData {
     blocks: MoodBlock[];
-    profile: Room;
+    profile: Room | (RoomVisualConfig & { id: string });
 }
 
 export function StudioClientLayout({ 
@@ -103,10 +103,10 @@ function StudioClientLayoutInner({
         forceReset
     } = useCanvasManager(moodBlocks, profile.id);
 
-    const handleAddNewBlock = useCallback(async (type: string, content: any, shouldSelect = true) => {
+    const handleAddNewBlock = useCallback(async (type: string, content: MoodBlockContent, shouldSelect = true) => {
         try {
             const actualShouldSelect = type === 'gif' ? false : shouldSelect;
-            let options: any = { x: Math.random() * 20 + 40, y: Math.random() * 20 + 40, width: 200, height: 200, roomId: localProfile.id };
+            let options: { x: number, y: number, width: number, height: number, roomId: string } = { x: Math.random() * 20 + 40, y: Math.random() * 20 + 40, width: 200, height: 200, roomId: localProfile.id };
             
             if (type === 'gif' || type === 'photo') {
                 options = { ...options, width: 250, height: 250 };
@@ -114,10 +114,10 @@ function StudioClientLayoutInner({
                 options = { ...options, width: 300, height: 120 };
             }
 
-            const res = await addMoodBlock(type, content, options);
+            const res = await addMoodBlock(type, content as MoodBlockContent, options);
             
             if (res.success && res.block) {
-                setBlocks(prev => [...prev, res.block]);
+                setBlocks(prev => [...prev, res.block as MoodBlock]);
                 if (actualShouldSelect) {
                     setSelectedIds([res.block.id]);
                 }
@@ -176,8 +176,8 @@ function StudioClientLayoutInner({
         setLocalProfile(profile);
     }, [profile]);
 
-    const handleUpdateProfile = useCallback((data: any) => {
-        setLocalProfile((prev: any) => ({ ...prev, ...data }));
+    const handleUpdateProfile = useCallback((data: Partial<RoomVisualConfig>) => {
+        setLocalProfile((prev) => ({ ...prev, ...data }));
         startProfileTransition(async () => {
             await updateProfile(data, localProfile.id); // Passando o ID da sala
         });
@@ -189,7 +189,7 @@ function StudioClientLayoutInner({
         <main 
             className={cn(
                 "flex-1 relative overflow-hidden flex flex-col focus:outline-none",
-                (localProfile as any).uiTheme === 'light' ? 'light bg-white' : 'dark bg-zinc-950'
+                (localProfile as Room).uiTheme === 'light' ? 'light bg-white' : 'dark bg-zinc-950'
             )}
         >
             <CustomCursor type={localProfile.customCursor || 'auto'} />
@@ -246,7 +246,7 @@ function StudioClientLayoutInner({
             >
                 <div className={`h-full shadow-none relative ${isSidebarOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
                     <StudioSidebar
-                        profile={localProfile as any}
+                        profile={localProfile as Room}
                         username={username}
                         blocks={blocks}
                         selectedBlocks={selectedBlocks}
@@ -307,11 +307,11 @@ function StudioClientLayoutInner({
                     <ActionsSidebar 
                         username={username} 
                         name={name}
-                        profile={localProfile as any} 
+                        profile={localProfile as Room} 
                         publishedAt={publishedAt} 
                         hasUnpublishedChanges={hasUnpublishedChanges} 
                         isAdmin={isAdmin} 
-                        setPreviewData={setPreviewData as any}
+                        setPreviewData={setPreviewData}
                         isPreview={!!previewData}
                         allRooms={allRooms}
                         userAvatar={userAvatar}

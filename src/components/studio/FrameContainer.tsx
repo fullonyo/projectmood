@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { useViewportScale } from "@/lib/canvas-scale"
 import React from "react"
 
-export type FrameType = 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'glass'
+export type FrameType = 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'glass' | 'border' | 'shadow'
 
 interface FrameContainerProps {
     children: React.ReactNode

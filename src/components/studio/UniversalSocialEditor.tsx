@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useTranslation } from "@/i18n/context"
 
-const PLATFORMS = [
+const PLATFORMS: { id: string; icon: React.ComponentType<any>; label: string; color: string }[] = [
     { id: 'instagram', icon: Instagram, label: 'Instagram', color: '#E4405F' },
     { id: 'twitter', icon: Twitter, label: 'Twitter/X', color: '#000000' },
     { id: 'discord', icon: DiscordIcon, label: 'Discord', color: '#5865F2' },
@@ -112,13 +112,13 @@ export function UniversalSocialEditor({
         }
 
         // Deep check to prevent infinite loops
-        const currentContent = block.content as any || {}
+        const currentContent = block.content as SocialContent || {}
         const hasChanged = Object.entries(updates).some(([key, value]) => {
-            return currentContent[key] !== value
+            return (currentContent as unknown as Record<string, unknown>)[key] !== value
         })
 
         if (hasChanged) {
-            onUpdate({ content: updates })
+            onUpdate({ content: updates as SocialContent })
         }
     }, [selectedPlatform, url, label, subLabel, style, layoutMode, block?.id, onUpdate, block?.content])
 
@@ -189,8 +189,8 @@ export function UniversalSocialEditor({
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <EditorSection title={t('editors.social.nodes') || "Plataforma"}>
                         <GridSelector
-                            options={PLATFORMS.map(p => ({ id: p.id as any, label: p.label, icon: p.icon, color: p.color }))}
-                            activeId={selectedPlatform.id as any}
+                            options={PLATFORMS.map(p => ({ id: p.id, label: p.label, icon: p.icon, color: p.color }))}
+                            activeId={selectedPlatform.id}
                             onChange={(id) => {
                                 const p = PLATFORMS.find(platform => platform.id === id)
                                 if (p) setSelectedPlatform(p)
@@ -254,7 +254,7 @@ export function UniversalSocialEditor({
                                 { id: 'floating', label: t('editors.social.layout_borderless') || 'Flutuante', icon: Ghost }
                             ]}
                             activeId={layoutMode}
-                            onChange={(id) => setLayoutMode(id as any)}
+                            onChange={(id) => setLayoutMode(id as 'classic' | 'bento' | 'floating')}
                             columns={3}
                             variant="ghost"
                             id="social-layouts"
@@ -267,8 +267,8 @@ export function UniversalSocialEditor({
                                 id: s.id as any, 
                                 label: t(`editors.social.styles.${s.id}`) || s.label 
                             }))}
-                            activeId={style as any}
-                            onChange={(id) => setStyle(id as any)}
+                            activeId={style}
+                            onChange={(id) => setStyle(id as string)}
                         />
                     </EditorSection>
                 </div>

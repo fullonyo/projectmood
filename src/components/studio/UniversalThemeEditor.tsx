@@ -22,20 +22,21 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { ColorPaletteExtractor } from "./color-palette-extractor"
 import { EditorSection, GridSelector } from "./EditorUI"
+import { RoomVisualConfig } from "@/types/database"
 
 interface ThemeEditorProps {
     currentTheme: string
     currentBackgroundColor: string
     currentPrimaryColor: string
     currentStaticTexture: string
-    onUpdate?: (data: any) => void
+    onUpdate?: (data: Partial<RoomVisualConfig>) => void
 }
 
 export function UniversalThemeEditor({ currentTheme, currentBackgroundColor, currentPrimaryColor, currentStaticTexture, onUpdate }: ThemeEditorProps) {
     const { t } = useTranslation()
     const [showExtractor, setShowExtractor] = useState(false)
 
-    const handleUpdate = (data: any) => {
+    const handleUpdate = (data: Partial<RoomVisualConfig>) => {
         if (onUpdate) onUpdate(data)
     }
 
@@ -91,7 +92,7 @@ export function UniversalThemeEditor({ currentTheme, currentBackgroundColor, cur
             <EditorSection title={t('editors.theme.textures_title')}>
                 <GridSelector
                     id="theme-textures"
-                    options={textures.map(tInfo => ({ id: tInfo.id as any, label: tInfo.name, icon: tInfo.icon }))}
+                    options={textures.map(tInfo => ({ id: tInfo.id, label: tInfo.name, icon: tInfo.icon }))}
                     activeId={currentStaticTexture || 'none'}
                     onChange={(id) => handleUpdate({ staticTexture: id })}
                     columns={4}

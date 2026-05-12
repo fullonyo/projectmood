@@ -7,7 +7,7 @@ import { EditorHeader, EditorSection, GridSelector, EditorActionButton } from ".
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 
-const ICONS = [
+const ICONS: { name: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { name: 'Gift', icon: Gift },
     { name: 'Cake', icon: Cake },
     { name: 'Calendar', icon: Calendar },
@@ -35,7 +35,7 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
     const [title, setTitle] = useState(defaultContent.title || "")
     const [targetDate, setTargetDate] = useState(defaultContent.targetDate || "")
     const [emoji, setEmoji] = useState(defaultContent.emoji || "PartyPopper")
-    const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>(() => (defaultContent.style as any) || 'minimal')
+    const [style, setStyle] = useState<'minimal' | 'bold' | 'neon'>(defaultContent.style || 'minimal')
     const [isPending, setIsPending] = useState(false)
 
     // Manual update to avoid useEffect loops
@@ -144,8 +144,8 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
 
             <EditorSection title="Ícone">
                 <GridSelector
-                    options={ICONS.map(i => ({ id: i.name as any, label: i.name, icon: i.icon }))}
-                    activeId={emoji as any}
+                    options={ICONS.map(i => ({ id: i.name, label: i.name, icon: i.icon }))}
+                    activeId={emoji}
                     onChange={(id) => {
                         setEmoji(id as string)
                         triggerUpdate({ emoji: id as string })
@@ -163,10 +163,11 @@ export function UniversalCountdownEditor({ block, onUpdate, onAdd, onClose }: Co
                         { id: 'bold', label: 'Bold', icon: Box },
                         { id: 'neon', label: 'Neon', icon: Sparkles },
                     ]}
-                    activeId={style as any}
+                    activeId={style}
                     onChange={(id) => {
-                        setStyle(id as any)
-                        triggerUpdate({ style: id as any })
+                        const newStyle = id as 'minimal' | 'bold' | 'neon'
+                        setStyle(newStyle)
+                        triggerUpdate({ style: newStyle })
                     }}
                     columns={4}
                     variant="ghost"

@@ -17,12 +17,16 @@ export async function getAuditFeed(page = 1, pageSize = 20) {
                 skip: skip,
                 orderBy: { createdAt: 'desc' },
                 include: {
-                    user: {
-                        select: {
-                            id: true,
-                            username: true,
-                            role: true,
-                            isBanned: true
+                    room: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    username: true,
+                                    role: true,
+                                    isBanned: true
+                                }
+                            }
                         }
                     }
                 }
@@ -50,7 +54,11 @@ export async function adminDeleteBlock(blockId: string) {
     try {
         const block = await prisma.moodBlock.findUnique({
             where: { id: blockId },
-            include: { user: true }
+            include: {
+                room: {
+                    include: { user: true }
+                }
+            }
         });
 
         await prisma.moodBlock.update({
@@ -64,11 +72,11 @@ export async function adminDeleteBlock(blockId: string) {
                 action: "DELETE_BLOCK",
                 targetId: blockId,
                 targetType: "MoodBlock",
-                metadata: block ? { type: block.type, content: block.content, author: block.user.username } : {}
+                metadata: block ? { type: block.type, content: block.content, author: block.room.user.username } : {}
             }
         });
 
-        revalidateProfile(block?.user?.username, ["/admin/audit", `/${block?.user?.username}`])
+        revalidateProfile(block?.room?.user?.username, ["/admin/audit", `/${block?.room?.user?.username}`])
         return { success: true }
     } catch (error) {
         console.error("[adminDeleteBlock] Error:", error)

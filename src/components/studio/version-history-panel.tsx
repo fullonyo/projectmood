@@ -14,6 +14,17 @@ import { EditorHeader } from "./EditorUI"
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
+export interface RoomVersion {
+    id: string;
+    label: string | null;
+    isActive: boolean;
+    createdAt: string | Date;
+    roomId?: string;
+    blocks?: any;
+    profileData?: any;
+    updatedAt?: string | Date;
+}
+
 interface VersionHistoryPanelProps {
     onRollbackComplete: () => void;
     setPreviewData: (data: PreviewData | null) => void;
@@ -22,13 +33,13 @@ interface VersionHistoryPanelProps {
 }
 
 interface VersionItemProps {
-    version: any;
+    version: RoomVersion;
     idx: number;
     previewId: string | null;
     isPending: boolean;
     onPreview: (id: string) => void;
     onRollback: (id: string, type: 'full' | 'draft' | 'live' | 'delete') => void;
-    t: any;
+    t: (key: string) => string;
 }
 
 // ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
@@ -132,7 +143,7 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
     const { t } = useTranslation()
     const router = useRouter()
 
-    const [versions, setVersions] = useState<any[]>([])
+    const [versions, setVersions] = useState<RoomVersion[]>([])
     const [loadingHistory, setLoadingHistory] = useState(false)
     const [loadingMore, setLoadingMore] = useState(false)
     const [page, setPage] = useState(1)
@@ -207,7 +218,7 @@ export function VersionHistoryPanel({ onRollbackComplete, setPreviewData, onClos
                 setPreviewId(versionId)
                 setPreviewData({
                     blocks: result.blocks,
-                    profile: result.profile
+                    profile: { ...result.profile, id: roomId }
                 })
             }
         } catch (error) {

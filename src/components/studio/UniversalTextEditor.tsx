@@ -17,7 +17,7 @@ import { FrameType, FrameContainer } from "./FrameContainer"
 import { SmartText, TextBehavior } from "./SmartText"
 import { FRAME_OPTIONS } from "@/lib/editor-constants"
 
-const BEHAVIORS: { id: TextBehavior; label: string; icon: any }[] = [
+const BEHAVIORS: { id: TextBehavior; label: string; icon: React.ComponentType }[] = [
     { id: 'static', label: 'Estático', icon: Type },
     { id: 'ticker', label: 'Letreiro', icon: Play },
     { id: 'typewriter', label: 'Legenda', icon: Terminal },
@@ -53,6 +53,11 @@ const COLORS = [
 import { MoodBlock, TextContent } from "@/types/database"
 import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, EditorSlider, EditorSwitch, ListSelector } from "./EditorUI"
 
+interface DialogueLine {
+    name: string;
+    text: string;
+}
+
 interface UniversalTextEditorProps {
     block?: MoodBlock | null
     onUpdate?: (updates: Partial<MoodBlock>) => void
@@ -69,7 +74,7 @@ export function UniversalTextEditor({
     highlight
 }: UniversalTextEditorProps) {
     const { t } = useTranslation()
-    const content = block?.content || {}
+    const content = block?.content as TextContent || {}
 
     // Determine initial behavior
     const initialBehavior: TextBehavior = content.behavior || 'static'
@@ -92,14 +97,14 @@ export function UniversalTextEditor({
     const [dialogueStyle, setDialogueStyle] = useState(content.dialogueStyle || 'novel')
     const [dialogueFormat, setDialogueFormat] = useState(content.dialogueFormat || 'alternating')
     const [nameStyle, setNameStyle] = useState(content.nameStyle || 'bold')
-    const [dialogueLines, setDialogueLines] = useState<{name: string, text: string}[]>(
+    const [dialogueLines, setDialogueLines] = useState<DialogueLine[]>(
         content.dialogueLines || [{ name: '', text: '' }]
     )
 
     const [isPending, startTransition] = useTransition()
 
     // Real-time Preview
-    const triggerUpdate = (updates: any) => {
+    const triggerUpdate = (updates: Partial<TextContent>) => {
         if (!block?.id || !onUpdate) return
 
         const currentContent = {
@@ -197,7 +202,7 @@ export function UniversalTextEditor({
                         const newBehavior = id as TextBehavior
                         setBehavior(newBehavior)
                         
-                        let extraUpdates: any = { behavior: newBehavior }
+                        const extraUpdates: Partial<TextContent> = { behavior: newBehavior }
                         
                         if (newBehavior === 'ticker') {
                             setFontSize('3xl')
@@ -286,7 +291,7 @@ export function UniversalTextEditor({
                             columns={4}
                             variant="ghost"
                             onChange={(id) => {
-                                setCursorType(id as any)
+                                setCursorType(id as 'block' | 'bar' | 'underline' | 'none')
                                 triggerUpdate({ cursorType: id })
                             }}
                         />
@@ -385,8 +390,8 @@ export function UniversalTextEditor({
                             options={FRAME_OPTIONS.map(f => ({ id: f.id as string, label: f.label }))}
                             activeId={frame as string}
                             onChange={(id) => {
-                                setFrame(id as any)
-                                triggerUpdate({ frame: id as any })
+                                setFrame(id as FrameType)
+                                triggerUpdate({ frame: id as FrameType })
                             }}
                         />
                     </EditorSection>
@@ -440,8 +445,8 @@ export function UniversalTextEditor({
                                         ]}
                                         activeId={direction as string}
                                         onChange={(id) => {
-                                            setDirection(id as any)
-                                            triggerUpdate({ direction: id as any })
+                                            setDirection(id as 'left' | 'right')
+                                            triggerUpdate({ direction: id as 'left' | 'right' })
                                         }}
                                     />
                                 </EditorSection>
@@ -482,8 +487,8 @@ export function UniversalTextEditor({
                             <div className="col-span-2 space-y-4">
                                 <Label className="text-[10px] uppercase font-black tracking-widest opacity-40">Selecione seu Ícone</Label>
                                 <GridSelector
-                                    options={STATUS_ICONS.map(s => ({ id: s.id as any, label: '', icon: s.icon }))}
-                                    activeId={statusIcon as any}
+                                    options={STATUS_ICONS.map(s => ({ id: s.id, label: '', icon: s.icon }))}
+                                    activeId={statusIcon}
                                     onChange={(id) => {
                                         setStatusIcon(id)
                                         triggerUpdate({ icon: id })
@@ -497,8 +502,8 @@ export function UniversalTextEditor({
 
                     <EditorSection title="Cor do Texto">
                         <GridSelector
-                            options={COLORS.map(c => ({ id: c.value as any, label: '', icon: undefined, color: c.value || '#ccc' }))}
-                            activeId={textColor as any}
+                            options={COLORS.map(c => ({ id: c.value, label: '', icon: undefined, color: c.value || '#ccc' }))}
+                            activeId={textColor}
                             onChange={(id) => {
                                 setTextColor(id)
                                 triggerUpdate({ textColor: id })

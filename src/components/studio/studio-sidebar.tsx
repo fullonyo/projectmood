@@ -35,7 +35,7 @@ import {
 
 type TopLevelTab = 'elements' | 'layers' | 'room'
 
-import { MoodBlock, Room } from "@/types/database"
+import { MoodBlock, Room, MoodBlockContent, RoomVisualConfig } from "@/types/database"
 
 export function StudioSidebar({
     profile,
@@ -63,12 +63,12 @@ export function StudioSidebar({
     removeBlocks: (ids: string[]) => void;
     onGroup: () => void;
     onUngroup: () => void;
-    onUpdateProfile: (data: Partial<Room>) => void;
+    onUpdateProfile: (data: Partial<RoomVisualConfig>) => void;
     blocks: MoodBlock[];
     systemFlags?: Record<string, boolean>;
     publishedAt?: string | null;
     onNormalize?: () => void;
-    onAddBlock?: (type: string, content: any) => Promise<void>;
+    onAddBlock?: (type: string, content: MoodBlockContent) => Promise<void>;
 }) {
 
     const { t } = useTranslation()
@@ -78,7 +78,7 @@ export function StudioSidebar({
     const [isClearing, setIsClearing] = useState(false)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-    const handleAddBlock = async (type: string, content?: any) => {
+    const handleAddBlock = async (type: string, content?: MoodBlockContent) => {
         if (content && onAddBlock) {
             await onAddBlock(type, content);
             // O fechamento do draft e seleção do novo bloco agora é gerido 
@@ -110,7 +110,7 @@ export function StudioSidebar({
             }, 50)
         }
         // ✅ Usa .length em vez do array inteiro — referência do array muda a cada render
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, [selectedBlocks.length, activeTab])
 
     const tabs = [

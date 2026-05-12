@@ -1,5 +1,5 @@
 "use client"
-import { MoodBlock } from "@/types/database"
+import { MoodBlock, MoodBlockContent } from "@/types/database"
 import { useTranslation } from "@/i18n/context"
 import {
     Layers, Eye, EyeOff, Lock, Unlock,
@@ -58,7 +58,7 @@ export function UniversalLayersPanel({
             if (block.groupId && !processedGroups.has(block.groupId)) {
                 const groupMembers = validBlocks.filter(b => b.groupId === block.groupId)
                 if (groupMembers.length > 0) {
-                    const groupName = (block.content as any)?.groupName || `Group // ${block.groupId.split('_')[1]?.substring(0, 4)}`
+                    const groupName = (block.content as MoodBlockContent & { groupName?: string })?.groupName || `Group // ${block.groupId.split('_')[1]?.substring(0, 4)}`
                     result.push({ type: 'header', id: `header_${block.groupId}`, groupId: block.groupId, name: groupName })
                     processedGroups.add(block.groupId)
                 }
@@ -222,8 +222,13 @@ export function UniversalLayersPanel({
                     className="space-y-1"
                 >
                     {entities.map((entity, index) => {
-                        const isLastInGroup = entity.type === 'block' && entity.data.groupId && 
-                            (index === entities.length - 1 || (entities[index + 1].type === 'block' && entities[index + 1].data.groupId !== entity.data.groupId) || entities[index + 1].type === 'header')
+                        let isLastInGroup = false;
+                        if (entity.type === 'block' && entity.data.groupId) {
+                            const nextEntity = entities[index + 1];
+                            isLastInGroup = index === entities.length - 1 || 
+                                            nextEntity.type === 'header' || 
+                                            (nextEntity.type === 'block' && nextEntity.data.groupId !== entity.data.groupId);
+                        }
 
                         return (
                             <Reorder.Item 
@@ -238,7 +243,7 @@ export function UniversalLayersPanel({
                                         isCollapsed={collapsedGroups.includes(entity.groupId)}
                                         onToggle={() => toggleGroupCollapse(entity.groupId)}
                                         onSelect={(multi: boolean) => handleHeaderSelect(entity.groupId, multi)}
-                                        onUpdateGroup={(updates: any) => {
+                                        onUpdateGroup={(updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => {
                                             const ids = blocks.filter(b => b.groupId === entity.groupId).map(b => b.id)
                                             onUpdateBlocks(ids, updates)
                                         }}
@@ -255,7 +260,7 @@ export function UniversalLayersPanel({
                                         block={entity.data}
                                         isLastInGroup={isLastInGroup}
                                         isSelected={selectedIds.includes(entity.id)}
-                                        onSelect={(id, multi) => {
+                                        onSelect={(id: string, multi: boolean) => {
                                             setSelectedIds(prev => {
                                                 if (multi) {
                                                     if (prev.includes(id)) return prev.filter(i => i !== id)
@@ -267,7 +272,7 @@ export function UniversalLayersPanel({
                                         onUpdate={onUpdateBlock}
                                         t={t}
                                         setHoveredBlockIds={setHoveredBlockIds}
-                                        onDelete={(id) => onDeleteRequest([id])}
+                                        onDelete={(id: string) => onDeleteRequest([id])}
                                     />
                                 )}
                             </Reorder.Item>
@@ -298,13 +303,26 @@ export function UniversalLayersPanel({
     )
 }
 
-const FolderHeader = ({ groupId, name, isCollapsed, onToggle, onSelect, onUpdateGroup, onDelete, members, t, setHoveredBlockIds }: any) => {
+interface FolderHeaderProps {
+    groupId: string;
+    name: string;
+    isCollapsed: boolean;
+    onToggle: () => void;
+    onSelect: (multi: boolean) => void;
+    onUpdateGroup: (updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => void;
+    onDelete: () => void;
+    members: MoodBlock[];
+    t: (key: string) => string;
+    setHoveredBlockIds: (ids: string[]) => void;
+}
+
+const FolderHeader = ({ groupId, name, isCollapsed, onToggle, onSelect, onUpdateGroup, onDelete, members, t, setHoveredBlockIds }: FolderHeaderProps) => {
     const [isEditing, setIsEditing] = useState(false)
     const [tempName, setTempName] = useState(name)
     const dragControls = useDragControls()
 
-    const isAllHidden = members.every((m: any) => m.isHidden)
-    const isAllLocked = members.every((m: any) => m.isLocked)
+    const isAllHidden = members.every((m) => m.isHidden)
+    const isAllLocked = members.every((m) => m.isLocked)
 
     const handleSaveName = () => {
         onUpdateGroup((block: MoodBlock) => ({ content: { ...(block.content || {}), groupName: tempName } }))
@@ -314,7 +332,7 @@ const FolderHeader = ({ groupId, name, isCollapsed, onToggle, onSelect, onUpdate
     return (
         <motion.div 
             onClick={(e) => onSelect(e.shiftKey || e.metaKey)}
-            onMouseEnter={() => setHoveredBlockIds(members.map((m: any) => m.id))}
+            onMouseEnter={() => setHoveredBlockIds(members.map((m) => m.id))}
             onMouseLeave={() => setHoveredBlockIds([])}
             className={cn(
                 "flex items-center gap-2 px-2 py-2 group/folder cursor-pointer rounded-xl transition-all border border-transparent mb-0.5 relative z-10",
@@ -370,13 +388,13 @@ const FolderHeader = ({ groupId, name, isCollapsed, onToggle, onSelect, onUpdate
 
             <div className="flex items-center gap-0.5 opacity-0 group-hover/folder:opacity-100 transition-opacity pr-1">
                 <button 
-                    onClick={(e) => { e.stopPropagation(); onUpdateGroup((b: any) => ({ isHidden: !isAllHidden })); }}
+                    onClick={(e) => { e.stopPropagation(); onUpdateGroup(() => ({ isHidden: !isAllHidden })); }}
                     className={cn("p-1.5 rounded-lg hover:bg-white dark:hover:bg-zinc-800 transition-colors", isAllHidden && "text-blue-600")}
                 >
                     {isAllHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
                 <button 
-                    onClick={(e) => { e.stopPropagation(); onUpdateGroup((b: any) => ({ isLocked: !isAllLocked })); }}
+                    onClick={(e) => { e.stopPropagation(); onUpdateGroup(() => ({ isLocked: !isAllLocked })); }}
                     className={cn("p-1.5 rounded-lg hover:bg-white dark:hover:bg-zinc-800 transition-colors", isAllLocked && "text-amber-600")}
                 >
                     {isAllLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
@@ -392,9 +410,20 @@ const FolderHeader = ({ groupId, name, isCollapsed, onToggle, onSelect, onUpdate
     )
 }
 
-const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, setHoveredBlockIds, isLastInGroup }: any) => {
+interface LayerItemProps {
+    block: MoodBlock;
+    isSelected: boolean;
+    onSelect: (id: string, multi: boolean) => void;
+    onUpdate: (id: string, updates: Partial<MoodBlock>) => void;
+    onDelete: (id: string) => void;
+    t: (key: string) => string;
+    setHoveredBlockIds: (ids: string[]) => void;
+    isLastInGroup: boolean;
+}
+
+const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, setHoveredBlockIds, isLastInGroup }: LayerItemProps) => {
     const [isEditingName, setIsEditingName] = useState(false)
-    const [tempName, setTempName] = useState((block.content as any).customName || "")
+    const [tempName, setTempName] = useState((block.content as MoodBlockContent & { customName?: string }).customName || "")
     const dragControls = useDragControls()
 
     const getBlockIcon = (type: string) => {
@@ -414,7 +443,7 @@ const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, se
     }
 
     const getBlockLabel = (block: MoodBlock) => {
-        const content = block.content as any
+        const content = block.content as MoodBlockContent & { customName?: string, text?: string, trackName?: string }
         if (content.customName) return content.customName
         switch (block.type) {
             case 'text': return content.text?.substring(0, 20) || t('block_manager.labels.text')
@@ -426,12 +455,12 @@ const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, se
             case 'moodStatus': return t('block_manager.labels.moodStatus')
             case 'countdown': return t('block_manager.labels.countdown')
             case 'weather': return t('block_manager.labels.weather')
-            default: return t(`block_manager.labels.${block.type as any}`) || block.type.charAt(0).toUpperCase() + block.type.slice(1)
+            default: return t(`block_manager.labels.${block.type}`) || block.type.charAt(0).toUpperCase() + block.type.slice(1)
         }
     }
 
     const handleSaveName = () => {
-        onUpdate(block.id, { content: { ...(block.content as any), customName: tempName } })
+        onUpdate(block.id, { content: { ...(block.content as MoodBlockContent), customName: tempName } })
         setIsEditingName(false)
     }
 
@@ -514,10 +543,10 @@ const LayerItem = memo(({ block, isSelected, onSelect, onUpdate, onDelete, t, se
                         )}
                         {block.isLocked && <Lock className="w-2.5 h-2.5 text-amber-500" />}
                     </div>
-                    {(block.content as any).customName && (
+                    {(block.content as MoodBlockContent & { customName?: string }).customName && (
                         <div className="flex items-center gap-3">
                             <span className="text-[8px] font-black text-zinc-400/60 tracking-[0.1em] uppercase">
-                                {t(`block_manager.labels.${block.type as any}`) || block.type}
+                                {t(`block_manager.labels.${block.type}`) || block.type}
                             </span>
                         </div>
                     )}

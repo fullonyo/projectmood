@@ -93,7 +93,7 @@ export default async function Image({ params }: { params: { handle: string } }) 
                     {avatarUrl ? (
                         <img
                             src={avatarUrl}
-                            alt={name}
+                            alt={name || "User Avatar"}
                             style={{
                                 width: 200,
                                 height: 200,

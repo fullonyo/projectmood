@@ -23,7 +23,20 @@ import { SmartSocial } from "./SmartSocial"
 import { SmartWeather } from "./SmartWeather"
 import { SmartGuestbook } from "./SmartGuestbook"
 
-import { MoodBlock } from "@/types/database"
+import { 
+    MoodBlock, 
+    TextContent, 
+    PhotoContent, 
+    CountdownContent, 
+    SocialContent, 
+    WeatherContent, 
+    ShapeContent, 
+    RorschachContent, 
+    DoodleContent, 
+    TapeContent, 
+    UniversalMediaContent,
+    GuestbookContent
+} from "@/types/database"
 import { BlockErrorBoundary } from "./block-error-boundary"
 
 interface BlockRendererProps {
@@ -45,7 +58,8 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
     const scale = useViewportScale()
 
     const renderText = () => {
-        const behavior = content.behavior || (
+        const textContent = content as TextContent
+        const behavior = textContent.behavior || (
             block.type === 'ticker' ? 'ticker' :
                 block.type === 'floating' ? 'floating' :
                     block.type === 'subtitle' ? 'typewriter' :
@@ -53,53 +67,54 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                             (block.type === 'moodStatus' || block.type === 'mood-status') ? 'status' :
                                 'static'
         )
-        const frame = content.frame || (content.style === 'simple' ? 'none' : content.style as any) || (['ticker', 'subtitle', 'floating'].includes(block.type) ? 'minimal' : 'none')
+        const frame = textContent.frame || (textContent.style === 'simple' ? 'none' : textContent.style as any) || (['ticker', 'subtitle', 'floating'].includes(block.type) ? 'minimal' : 'none')
         
         return (
             <FrameContainer frame={frame}>
                 <SmartText
-                    text={content.text}
+                    text={textContent.text}
                     behavior={behavior as TextBehavior}
-                    style={content.style}
-                    textColor={content.textColor}
-                    fontSize={content.fontSize}
-                    align={content.align}
-                    speed={content.speed}
-                    direction={content.direction}
-                    cursorType={content.cursorType}
-                    author={content.author}
-                    showQuotes={content.showQuotes}
-                    icon={content.icon}
-                    dialogueStyle={content.dialogueStyle}
-                    dialogueFormat={content.dialogueFormat}
-                    nameStyle={content.nameStyle}
-                    dialogueLines={content.dialogueLines}
-                    typingRhythm={content.typingRhythm}
-                    revealMode={content.revealMode}
+                    style={textContent.style as any}
+                    textColor={textContent.textColor}
+                    fontSize={textContent.fontSize as any}
+                    align={textContent.align as any}
+                    speed={textContent.speed}
+                    direction={textContent.direction as "left" | "right"}
+                    cursorType={textContent.cursorType as any}
+                    author={textContent.author}
+                    showQuotes={textContent.showQuotes}
+                    icon={textContent.icon}
+                    dialogueStyle={textContent.dialogueStyle as any}
+                    dialogueFormat={textContent.dialogueFormat as any}
+                    nameStyle={textContent.nameStyle as any}
+                    dialogueLines={textContent.dialogueLines}
+                    typingRhythm={textContent.typingRhythm as any}
+                    revealMode={textContent.revealMode as any}
                 />
             </FrameContainer>
         )
     }
 
     const renderMedia = () => {
-        const mediaType = content.mediaType || (block.type === 'music' ? 'music' : 'video')
-        const frame = content.frame || (mediaType === 'music' ? 'minimal' : 'none')
+        const mediaContent = content as UniversalMediaContent
+        const mediaType = mediaContent.mediaType || (block.type === 'music' ? 'music' : 'video')
+        const frame = mediaContent.frame || (mediaType === 'music' ? 'minimal' : 'none')
         
         return (
-            <FrameContainer frame={frame}>
+            <FrameContainer frame={frame as any}>
                 <SmartMedia
                     mediaType={mediaType as MediaType}
-                    videoId={content.videoId}
-                    trackId={content.trackId}
-                    audioUrl={content.audioUrl}
+                    videoId={mediaContent.videoId}
+                    trackId={mediaContent.trackId}
+                    audioUrl={mediaContent.audioUrl}
                     audioMetadata={{
-                        name: content.name,
-                        artist: content.artist
+                        name: mediaContent.name,
+                        artist: mediaContent.artist
                     }}
                     isPublic={isPublic}
                     hasInteracted={hasInteracted}
-                    lyrics={content.lyrics}
-                    lyricsDisplay={content.lyricsDisplay}
+                    lyrics={mediaContent.lyrics}
+                    lyricsDisplay={mediaContent.lyricsDisplay}
                 />
             </FrameContainer>
         )
@@ -118,8 +133,13 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
 
             case 'photo':
                 return (
-                    <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
-                        <SmartPhoto content={content} />
+                    <FrameContainer frame={(content as PhotoContent).frame as FrameType} caption={(content as PhotoContent).caption}>
+                        <SmartPhoto content={{
+                            ...(content as PhotoContent),
+                            imageUrl: (content as PhotoContent).imageUrl || '',
+                            filter: (content as PhotoContent).filter || 'none',
+                            frame: (content as PhotoContent).frame || 'none'
+                        }} />
                     </FrameContainer>
                 )
 
@@ -130,47 +150,55 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                 return renderMedia()
 
             case 'shape':
+                const shapeContent = content as ShapeContent
                 return (
                     <SmartShape
-                        type={content.shapeType}
-                        color={content.color}
-                        blur={content.blur}
-                        sides={content.sides}
-                        points={content.points}
-                        seed={content.seed}
-                        glowIntensity={content.glowIntensity}
-                        isFloating={content.isFloating}
-                        floatSpeed={content.floatSpeed}
-                        gradient={content.gradient}
-                        gradientType={content.gradientType as any}
+                        type={shapeContent.shapeType}
+                        color={shapeContent.color}
+                        blur={shapeContent.blur}
+                        sides={shapeContent.sides}
+                        points={shapeContent.points}
+                        seed={shapeContent.seed}
+                        glowIntensity={shapeContent.glowIntensity}
+                        isFloating={shapeContent.isFloating}
+                        floatSpeed={shapeContent.floatSpeed}
+                        gradient={shapeContent.gradient}
+                        gradientType={shapeContent.gradientType as "linear" | "radial"}
                     />
                 )
 
             case 'rorschach':
+                const rorschachContent = content as RorschachContent
                 return (
                     <SmartRorschach
-                        seed={content.seed}
-                        color={content.color}
-                        blur={content.blur}
-                        symmetry={content.symmetry}
-                        complexity={content.complexity}
+                        seed={rorschachContent.seed}
+                        color={rorschachContent.color}
+                        blur={rorschachContent.blur}
+                        symmetry={rorschachContent.symmetry}
+                        complexity={rorschachContent.complexity}
                     />
                 )
                 
             case 'gif':
                 return (
-                    <FrameContainer frame={content.frame || 'none'} caption={content.caption}>
-                        <SmartPhoto content={content} />
+                    <FrameContainer frame={(content as PhotoContent).frame as FrameType} caption={(content as PhotoContent).caption}>
+                        <SmartPhoto content={{
+                            ...(content as PhotoContent),
+                            imageUrl: (content as PhotoContent).imageUrl || '',
+                            filter: (content as PhotoContent).filter || 'none',
+                            frame: (content as PhotoContent).frame || 'none'
+                        }} />
                     </FrameContainer>
                 )
 
             case 'tape':
+                const tapeContent = content as TapeContent
                 return (
                     <div
                         className="w-full h-full shadow-none border border-black/5 backdrop-blur-[2px]"
                         style={{
-                            backgroundColor: content.color,
-                            backgroundImage: content.pattern === 'dots' ? `radial-gradient(rgba(0,0,0,0.1) ${Math.max(1, Math.round(1 * scale))}px, transparent ${Math.max(1, Math.round(1 * scale))}px)` : 'none',
+                            backgroundColor: tapeContent.color,
+                            backgroundImage: tapeContent.pattern === 'dots' ? `radial-gradient(rgba(0,0,0,0.1) ${Math.max(1, Math.round(1 * scale))}px, transparent ${Math.max(1, Math.round(1 * scale))}px)` : 'none',
                             backgroundSize: `${Math.round(4 * scale)}px ${Math.round(4 * scale)}px`,
                             clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 98%)'
                         }}
@@ -178,13 +206,19 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                 )
 
             case 'weather':
-                return <SmartWeather content={content} isInsideFrame={content.frame && content.frame !== 'none'} />
+                const weatherContent = content as WeatherContent
+                return <SmartWeather content={{
+                    ...weatherContent,
+                    vibe: weatherContent.vibe || 'clear',
+                    location: weatherContent.location || 'Unknown'
+                }} isInsideFrame={Boolean(weatherContent.frame && weatherContent.frame !== 'none')} />
 
             case 'doodle':
-                if (!content.image) return null;
+                const doodleContent = content as DoodleContent
+                if (!doodleContent.image) return null;
                 return (
                     <img
-                        src={content.image}
+                        src={doodleContent.image}
                         alt="doodle"
                         loading="lazy"
                         decoding="async"
@@ -193,7 +227,12 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                 )
 
             case 'social':
-                return <SmartSocial content={content} isPublic={isPublic} isInsideFrame={content.frame && content.frame !== 'none'} />
+                const socialContent = content as SocialContent
+                return <SmartSocial content={{
+                    ...socialContent,
+                    label: socialContent.label || '',
+                    style: (socialContent.style as any) || 'minimal'
+                }} isPublic={isPublic} isInsideFrame={Boolean(socialContent.frame && socialContent.frame !== 'none')} />
 
             case 'guestbook':
                 return (
@@ -203,7 +242,11 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                 )
 
             case 'countdown':
-                return <SmartCountdown content={content} />
+                const countdownContent = content as CountdownContent
+                return <SmartCountdown content={{
+                    ...countdownContent,
+                    style: countdownContent.style || 'minimal'
+                }} />
 
             default:
                 return <div className="p-4 bg-red-500/10 text-red-500 text-[10px] uppercase font-black">Unknown Block Type: {block.type}</div>

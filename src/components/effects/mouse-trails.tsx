@@ -18,8 +18,8 @@ export function MouseTrails({ type }: MouseTrailsProps) {
         if (!ctx) return
 
         let animationFrameId: number
-        let particles: Particle[] = []
-        let mouse = { x: 0, y: 0 }
+        const particles: Particle[] = []
+        const mouse = { x: 0, y: 0 }
 
         const resize = () => {
             canvas.width = window.innerWidth

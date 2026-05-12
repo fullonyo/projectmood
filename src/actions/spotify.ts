@@ -37,7 +37,16 @@ export async function searchSpotifyTracks(query: string) {
     });
 
     const data = await response.json();
-    return data.tracks.items.map((track: any) => ({
+    if (!data.tracks) return [];
+
+    return data.tracks.items.map((track: { 
+        id: string; 
+        name: string; 
+        artists: { name: string }[]; 
+        album: { images: { url: string }[] }; 
+        preview_url?: string; 
+        external_urls: { spotify: string } 
+    }) => ({
         id: track.id,
         name: track.name,
         artist: track.artists[0].name,

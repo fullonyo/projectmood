@@ -1,5 +1,5 @@
 "use client"
-import { MoodBlock } from "@/types/database"
+import { MoodBlock, MoodBlockContent } from "@/types/database"
 import { useTranslation } from "@/i18n/context"
 import { 
     Eye, EyeOff, Lock, Unlock, 
@@ -30,7 +30,7 @@ export function UniversalCommonEditor({
     const allLocked = selectedBlocks.every(b => b.isLocked)
     
     // Average opacity or mixed
-    const opacities = selectedBlocks.map(b => (b.content as any).opacity ?? 1)
+    const opacities = selectedBlocks.map(b => (b.content as MoodBlockContent & { opacity?: number }).opacity ?? 1)
     const isMixedOpacity = new Set(opacities).size > 1
     const [localOpacity, setLocalOpacity] = useState(opacities[0])
 
@@ -164,7 +164,7 @@ export function UniversalCommonEditor({
                 <button
                     onClick={() => {
                         if (confirm(`Tem certeza que deseja excluir esses ${selectedBlocks.length} itens?`)) {
-                            onUpdateBlocks(blockIds, { isDeleted: true } as any)
+                            onUpdateBlocks(blockIds, { deletedAt: new Date() })
                             onClose()
                         }
                     }}

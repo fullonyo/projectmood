@@ -29,7 +29,7 @@ export default async function AdminControlPage() {
     }
 
     const userTrend = calculateTrend(metrics.newUsers24h.current, metrics.newUsers24h.prev)
-    const activeTrend = calculateTrend(metrics.activeProfiles7d.current, metrics.activeProfiles7d.prev)
+    const activeTrend = calculateTrend(metrics.activeRooms7d.current, metrics.activeRooms7d.prev)
 
     return (
         <div className="space-y-12 pb-20">
@@ -73,7 +73,7 @@ export default async function AdminControlPage() {
                 />
                 <MetricCard
                     title="Active Moods (7d)"
-                    value={metrics.activeProfiles7d.current}
+                    value={metrics.activeRooms7d.current}
                     icon={Activity}
                     trend={activeTrend}
                     description="vs. previous week"

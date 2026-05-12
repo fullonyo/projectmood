@@ -483,3 +483,25 @@ Para detalhes profundos, consulte: `docs/CANVAS_ARCHITECTURE.md`
 3.  **Eventos Customizados**: Se adicionar um novo tipo de manipulação global (ex: skew, zoom), use o barramento `CANVAS_EVENTS` em `canvas-utils.ts`.
 4.  **Coordenadas**: Sempre converta cálculos de pixel para porcentagem (%) usando as dimensões do canvas antes de salvar.
 5.  **Smart Selection**: Sempre respeite o `groupId`. Se um bloco for movido, todos do grupo devem segui-lo (o `useCanvasManager` já faz isso no `updateBlocks`).
+
+---
+
+## 🛡️ Estabilização & Correções Críticas (Maio 2026)
+
+### 1. Migração Completa: Room vs Profile
+O ecossistema foi totalmente migrado para o modelo **Room**.
+- **Relações**: User → Room → MoodBlock. 
+- **Analytics**: RoomAnalytics substitui o antigo ProfileAnalytics.
+- **Actions**: admin-analytics.ts, moderation.ts e guestbook.ts foram corrigidos para respeitar o novo schema.
+
+### 2. Lógica de Visualizações (Sovereign Access)
+A contagem de visualizações em page.tsx agora ocorre apenas se a sala não estiver expirada ou com limite atingido.
+
+### 3. Estabilidade de Tipos (TypeScript Strict)
+- **Eliminação de `any`**: Componentes críticos como `CanvasItem`, `VersionHistoryPanel`, `ActionsSidebar` e `RoomEnvironment` foram refatorados para usar interfaces rigorosas.
+- **Preview System**: Implementado suporte a `RoomVisualConfig` e `PreviewData` para permitir a visualização de versões históricas sem comprometer a tipagem do canvas.
+- **BlockRenderer Casting**: O renderizador central agora utiliza casting específico para cada interface de conteúdo (`TextContent`, `PhotoContent`, etc.), garantindo que as propriedades de cada bloco sejam acessadas com segurança.
+- **Typecheck**: O projeto agora passa integralmente em `npx tsc --noEmit`. 
+- **Username Safety**: Tratamento de username nulo e normalização para lowercase implementados em todo o fluxo de autenticação e perfil.
+
+*Documentação atualizada por Antigravity em 12/05/2026.*

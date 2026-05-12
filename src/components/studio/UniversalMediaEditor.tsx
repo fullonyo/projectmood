@@ -15,14 +15,15 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { FrameType } from "./FrameContainer"
 import { MediaType } from "./SmartMedia"
-import { MoodBlock } from "@/types/database"
 import { getFrameOptions } from "@/lib/editor-constants"
 import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, ListSelector } from "./EditorUI"
+
+import { MoodBlock, UniversalMediaContent } from "@/types/database"
 
 interface UniversalMediaEditorProps {
     block?: MoodBlock | null
     onUpdate?: (updates: Partial<MoodBlock>) => void
-    onAdd?: (content: any) => Promise<void>
+    onAdd?: (content: UniversalMediaContent) => Promise<void>
     onClose?: () => void
 }
 
@@ -37,12 +38,12 @@ export function UniversalMediaEditor({
     const { t } = useTranslation()
     const [isPending, startTransition] = useTransition()
 
-    const content = block?.content || {}
+    const content = block?.content as UniversalMediaContent || {}
     const [mediaType, setMediaType] = useState<MediaType>(content.mediaType || (block?.type === 'music' ? 'music' : 'video'))
     const [videoId, setVideoId] = useState(content.videoId || "")
     const [trackId, setTrackId] = useState(content.trackId || "")
     const [audioUrl, setAudioUrl] = useState(content.audioUrl || "")
-    const [frame, setFrame] = useState<FrameType>(content.frame || (block?.type === 'music' ? 'minimal' : 'none'))
+    const [frame, setFrame] = useState<FrameType>(content.frame as FrameType || (block?.type === 'music' ? 'minimal' : 'none'))
 
     const [trackName, setTrackName] = useState(content.name || "")
     const [trackArtist, setTrackArtist] = useState(content.artist || "")
@@ -50,9 +51,16 @@ export function UniversalMediaEditor({
     const [lyrics, setLyrics] = useState(content.lyrics || "")
     const [lyricsDisplay, setLyricsDisplay] = useState<'integrated' | 'fullscreen'>(content.lyricsDisplay || 'integrated')
 
+    interface SpotifyTrack {
+        id: string;
+        name: string;
+        artist: string;
+        albumArt: string;
+    }
+
     const [urlInput, setUrlInput] = useState("")
     const [query, setQuery] = useState("")
-    const [results, setResults] = useState<any[]>([])
+    const [results, setResults] = useState<SpotifyTrack[]>([])
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
@@ -67,10 +75,10 @@ export function UniversalMediaEditor({
         setError(null)
         setIsLoading(true)
         const tracks = await searchSpotifyTracks(query)
-        if ('error' in tracks) {
+        if (tracks && 'error' in tracks) {
             setError(tracks.error as string)
         } else {
-            setResults(tracks)
+            setResults(tracks as SpotifyTrack[])
         }
         setIsLoading(false)
     }
@@ -117,10 +125,10 @@ export function UniversalMediaEditor({
         reader.readAsDataURL(file)
     }
 
-    const triggerUpdate = (updates: any) => {
+    const triggerUpdate = (updates: Partial<UniversalMediaContent>) => {
         if (!block?.id || !onUpdate) return
 
-        const currentContent = {
+        const currentContent: UniversalMediaContent = {
             mediaType,
             videoId,
             trackId,
@@ -143,7 +151,7 @@ export function UniversalMediaEditor({
     }
 
     const handleSave = () => {
-        const finalContent = {
+        const finalContent: UniversalMediaContent = {
             mediaType,
             videoId,
             trackId,
@@ -364,8 +372,9 @@ export function UniversalMediaEditor({
                                 options={FRAMES.map(f => ({ id: f.id as string, label: f.label }))}
                                 activeId={frame as string}
                                 onChange={(id) => {
-                                    setFrame(id as any)
-                                    triggerUpdate({ frame: id as any })
+                                    const newFrame = id as FrameType
+                                    setFrame(newFrame)
+                                    triggerUpdate({ frame: newFrame })
                                 }}
                             />
                         </EditorSection>
@@ -382,8 +391,9 @@ export function UniversalMediaEditor({
                                     ]}
                                     activeId={lyricsDisplay}
                                     onChange={(id) => {
-                                        setLyricsDisplay(id as any)
-                                        triggerUpdate({ lyricsDisplay: id as any })
+                                        const newMode = id as 'integrated' | 'fullscreen'
+                                        setLyricsDisplay(newMode)
+                                        triggerUpdate({ lyricsDisplay: newMode })
                                     }}
                                 />
                             </EditorSection>

@@ -28,10 +28,11 @@ import {
 } from "lucide-react"
 import { useTranslation } from "@/i18n/context"
 import { EditorHeader, EditorSection, ListSelector, GridSelector } from "./EditorUI"
+import { Room, RoomVisualConfig } from "@/types/database"
 
 interface EffectsEditorProps {
-    profile: any
-    onUpdateProfile?: (data: any) => void
+    profile: Room
+    onUpdateProfile?: (data: Partial<RoomVisualConfig>) => void
     onClose?: () => void
 }
 
@@ -39,7 +40,7 @@ export function UniversalEffectsEditor({ profile, onUpdateProfile, onClose }: Ef
     const { t } = useTranslation()
     const [showSuccess, setShowSuccess] = useState(false)
 
-    const handleUpdate = (field: string, value: string) => {
+    const handleUpdate = (field: keyof RoomVisualConfig, value: string) => {
         if (onUpdateProfile) {
             onUpdateProfile({ [field]: value })
             setShowSuccess(true)

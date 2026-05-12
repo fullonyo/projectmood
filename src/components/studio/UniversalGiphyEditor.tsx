@@ -7,12 +7,12 @@ import { Search, Loader2, Activity, Sparkles, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { EditorHeader, EditorSection } from "./EditorUI"
-import { MoodBlock } from "@/types/database"
+import { MoodBlock, PhotoContent } from "@/types/database"
 
 interface GiphyEditorProps {
     block?: MoodBlock | null
     onUpdate?: (id: string, updates: Partial<MoodBlock>) => void
-    onAdd?: (content: any) => Promise<void>
+    onAdd?: (content: PhotoContent) => Promise<void>
     onClose?: () => void
 }
 
@@ -54,7 +54,7 @@ export function UniversalGiphyEditor({ block, onUpdate, onAdd, onClose }: GiphyE
 
     const [addedIds, setAddedIds] = useState<Set<string>>(new Set())
 
-    const handleAddGif = (gif: any) => {
+    const handleAddGif = (gif: { id: string, url: string, title: string }) => {
         if (addedIds.has(gif.id)) return
         
         startTransition(async () => {

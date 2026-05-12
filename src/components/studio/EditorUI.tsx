@@ -102,7 +102,7 @@ export function EditorSection({ title, children, description }: EditorSectionPro
 }
 
 interface PillSelectorProps<T> {
-    options: { id: T, label: string, icon?: any }[]
+    options: { id: T, label: string, icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }[]
     activeId: T
     onChange: (id: T) => void
     variant?: 'standard' | 'scroll' | 'ghost'
@@ -152,7 +152,7 @@ export function PillSelector<T extends string>({ options, activeId, onChange, va
 }
 
 interface GridSelectorProps<T> {
-    options: { id: T, label: string, icon: any, color?: string }[]
+    options: { id: T, label: string, icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>, color?: string }[]
     activeId: T | T[]
     onChange: (id: T) => void
     columns?: number
@@ -260,7 +260,7 @@ export function GridSelector<T extends string>({ options, activeId, onChange, co
 }
 
 interface EditorListSelectorProps<T> {
-    options: { id: T, label: string, icon?: any }[]
+    options: { id: T, label: string, icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }[]
     activeId: T
     onChange: (id: T) => void
     maxHeight?: string
@@ -302,7 +302,7 @@ interface EditorActionButtonProps {
     isLoading?: boolean
     label: string
     variant?: 'primary' | 'danger'
-    icon?: any
+    icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
 }
 
 export function EditorActionButton({ onClick, disabled, isLoading, label, variant = 'primary', icon: Icon }: EditorActionButtonProps) {
@@ -341,7 +341,7 @@ interface EditorSliderProps {
     onChange: (val: number) => void
     label?: string
     unit?: string
-    icon?: any
+    icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
     variant?: 'standard' | 'ghost'
 }
 
@@ -415,7 +415,7 @@ interface EditorSwitchProps {
     value: boolean
     onChange: (val: boolean) => void
     label: string
-    icon?: any
+    icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
 }
 
 export function EditorSwitch({ value, onChange, label, icon: Icon }: EditorSwitchProps) {

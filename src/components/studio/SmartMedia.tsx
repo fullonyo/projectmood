@@ -9,7 +9,7 @@ import { useState, useRef, useEffect, useMemo } from "react"
 import { useAudio } from "./audio-context"
 import { useLyrics } from "./lyrics-context"
 
-export type MediaType = 'video' | 'music' | 'audio'
+export type MediaType = 'video' | 'music' | 'audio' | 'media'
 
 interface SmartMediaProps {
     mediaType: MediaType
@@ -35,7 +35,20 @@ interface LyricLine {
 const AudioPlayer = ({ 
     audioUrl, isPlaying, togglePlay, progress, setProgress, scale = 1, audioMetadata, 
     renderLyricsOverlay, isGlobalMuted, audioRef, handleTimeUpdate, setIsPlaying
-}: any) => {
+}: {
+    audioUrl: string;
+    isPlaying: boolean;
+    togglePlay: (e: React.MouseEvent) => void;
+    progress: number;
+    setProgress: (p: number) => void;
+    scale?: number;
+    audioMetadata?: { name?: string; artist?: string };
+    renderLyricsOverlay: (mode?: 'audio' | 'overlay') => React.ReactNode;
+    isGlobalMuted: boolean;
+    audioRef: React.RefObject<HTMLAudioElement | null>;
+    handleTimeUpdate: () => void;
+    setIsPlaying: (p: boolean) => void;
+}) => {
     // Generate static heights for waveform - more striking and organic variations
     const staticHeights = useMemo(() => {
         return [...Array(36)].map((_, i) => {
@@ -160,7 +173,13 @@ const AudioPlayer = ({
     )
 }
 
-const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, renderLyricsOverlay }: any) => {
+const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, renderLyricsOverlay }: {
+    videoId: string;
+    isPublic: boolean;
+    hasInteracted: boolean;
+    isGlobalMuted: boolean;
+    renderLyricsOverlay: () => React.ReactNode;
+}) => {
     const muteParam = (hasInteracted && !isGlobalMuted) ? '0' : '1';
     const autoplayParam = isPublic ? `&autoplay=1&mute=${muteParam}` : '';
 
@@ -180,7 +199,13 @@ const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, renderLy
     )
 }
 
-const MusicPlayer = ({ trackId, isPublic, hasInteracted, isGlobalMuted, renderLyricsOverlay }: any) => {
+const MusicPlayer = ({ trackId, isPublic, hasInteracted, isGlobalMuted, renderLyricsOverlay }: {
+    trackId: string;
+    isPublic: boolean;
+    hasInteracted: boolean;
+    isGlobalMuted: boolean;
+    renderLyricsOverlay: () => React.ReactNode;
+}) => {
     const spotifyAutoplay = isPublic && hasInteracted && !isGlobalMuted ? '&autoplay=1' : '';
 
     return (

@@ -14,19 +14,19 @@ export async function getAdminAnalytics() {
         const last48h = new Date(now.getTime() - 48 * 60 * 60 * 1000)
         const last14d = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
 
-        const [totalUsers, newUsers24h, prevNewUsers24h, activeProfiles7d, prevActiveProfiles7d, bannedCount] = await Promise.all([
+        const [totalUsers, newUsers24h, prevNewUsers24h, activeRooms7d, prevActiveRooms7d, bannedCount] = await Promise.all([
             prisma.user.count({ where: { deletedAt: null } }),
             prisma.user.count({ where: { createdAt: { gte: last24h }, deletedAt: null } }),
             prisma.user.count({ where: { createdAt: { gte: last48h, lt: last24h }, deletedAt: null } }),
-            prisma.profile.count({ where: { updatedAt: { gte: last7d }, deletedAt: null } }),
-            prisma.profile.count({ where: { updatedAt: { gte: last14d, lt: last7d }, deletedAt: null } }),
+            prisma.room.count({ where: { updatedAt: { gte: last7d }, deletedAt: null } }),
+            prisma.room.count({ where: { updatedAt: { gte: last14d, lt: last7d }, deletedAt: null } }),
             prisma.user.count({ where: { isBanned: true, deletedAt: null } })
         ])
 
-        const viewStats = await prisma.profileAnalytics.aggregate({
+        const viewStats = await prisma.roomAnalytics.aggregate({
             _sum: { views: true },
             _max: { views: true },
-            where: { profile: { deletedAt: null } }
+            where: { room: { deletedAt: null } }
         })
 
         const blockUsage = await prisma.moodBlock.groupBy({
@@ -85,13 +85,13 @@ export async function getAdminAnalytics() {
                     current: newUsers24h,
                     prev: prevNewUsers24h
                 },
-                activeProfiles7d: {
-                    current: activeProfiles7d,
-                    prev: prevActiveProfiles7d
+                activeRooms7d: {
+                    current: activeRooms7d,
+                    prev: prevActiveRooms7d
                 },
                 bannedCount,
                 totalViews: viewStats._sum.views || 0,
-                maxViewsInOneProfile: viewStats._max.views || 0,
+                maxViewsInOneRoom: viewStats._max.views || 0,
             },
             growthData,
             roleDistribution: usersByRole.map((r: { role: string; _count: { _all: number } }) => ({ role: r.role, count: r._count._all })),

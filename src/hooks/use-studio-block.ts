@@ -37,7 +37,7 @@ export function useStudioBlock<T extends HTMLElement = HTMLDivElement>() {
         if (!element) return
 
         const observer = new ResizeObserver((entries) => {
-            for (let entry of entries) {
+            for (const entry of entries) {
                 const { width, height } = entry.contentRect
 
                 // Aplicar fórmula padrão de normalização Studio (Área)

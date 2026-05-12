@@ -9,25 +9,27 @@ import {
 } from "@/lib/validations";
 import { requireAuth, getUsernameById, revalidateProfile } from "@/lib/action-helpers";
 import { randomBytes } from "crypto";
+import { MoodBlock, MoodBlockContent } from "@/types/database";
+import { Prisma } from "@prisma/client";
 
 
 // ─── ROOM / PROFILE MANAGEMENT ──────────────────────────────────────────────
 
 export async function updateProfile(data: {
-    name?: string;
-    username?: string;
-    title?: string;
-    theme?: string;
-    primaryColor?: string;
-    backgroundColor?: string;
-    fontStyle?: string;
-    customCursor?: string;
-    mouseTrails?: string;
-    backgroundEffect?: string;
-    staticTexture?: string;
-    avatarUrl?: string;
-    slug?: string;
-    uiTheme?: string;
+    name?: string | null;
+    username?: string | null;
+    title?: string | null;
+    theme?: string | null;
+    primaryColor?: string | null;
+    backgroundColor?: string | null;
+    fontStyle?: string | null;
+    customCursor?: string | null;
+    mouseTrails?: string | null;
+    backgroundEffect?: string | null;
+    staticTexture?: string | null;
+    avatarUrl?: string | null;
+    slug?: string | null;
+    uiTheme?: string | null;
 }, roomId?: string) {
     try {
         const session = await requireAuth();
@@ -105,7 +107,7 @@ export async function updateProfile(data: {
         if (data.username && data.username !== currentUsername) revalidateProfile(data.username);
 
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[updateProfile]', error);
         return { error: "Erro ao atualizar perfil" };
     }
@@ -148,7 +150,7 @@ export async function createRoom(data: { title: string, type: 'PERMANENT' | 'TEM
 
         revalidateProfile(username);
         return { success: true, room };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[createRoom]', error);
         return { error: "Erro ao criar novo espaço" };
     }
@@ -173,7 +175,7 @@ export async function deleteRoom(roomId: string) {
 
         revalidateProfile(username);
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[deleteRoom]', error);
         return { error: "Erro ao deletar espaço" };
     }
@@ -182,7 +184,7 @@ export async function deleteRoom(roomId: string) {
 
 // ─── BLOCK MANAGEMENT ────────────────────────────────────────────────────────
 
-export async function addMoodBlock(type: string, content: any, options: { x?: number, y?: number, width?: number, height?: number, roomId?: string } = {}) {
+export async function addMoodBlock(type: string, content: MoodBlockContent, options: { x?: number, y?: number, width?: number, height?: number, roomId?: string } = {}) {
     try {
         const session = await requireAuth();
         const userId = session.user.id;
@@ -207,7 +209,7 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
             data: {
                 roomId: targetRoom.id,
                 type: validation.data.type,
-                content: validation.data.content as any,
+                content: validation.data.content as Prisma.InputJsonValue,
                 x, y,
                 width: width ? Math.round(width) : null,
                 height: height ? Math.round(height) : null,
@@ -215,14 +217,14 @@ export async function addMoodBlock(type: string, content: any, options: { x?: nu
         });
 
         revalidateProfile(username);
-        return { success: true, block };
-    } catch (error: any) {
+        return { success: true, block: block as unknown as MoodBlock };
+    } catch (error) {
         console.error('[addMoodBlock]', error);
         return { error: "Erro ao adicionar bloco" };
     }
 }
 
-export async function addMoodBlocksBulk(blocks: { type: string, content: any, options: { x: number, y: number, width?: number, height?: number, roomId?: string } }[]) {
+export async function addMoodBlocksBulk(blocks: { type: string, content: MoodBlockContent, options: { x: number, y: number, width?: number, height?: number, roomId?: string } }[]) {
     try {
         const session = await requireAuth();
         const userId = session.user.id;
@@ -242,7 +244,7 @@ export async function addMoodBlocksBulk(blocks: { type: string, content: any, op
                 data: {
                     roomId: targetRoom.id,
                     type: b.type,
-                    content: b.content as any,
+                    content: b.content as Prisma.InputJsonValue,
                     x: b.options.x,
                     y: b.options.y,
                     width: b.options.width ? Math.round(b.options.width) : null,
@@ -253,7 +255,7 @@ export async function addMoodBlocksBulk(blocks: { type: string, content: any, op
 
         revalidateProfile(username);
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[addMoodBlocksBulk]', error);
         return { error: "Erro ao colar blocos" };
     }
@@ -283,7 +285,7 @@ export async function updateMoodBlockLayout(blockId: string, data: { x?: number,
 
         revalidateProfile(username);
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[updateMoodBlockLayout]', error);
         return { error: "Erro ao salvar alterações" };
     }
@@ -302,7 +304,7 @@ export async function deleteMoodBlock(blockId: string) {
 
         revalidateProfile(username);
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[deleteMoodBlock]', error);
         return { error: "Erro ao excluir bloco" };
     }
@@ -321,7 +323,7 @@ export async function restoreMoodBlock(blockId: string) {
 
         revalidateProfile(username);
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[restoreMoodBlock]', error);
         return { error: "Erro ao restaurar bloco" };
     }
@@ -344,16 +346,16 @@ export async function duplicateMoodBlock(blockId: string) {
         const newBlock = await prisma.moodBlock.create({
             data: {
                 ...rest,
-                content: rest.content as any,
-                roomId: (source as any).roomId, // Garante que fica na mesma sala
+                content: rest.content as Prisma.InputJsonValue,
+                roomId: (source as MoodBlock).roomId, // Garante que fica na mesma sala
                 x: Math.min(95, source.x + 2),
                 y: Math.min(95, source.y + 2),
             }
         });
 
         revalidateProfile(username);
-        return { success: true, block: newBlock };
-    } catch (error: any) {
+        return { success: true, block: newBlock as unknown as MoodBlock };
+    } catch (error) {
         console.error('[duplicateMoodBlock]', error);
         return { error: "Erro ao duplicar bloco" };
     }
@@ -377,7 +379,7 @@ export async function clearMoodBlocks(roomId?: string) {
 
         revalidateProfile(username);
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[clearMoodBlocks]', error);
         return { error: "Erro ao limpar mural" };
     }
@@ -400,7 +402,7 @@ export async function reorderMoodBlocks(blocks: { id: string, order: number }[])
 
         revalidateProfile(username);
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[reorderMoodBlocks]', error);
         return { error: "Erro ao reordenar blocos" };
     }
@@ -423,7 +425,7 @@ export async function updateMoodBlocksZIndex(updates: { id: string, zIndex: numb
 
         revalidateProfile(username);
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error('[updateMoodBlocksZIndex]', error);
         return { error: "Erro ao atualizar camadas" };
     }

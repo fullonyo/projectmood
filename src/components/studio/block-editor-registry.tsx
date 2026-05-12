@@ -1,5 +1,5 @@
 "use client"
-import { MoodBlock } from "@/types/database"
+import { MoodBlock, MoodBlockContent } from "@/types/database"
 import { UniversalTextEditor } from "./UniversalTextEditor"
 import { UniversalPhotoEditor } from "./UniversalPhotoEditor"
 import { UniversalMediaEditor } from "./UniversalMediaEditor"
@@ -24,7 +24,7 @@ interface BlockEditorRegistryProps {
     onUpdateBlocks: (ids: string[], updates: Partial<MoodBlock> | ((block: MoodBlock) => Partial<MoodBlock>)) => void
     onClose: () => void
     setDraftBlockType: (type: string | null) => void
-    onAddBlock?: (type: string, content: any) => Promise<void>
+    onAddBlock?: (type: string, content: MoodBlockContent) => Promise<void>
 }
 
 export function BlockEditorRegistry({
@@ -60,7 +60,7 @@ export function BlockEditorRegistry({
         if (!Editor) return null
         return (
             <Editor
-                onAdd={(content: any) => onAddBlock?.(draftBlockType, content)}
+                onAdd={(content: MoodBlockContent) => onAddBlock?.(draftBlockType, content)}
                 onClose={onClose}
             />
         )
@@ -121,8 +121,8 @@ export function BlockEditorRegistry({
     )
 }
 
-function getEditor(type: string) {
-    const editors: Record<string, any> = {
+function getEditor(type: string): React.ComponentType<any> | null {
+    const editors: Record<string, React.ComponentType<any>> = {
         'text': UniversalTextEditor,
         'photo': UniversalPhotoEditor,
         'gif': UniversalGiphyEditor,

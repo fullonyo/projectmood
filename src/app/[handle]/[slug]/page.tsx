@@ -54,18 +54,11 @@ export default async function SharedRoomPage({ params }: Props) {
 
     // ────────────────────────────────────────────────────────────────────────────
 
-    // Incrementar visualizações
-    await prisma.roomAnalytics.upsert({
-        where: { roomId: room.id },
-        create: { roomId: room.id, views: 1 },
-        update: { views: { increment: 1 } }
-    });
-
-    const currentViews = (analytics?.views || 0) + 1;
+    const currentViews = (analytics?.views || 0);
 
     // Verificar expiração e limite de acessos
     const isExpired = room.expiresAt && new Date() > room.expiresAt;
-    const isLimitReached = room.maxViews && currentViews > room.maxViews;
+    const isLimitReached = room.maxViews && currentViews >= room.maxViews;
 
     if (isExpired || isLimitReached) {
         return (
@@ -90,6 +83,13 @@ export default async function SharedRoomPage({ params }: Props) {
             </div>
         );
     }
+
+    // Incrementar visualizações (apenas se não estiver expirado/limitado)
+    await prisma.roomAnalytics.upsert({
+        where: { roomId: room.id },
+        create: { roomId: room.id, views: 1, lastViewAt: new Date() },
+        update: { views: { increment: 1 }, lastViewAt: new Date() }
+    });
 
     const moodBlocksRaw = activeVersion ? activeVersion.blocks : liveBlocks;
 

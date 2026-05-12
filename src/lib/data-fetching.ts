@@ -36,7 +36,7 @@ export const getPrimaryRoomByUsername = async (username: string): Promise<Public
     const room = (user as any).rooms[0];
     return {
         user: {
-            username: user.username,
+            username: user.username || "",
             name: user.name,
             isVerified: user.isVerified,
             verificationType: user.verificationType,
@@ -77,7 +77,7 @@ export const getRoomBySlug = async (slug: string): Promise<PublicRoomData | null
 
     return {
         user: {
-            username: room.user.username,
+            username: room.user.username || "",
             name: room.user.name,
             isVerified: room.user.isVerified,
             verificationType: room.user.verificationType,

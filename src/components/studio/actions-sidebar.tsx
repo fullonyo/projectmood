@@ -29,7 +29,8 @@ import { toast } from "sonner"
 import imageCompression from "browser-image-compression"
 
 import { useTranslation } from "@/i18n/context"
-import { Room, MoodBlock } from "@/types/database"
+import { Room, MoodBlock, RoomVisualConfig } from "@/types/database"
+import { PreviewData } from "./studio-client-layout"
 import { cn } from "@/lib/utils"
 import { updateProfile } from "@/actions/profile"
 import { publishRoom } from "@/actions/publish"
@@ -50,18 +51,18 @@ interface ActionsSidebarProps {
     publishedAt?: string | null
     hasUnpublishedChanges?: boolean
     isAdmin?: boolean
-    setPreviewData: (data: { blocks: MoodBlock[], profile: Room } | null) => void
+    setPreviewData: (data: PreviewData | null) => void
     isPreview?: boolean
-    allRooms?: any[]
+    allRooms?: Room[]
     userAvatar?: string | null
     onForceReset?: (blocks: MoodBlock[]) => void
     blocksCount?: number
-    onUpdateProfile?: (data: Partial<Room>) => void
+    onUpdateProfile?: (data: Partial<RoomVisualConfig>) => void
 }
 
 // ─── SPACES PANEL ──────────────────────────────────────────────────────────
 
-const RoomItem = memo(({ room, isActive, onSwitch, onDelete, username }: { room: any, isActive: boolean, onSwitch: (id: string) => void, onDelete: (id: string) => void, username: string }) => {
+const RoomItem = memo(({ room, isActive, onSwitch, onDelete, username }: { room: Room, isActive: boolean, onSwitch: (id: string) => void, onDelete: (id: string) => void, username: string }) => {
     return (
         <div
             onClick={() => onSwitch(room.id)}
@@ -109,7 +110,7 @@ const RoomItem = memo(({ room, isActive, onSwitch, onDelete, username }: { room:
 
 RoomItem.displayName = "RoomItem"
 
-function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[], currentRoomId: string, username: string, onClose: () => void }) {
+function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[], currentRoomId: string, username: string, onClose: () => void }) {
     const { dict } = useTranslation()
     const router = useRouter()
     const [isCreating, startCreateTransition] = useTransition()
@@ -128,7 +129,8 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: any[]
 
     const handleSwitchSpace = (roomId: string) => {
         const targetRoom = rooms.find(r => r.id === roomId)
-        if (targetRoom?.isPrimary) router.push('/studio')
+        if (!targetRoom) return
+        if (targetRoom.isPrimary) router.push('/studio')
         else router.push(`/studio/${targetRoom.slug}`)
         onClose()
     }
@@ -478,11 +480,11 @@ export function ActionsSidebar({
                     >
                         <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
                             <button
-                                onClick={() => onUpdateProfile?.({ uiTheme: (profile as any).uiTheme === 'dark' ? 'light' : 'dark' } as any)}
+                                onClick={() => onUpdateProfile?.({ uiTheme: profile.uiTheme === 'dark' ? 'light' : 'dark' })}
                                 className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-50 dark:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all active:scale-90"
-                                title={(profile as any).uiTheme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+                                title={profile.uiTheme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
                             >
-                                {(profile as any).uiTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                                {profile.uiTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                             </button>
                             <LanguageSwitcher />
                         </div>

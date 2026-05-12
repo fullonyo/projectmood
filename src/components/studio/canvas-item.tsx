@@ -16,7 +16,7 @@ import {
     Guideline,
     DistanceGuide
 } from "@/lib/canvas-transforms"
-import { MoodBlock, Room, ThemeConfig } from "@/types/database"
+import { MoodBlock, MoodBlockContent, Room, RoomVisualConfig, ThemeConfig } from "@/types/database"
 import { useCanvasInteraction } from "./canvas-interaction-context"
 import { getClientPos, isInputActive, CANVAS_EVENTS } from "@/lib/canvas-utils"
 
@@ -26,7 +26,7 @@ interface CanvasItemProps {
     isSelected: boolean
     onSelect: (toggle?: boolean) => void
     onUpdate: (updates: Partial<MoodBlock>) => void
-    profile: Room
+    profile: Room | (RoomVisualConfig & { id: string })
     themeConfig: ThemeConfig
     onDeleteRequest: (id: string) => void
     blocks: MoodBlock[]
@@ -170,15 +170,16 @@ export const CanvasItem = memo(({
         }
 
         const otherBlocks = blocks.filter(b => b.id !== block.id).map(b => ({
-            ...b,
-            width: b.width ?? 'auto',
-            height: b.height ?? 'auto'
+            x: b.x,
+            y: b.y,
+            width: (b.width as number | "auto") ?? 'auto',
+            height: (b.height as number | "auto") ?? 'auto'
         }))
 
         const snap = calculateSnap(
             newX, newY, stateRef.current.width, stateRef.current.height,
             canvas.width, canvas.height,
-            otherBlocks as any
+            otherBlocks
         )
 
         stateRef.current.x = snap.x;
@@ -241,7 +242,7 @@ export const CanvasItem = memo(({
         mvX.set(result.x); mvY.set(result.y); mvW.set(result.width); mvH.set(result.height);
     }, [block.isLocked, canvasRef, mvH, mvW, mvX, mvY, shiftHeld])
 
-    const handleResizeStart = useCallback((e: any, info: PanInfo) => {
+    const handleResizeStart = useCallback((e: React.PointerEvent | PointerEvent, info: PanInfo) => {
         if (isPreview || block.isLocked) return;
         setIsResizing(true); stateRef.current.isInteracting = true;
     }, [block.isLocked])
@@ -260,8 +261,9 @@ export const CanvasItem = memo(({
     useEffect(() => {
         if (!isSelected || block.isLocked) return;
 
-        const handleGroupRotate = (e: any) => {
-            const { deltaAngle } = e.detail;
+        const handleGroupRotate = (e: Event) => {
+            const customEvent = e as CustomEvent<{ deltaAngle: number }>;
+            const { deltaAngle } = customEvent.detail;
             const newRotation = (block.rotation || 0) + deltaAngle;
             mvR.set(newRotation);
             stateRef.current.rotation = newRotation;
@@ -362,9 +364,9 @@ export const CanvasItem = memo(({
                 boxShadow: (isSelected && !isMultiSelect) ? `0 0 0 2px ${themeConfig?.bg || '#000'}, 0 0 0 4px ${profile?.primaryColor || '#3b82f6'}` : 'none',
                 touchAction: 'none', transformOrigin: 'center',
                 display: block.isHidden ? 'none' : 'block',
-                opacity: block.isHidden ? 0 : ((block.content as any).opacity ?? 1),
+                opacity: block.isHidden ? 0 : ((block.content as MoodBlockContent).opacity ?? 1),
                 pointerEvents: (block.isHidden || (block.isLocked && !isSelected)) ? 'none' : 'auto',
-                mixBlendMode: (block.content as any).blendMode || 'normal',
+                mixBlendMode: (block.content as MoodBlockContent).blendMode || 'normal',
                 cursor: block.isLocked ? 'not-allowed' : (isDragging ? 'grabbing' : (isSelected ? 'default' : 'grab'))
             }}
             onPointerDown={(e) => {
@@ -536,7 +538,7 @@ export const CanvasItem = memo(({
                                         let deltaAngle = currentMouseAngle - stateRef.current.initialMouseAngle
                                         if (deltaAngle > 180) deltaAngle -= 360
                                         if (deltaAngle < -180) deltaAngle += 360
-                                        let newRotation = stateRef.current.initialRotation + deltaAngle
+                                        const newRotation = stateRef.current.initialRotation + deltaAngle
                                         mvR.set(newRotation)
                                         stateRef.current.rotation = newRotation
                                     }}

@@ -19,7 +19,7 @@ export default async function AdminConfigPage() {
     const session = await auth()
     if ((session?.user as any)?.role !== "ADMIN") redirect("/studio")
 
-    let flags = await getFeatureFlags()
+    const flags = await getFeatureFlags()
 
     const syncAction = async () => {
         "use server"

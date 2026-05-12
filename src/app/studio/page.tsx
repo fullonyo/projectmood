@@ -95,7 +95,6 @@ export default async function StudioPage() {
     // 5. Carregar lista de todas as salas para o switcher
     const allRooms = await prisma.room.findMany({
         where: { userId: session.user.id },
-        select: { id: true, title: true, slug: true, isPrimary: true, type: true, userId: true, avatarUrl: true },
         orderBy: { createdAt: 'desc' }
     });
 
