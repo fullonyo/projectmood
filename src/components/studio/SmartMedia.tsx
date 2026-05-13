@@ -88,7 +88,7 @@ const AudioPlayer = ({
     const barGap = Math.max(2, Math.round(3 * scale))
 
     return (
-        <div className="w-full h-full flex flex-col justify-center p-6 pointer-events-auto group/audio relative" onClick={togglePlay}>
+        <div className="w-full h-full flex flex-col justify-center p-[8%] pointer-events-auto group/audio relative overflow-hidden" onClick={togglePlay}>
             <audio
                 ref={audioRef}
                 src={audioUrl}
@@ -99,37 +99,38 @@ const AudioPlayer = ({
                 loop
             />
 
-            <div className="flex flex-col w-full mx-auto" style={{ gap: `${Math.round(20 * scale)}px` }}>
+            <div className="flex flex-col w-full min-h-0" style={{ gap: `${Math.max(4, Math.round(12 * scale))}px` }}>
                 
                 {/* Header: Play Button + Typography */}
-                <div className="flex items-center" style={{ gap: `${Math.round(16 * scale)}px` }}>
+                <div className="flex items-center min-w-0" style={{ gap: `${Math.max(8, Math.round(12 * scale))}px` }}>
                     <button 
                         onClick={togglePlay}
-                        className="shrink-0 flex items-center justify-center bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
+                        className="shrink-0 flex items-center justify-center bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg"
                         style={{ width: `${buttonSize}px`, height: `${buttonSize}px` }}
                     >
                         {isPlaying ? <Pause className="fill-current" style={{ width: `${Math.round(buttonSize/2.5)}px`, height: `${Math.round(buttonSize/2.5)}px` }} /> : <Play className="fill-current ml-1" style={{ width: `${Math.round(buttonSize/2.5)}px`, height: `${Math.round(buttonSize/2.5)}px` }} />}
                     </button>
 
-                    <div className="flex flex-col justify-center overflow-hidden">
-                        <h3 className="font-semibold text-zinc-900 dark:text-white tracking-tight truncate leading-tight" style={{ fontSize: `${titleSize}px` }}>
+                    <div className="flex flex-col justify-center min-w-0 overflow-hidden">
+                        <h3 className="font-bold text-zinc-900 dark:text-white tracking-tight truncate leading-tight" style={{ fontSize: `${titleSize}px` }}>
                             {audioMetadata?.name || "Untitled Track"}
                         </h3>
-                        {audioMetadata?.artist && (
-                            <p className="text-zinc-500 dark:text-zinc-400 font-medium tracking-wide truncate opacity-80 uppercase" style={{ fontSize: `${artistSize}px`, marginTop: `${Math.round(2 * scale)}px` }}>
+                        {audioMetadata?.artist && scale > 0.6 && (
+                            <p className="text-zinc-500 dark:text-zinc-400 font-medium tracking-wide truncate opacity-80 uppercase" style={{ fontSize: `${artistSize}px`, marginTop: `${Math.round(1 * scale)}px` }}>
                                 {audioMetadata.artist}
                             </p>
                         )}
                     </div>
                 </div>
 
-                {/* Waveform Row */}
-                <div className="flex items-center" style={{ gap: `${Math.round(16 * scale)}px` }}>
+                {/* Waveform Row - Responsive Gap and Flex */}
+                <div className="flex items-center w-full min-h-0" style={{ gap: `${Math.max(8, Math.round(12 * scale))}px` }}>
                     <div 
-                        className="flex-1 flex items-center justify-between relative overflow-hidden cursor-pointer group/scrub" 
+                        className="flex-1 flex items-center justify-between relative overflow-hidden cursor-pointer group/scrub min-w-0" 
                         onClick={handleScrub}
-                        style={{ height: `${Math.round(40 * scale)}px`, gap: `${barGap}px` }}
+                        style={{ height: `${Math.max(16, Math.round(20 * scale))}px` }}
                     >
+                        {/* We use a subset of bars if space is tight to prevent overflow */}
                         {staticHeights.map((h, i) => {
                             const barProgress = (i / 36) * 100;
                             const isActive = barProgress <= progress;
@@ -140,27 +141,31 @@ const AudioPlayer = ({
                                     className={cn(
                                         "transition-all duration-300 rounded-full shrink-0 origin-bottom",
                                         isActive 
-                                            ? "bg-gradient-to-t from-rose-500 to-rose-400 dark:from-rose-400 dark:to-rose-300 shadow-[0_0_8px_rgba(244,63,94,0.3)]" 
+                                            ? "bg-gradient-to-t from-rose-500 to-rose-400 dark:from-rose-400 dark:to-rose-300" 
                                             : "bg-zinc-200/80 dark:bg-zinc-800/80",
                                         isPlaying && isActive && "animate-waveform",
-                                        "group-hover/scrub:brightness-110"
+                                        // Dynamic bar hiding based on scale to prevent overflow
+                                        i > Math.floor(36 * Math.max(0.3, scale)) && "hidden"
                                     )}
                                     style={{
-                                        width: `${barWidth}px`,
+                                        width: `${Math.max(2, barWidth)}px`,
                                         height: `100%`,
-                                        transform: `scaleY(${isPlaying ? h/100 : isActive ? 0.25 : 0.15})`,
+                                        transform: `scaleY(${isPlaying ? (h/100) * 0.45 : isActive ? 0.25 : 0.15})`,
                                         willChange: 'transform',
                                         animationDelay: `${i * 0.04}s`,
-                                        animationDuration: `${0.6 + (i % 3) * 0.2}s`
+                                        animationDuration: `${0.6 + (i % 3) * 0.2}s`,
+                                        marginRight: i === staticHeights.length - 1 ? 0 : '1px'
                                     }}
                                 />
                             )
                         })}
                     </div>
 
-                    <div className="shrink-0 text-right tabular-nums font-mono font-semibold text-zinc-400 dark:text-zinc-500 tracking-tighter" style={{ fontSize: `${Math.max(10, Math.round(12 * scale))}px`, width: `${Math.round(36 * scale)}px` }}>
-                        {formatTime(currentTime)}
-                    </div>
+                    {scale > 0.5 && (
+                        <div className="shrink-0 text-right tabular-nums font-mono font-bold text-zinc-400 dark:text-zinc-500 tracking-tighter" style={{ fontSize: `${Math.max(9, Math.round(11 * scale))}px` }}>
+                            {formatTime(currentTime)}
+                        </div>
+                    )}
                 </div>
 
             </div>
