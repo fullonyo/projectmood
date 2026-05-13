@@ -1,9 +1,8 @@
 import { ImageResponse } from 'next/og'
 import prisma from '@/lib/prisma'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
-export const alt = 'MoodSpace Profile'
 export const size = {
     width: 1200,
     height: 630,
@@ -53,7 +52,7 @@ export default async function Image({ params }: { params: { handle: string } }) 
 
     const name = user.name || user.username
     const primaryRoom = user.rooms[0]
-    const avatarUrl = primaryRoom?.avatarUrl
+    const avatarUrl = primaryRoom?.avatarUrl || user.image
 
     return new ImageResponse(
         (

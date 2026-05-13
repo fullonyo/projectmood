@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const rawHandle = (await params).handle;
     const handle = decodeURIComponent(rawHandle);
-    
+
     // Legacy redirect handling for metadata
     if (!handle.startsWith('@')) {
         const user = await prisma.user.findFirst({
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { user } = data;
     const separator = user.isVerified ? "✦" : "—";
     const title = `@${user.username} ${separator} moodspace`;
-    const description = `Confira o espaço criativo de @${user.username} no MoodSpace. Aesthetic moods, music & GIFs.`;
+    const description = `Confira a room de @${user.username} no MoodSpace. moods, music & GIFs.`;
 
     return {
         title: { absolute: title },
@@ -133,7 +133,7 @@ export default async function PublicMoodPage({ params }: Props) {
             <PublicMoodPageClient
                 publicUser={user}
                 roomId={room.id}
-                profile={effectiveRoom as any} 
+                profile={effectiveRoom as any}
                 moodBlocks={moodBlocks as any}
                 config={config}
                 theme={theme}
