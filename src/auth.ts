@@ -7,29 +7,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
     ...authConfig,
-    callbacks: {
-        async jwt({ token, user, trigger, session }) {
-            if (user) {
-                token.id = user.id;
-                token.username = user.username;
-                token.role = user.role;
-                token.isBanned = user.isBanned;
-            }
-            if (trigger === "update" && session) {
-                return { ...token, ...session.user };
-            }
-            return token;
-        },
-        async session({ session, token }) {
-            if (token.id && session.user) {
-                session.user.id = token.id;
-                session.user.username = token.username ?? null;
-                session.user.role = token.role || "USER";
-                session.user.isBanned = !!token.isBanned;
-            }
-            return session;
-        },
-    },
+
     events: {
         async createUser({ user }) {
             const baseUsername = user.email?.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "") || "user";

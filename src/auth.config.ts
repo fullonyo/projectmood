@@ -32,4 +32,27 @@ export default {
             },
         }),
     ],
+    callbacks: {
+        async jwt({ token, user, trigger, session }) {
+            if (user) {
+                token.id = user.id;
+                token.username = (user as any).username;
+                token.role = (user as any).role;
+                token.isBanned = (user as any).isBanned;
+            }
+            if (trigger === "update" && session) {
+                return { ...token, ...session.user };
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (token.id && session.user) {
+                session.user.id = token.id as string;
+                session.user.username = (token.username as string) ?? null;
+                session.user.role = (token.role as any) || "USER";
+                session.user.isBanned = !!token.isBanned;
+            }
+            return session;
+        },
+    },
 } satisfies NextAuthConfig;
