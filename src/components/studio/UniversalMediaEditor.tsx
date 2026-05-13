@@ -13,6 +13,7 @@ import {
     Upload, Maximize2, Flag, Languages
 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
+import { SpotifyIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { FrameType } from "./FrameContainer"
@@ -212,12 +213,14 @@ export function UniversalMediaEditor({
             />
 
             <EditorSection title="Tipo de Mídia">
-                <ListSelector
+                <GridSelector
                     id="media-type"
+                    columns={3}
+                    variant="ghost"
                     options={[
-                        { id: 'video', label: t('editors.universal_media.video_tab') },
-                        { id: 'music', label: t('editors.universal_media.music_tab') },
-                        { id: 'audio', label: t('editors.universal_media.audio_tab') },
+                        { id: 'video', label: 'YouTube', icon: Youtube, color: '#FF0000' },
+                        { id: 'music', label: 'Spotify', icon: SpotifyIcon, color: '#1DB954' },
+                        { id: 'audio', label: 'Arquivo Local', icon: Upload, color: '#fb7185' }
                     ]}
                     activeId={mediaType}
                     onChange={(id) => { 
@@ -391,7 +394,7 @@ export function UniversalMediaEditor({
             {(videoId || trackId || audioUrl) && (
                 <div className="space-y-10">
                     <EditorSection title="Estética">
-                        {mediaType !== 'audio' && (
+                        {mediaType !== 'audio' && mediaType !== 'music' && (
                             <EditorSection title="Moldura">
                                 <ListSelector
                                     id="frame-type"

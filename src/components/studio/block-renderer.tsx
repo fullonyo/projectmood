@@ -129,7 +129,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
     const renderMedia = () => {
         const mediaContent = content as UniversalMediaContent
         const mediaType = mediaContent.mediaType || (block.type === 'music' ? 'audio' : 'video')
-        const isAudio = mediaType === 'audio' || block.type === 'music'
+        const isAudio = mediaType === 'audio' || mediaType === 'music' || block.type === 'music'
         
         // Audio players never use frames, they are their own containers
         const frame = isAudio ? 'none' : getFrameType(mediaContent.frame, 'none')
