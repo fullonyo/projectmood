@@ -51,6 +51,7 @@ export function UniversalMediaEditor({
     const [trackAlbumArt, setTrackAlbumArt] = useState(content.albumArt || "")
     const [lyrics, setLyrics] = useState(content.lyrics || "")
     const [lyricsDisplay, setLyricsDisplay] = useState<'integrated' | 'fullscreen'>(content.lyricsDisplay || 'integrated')
+    const [audioStyle, setAudioStyle] = useState<'classic' | 'aura'>(content.audioStyle || 'classic')
 
     interface SpotifyTrack {
         id: string;
@@ -158,6 +159,7 @@ export function UniversalMediaEditor({
             name: trackName,
             artist: trackArtist,
             albumArt: trackAlbumArt,
+            audioStyle,
             ...updates
         }
 
@@ -181,7 +183,8 @@ export function UniversalMediaEditor({
             ...((mediaType === 'music' || mediaType === 'audio') ? {
                 name: trackName,
                 artist: trackArtist,
-                albumArt: trackAlbumArt
+                albumArt: trackAlbumArt,
+                audioStyle
             } : {})
         }
 
@@ -397,6 +400,24 @@ export function UniversalMediaEditor({
                                 }}
                             />
                         </EditorSection>
+
+                        {mediaType === 'audio' && (
+                            <EditorSection title="Estilo do Player">
+                                <ListSelector
+                                    id="audio-style"
+                                    options={[
+                                        { id: 'classic', label: 'Classic' },
+                                        { id: 'aura', label: 'Neural Aura' }
+                                    ]}
+                                    activeId={audioStyle}
+                                    onChange={(id) => {
+                                        const newStyle = id as 'classic' | 'aura'
+                                        setAudioStyle(newStyle)
+                                        triggerUpdate({ audioStyle: newStyle })
+                                    }}
+                                />
+                            </EditorSection>
+                        )}
                     </EditorSection>
 
                     <EditorSection title="Letras (Lyrics)">

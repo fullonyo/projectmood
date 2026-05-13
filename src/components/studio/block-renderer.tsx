@@ -142,6 +142,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                         name: mediaContent.name,
                         artist: mediaContent.artist
                     }}
+                    audioStyle={mediaContent.audioStyle}
                     isPublic={isPublic}
                     hasInteracted={hasInteracted}
                     lyrics={mediaContent.lyrics}

@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useStudioBlock } from "@/hooks/use-studio-block"
 
@@ -25,6 +25,7 @@ interface SmartMediaProps {
     hasInteracted?: boolean
     lyrics?: string // Valid format: [mm:ss] text
     lyricsDisplay?: 'integrated' | 'fullscreen'
+    audioStyle?: 'classic' | 'aura'
 }
 
 interface LyricLine {
@@ -181,6 +182,130 @@ const AudioPlayer = ({
     )
 }
 
+const AuraPlayer = ({ 
+    audioUrl, isPlaying, togglePlay, progress, scale = 1, audioMetadata, 
+    audioRef, handleTimeUpdate, setIsPlaying
+}: {
+    audioUrl: string;
+    isPlaying: boolean;
+    togglePlay: (e: React.MouseEvent) => void;
+    progress: number;
+    scale?: number;
+    audioMetadata?: { name?: string; artist?: string };
+    audioRef: React.RefObject<HTMLAudioElement | null>;
+    handleTimeUpdate: () => void;
+    setIsPlaying: (p: boolean) => void;
+}) => {
+    const orbSize = Math.max(80, Math.round(120 * scale))
+    
+    return (
+        <div className="w-full h-full flex flex-col items-center justify-center p-4 pointer-events-auto group/aura relative" onClick={togglePlay}>
+            <audio
+                ref={audioRef}
+                src={audioUrl}
+                onTimeUpdate={handleTimeUpdate}
+                onEnded={() => setIsPlaying(false)}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                loop
+            />
+
+            {/* Neural Orb Container */}
+            <div className="relative flex items-center justify-center" style={{ width: orbSize, height: orbSize }}>
+                
+                {/* Orbital Progress Ring */}
+                <svg className="absolute inset-0 -rotate-90" width={orbSize} height={orbSize}>
+                    <circle
+                        cx={orbSize / 2}
+                        cy={orbSize / 2}
+                        r={(orbSize / 2) - 4}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="text-zinc-100 dark:text-zinc-800 opacity-20"
+                    />
+                    <motion.circle
+                        cx={orbSize / 2}
+                        cy={orbSize / 2}
+                        r={(orbSize / 2) - 4}
+                        fill="none"
+                        stroke="url(#auraGradient)"
+                        strokeWidth="3"
+                        strokeDasharray={Math.PI * (orbSize - 8)}
+                        initial={{ strokeDashoffset: Math.PI * (orbSize - 8) }}
+                        animate={{ strokeDashoffset: Math.PI * (orbSize - 8) * (1 - progress / 100) }}
+                        strokeLinecap="round"
+                        className="drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]"
+                    />
+                    <defs>
+                        <linearGradient id="auraGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#f43f5e" />
+                            <stop offset="100%" stopColor="#fb7185" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+
+                {/* The Fluid Orb */}
+                <motion.div
+                    animate={{
+                        borderRadius: isPlaying 
+                            ? ["42% 58% 70% 30% / 45% 45% 55% 55%", "50% 50% 33% 67% / 55% 27% 73% 45%", "42% 58% 70% 30% / 45% 45% 55% 55%"]
+                            : "50%",
+                        scale: isPlaying ? [1, 1.05, 1] : 1
+                    }}
+                    transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    className={cn(
+                        "relative flex items-center justify-center overflow-hidden transition-all duration-500 shadow-2xl",
+                        "bg-white/10 dark:bg-black/20 backdrop-blur-2xl border border-white/20 dark:border-white/10"
+                    )}
+                    style={{ 
+                        width: orbSize - 20, 
+                        height: orbSize - 20,
+                        boxShadow: isPlaying ? '0 0 40px rgba(244,63,94,0.2)' : 'none'
+                    }}
+                >
+                    {/* Animated Mesh Background (Inside Orb) */}
+                    <AnimatePresence>
+                        {isPlaying && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-gradient-to-tr from-rose-500/20 via-fuchsia-500/10 to-blue-500/20 animate-pulse"
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    {/* Play/Pause Central Icon */}
+                    <div className="relative z-10 text-zinc-900 dark:text-white opacity-0 group-hover/aura:opacity-100 transition-opacity duration-300">
+                        {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Metadata Floating Overlay */}
+            <div className="mt-6 flex flex-col items-center text-center max-w-[140%] overflow-visible pointer-events-none">
+                <motion.h3 
+                    className="font-black text-zinc-900 dark:text-white uppercase tracking-[0.3em] leading-none mb-2"
+                    style={{ fontSize: Math.max(10, Math.round(14 * scale)) }}
+                >
+                    {audioMetadata?.name || "Neural Aura"}
+                </motion.h3>
+                <p 
+                    className="font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.15em] opacity-60"
+                    style={{ fontSize: Math.max(8, Math.round(9 * scale)) }}
+                >
+                    {audioMetadata?.artist || "Atmospheric Sound"}
+                </p>
+            </div>
+        </div>
+    )
+}
+
 const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, renderLyricsOverlay }: {
     videoId: string;
     isPublic: boolean;
@@ -253,7 +378,8 @@ export function SmartMedia({
     scale: manualScale,
     hasInteracted = false,
     lyrics,
-    lyricsDisplay: localLyricsDisplay
+    lyricsDisplay: localLyricsDisplay,
+    audioStyle = 'classic'
 }: SmartMediaProps) {
     const { ref, fluidScale } = useStudioBlock()
     const { isGlobalMuted, globalVolume, lyricsMode } = useAudio()
@@ -419,11 +545,18 @@ export function SmartMedia({
     let content = null
     
     if (mediaType === 'audio' && audioUrl) {
-        content = <AudioPlayer 
-            audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} setProgress={setProgress} scale={scale} 
-            audioMetadata={audioMetadata} renderLyricsOverlay={renderLyricsOverlay} isGlobalMuted={isGlobalMuted} 
-            audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} currentTime={currentTime} setCurrentTime={setCurrentTime} setIsPlaying={setIsPlaying}
-        />
+        content = audioStyle === 'aura' ? (
+            <AuraPlayer 
+                audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} scale={scale} 
+                audioMetadata={audioMetadata} audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} setIsPlaying={setIsPlaying}
+            />
+        ) : (
+            <AudioPlayer 
+                audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} setProgress={setProgress} scale={scale} 
+                audioMetadata={audioMetadata} renderLyricsOverlay={renderLyricsOverlay} isGlobalMuted={isGlobalMuted} 
+                audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} currentTime={currentTime} setCurrentTime={setCurrentTime} setIsPlaying={setIsPlaying}
+            />
+        )
     } else if (mediaType === 'video' && videoId) {
         content = <VideoPlayer videoId={videoId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} renderLyricsOverlay={renderLyricsOverlay} />
     } else if (mediaType === 'music' && trackId) {
@@ -447,7 +580,8 @@ export function SmartMedia({
                 mediaType !== 'audio' && "overflow-hidden bg-white/40 dark:bg-zinc-950/40 backdrop-blur-3xl border border-white/50 dark:border-white/10 rounded-[32px] shadow-xl",
                 !isPublic && "cursor-pointer",
                 mediaType === 'audio' && "bg-transparent",
-                mediaType === 'audio' && isPlaying && "scale-[1.02]"
+                mediaType === 'audio' && audioStyle === 'classic' && isPlaying && "scale-[1.02]",
+                mediaType === 'audio' && audioStyle === 'aura' && "overflow-visible"
             )}
         >
             {mediaType !== 'audio' && renderHUDMarkings()}
