@@ -164,14 +164,13 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
 
             case 'photo':
                 return (
-                    <FrameContainer frame={(content as PhotoContent).frame as FrameType} caption={(content as PhotoContent).caption}>
-                        <SmartPhoto content={{
-                            ...(content as PhotoContent),
-                            imageUrl: (content as PhotoContent).imageUrl || '',
-                            filter: (content as PhotoContent).filter || 'none',
-                            frame: (content as PhotoContent).frame || 'none'
-                        }} />
-                    </FrameContainer>
+                    <SmartPhoto content={{
+                        ...(content as PhotoContent),
+                        imageUrl: (content as PhotoContent).imageUrl || '',
+                        filter: (content as PhotoContent).filter || 'none',
+                        frame: (content as PhotoContent).frame || 'none',
+                        ambientTint: !!(content as any).ambientTint
+                    }} />
                 )
 
             case 'video':
@@ -212,14 +211,13 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                 
             case 'gif':
                 return (
-                    <FrameContainer frame={(content as PhotoContent).frame as FrameType} caption={(content as PhotoContent).caption}>
-                        <SmartPhoto content={{
-                            ...(content as PhotoContent),
-                            imageUrl: (content as PhotoContent).imageUrl || '',
-                            filter: (content as PhotoContent).filter || 'none',
-                            frame: (content as PhotoContent).frame || 'none'
-                        }} />
-                    </FrameContainer>
+                    <SmartPhoto content={{
+                        ...(content as PhotoContent),
+                        imageUrl: (content as PhotoContent).imageUrl || '',
+                        filter: (content as PhotoContent).filter || 'none',
+                        frame: (content as PhotoContent).frame || 'none',
+                        ambientTint: !!(content as any).ambientTint
+                    }} />
                 )
 
             case 'tape':

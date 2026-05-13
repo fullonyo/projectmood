@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { toast } from "sonner"
 import { MoodBlock, PhotoContent } from "@/types/database"
-import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, ListSelector } from "./EditorUI"
+import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, ListSelector, EditorSwitch } from "./EditorUI"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { getUploadUrl } from "@/actions/upload"
@@ -26,8 +26,9 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
     const [imageUrl, setImageUrl] = useState<string>(defaultContent.imageUrl || "")
     const [alt, setAlt] = useState(defaultContent.alt || "")
     const [caption, setCaption] = useState(defaultContent.caption || "")
-    const [filter, setFilter] = useState<'none' | 'vintage' | 'bw' | 'warm' | 'cool'>(defaultContent.filter || 'none')
-    const [frame, setFrame] = useState<'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'border' | 'shadow' | 'glass'>(defaultContent.frame || 'none')
+    const [filter, setFilter] = useState<any>(defaultContent.filter || 'none')
+    const [frame, setFrame] = useState<any>(defaultContent.frame || 'none')
+    const [ambientTint, setAmbientTint] = useState<boolean>(!!(defaultContent as any).ambientTint)
     const [isUploading, setIsUploading] = useState(false)
     const [isPending, setIsPending] = useState(false)
 
@@ -41,6 +42,7 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                 caption,
                 filter,
                 frame,
+                ambientTint,
                 ...updates
             }
         })
@@ -196,6 +198,8 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                                     { id: 'none', label: 'RAW (Sem Filtro)' },
                                     { id: 'vintage', label: 'Vintage (Nostálgico)' },
                                     { id: 'bw', label: 'B&W (Preto e Branco)' },
+                                    { id: 'fade', label: 'Faded (Baixo Contraste)' },
+                                    { id: 'cinematic', label: 'Cinematic (Editorial)' },
                                     { id: 'warm', label: 'Warm (Aquecido)' },
                                     { id: 'cool', label: 'Cool (Frio)' },
                                 ]}
@@ -213,11 +217,14 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                                 id="photo-frame"
                                 options={[
                                     { id: 'none', label: 'Original' },
-                                    { id: 'polaroid', label: 'Polaroid' },
+                                    { id: 'melt', label: 'Desvanecer (Edge Melt)' },
+                                    { id: 'polaroid', label: 'Polaroid Claro' },
+                                    { id: 'polaroid-dark', label: 'Polaroid Escuro' },
                                     { id: 'minimal', label: 'Minimalist' },
                                     { id: 'glass', label: 'Glassmorphism' },
                                     { id: 'round', label: 'Rounded Circles' },
-                                    { id: 'shadow', label: 'Deep Shadow' },
+                                    { id: 'capsule', label: 'Capsule (Tampinha)' },
+                                    { id: 'shadow', label: 'Aura Shadow' },
                                     { id: 'border', label: 'Clean Border' },
                                     { id: 'frame', label: 'Classic Gallery' },
                                 ]}
@@ -226,6 +233,17 @@ export function UniversalPhotoEditor({ block, onUpdate, onAdd, onClose }: PhotoE
                                     const newFrame = id as PhotoContent['frame']
                                     setFrame(newFrame || 'none')
                                     triggerUpdate({ frame: newFrame })
+                                }}
+                            />
+                        </EditorSection>
+
+                        <EditorSection title="Integração ao Ambiente" description="Faz a foto reagir à cor do mural.">
+                            <EditorSwitch
+                                label="Sincronia Ambiental"
+                                value={ambientTint}
+                                onChange={(val: boolean) => {
+                                    setAmbientTint(val)
+                                    triggerUpdate({ ambientTint: val } as any)
                                 }}
                             />
                         </EditorSection>
