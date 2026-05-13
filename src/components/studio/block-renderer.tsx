@@ -130,9 +130,10 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         const mediaContent = content as UniversalMediaContent
         const mediaType = mediaContent.mediaType || (block.type === 'music' ? 'music' : 'video')
         const frame = getFrameType(mediaContent.frame, mediaType === 'music' ? 'minimal' : 'none')
+        const allowOverflow = mediaType === 'audio' && mediaContent.audioStyle === 'aura'
         
         return (
-            <FrameContainer frame={frame}>
+            <FrameContainer frame={frame} allowOverflow={allowOverflow}>
                 <SmartMedia
                     mediaType={mediaType as MediaType}
                     videoId={mediaContent.videoId}

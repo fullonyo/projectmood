@@ -11,6 +11,7 @@ interface FrameContainerProps {
     frame?: FrameType
     caption?: string
     padding?: boolean
+    allowOverflow?: boolean
     className?: string
 }
 
@@ -19,6 +20,7 @@ export function FrameContainer({
     frame = 'none',
     caption,
     padding = true,
+    allowOverflow = false,
     className
 }: FrameContainerProps) {
     const scale = useViewportScale()
@@ -72,12 +74,12 @@ export function FrameContainer({
     }
 
     return (
-        <div className={cn("w-full h-full flex flex-col group overflow-hidden", className)} style={getFrameStyles()}>
+        <div className={cn("w-full h-full flex flex-col group", !allowOverflow && "overflow-hidden", className)} style={getFrameStyles()}>
             <div className={cn(
                 "relative w-full h-full flex-1 flex flex-col transition-all duration-500",
                 getFrameClass()
             )}>
-                <div className="relative flex-1 w-full min-h-0 z-0 overflow-hidden">
+                <div className={cn("relative flex-1 w-full min-h-0 z-0", !allowOverflow && "overflow-hidden")}>
                     {children}
                 </div>
 

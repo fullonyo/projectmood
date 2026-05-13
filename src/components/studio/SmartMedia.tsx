@@ -92,7 +92,7 @@ const AudioPlayer = ({
         <div className="w-full h-full flex flex-col justify-center p-[8%] pointer-events-auto group/audio relative overflow-hidden" onClick={togglePlay}>
             <audio
                 ref={audioRef}
-                src={audioUrl}
+                src={audioUrl} crossOrigin="anonymous"
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={() => setIsPlaying(false)}
                 onPlay={() => setIsPlaying(true)}
@@ -197,12 +197,73 @@ const AuraPlayer = ({
     setIsPlaying: (p: boolean) => void;
 }) => {
     const orbSize = Math.max(80, Math.round(120 * scale))
-    
+    const [audioIntensity, setAudioIntensity] = useState(0)
+    const analyserRef = useRef<AnalyserNode | null>(null)
+    const audioCtxRef = useRef<AudioContext | null>(null)
+    const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
+    const animationFrameRef = useRef<number | undefined>(undefined)
+
+    // Audio Analysis Engine
+    useEffect(() => {
+        if (!audioRef.current || !isPlaying) {
+            setAudioIntensity(0)
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current)
+            return
+        }
+
+        const setupAudioContext = () => {
+            if (!audioRef.current) return
+            try {
+                if (!audioCtxRef.current) {
+                    const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext)
+                    audioCtxRef.current = new AudioContextClass()
+                }
+
+                const audioCtx = audioCtxRef.current
+                
+                if (!sourceRef.current) {
+                    const audioEl = audioRef.current
+                    sourceRef.current = audioCtx.createMediaElementSource(audioEl)
+                    analyserRef.current = audioCtx.createAnalyser()
+                    analyserRef.current.fftSize = 256
+                    sourceRef.current.connect(analyserRef.current)
+                    analyserRef.current.connect(audioCtx.destination)
+                }
+
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume()
+                }
+            } catch (e) {
+                console.warn("Audio Context failed", e)
+            }
+        }
+
+        setupAudioContext()
+
+        const dataArray = new Uint8Array(analyserRef.current?.frequencyBinCount || 0)
+        const analyze = () => {
+            if (analyserRef.current) {
+                analyserRef.current.getByteFrequencyData(dataArray)
+                // Get average of low frequencies (Bass) for the pulse
+                const lowFreqs = dataArray.slice(0, 10)
+                const average = lowFreqs.reduce((a, b) => a + b, 0) / lowFreqs.length
+                setAudioIntensity(average / 255) // Normalizado 0-1
+            }
+            animationFrameRef.current = requestAnimationFrame(analyze)
+        }
+
+        analyze()
+
+        return () => {
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current)
+        }
+    }, [isPlaying, audioRef])
+
     return (
         <div className="w-full h-full flex flex-col items-center justify-center p-4 pointer-events-auto group/aura relative" onClick={togglePlay}>
             <audio
                 ref={audioRef}
-                src={audioUrl}
+                src={audioUrl} crossOrigin="anonymous"
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={() => setIsPlaying(false)}
                 onPlay={() => setIsPlaying(true)}
@@ -251,12 +312,11 @@ const AuraPlayer = ({
                         borderRadius: isPlaying 
                             ? ["42% 58% 70% 30% / 45% 45% 55% 55%", "50% 50% 33% 67% / 55% 27% 73% 45%", "42% 58% 70% 30% / 45% 45% 55% 55%"]
                             : "50%",
-                        scale: isPlaying ? [1, 1.05, 1] : 1
+                        scale: isPlaying ? 1 + (audioIntensity * 0.4) : 1
                     }}
                     transition={{
-                        duration: 8,
-                        repeat: Infinity,
-                        ease: "easeInOut"
+                        borderRadius: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+                        scale: { type: "spring", stiffness: 300, damping: 20 }
                     }}
                     className={cn(
                         "relative flex items-center justify-center overflow-hidden transition-all duration-500 shadow-2xl",
@@ -265,7 +325,7 @@ const AuraPlayer = ({
                     style={{ 
                         width: orbSize - 20, 
                         height: orbSize - 20,
-                        boxShadow: isPlaying ? '0 0 40px rgba(244,63,94,0.2)' : 'none'
+                        boxShadow: isPlaying ? `0 0 ${20 + audioIntensity * 60}px rgba(244,63,94,${0.2 + audioIntensity * 0.4})` : 'none'
                     }}
                 >
                     {/* Animated Mesh Background (Inside Orb) */}
@@ -273,9 +333,12 @@ const AuraPlayer = ({
                         {isPlaying && (
                             <motion.div
                                 initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
+                                animate={{ 
+                                    opacity: 0.3 + audioIntensity * 0.7,
+                                    scale: 1 + audioIntensity * 0.2
+                                }}
                                 exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-gradient-to-tr from-rose-500/20 via-fuchsia-500/10 to-blue-500/20 animate-pulse"
+                                className="absolute inset-0 bg-gradient-to-tr from-rose-500/40 via-fuchsia-500/20 to-blue-500/40"
                             />
                         )}
                     </AnimatePresence>
