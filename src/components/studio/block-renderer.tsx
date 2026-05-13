@@ -128,10 +128,15 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
 
     const renderMedia = () => {
         const mediaContent = content as UniversalMediaContent
-        const mediaType = mediaContent.mediaType || (block.type === 'music' ? 'music' : 'video')
-        const frame = getFrameType(mediaContent.frame, mediaType === 'music' ? 'minimal' : 'none')
-        const allowOverflow = mediaType === 'audio' && (mediaContent.audioStyle === 'aura' || mediaContent.audioStyle === 'dots')
+        const mediaType = mediaContent.mediaType || (block.type === 'music' ? 'audio' : 'video')
+        const isAudio = mediaType === 'audio' || block.type === 'music'
         
+        // Audio players never use frames, they are their own containers
+        const frame = isAudio ? 'none' : getFrameType(mediaContent.frame, 'none')
+        
+        // Audio players need to be able to overflow for their particle effects, custom shapes, and floating layouts
+        const allowOverflow = isAudio
+
         return (
             <FrameContainer frame={frame} allowOverflow={allowOverflow}>
                 <SmartMedia
@@ -147,7 +152,6 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                     isPublic={isPublic}
                     hasInteracted={hasInteracted}
                     lyrics={mediaContent.lyrics}
-                    lyricsDisplay={mediaContent.lyricsDisplay}
                 />
             </FrameContainer>
         )

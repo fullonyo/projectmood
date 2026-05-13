@@ -24,7 +24,6 @@ interface SmartMediaProps {
     scale?: number
     hasInteracted?: boolean
     lyrics?: string // Valid format: [mm:ss] text
-    lyricsDisplay?: 'integrated' | 'fullscreen'
     audioStyle?: 'classic' | 'aura' | 'dots'
 }
 
@@ -35,7 +34,7 @@ interface LyricLine {
 
 const AudioPlayer = ({ 
     audioUrl, isPlaying, togglePlay, progress, setProgress, scale = 1, audioMetadata, 
-    renderLyricsOverlay, isGlobalMuted, audioRef, handleTimeUpdate, currentTime, setCurrentTime, setIsPlaying
+    isGlobalMuted, audioRef, handleTimeUpdate, currentTime, setCurrentTime, setIsPlaying
 }: {
     audioUrl: string;
     isPlaying: boolean;
@@ -44,7 +43,6 @@ const AudioPlayer = ({
     setProgress: (p: number) => void;
     scale?: number;
     audioMetadata?: { name?: string; artist?: string };
-    renderLyricsOverlay: (mode?: 'audio' | 'overlay') => React.ReactNode;
     isGlobalMuted: boolean;
     audioRef: React.RefObject<HTMLAudioElement | null>;
     handleTimeUpdate: () => void;
@@ -171,7 +169,6 @@ const AudioPlayer = ({
 
             </div>
 
-            {renderLyricsOverlay('audio')}
 
             {isGlobalMuted && (
                 <div className="absolute top-0 right-4 p-1.5 rounded-full bg-red-500/10 text-red-500 animate-pulse backdrop-blur-md">
@@ -272,7 +269,7 @@ const AuraPlayer = ({
     }, [isPlaying, audioRef])
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-4 pointer-events-auto group/aura relative" onClick={togglePlay}>
+        <div className="w-full h-full flex flex-col items-center justify-center pointer-events-auto p-4 group/aura relative" onClick={togglePlay}>
             <audio
                 ref={audioRef}
                 src={audioUrl} crossOrigin="anonymous"
@@ -360,8 +357,10 @@ const AuraPlayer = ({
                 </motion.div>
                 </motion.div>
 
-            {/* Metadata Floating Overlay */}
-            <div className="mt-8 flex flex-col items-center text-center max-w-[140%] overflow-visible pointer-events-none z-10">
+            <div 
+                className="flex flex-col items-center text-center max-w-[140%] overflow-visible pointer-events-none z-10"
+                style={{ marginTop: Math.round(24 * scale) }}
+            >
                 <motion.h3 
                     className="font-black text-zinc-900 dark:text-white uppercase tracking-[0.3em] leading-none mb-2"
                     style={{ fontSize: Math.max(10, Math.round(14 * scale)) }}
@@ -632,47 +631,49 @@ const PulseFieldPlayer = ({
                     {isPlaying ? <Pause className="w-8 h-8 text-white fill-current" /> : <Play className="w-8 h-8 text-white fill-current translate-x-1" />}
                 </motion.div>
 
-                <div className="text-center">
-
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider max-w-[200px] truncate">{audioMetadata?.name || 'Unknown Audio'}</h3>
+                <div 
+                    className="text-center"
+                    style={{ marginTop: Math.round(16 * scale) }}
+                >
+                    <h3 
+                        className="font-black text-zinc-900 dark:text-white uppercase tracking-[0.2em] max-w-[240px] truncate"
+                        style={{ fontSize: Math.max(9, Math.round(12 * scale)) }}
+                    >
+                        {audioMetadata?.name || 'Unknown Audio'}
+                    </h3>
                 </div>
             </div>
         </div>
     )
 }
 
-const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, renderLyricsOverlay }: {
+const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted }: {
     videoId: string;
     isPublic: boolean;
     hasInteracted: boolean;
     isGlobalMuted: boolean;
-    renderLyricsOverlay: () => React.ReactNode;
 }) => {
     const muteParam = (hasInteracted && !isGlobalMuted) ? '0' : '1';
     const autoplayParam = isPublic ? `&autoplay=1&mute=${muteParam}` : '';
 
     return (
-        <>
-            <iframe
-                src={`https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&controls=1&rel=0${autoplayParam}`}
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full grayscale-[0.1] hover:grayscale-0 transition-all duration-1000 object-cover"
-            />
-            {renderLyricsOverlay()}
-        </>
+        <iframe
+            src={`https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&controls=1&rel=0${autoplayParam}`}
+            width="100%"
+            height="100%"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-full grayscale-[0.1] hover:grayscale-0 transition-all duration-1000 object-cover"
+        />
     )
 }
 
-const MusicPlayer = ({ trackId, isPublic, hasInteracted, isGlobalMuted, renderLyricsOverlay }: {
+const MusicPlayer = ({ trackId, isPublic, hasInteracted, isGlobalMuted }: {
     trackId: string;
     isPublic: boolean;
     hasInteracted: boolean;
     isGlobalMuted: boolean;
-    renderLyricsOverlay: () => React.ReactNode;
 }) => {
     const spotifyAutoplay = isPublic && hasInteracted && !isGlobalMuted ? '&autoplay=1' : '';
 
@@ -694,7 +695,6 @@ const MusicPlayer = ({ trackId, isPublic, hasInteracted, isGlobalMuted, renderLy
                     className="transition-all duration-1000 grayscale-[0.2] hover:grayscale-0 flex-1 rounded-2xl shadow-inner"
                 />
             )}
-            {renderLyricsOverlay()}
         </div>
     )
 }
@@ -713,11 +713,10 @@ export function SmartMedia({
     scale: manualScale,
     hasInteracted = false,
     lyrics,
-    lyricsDisplay: localLyricsDisplay,
     audioStyle = 'classic'
 }: SmartMediaProps) {
     const { ref, fluidScale } = useStudioBlock()
-    const { isGlobalMuted, globalVolume, lyricsMode } = useAudio()
+    const { isGlobalMuted, globalVolume } = useAudio()
     const { setActiveLyrics } = useLyrics()
     const scale = manualScale ?? fluidScale
 
@@ -801,9 +800,7 @@ export function SmartMedia({
 
                 if (activeLine && activeLine.text !== currentLyric) {
                     setCurrentLyric(activeLine.text)
-                    if (localLyricsDisplay === 'fullscreen' || lyricsMode === 'fullscreen') {
-                        setActiveLyrics(activeLine.text)
-                    }
+                    setActiveLyrics(activeLine.text)
                 }
             }
         }
@@ -811,50 +808,16 @@ export function SmartMedia({
 
     useEffect(() => {
         return () => {
-            if (localLyricsDisplay === 'fullscreen' || lyricsMode === 'fullscreen') {
-                setActiveLyrics(null)
-            }
-        }
-    }, [localLyricsDisplay, lyricsMode, setActiveLyrics])
-
-    useEffect(() => {
-        if (!isPlaying && (localLyricsDisplay === 'fullscreen' || lyricsMode === 'fullscreen')) {
             setActiveLyrics(null)
         }
-    }, [isPlaying, localLyricsDisplay, lyricsMode, setActiveLyrics])
+    }, [setActiveLyrics])
 
-    const renderLyricsOverlay = (mode: 'audio' | 'overlay' = 'overlay') => {
-        if (localLyricsDisplay === 'fullscreen' || lyricsMode === 'fullscreen') return mode === 'audio' ? <div style={{ height: Math.round(24 * scale), marginBottom: Math.round(16 * scale) }} /> : null
-        if (!currentLyric) return mode === 'audio' ? <div style={{ height: Math.round(24 * scale), marginBottom: Math.round(16 * scale) }} /> : null
+    useEffect(() => {
+        if (!isPlaying) {
+            setActiveLyrics(null)
+        }
+    }, [isPlaying, setActiveLyrics])
 
-        const content = (
-            <div 
-                className="flex flex-col items-center backdrop-blur-md bg-white/5 dark:bg-black/20 rounded-xl border border-white/10 shadow-lg overflow-hidden"
-                style={{
-                    padding: Math.round(8 * scale),
-                    gap: Math.round(6 * scale)
-                }}
-            >
-                <span className="font-black tracking-[0.4em] opacity-50 uppercase text-rose-500" style={{ fontSize: Math.max(6, Math.round(7 * scale)) }}>Lyrics • Live</span>
-                <motion.p
-                    key={currentLyric}
-                    initial={{ opacity: 0, y: 8, filter: 'blur(8px)' }}
-                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                    className="font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white leading-tight max-w-[95%] text-center px-4"
-                    style={{
-                        fontSize: Math.max(10, Math.round(18 * scale)),
-                        textShadow: `0 ${Math.round(4 * scale)}px ${Math.round(12 * scale)}px rgba(0,0,0,0.3)`
-                    }}
-                >
-                    {currentLyric}
-                </motion.p>
-            </div>
-        )
-
-        return mode === 'audio' 
-            ? <div className="w-full z-30 pointer-events-none flex justify-center" style={{ padding: `${Math.round(8 * scale)}px 0`, marginBottom: Math.round(16 * scale) }}>{content}</div>
-            : <div className="absolute inset-x-0 bottom-[15%] flex flex-col items-center justify-center z-30 pointer-events-none px-6 text-center">{content}</div>
-    }
 
     const renderHUDMarkings = () => (
         <div className="absolute inset-0 pointer-events-none z-20">
@@ -898,15 +861,15 @@ export function SmartMedia({
             content = (
                 <AudioPlayer 
                     audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} setProgress={setProgress} scale={scale} 
-                    audioMetadata={audioMetadata} renderLyricsOverlay={renderLyricsOverlay} isGlobalMuted={isGlobalMuted} 
+                    audioMetadata={audioMetadata} isGlobalMuted={isGlobalMuted} 
                     audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} currentTime={currentTime} setCurrentTime={setCurrentTime} setIsPlaying={setIsPlaying}
                 />
             )
         }
     } else if (mediaType === 'video' && videoId) {
-        content = <VideoPlayer videoId={videoId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} renderLyricsOverlay={renderLyricsOverlay} />
+        content = <VideoPlayer videoId={videoId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} />
     } else if (mediaType === 'music' && trackId) {
-        content = <MusicPlayer trackId={trackId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} renderLyricsOverlay={renderLyricsOverlay} />
+        content = <MusicPlayer trackId={trackId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} />
     } else {
         content = (
             <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/50 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-[32px] p-6 text-center">

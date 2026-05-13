@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useState, useTransition, useEffect } from "react"
 import { searchSpotifyTracks } from "@/actions/spotify"
 import { addMoodBlock } from "@/actions/profile"
@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
     Search, Music, Youtube, Plus, Video,
-    Upload, Maximize2
+    Upload, Maximize2, Flag, Languages
 } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { FrameType } from "./FrameContainer"
@@ -50,8 +51,9 @@ export function UniversalMediaEditor({
     const [trackArtist, setTrackArtist] = useState(content.artist || "")
     const [trackAlbumArt, setTrackAlbumArt] = useState(content.albumArt || "")
     const [lyrics, setLyrics] = useState(content.lyrics || "")
-    const [lyricsDisplay, setLyricsDisplay] = useState<'integrated' | 'fullscreen'>(content.lyricsDisplay || 'integrated')
+    const [lyricsDisplay, setLyricsDisplay] = useState<'integrated' | 'fullscreen'>('fullscreen')
     const [audioStyle, setAudioStyle] = useState<'classic' | 'aura' | 'dots'>(content.audioStyle || 'classic')
+    const [showLyrics, setShowLyrics] = useState(!!content.lyrics && content.lyrics.trim().length > 0)
 
     interface SpotifyTrack {
         id: string;
@@ -145,7 +147,7 @@ export function UniversalMediaEditor({
         }
     }
 
-    const triggerUpdate = (updates: Partial<UniversalMediaContent>) => {
+    const triggerUpdate = (updates: Partial<UniversalMediaContent>, blockUpdates: Partial<MoodBlock> = {}) => {
         if (!block?.id || !onUpdate) return
 
         const currentContent: UniversalMediaContent = {
@@ -167,7 +169,8 @@ export function UniversalMediaEditor({
 
         onUpdate({
             type: typeToSave,
-            content: currentContent
+            content: currentContent,
+            ...blockUpdates
         })
     }
 
@@ -388,18 +391,34 @@ export function UniversalMediaEditor({
             {(videoId || trackId || audioUrl) && (
                 <div className="space-y-10">
                     <EditorSection title="Estética">
-                        <EditorSection title="Moldura">
-                            <ListSelector
-                                id="frame-type"
-                                options={FRAMES.map(f => ({ id: f.id as string, label: f.label }))}
-                                activeId={frame as string}
-                                onChange={(id) => {
-                                    const newFrame = id as FrameType
-                                    setFrame(newFrame)
-                                    triggerUpdate({ frame: newFrame })
-                                }}
-                            />
-                        </EditorSection>
+                        {mediaType !== 'audio' && (
+                            <EditorSection title="Moldura">
+                                <ListSelector
+                                    id="frame-type"
+                                    options={FRAMES.map(f => ({ id: f.id as string, label: f.label }))}
+                                    activeId={frame as string}
+                                    onChange={(id) => {
+                                        const newFrame = id as FrameType
+                                        setFrame(newFrame)
+                                        triggerUpdate({ frame: newFrame })
+                                    }}
+                                />
+                            </EditorSection>
+                        )}
+
+                        <div className="flex items-center justify-between px-1 mb-4">
+                            <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-600">
+                                Configurações
+                            </h4>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400/60">Lyrics</span>
+                                <Switch 
+                                    checked={showLyrics} 
+                                    onCheckedChange={setShowLyrics}
+                                    className="scale-75 data-[state=checked]:bg-rose-500"
+                                />
+                            </div>
+                        </div>
 
                         {mediaType === 'audio' && (
                             <EditorSection title="Estilo do Player">
@@ -414,42 +433,44 @@ export function UniversalMediaEditor({
                                     onChange={(id) => {
                                         const newStyle = id as 'classic' | 'aura' | 'dots'
                                         setAudioStyle(newStyle)
-                                        triggerUpdate({ audioStyle: newStyle })
+                                        
+                                        const recommendedSizes = {
+                                            classic: { width: 320, height: 160 },
+                                            aura: { width: 280, height: 280 },
+                                            dots: { width: 400, height: 240 }
+                                        }
+
+                                        triggerUpdate({ audioStyle: newStyle }, recommendedSizes[newStyle])
                                     }}
                                 />
                             </EditorSection>
                         )}
                     </EditorSection>
 
-                    <EditorSection title="Letras (Lyrics)">
-                        <div className="space-y-6">
-                            <EditorSection title="Exibição">
-                                <ListSelector
-                                    id="lyrics-mode"
-                                    options={[
-                                        { id: 'integrated', label: 'Integrado' },
-                                        { id: 'fullscreen', label: 'Tela Cheia' }
-                                    ]}
-                                    activeId={lyricsDisplay}
-                                    onChange={(id) => {
-                                        const newMode = id as 'integrated' | 'fullscreen'
-                                        setLyricsDisplay(newMode)
-                                        triggerUpdate({ lyricsDisplay: newMode })
-                                    }}
-                                />
-                            </EditorSection>
-
-                            <textarea
-                                value={lyrics}
-                                onChange={(e) => {
-                                    setLyrics(e.target.value)
-                                    triggerUpdate({ lyrics: e.target.value })
-                                }}
-                                placeholder="Insira as letras aqui..."
-                                className="w-full h-32 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 text-[12px] font-medium resize-none focus:ring-2 focus:ring-blue-500/10 transition-all custom-scrollbar"
-                            />
-                        </div>
-                    </EditorSection>
+                    <AnimatePresence>
+                        {showLyrics && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0, y: -10 }}
+                                animate={{ opacity: 1, height: "auto", y: 0 }}
+                                exit={{ opacity: 0, height: 0, y: -10 }}
+                                className="overflow-hidden"
+                            >
+                                <EditorSection title="Letras (Lyrics)">
+                                    <div className="space-y-6">
+                                        <textarea
+                                            value={lyrics}
+                                            onChange={(e) => {
+                                                setLyrics(e.target.value)
+                                                triggerUpdate({ lyrics: e.target.value })
+                                            }}
+                                            placeholder="Insira as letras aqui... Ex: [00:15] Minha frase"
+                                            className="w-full h-32 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 text-[12px] font-medium resize-none focus:ring-2 focus:ring-rose-500/10 transition-all custom-scrollbar"
+                                        />
+                                    </div>
+                                </EditorSection>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     <EditorActionButton 
                         onClick={handleSave} 
