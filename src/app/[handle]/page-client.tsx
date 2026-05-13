@@ -21,6 +21,19 @@ import { LyricsProvider } from "@/components/studio/lyrics-context"
 import { GlobalLyricsOverlay } from "@/components/studio/GlobalLyricsOverlay"
 import { themeConfigs } from "@/lib/themes"
 
+const MIX_BLEND_MODES = [
+    'normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten',
+    'color-dodge', 'color-burn', 'hard-light', 'soft-light',
+    'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity',
+    'plus-darker', 'plus-lighter'
+] as const
+
+const getBlendMode = (content: any): React.CSSProperties['mixBlendMode'] => {
+    return content && typeof content.blendMode === 'string' && MIX_BLEND_MODES.includes(content.blendMode as any)
+        ? content.blendMode as React.CSSProperties['mixBlendMode']
+        : 'normal'
+}
+
 export function PublicMoodPageClient(props: PublicMoodPageProps) {
     return (
         <I18nProvider>
@@ -134,6 +147,9 @@ function PublicMoodPageClientInner({ publicUser, roomId, profile, moodBlocks, co
                                 height: scaleBlockSize(block.height, viewportScale, block.type, 'h'),
                                 rotate: block.rotation ? `${block.rotation}deg` : undefined,
                                 zIndex: block.zIndex || 1,
+                                display: block.isHidden ? 'none' : 'block',
+                                opacity: block.isHidden ? 0 : (block.content?.opacity ?? 1),
+                                mixBlendMode: getBlendMode(block.content),
                             }}
                         >
                             <React.Suspense fallback={<div className="w-full h-full animate-pulse bg-white/5 rounded-xl border border-white/10" />}>
