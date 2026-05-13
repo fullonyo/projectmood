@@ -186,3 +186,75 @@ export async function getYouTubeVideoInfo(videoId: string): Promise<YouTubeSearc
         return { error: "Erro ao buscar informações do vídeo" }
     }
 }
+/**
+ * Extrai o ID da playlist de uma URL do YouTube de forma robusta.
+ */
+function extractPlaylistId(url: string): string | null {
+    // Tenta pegar o parâmetro 'list' de qualquer URL
+    const match = url.match(/[&?]list=([^&?#]+)/);
+    if (match && match[1]) return match[1];
+    
+    // Se não for uma URL, assume que é o próprio ID (se tiver cara de ID de playlist)
+    if (url.length > 10 && !url.includes("/") && !url.includes(".")) return url;
+    
+    return null;
+}
+
+/**
+ * Importa vídeos de uma playlist do YouTube OU um vídeo único para a fila.
+ */
+export async function importYouTubePlaylist(urlOrId: string): Promise<YouTubeSearchResult[] | { error: string }> {
+    const apiKey = process.env.YOUTUBE_API_KEY
+    if (!apiKey) return { error: "YOUTUBE_API_KEY não configurada" }
+
+    const trimmedInput = urlOrId.trim()
+    const playlistId = extractPlaylistId(trimmedInput)
+    
+    // Se achou um ID de playlist válido (e não é Mix)
+    if (playlistId && !playlistId.startsWith("RD")) {
+        try {
+            console.log(`[YouTube API] Importando playlist: ${playlistId}`)
+            const url = new URL("https://www.googleapis.com/youtube/v3/playlistItems")
+            url.searchParams.set("part", "snippet")
+            url.searchParams.set("playlistId", playlistId)
+            url.searchParams.set("maxResults", "20")
+            url.searchParams.set("key", apiKey)
+
+            const response = await fetch(url.toString(), { next: { revalidate: 3600 } })
+
+            if (response.ok) {
+                const data = await response.json()
+                const items = data.items || []
+                if (items.length > 0) {
+                    return items.map((item: any) => ({
+                        videoId: item.snippet.resourceId.videoId,
+                        title: item.snippet.title,
+                        channel: item.snippet.channelTitle,
+                        thumbnail: item.snippet.thumbnails.medium?.url 
+                            || item.snippet.thumbnails.default?.url 
+                            || `https://img.youtube.com/vi/${item.snippet.resourceId.videoId}/mqdefault.jpg`
+                    }))
+                }
+            }
+        } catch (e) {
+            console.error("[YouTube API] Playlist fetch error, falling back to video check", e)
+        }
+    }
+
+    // Fallback: Tenta tratar como um vídeo único
+    const videoId = trimmedInput.includes("v=") 
+        ? trimmedInput.split("v=")[1]?.split("&")[0] 
+        : trimmedInput.includes("youtu.be/") 
+            ? trimmedInput.split("youtu.be/")[1]?.split("?")[0]
+            : trimmedInput.length === 11 ? trimmedInput : null
+
+    if (videoId) {
+        console.log(`[YouTube API] Tratando como vídeo único: ${videoId}`)
+        const info = await getYouTubeVideoInfo(videoId)
+        if (info && !('error' in info)) {
+            return [info as YouTubeSearchResult]
+        }
+    }
+
+    return { error: "Não foi possível encontrar uma playlist ou vídeo válido neste link. Verifique se ele é público." }
+}

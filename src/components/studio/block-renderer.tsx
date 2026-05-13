@@ -152,6 +152,8 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                     isPublic={isPublic}
                     hasInteracted={hasInteracted}
                     lyrics={mediaContent.lyrics}
+                    playlistMode={mediaContent.playlistMode}
+                    playlist={mediaContent.playlist}
                 />
             </FrameContainer>
         )

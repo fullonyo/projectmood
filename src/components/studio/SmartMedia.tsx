@@ -70,6 +70,8 @@ interface SmartMediaProps {
     hasInteracted?: boolean
     lyrics?: string // Valid format: [mm:ss] text
     audioStyle?: 'classic' | 'aura' | 'dots'
+    playlistMode?: boolean
+    playlist?: any[]
 }
 
 interface LyricLine {
@@ -692,13 +694,17 @@ const PulseFieldPlayer = ({
     )
 }
 
-const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUpdate, onPlayStateChange }: {
+const VideoPlayer = ({ 
+    videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUpdate, onPlayStateChange, playlistMode, playlist 
+}: {
     videoId: string;
     isPublic: boolean;
     hasInteracted: boolean;
     isGlobalMuted: boolean;
     onTimeUpdate?: (currentTime: number, duration: number) => void;
     onPlayStateChange?: (isPlaying: boolean) => void;
+    playlistMode?: boolean;
+    playlist?: any[];
 }) => {
     const rawId = useId()
     const ytContainerId = `yt-player-${videoId}-${rawId.replace(/:/g, '')}`
@@ -714,12 +720,19 @@ const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUp
     const [isVideoPlaying, setIsVideoPlaying] = useState(false)
     const [progress, setProgress] = useState(0)
     const [isHovered, setIsHovered] = useState(false)
+    const [currentIndex, setCurrentIndex] = useState(0)
+
+    const playlistRef = useRef(playlist)
+    const playlistModeRef = useRef(playlistMode)
+    const currentIndexRef = useRef(currentIndex)
 
     // Refs espelho — atualizados sincronamente a cada render.
-    // Padrão React para leitura de props atuais em callbacks de APIs de terceiros.
     hasInteractedRef.current = hasInteracted
     isGlobalMutedRef.current = isGlobalMuted
     isPublicRef.current = isPublic
+    playlistRef.current = playlist
+    playlistModeRef.current = playlistMode
+    currentIndexRef.current = currentIndex
 
     const markReady = () => {
         apiReadyRef.current = true
@@ -761,7 +774,6 @@ const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUp
     // e cause o erro "removeChild: node is not a child" no unmount.
     useEffect(() => {
         if (!apiReady || apiFailed) return
-        // Aguardar o DOM montar o elemento com o ID
         const target = document.getElementById(ytContainerId)
         if (!target) return
 
@@ -772,16 +784,21 @@ const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUp
 
         const muteParam = (hasInteracted && !isGlobalMuted) ? 0 : 1
         const autoplayParam = isPublic ? 1 : 0
+        
+        // Blindagem: Se for playlist, garante que começa pelo ID correto
+        const initialVideoId = (playlistMode && playlist && playlist.length > 0) 
+            ? playlist[0].videoId 
+            : videoId
 
         playerRef.current = new window.YT.Player(ytContainerId, {
-            videoId,
+            videoId: initialVideoId,
             width: '100%',
             height: '100%',
             playerVars: {
                 autoplay: autoplayParam,
                 mute: muteParam,
-                loop: 1,
-                playlist: videoId,
+                loop: playlistMode ? 0 : 1,
+                playlist: (playlistMode ? "" : initialVideoId) as string,
                 controls: 0,
                 rel: 0,
                 modestbranding: 1,
@@ -791,14 +808,25 @@ const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUp
             },
             events: {
                 onReady: (event: YT.PlayerEvent) => {
-                    // Ler valores ATUAIS via refs (não os valores do momento da criação)
-                    // Cobre o race condition: player termina de carregar DEPOIS
-                    // do usuário já ter clicado no overlay global
+                    // Sincronização forçada de volume/mute no nascimento do player
                     if (isGlobalMutedRef.current) {
                         event.target.mute()
-                    } else if (isPublicRef.current && hasInteractedRef.current) {
-                        event.target.unMute() // garante unmute se player nasceu muted
+                    } else if (hasInteractedRef.current) {
+                        event.target.unMute()
+                        // No estúdio ou público, se já interagiu, tentamos dar play
                         event.target.playVideo()
+                    }
+                },
+                onError: (event: { data: number }) => {
+                    console.warn("[YouTube Player] Vídeo restrito ou indisponível (Erro " + event.data + "). Pulando...", event.data)
+                    // Se der erro no vídeo (ex: bloqueado), pula para o próximo se for playlist
+                    if (playlistModeRef.current && playlistRef.current && playlistRef.current.length > 1) {
+                        const nextIndex = (currentIndexRef.current + 1) % playlistRef.current.length
+                        const nextVideo = playlistRef.current[nextIndex]
+                        if (nextVideo?.videoId) {
+                            setCurrentIndex(nextIndex)
+                            ;(playerRef.current as any)?.loadVideoById(nextVideo.videoId)
+                        }
                     }
                 },
                 onStateChange: (event: YT.OnStateChangeEvent) => {
@@ -810,6 +838,14 @@ const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUp
                     onPlayStateChange?.(playing)
 
                     if (playing) {
+                        // Garantia extra de áudio ao iniciar o play
+                        if (!isGlobalMutedRef.current && hasInteractedRef.current) {
+                            event.target.unMute()
+                            if ((event.target as any).setVolume) {
+                                (event.target as any).setVolume(100) // Volume máximo do player, controlado pelo sistema
+                            }
+                        }
+
                         if (pollingRef.current) clearInterval(pollingRef.current)
                         pollingRef.current = setInterval(() => {
                             if (playerRef.current?.getCurrentTime && playerRef.current?.getDuration) {
@@ -821,8 +857,22 @@ const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUp
                         }, 250)
                     }
 
-                    if (paused || ended) {
+                    if (paused) {
                         if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null }
+                    }
+
+                    if (ended) {
+                        if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null }
+                        
+                        if (playlistModeRef.current && playlistRef.current && playlistRef.current.length > 1) {
+                            const nextIndex = (currentIndexRef.current + 1) % playlistRef.current.length
+                            const nextVideo = playlistRef.current[nextIndex]
+                            
+                            if (nextVideo && nextVideo.videoId) {
+                                setCurrentIndex(nextIndex)
+                                ;(playerRef.current as any)?.loadVideoById(nextVideo.videoId)
+                            }
+                        }
                     }
                 }
             }
@@ -835,7 +885,7 @@ const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUp
                 playerRef.current = null
             }
         }
-    }, [apiReady, videoId])
+    }, [apiReady, videoId, playlistMode])
 
     // Mute global
     useEffect(() => {
@@ -976,7 +1026,9 @@ export function SmartMedia({
     scale: manualScale,
     hasInteracted = false,
     lyrics,
-    audioStyle = 'classic'
+    audioStyle = 'classic',
+    playlistMode = false,
+    playlist = []
 }: SmartMediaProps) {
     const { ref, fluidScale } = useStudioBlock()
     const { isGlobalMuted, globalVolume } = useAudio()
@@ -1143,15 +1195,17 @@ export function SmartMedia({
                 />
             )
         }
-    } else if (mediaType === 'video' && videoId) {
+    } else if (mediaType === 'video' && (videoId || (playlistMode && playlist && playlist.length > 0))) {
         content = (
             <VideoPlayer 
-                videoId={videoId} 
+                videoId={videoId || playlist?.[0]?.videoId} 
                 isPublic={isPublic} 
                 hasInteracted={hasInteracted} 
                 isGlobalMuted={isGlobalMuted}
                 onTimeUpdate={handleVideoTimeUpdate}
                 onPlayStateChange={handleVideoPlayState}
+                playlistMode={playlistMode}
+                playlist={playlist}
             />
         )
     } else if (mediaType === 'music' && trackId) {

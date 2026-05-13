@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useTransition, useEffect } from "react"
 import { searchSpotifyTracks } from "@/actions/spotify"
-import { searchYouTubeVideos, getYouTubeVideoInfo } from "@/actions/youtube"
+import { searchYouTubeVideos, getYouTubeVideoInfo, importYouTubePlaylist } from "@/actions/youtube"
 import { addMoodBlock } from "@/actions/profile"
 import { getUploadUrl } from "@/actions/upload"
 import { Input } from "@/components/ui/input"
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
     Search, Music, Youtube, Plus, Video,
-    Upload, Maximize2, Flag, Languages
+    Upload, Maximize2, Flag, Languages, ListMusic, Trash2, ListPlus, Loader2
 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { SpotifyIcon } from "@/components/icons"
@@ -59,6 +59,11 @@ export function UniversalMediaEditor({
     const [lyricsDisplay, setLyricsDisplay] = useState<'integrated' | 'fullscreen'>('fullscreen')
     const [audioStyle, setAudioStyle] = useState<'classic' | 'aura' | 'dots'>(content.audioStyle || 'classic')
     const [showLyrics, setShowLyrics] = useState(!!content.lyrics && content.lyrics.trim().length > 0)
+    
+    // Playlist States
+    const [playlistMode, setPlaylistMode] = useState(content.playlistMode || false)
+    const [playlist, setPlaylist] = useState<any[]>(content.playlist || [])
+    const [playlistUrl, setPlaylistUrl] = useState("")
 
     interface SpotifyTrack {
         id: string;
@@ -102,41 +107,38 @@ export function UniversalMediaEditor({
         setIsLoading(false)
     }
 
-    const handleAddYoutube = async () => {
-        const id = extractYoutubeId(urlInput)
-        if (id) {
-            setVideoId(id)
-            setMediaType('video')
-            setUrlInput("")
-            setError(null)
 
-            // Enriquecer com metadados da API (best-effort)
-            const info = await getYouTubeVideoInfo(id)
-            if (info && !('error' in info)) {
-                setVideoTitle(info.title)
-                setVideoChannel(info.channel)
-                setVideoThumbnail(info.thumbnail)
-                triggerUpdate({ 
-                    videoId: id, mediaType: 'video',
-                    videoTitle: info.title, videoChannel: info.channel, videoThumbnail: info.thumbnail
-                })
-            } else {
-                triggerUpdate({ videoId: id, mediaType: 'video' })
-            }
-        } else {
-            setError(t('editors.youtube.error'))
-        }
-    }
 
-    const handleYouTubeSearch = async () => {
-        if (!ytQuery || ytQuery.trim().length < 2) return
+    const handleUniversalYouTubeAction = async () => {
+        const query = ytQuery.trim()
+        if (!query || query.length < 2) return
+        
         setError(null)
         setIsLoading(true)
-        const results = await searchYouTubeVideos(ytQuery.trim())
-        if (results && 'error' in results) {
-            setError(results.error)
+
+        // Detecta se é um link (Vídeo ou Playlist)
+        const isUrl = query.includes("youtube.com/") || query.includes("youtu.be/")
+
+        if (isUrl) {
+            // Tenta importar como playlist ou vídeo único via nossa action robusta
+            const results = await importYouTubePlaylist(query)
+            if (results && 'error' in results) {
+                setError(results.error)
+            } else {
+                // Se for um link, mostramos como resultados para o usuário decidir o que fazer
+                // (Adicionar à fila ou tornar principal)
+                setYtResults(results as YouTubeResult[])
+                // Limpa o input após colar um link para facilitar o próximo
+                setYtQuery("")
+            }
         } else {
-            setYtResults(results as YouTubeResult[])
+            // Busca normal por palavra-chave
+            const results = await searchYouTubeVideos(query)
+            if (results && 'error' in results) {
+                setError(results.error)
+            } else {
+                setYtResults(results as YouTubeResult[])
+            }
         }
         setIsLoading(false)
     }
@@ -149,9 +151,55 @@ export function UniversalMediaEditor({
         setYtResults([])
         setYtQuery("")
         triggerUpdate({ 
-            videoId: result.videoId, mediaType: 'video',
-            videoTitle: result.title, videoChannel: result.channel, videoThumbnail: result.thumbnail
+            videoId: result.videoId, 
+            videoTitle: result.title, 
+            videoChannel: result.channel, 
+            videoThumbnail: result.thumbnail 
         })
+    }
+
+    const handleAddVideoToPlaylist = (video: any) => {
+        const newPlaylist = [...playlist, {
+            videoId: video.videoId,
+            title: video.title,
+            channel: video.channel,
+            thumbnail: video.thumbnail
+        }]
+        setPlaylist(newPlaylist)
+        setPlaylistMode(true)
+        
+        // Auto-seleção: se não tiver vídeo principal, define este como o primeiro
+        if (!videoId) {
+            setVideoId(video.videoId)
+            setVideoTitle(video.title)
+            setVideoChannel(video.channel)
+            setVideoThumbnail(video.thumbnail)
+        }
+
+        triggerUpdate({ 
+            playlist: newPlaylist, 
+            playlistMode: true,
+            // Inclui os dados do vídeo principal caso tenham sido setados agora
+            ...(!videoId ? {
+                videoId: video.videoId,
+                videoTitle: video.title,
+                videoChannel: video.channel,
+                videoThumbnail: video.thumbnail
+            } : {})
+        })
+        setYtResults([])
+        setYtQuery("")
+    }
+
+    const handleImportPlaylist = async () => {
+        // Agora esta lógica está integrada no handleUniversalYouTubeAction
+        handleUniversalYouTubeAction()
+    }
+
+    const removeFromPlaylist = (index: number) => {
+        const newPlaylist = playlist.filter((_, i) => i !== index)
+        setPlaylist(newPlaylist)
+        triggerUpdate({ playlist: newPlaylist })
     }
 
     const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,6 +267,8 @@ export function UniversalMediaEditor({
             artist: trackArtist,
             albumArt: trackAlbumArt,
             audioStyle,
+            playlist,
+            playlistMode,
             ...updates
         }
 
@@ -240,6 +290,8 @@ export function UniversalMediaEditor({
             frame,
             lyrics,
             lyricsDisplay,
+            playlist,
+            playlistMode,
             ...(mediaType === 'video' ? {
                 videoTitle,
                 videoChannel,
@@ -295,51 +347,26 @@ export function UniversalMediaEditor({
             <EditorSection title="Fonte de Dados">
                 {mediaType === 'video' ? (
                     <div className="space-y-4">
-                        {/* Busca por texto */}
                         <div className="relative group">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-red-500 transition-colors" />
                             <Input
-                                placeholder="Buscar vídeo no YouTube..."
+                                placeholder="Pesquisar ou colar link do YouTube..."
                                 value={ytQuery}
                                 onChange={(e) => setYtQuery(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleYouTubeSearch()}
+                                onKeyDown={(e) => e.key === 'Enter' && handleUniversalYouTubeAction()}
                                 className="bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-2xl pl-12 h-14 text-[11px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-red-500/20 placeholder:text-zinc-400"
                             />
                         </div>
+                        
                         <Button
-                            onClick={handleYouTubeSearch}
+                            onClick={handleUniversalYouTubeAction}
                             disabled={isLoading}
                             className="w-full bg-red-600 hover:bg-red-700 text-white rounded-2xl h-14 font-black uppercase tracking-widest text-[9px] shadow-lg shadow-red-500/20 transition-all active:scale-95"
                         >
-                            {isLoading ? 'Buscando...' : 'Buscar no YouTube'}
+                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Search className="w-4 h-4 mr-2" />}
+                            {isLoading ? 'Processando...' : 'Buscar ou Importar'}
                         </Button>
 
-                        {/* Separador visual */}
-                        <div className="flex items-center gap-4 px-2">
-                            <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
-                            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">ou cole o link</span>
-                            <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
-                        </div>
-
-                        {/* Input de URL direto (fallback) */}
-                        <div className="relative group">
-                            <Video className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
-                            <Input
-                                placeholder={t('editors.universal_media.youtube_placeholder')}
-                                value={urlInput}
-                                onChange={(e) => setUrlInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddYoutube()}
-                                className="bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-2xl pl-12 h-14 text-[11px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-blue-500/20 placeholder:text-zinc-400"
-                            />
-                        </div>
-                        {urlInput && (
-                            <Button
-                                onClick={handleAddYoutube}
-                                className="w-full bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl h-14 font-black uppercase tracking-widest text-[9px] transition-all active:scale-95"
-                            >
-                                {t('editors.universal_media.youtube_btn')}
-                            </Button>
-                        )}
 
                         {/* Card de vídeo selecionado (enriquecido) */}
                         {videoId && (
@@ -487,10 +514,17 @@ export function UniversalMediaEditor({
             {mediaType === 'video' && ytResults.length > 0 && (
                 <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-lg divide-y divide-zinc-50 dark:divide-zinc-800 max-h-72 overflow-y-auto custom-scrollbar">
                     {ytResults.map((result) => (
-                        <button
+                        <div
                             key={result.videoId}
                             onClick={() => handleSelectYouTubeResult(result)}
-                            className="w-full flex items-center gap-4 p-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all text-left group"
+                            className="w-full flex items-center gap-4 p-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all text-left group cursor-pointer"
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    handleSelectYouTubeResult(result)
+                                }
+                            }}
                         >
                             <div className="w-16 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800 relative">
                                 <img src={result.thumbnail} alt="" className="w-full h-full object-cover" />
@@ -504,13 +538,79 @@ export function UniversalMediaEditor({
                                 <p className="text-[10px] font-bold text-zinc-900 dark:text-white uppercase truncate">{result.title}</p>
                                 <p className="text-[9px] text-zinc-500 uppercase truncate">{result.channel}</p>
                             </div>
-                        </button>
+                            <div className="flex items-center gap-2 pr-2">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleAddVideoToPlaylist(result)
+                                    }}
+                                    className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 hover:bg-red-500 hover:text-white transition-all shadow-sm group/btn"
+                                    title="Adicionar à Playlist"
+                                >
+                                    <ListPlus className="w-4 h-4 transition-transform group-hover/btn:scale-110" />
+                                </button>
+                            </div>
+                        </div>
                     ))}
                 </div>
             )}
 
-            {(videoId || trackId || audioUrl) && (
+            {(videoId || trackId || audioUrl || playlist.length > 0) && (
                 <div className="space-y-10">
+                    {/* Modular Playlist Section */}
+                    {mediaType === 'video' && (
+                        <EditorSection title="Playlist Modular">
+                            <div className="flex items-center justify-between px-1 mb-6">
+                                <div className="flex items-center gap-3">
+                                    <ListMusic className="w-4 h-4 text-zinc-400" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Modo Sequencial</span>
+                                </div>
+                                <Switch 
+                                    checked={playlistMode} 
+                                    onCheckedChange={(val) => {
+                                        setPlaylistMode(val)
+                                        triggerUpdate({ playlistMode: val })
+                                    }}
+                                    className="scale-75 data-[state=checked]:bg-red-500"
+                                />
+                            </div>
+
+                            {playlistMode && (
+                                <div className="space-y-6">
+                                    {/* Queue List */}
+                                    {playlist.length > 0 && (
+                                        <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                                            {playlist.map((item, idx) => (
+                                                <motion.div
+                                                    layout
+                                                    key={`${item.videoId}-${idx}`}
+                                                    className="flex items-center gap-3 p-2 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl group/item hover:border-zinc-200 dark:hover:border-zinc-700 transition-all shadow-sm"
+                                                >
+                                                    <div className="w-12 h-8 rounded-lg overflow-hidden flex-shrink-0 relative">
+                                                        <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                                            <span className="text-[8px] text-white font-black">{idx + 1}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-[10px] font-bold text-zinc-900 dark:text-white uppercase truncate">{item.title}</p>
+                                                        <p className="text-[8px] text-zinc-500 uppercase truncate">{item.channel}</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => removeFromPlaylist(idx)}
+                                                        className="w-7 h-7 rounded-lg bg-zinc-50 dark:bg-zinc-950 text-zinc-400 hover:text-red-500 transition-colors flex items-center justify-center opacity-0 group-hover/item:opacity-100"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </EditorSection>
+                    )}
+
                     <EditorSection title="Estética">
 
 
