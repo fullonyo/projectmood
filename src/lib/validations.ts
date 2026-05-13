@@ -95,6 +95,7 @@ export const PhotoBlockContentSchema = z.object({
     alt: z.string().max(200).optional(),
     filter: z.enum(['none', 'vintage', 'bw', 'warm', 'cool', 'fade', 'cinematic']).default('none'),
     frame: z.enum(['none', 'polaroid', 'polaroid-dark', 'frame', 'minimal', 'round', 'glass', 'border', 'shadow', 'melt', 'capsule']).default('none'),
+    mask: z.enum(['none', 'circle', 'heart', 'star', 'blob1', 'blob2', 'blob3']).default('none'),
     caption: z.string().max(100).optional(),
     ambientTint: z.boolean().default(false)
 })

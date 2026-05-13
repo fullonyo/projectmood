@@ -12,12 +12,17 @@ import { MoodBlock, Room, MoodBlockContent, RoomVisualConfig } from "@/types/dat
 import { useCanvasManager } from "@/hooks/use-canvas-manager";
 import { updateMoodBlocksZIndex, addMoodBlock, updateProfile } from "@/actions/profile";
 import { cn } from "@/lib/utils";
-import { I18nProvider } from "@/i18n/context";
+import { I18nProvider, useTranslation } from "@/i18n/context";
 import { CanvasInteractionProvider, useCanvasInteraction } from "./canvas-interaction-context";
 import { AudioProvider } from "./audio-context";
 import { LyricsProvider } from "./lyrics-context";
 import { FullscreenDoodleOverlay } from "./fullscreen-doodle-overlay";
 import { GlobalLyricsOverlay } from "./GlobalLyricsOverlay";
+import { ImageCropperModal } from "./ImageCropperModal";
+import { SVGMasks } from "./SVGMasks";
+import imageCompression from 'browser-image-compression';
+import { getUploadUrl } from "@/actions/upload";
+import { toast } from "sonner";
 
 interface StudioClientLayoutProps {
     profile: Room; // Agora usamos o tipo Room
@@ -93,6 +98,9 @@ function StudioClientLayoutInner({
     const [isProfilePending, startProfileTransition] = useTransition();
     const [previewData, setPreviewData] = useState<PreviewData | null>(null);
     const { isDrawingMode } = useCanvasInteraction();
+    const { t } = useTranslation();
+    const [pendingFileDrop, setPendingFileDrop] = useState<{ file: File, x: number, y: number } | null>(null);
+    const [isUploadingDrop, setIsUploadingDrop] = useState(false);
 
     const {
         blocks, setBlocks, updateBlock, updateBlocks, removeBlocks,
@@ -103,14 +111,18 @@ function StudioClientLayoutInner({
         forceReset
     } = useCanvasManager(moodBlocks, profile.id);
 
-    const handleAddNewBlock = useCallback(async (type: string, content: MoodBlockContent, shouldSelect = true) => {
+    const handleAddNewBlock = useCallback(async (type: string, content: MoodBlockContent, shouldSelect = true, initialPos?: { x: number, y: number }) => {
         try {
             const actualShouldSelect = type === 'gif' ? false : shouldSelect;
-            let options: { x: number, y: number, width: number, height: number, roomId: string } = { x: Math.random() * 20 + 40, y: Math.random() * 20 + 40, width: 200, height: 200, roomId: localProfile.id };
+            let options: { x: number, y: number, width: number, height: number, roomId: string } = { 
+                x: initialPos ? initialPos.x : Math.random() * 20 + 40, 
+                y: initialPos ? initialPos.y : Math.random() * 20 + 40, 
+                width: 250, 
+                height: 250, 
+                roomId: localProfile.id 
+            };
             
-            if (type === 'gif' || type === 'photo') {
-                options = { ...options, width: 250, height: 250 };
-            } else if (type === 'text' || type === 'quote') {
+            if (type === 'text' || type === 'quote') {
                 options = { ...options, width: 300, height: 120 };
             }
 
@@ -126,6 +138,68 @@ function StudioClientLayoutInner({
             console.error("Failed to add block:", error);
         }
     }, [localProfile.id, setBlocks, setSelectedIds]);
+
+    const handleFileDrop = useCallback((file: File, x: number, y: number) => {
+        if (!file.type.startsWith('image/')) {
+            toast.error("Apenas imagens são permitidas para drop direto.");
+            return;
+        }
+        setPendingFileDrop({ file, x, y });
+    }, []);
+
+    const onDrop = useCallback((acceptedFiles: File[], event: any) => {
+        if (acceptedFiles?.length > 0) {
+            const x = ((event.clientX - (window.innerWidth / 2)) / 25) + 50;
+            const y = ((event.clientY - (window.innerHeight / 2)) / 25) + 50;
+            handleFileDrop(acceptedFiles[0], x, y);
+        }
+    }, [handleFileDrop]);
+
+    const handleCropCompleteFromDrop = async (croppedBlob: Blob) => {
+        if (!pendingFileDrop) return;
+        const { x, y, file } = pendingFileDrop;
+        setPendingFileDrop(null);
+        setIsUploadingDrop(true);
+
+        try {
+            const croppedFile = new File([croppedBlob], file.name, { type: croppedBlob.type });
+            const compressed = await imageCompression(croppedFile, { maxSizeMB: 1, maxWidthOrHeight: 1200 });
+
+            const res = await getUploadUrl(compressed.type, "photos");
+            if (res.error || !res.uploadUrl || !res.publicUrl) throw new Error(res.error);
+
+            await fetch(res.uploadUrl, { method: "PUT", body: compressed, headers: { "Content-Type": compressed.type } });
+
+            await handleAddNewBlock('photo', { imageUrl: res.publicUrl, alt: "Dropped image" }, true, { x, y });
+            toast.success(t('editors.photo.success_process') || "Imagem adicionada!");
+        } catch (error) {
+            console.error("Drop upload failed:", error);
+            toast.error(t('editors.photo.error_process') || "Erro no upload");
+        } finally {
+            setIsUploadingDrop(false);
+        }
+    };
+
+    useEffect(() => {
+        const handlePaste = (e: ClipboardEvent) => {
+            if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) return;
+            
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        handleFileDrop(file, 50, 50);
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('paste', handlePaste);
+        return () => window.removeEventListener('paste', handlePaste);
+    }, [handleFileDrop]);
 
     const normalizeZIndexes = useCallback(async () => {
         const sorted = [...blocks].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
@@ -218,8 +292,27 @@ function StudioClientLayoutInner({
                     sendBackward={sendBackward}
                     isPreview={!!previewData}
                     onExitPreview={() => setPreviewData(null)}
+                    onFileDrop={handleFileDrop}
                 />
             </div>
+
+            <AnimatePresence>
+                {pendingFileDrop && (
+                    <ImageCropperModal
+                        file={pendingFileDrop.file}
+                        onCropComplete={handleCropCompleteFromDrop}
+                        onCancel={() => setPendingFileDrop(null)}
+                    />
+                )}
+                {isUploadingDrop && (
+                    <div className="fixed inset-0 z-[110] bg-black/20 backdrop-blur-[2px] flex items-center justify-center animate-in fade-in">
+                        <div className="bg-white dark:bg-zinc-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-4">
+                            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Processando Mural...</span>
+                        </div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             <AnimatePresence>
                 {isDrawingMode && <FullscreenDoodleOverlay />}
@@ -352,6 +445,7 @@ function StudioClientLayoutInner({
             </AnimatePresence>
 
             <GlobalLyricsOverlay />
+            <SVGMasks />
         </main>
     )
 }

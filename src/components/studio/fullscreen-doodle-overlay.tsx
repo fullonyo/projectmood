@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState, useTransition, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { getStroke } from "perfect-freehand"
 import { useCanvasInteraction } from "./canvas-interaction-context"
 import { Button } from "@/components/ui/button"
-import { X, Check, Eraser, Loader2, Paintbrush, Undo2, Zap, Minus, Plus, Square, Circle, Minus as LineIcon, Pipette, MousePointer2, Activity } from "lucide-react"
+import { Slider } from "@/components/ui/slider"
+import { X, Check, Eraser, Loader2, Paintbrush, Undo2, Zap, Minus, Plus, Square, Circle, Minus as LineIcon, Pipette, MousePointer2, Activity, PenTool, Highlighter } from "lucide-react"
 import { addMoodBlock } from "@/actions/profile"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
@@ -15,10 +17,15 @@ const COLOR_PALETTE = [
     '#3b82f6', '#8b5cf6', '#d946ef'
 ]
 
-type ToolType = 'brush' | 'eraser' | 'line' | 'rect' | 'circle'
+type ToolType = 'brush' | 'pen' | 'marker' | 'spray' | 'tape' | 'eraser' | 'line' | 'rect' | 'circle'
 
 export function FullscreenDoodleOverlay() {
-    const { isDrawingMode, setIsDrawingMode, brushColor, setBrushColor, brushSize, setBrushSize } = useCanvasInteraction()
+    const { 
+        isDrawingMode, setIsDrawingMode, 
+        brushColor, setBrushColor, 
+        brushSize, setBrushSize,
+        brushOpacity, setBrushOpacity
+    } = useCanvasInteraction()
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const colorInputRef = useRef<HTMLInputElement>(null)
     const [isDrawing, setIsDrawing] = useState(false)
@@ -26,19 +33,39 @@ export function FullscreenDoodleOverlay() {
     const [hasDrawn, setHasDrawn] = useState(false)
     const [history, setHistory] = useState<string[]>([])
     const [isNeon, setIsNeon] = useState(false)
-    const [tool, setTool] = useState<ToolType>('brush')
+    const [tool, setTool] = useState<ToolType>('pen')
     const { t } = useTranslation()
 
-    const lastPoint = useRef<{ x: number, y: number, time: number } | null>(null)
+    const points = useRef<number[][]>([])
     const startPoint = useRef<{ x: number, y: number } | null>(null)
     const snapshot = useRef<ImageData | null>(null)
+    const sprayInterval = useRef<any>(null)
 
     const applyContextStyles = (ctx: CanvasRenderingContext2D) => {
-        ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.strokeStyle = brushColor;
+        ctx.lineJoin = "round"; 
+        ctx.lineCap = "round"; 
+        ctx.strokeStyle = brushColor;
+        ctx.fillStyle = brushColor;
         ctx.lineWidth = brushSize;
-        ctx.globalCompositeOperation = tool === 'eraser' ? "destination-out" : "source-over";
-        if (isNeon && tool !== 'eraser') { ctx.shadowBlur = brushSize * 2; ctx.shadowColor = brushColor; } 
-        else { ctx.shadowBlur = 0; }
+        
+        if (tool === 'eraser') {
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.globalAlpha = 1.0;
+        } else {
+            ctx.globalAlpha = brushOpacity;
+            ctx.globalCompositeOperation = "source-over";
+        }
+
+        if (tool === 'marker') {
+            ctx.globalAlpha = brushOpacity * 0.5;
+        }
+
+        if (isNeon && tool !== 'eraser') { 
+            ctx.shadowBlur = brushSize * 1.5; 
+            ctx.shadowColor = brushColor; 
+        } else { 
+            ctx.shadowBlur = 0; 
+        }
     }
 
     const initCanvas = useCallback((restoreData?: string) => {
@@ -82,29 +109,102 @@ export function FullscreenDoodleOverlay() {
     }
 
     const startPosition = (e: any) => {
-        setIsDrawing(true); setHasDrawn(true); saveToHistory()
-        const coords = getCoords(e); lastPoint.current = coords; startPoint.current = { x: coords.x, y: coords.y }
-        const ctx = canvasRef.current?.getContext("2d")
-        if (ctx) {
-            applyContextStyles(ctx)
-            snapshot.current = ctx.getImageData(0, 0, canvasRef.current!.width, canvasRef.current!.height)
-            ctx.beginPath(); ctx.moveTo(coords.x, coords.y)
+        setIsDrawing(true); 
+        setHasDrawn(true); 
+        saveToHistory();
+        const coords = getCoords(e);
+        points.current = [[coords.x, coords.y, e.pressure || 0.5]];
+        startPoint.current = { x: coords.x, y: coords.y };
+        
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext("2d");
+        if (ctx && canvas) {
+            applyContextStyles(ctx);
+            snapshot.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        if (tool === 'spray') {
+            startSpray(coords.x, coords.y)
         }
     }
 
-    const draw = (e: any) => {
-        if (!isDrawing || !lastPoint.current || !startPoint.current) return
-        const canvas = canvasRef.current; const ctx = canvas?.getContext("2d"); if (!ctx) return
-        const currentPoint = getCoords(e)
-        if (!['brush', 'eraser'].includes(tool) && snapshot.current) ctx.putImageData(snapshot.current, 0, 0)
+    const startSpray = (x: number, y: number) => {
+        if (sprayInterval.current) clearInterval(sprayInterval.current)
+        sprayInterval.current = setInterval(() => {
+            const canvas = canvasRef.current;
+            const ctx = canvas?.getContext("2d");
+            if (!ctx) return
+            
+            ctx.fillStyle = brushColor
+            ctx.globalAlpha = brushOpacity * 0.2 // Partículas leves para acumulação suave
+            
+            const density = brushSize * 2
+            for (let i = 0; i < density; i++) {
+                // Distribuição polar para efeito esférico
+                const angle = Math.random() * Math.PI * 2
+                const radius = Math.random() * brushSize * (Math.random() > 0.5 ? 0.8 : 1) // Favorece centro
+                const px = x + Math.cos(angle) * radius
+                const py = y + Math.sin(angle) * radius
+                
+                const pSize = Math.random() * 1.5 + 0.5
+                ctx.beginPath()
+                ctx.arc(px, py, pSize, 0, Math.PI * 2)
+                ctx.fill()
+            }
+        }, 30)
+    }
 
-        if (tool === 'brush' || tool === 'eraser') {
-            const dist = Math.hypot(currentPoint.x - lastPoint.current.x, currentPoint.y - lastPoint.current.y)
-            const speed = dist / (currentPoint.time - lastPoint.current.time || 1)
-            const targetWidth = Math.max(brushSize * 0.3, brushSize - (speed * 2))
-            ctx.lineWidth = (ctx.lineWidth * 0.7) + (targetWidth * 0.3)
-            const mid = { x: lastPoint.current.x + (currentPoint.x - lastPoint.current.x) / 2, y: lastPoint.current.y + (currentPoint.y - lastPoint.current.y) / 2 }
-            ctx.quadraticCurveTo(lastPoint.current.x, lastPoint.current.y, mid.x, mid.y); ctx.stroke()
+    const getSvgPathFromStroke = (stroke: number[][]) => {
+        if (!stroke.length) return ""
+        const d = stroke.reduce(
+            (acc, [x, y], i, arr) => {
+                const [nx, ny] = arr[(i + 1) % arr.length]
+                acc.push(x, y, (x + nx) / 2, (y + ny) / 2)
+                return acc
+            },
+            ["M", ...stroke[0], "Q"]
+        )
+        d.push("Z")
+        return d.join(" ")
+    }
+
+    const draw = (e: any) => {
+        if (!isDrawing || !startPoint.current) return
+        const canvas = canvasRef.current; 
+        const ctx = canvas?.getContext("2d"); 
+        if (!ctx || !canvas) return
+        
+        const currentPoint = getCoords(e)
+        
+        // Se for ferramenta de forma, limpa e redesenha do snapshot
+        if (!['brush', 'pen', 'marker', 'eraser'].includes(tool) && snapshot.current) {
+            ctx.putImageData(snapshot.current, 0, 0)
+        }
+
+        if (['brush', 'pen', 'marker', 'eraser', 'tape'].includes(tool)) {
+            // Adiciona novo ponto
+            points.current.push([currentPoint.x, currentPoint.y, e.pressure || 0.5])
+            
+            // Perfeito Freehand logic
+            const stroke = getStroke(points.current, {
+                size: brushSize,
+                thinning: tool === 'pen' ? 0.5 : tool === 'brush' ? 0.7 : tool === 'tape' ? 0 : 0.5,
+                smoothing: 0.5,
+                streamline: 0.5,
+                simulatePressure: tool !== 'tape',
+                last: true
+            })
+
+            const pathData = getSvgPathFromStroke(stroke)
+            
+            if (snapshot.current) ctx.putImageData(snapshot.current, 0, 0)
+            
+            ctx.beginPath()
+            const p = new Path2D(pathData)
+            ctx.fill(p)
+        } else if (tool === 'spray') {
+            // Atualiza posição do spray contínuo
+            startSpray(currentPoint.x, currentPoint.y)
         } else if (tool === 'line') {
             ctx.beginPath(); ctx.moveTo(startPoint.current.x, startPoint.current.y); ctx.lineTo(currentPoint.x, currentPoint.y); ctx.stroke()
         } else if (tool === 'rect') {
@@ -113,10 +213,19 @@ export function FullscreenDoodleOverlay() {
             const r = Math.hypot(currentPoint.x - startPoint.current.x, currentPoint.y - startPoint.current.y)
             ctx.beginPath(); ctx.arc(startPoint.current.x, startPoint.current.y, r, 0, Math.PI * 2); ctx.stroke()
         }
-        lastPoint.current = currentPoint
     }
 
-    const finishedPosition = () => { setIsDrawing(false); lastPoint.current = null; startPoint.current = null; canvasRef.current?.getContext("2d")?.beginPath() }
+    const finishedPosition = () => { 
+        setIsDrawing(false); 
+        points.current = []; 
+        startPoint.current = null; 
+        if (sprayInterval.current) {
+            clearInterval(sprayInterval.current)
+            sprayInterval.current = null
+        }
+        const ctx = canvasRef.current?.getContext("2d")
+        if (ctx) ctx.beginPath()
+    }
 
     const saveManifest = async () => {
         const canvas = canvasRef.current; const ctx = canvas?.getContext("2d"); if (!canvas || !ctx || !hasDrawn) { setIsDrawingMode(false); return; }
@@ -192,6 +301,18 @@ export function FullscreenDoodleOverlay() {
                             <button onClick={() => setBrushSize(Math.min(50, brushSize + 2))} className="text-white/20 hover:text-white"><Plus className="w-3 h-3" /></button>
                         </div>
                         <div className="w-px h-3 bg-white/10" />
+                        <div className="flex items-center gap-4">
+                            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Opc</span>
+                            <Slider
+                                value={[brushOpacity]}
+                                min={0.1}
+                                max={1}
+                                step={0.05}
+                                onValueChange={(val: number[]) => setBrushOpacity(val[0])}
+                                className="w-20"
+                            />
+                        </div>
+                        <div className="w-px h-3 bg-white/10" />
                         <button 
                             onClick={() => setIsNeon(!isNeon)} 
                             className={cn("flex items-center gap-2 text-[8px] font-black uppercase tracking-widest transition-all", isNeon ? "text-blue-400" : "text-white/20 hover:text-white")}
@@ -210,7 +331,11 @@ export function FullscreenDoodleOverlay() {
                     {/* Tools Segment */}
                     <div className="flex items-center gap-2">
                         {[
+                            { id: 'pen', icon: PenTool },
                             { id: 'brush', icon: Paintbrush },
+                            { id: 'marker', icon: Highlighter },
+                            { id: 'spray', icon: Activity },
+                            { id: 'tape', icon: LineIcon },
                             { id: 'eraser', icon: Eraser },
                             { id: 'line', icon: LineIcon },
                             { id: 'rect', icon: Square },
@@ -218,9 +343,12 @@ export function FullscreenDoodleOverlay() {
                         ].map(t => (
                             <button 
                                 key={t.id} onClick={() => setTool(t.id as any)} 
-                                className={cn("w-10 h-10 flex items-center justify-center transition-all", tool === t.id ? "text-white scale-125" : "text-white/20 hover:text-white/60")}
+                                className={cn("w-10 h-10 flex items-center justify-center transition-all relative", tool === t.id ? "text-white scale-110" : "text-white/20 hover:text-white/60")}
                             >
-                                <t.icon className="w-4 h-4" />
+                                <t.icon className="w-4.5 h-4.5" />
+                                {tool === t.id && (
+                                    <motion.div layoutId="tool-active" className="absolute -bottom-1 w-1 h-1 bg-white rounded-full" />
+                                )}
                             </button>
                         ))}
                     </div>

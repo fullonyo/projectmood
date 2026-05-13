@@ -169,6 +169,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                         imageUrl: (content as PhotoContent).imageUrl || '',
                         filter: (content as PhotoContent).filter || 'none',
                         frame: (content as PhotoContent).frame || 'none',
+                        mask: (content as PhotoContent).mask || 'none',
                         ambientTint: !!(content as any).ambientTint
                     }} />
                 )
@@ -216,6 +217,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                         imageUrl: (content as PhotoContent).imageUrl || '',
                         filter: (content as PhotoContent).filter || 'none',
                         frame: (content as PhotoContent).frame || 'none',
+                        mask: (content as PhotoContent).mask || 'none',
                         ambientTint: !!(content as any).ambientTint
                     }} />
                 )

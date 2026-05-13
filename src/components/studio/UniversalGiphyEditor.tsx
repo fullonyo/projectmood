@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from "react"
 import { searchGifs, getTrendingGifs } from "@/actions/giphy"
 import { Input } from "@/components/ui/input"
-import { Search, Loader2, Activity, Sparkles, Globe } from "lucide-react"
+import { Search, Loader2, Activity, Sparkles, Globe, Box, Circle, Heart, Star, Wand2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "@/i18n/context"
 import { EditorHeader, EditorSection, EditorActionButton, ListSelector, EditorSwitch } from "./EditorUI"
@@ -28,6 +28,7 @@ export function UniversalGiphyEditor({ block, onUpdate, onAdd, onClose }: GiphyE
     const [imageUrl, setImageUrl] = useState<string>(defaultContent.imageUrl || "")
     const [filter, setFilter] = useState<any>(defaultContent.filter || 'none')
     const [frame, setFrame] = useState<any>(defaultContent.frame || 'none')
+    const [mask, setMask] = useState<any>(defaultContent.mask || 'none')
     const [caption, setCaption] = useState<string>(defaultContent.caption || "")
     const [ambientTint, setAmbientTint] = useState<boolean>(!!(defaultContent as any).ambientTint)
 
@@ -39,12 +40,23 @@ export function UniversalGiphyEditor({ block, onUpdate, onAdd, onClose }: GiphyE
                 imageUrl,
                 filter,
                 frame,
+                mask,
                 caption,
                 ambientTint,
                 ...updates
-            }
+            } as PhotoContent
         })
     }
+
+    const masks = [
+        { id: 'none', icon: Box, label: 'Original' },
+        { id: 'circle', icon: Circle, label: 'Círculo' },
+        { id: 'heart', icon: Heart, label: 'Coração' },
+        { id: 'star', icon: Star, label: 'Estrela' },
+        { id: 'blob1', icon: Wand2, label: 'Blob 1' },
+        { id: 'blob2', icon: Wand2, label: 'Blob 2' },
+        { id: 'blob3', icon: Wand2, label: 'Blob 3' },
+    ]
 
     useEffect(() => {
         const loadTrending = async () => {
@@ -228,6 +240,26 @@ export function UniversalGiphyEditor({ block, onUpdate, onAdd, onClose }: GiphyE
                                     triggerUpdate({ filter: newFilter })
                                 }}
                             />
+                        </EditorSection>
+
+                        <EditorSection title="Máscaras Criativas" description="Corte seu GIF em formatos artísticos.">
+                            <div className="grid grid-cols-4 gap-2">
+                                {masks.map((m) => (
+                                    <button
+                                        key={m.id}
+                                        onClick={() => { setMask(m.id); triggerUpdate({ mask: m.id as any }); }}
+                                        className={cn(
+                                            "flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 gap-2",
+                                            (mask || 'none') === m.id
+                                                ? "bg-zinc-900 text-white border-zinc-900 shadow-xl scale-105"
+                                                : "bg-zinc-100 dark:bg-zinc-900/50 text-zinc-500 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                                        )}
+                                    >
+                                        <m.icon className="w-4 h-4" />
+                                        <span className="text-[8px] font-bold uppercase tracking-tighter">{m.label}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </EditorSection>
 
                         <EditorSection title="Geometria / Moldura">

@@ -515,3 +515,50 @@ A contagem de visualizações em page.tsx agora ocorre apenas se a sala não est
 - **Segurança**: Endpoint protegido `/actions/upload.ts` via `auth()` garante que apenas usuários autenticados gerem tokens de PUT temporários para o S3.
 
 *Documentação atualizada por Antigravity em 12/05/2026. Implementação de Cloudflare R2 Presigned URLs.*
+
+## 🚀 Next-Gen Libraries Roadmap (MoodSpace Vision)
+
+Para elevar o ecossistema MoodSpace a um nível "World Class" (Awwwards), as seguintes bibliotecas foram mapeadas como integrações estratégicas:
+
+1. **`@use-gesture/react` (Canvas Interaction)**: Para transformar o mural infinito numa experiência touch-first ultra fluida (pinch-to-zoom, pan, drag), alinhando a experiência com ferramentas como Miro e Figma.
+2. **`@react-three/fiber` (Three.js 3D)**: Para inserir blocos 3D e primitivos interativos flutuando no mural de vidro, expandindo a estética Premium/Surrealista.
+3. **`Liveblocks` ou `Yjs` (Real-time Multiplayer)**: Evolução vital para transformar os murais em ambientes colaborativos onde múltiplos usuários editam juntos e vêem os cursores uns dos outros ao vivo.
+4. **`html-to-image` / `dom-to-image-more` (Mural Export)**: Ferramenta imprescindível de utilidade e viralização para permitir que os usuários exportem seus murais como JPEGs/PNGs de alta resolução para postar no Pinterest/Instagram.
+5. **`react-easy-crop` (Image/Mask Editing)**: Adicionar ferramentas nativas de recorte (crop livre ou formas customizadas) diretamente no editor de Fotos antes da aplicação dos filtros (SmartPhoto).
+
+*Roadmap mapeado em 12/05/2026. Prioridade atual: Implementação do `react-easy-crop` (Item 5).*
+
+## 🖼️ Image Experience Elite Roadmap (Maio 2026)
+
+Para transformar o MoodSpace na ferramenta mais fluida de curadoria visual, o seguinte pipeline de funcionalidades para mídias foi estabelecido:
+
+1.  **Canvas Native Drag & Drop**: Permitir que o usuário arraste arquivos do SO diretamente para o `MoodCanvas`. O sistema deve detectar as coordenadas do drop, criar o bloco `photo` na posição correta e disparar o fluxo de `react-easy-crop`.
+2.  **Clipboard Ingestion (Ctrl+V)**: Escuta global de eventos de `paste` no canvas. Se houver um arquivo de imagem no clipboard, ele é processado e injetado como um novo bloco instantaneamente.
+3.  **Unsplash Discovery**: Integração de busca de fotos profissionais via API do Unsplash diretamente no `UniversalPhotoEditor`, permitindo curadoria de alta qualidade sem sair do Studio.
+4.  **Creative Shape Masks**: Evolução das molduras para suportar máscaras SVG (Círculo, Estrela, Blobs, Coração), permitindo que fotos e GIFs assumam formas orgânicas no mural.
+
+*Status: Itens 1, 2, 3 e 4 concluídos em 12/05/2026.*
+
+## 📡 Integrações de APIs
+
+O MoodSpace Studio utiliza diversas APIs externas para fornecer conteúdos de alta qualidade e funcionalidades imersivas:
+
+### 1. Unsplash (Discovery)
+- **Função**: Busca de fotografias profissionais em alta resolução.
+- **Implementação**: `src/actions/unsplash.ts` e `UniversalPhotoEditor.tsx`.
+- **Configuração**: Requer `UNSPLASH_ACCESS_KEY` no `.env`. Possui fallback de modo demonstração (mock) caso a chave esteja ausente.
+
+### 2. Giphy (Expressão Visual)
+- **Função**: Busca e inserção de GIFs e stickers.
+- **Implementação**: `UniversalGiphyEditor.tsx` e `gif-picker.tsx`.
+- **Configuração**: Requer `GIPHY_API_KEY` no `.env`.
+
+### 3. Spotify (Imersão Sonora)
+- **Função**: Sincronização de música "Now Playing" e busca de faixas para o bloco de música.
+- **Implementação**: `now-playing-spotify.tsx` e `UniversalMediaEditor.tsx`.
+- **Configuração**: Requer `SPOTIFY_CLIENT_ID` e `SPOTIFY_CLIENT_SECRET`.
+
+### 4. Cloudflare R2 (Storage)
+- **Função**: Armazenamento de assets de usuários (fotos, doodles, áudios).
+- **Implementação**: `src/actions/upload.ts` (Presigned URLs).
+- **Configuração**: Requer credenciais R2 (`ACCESS_KEY`, `SECRET`, `BUCKET_NAME`, `PUBLIC_URL`).

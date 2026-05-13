@@ -41,6 +41,7 @@ interface MoodCanvasProps {
     sendBackward: (id: string) => void
     isPreview?: boolean
     onExitPreview?: () => void
+    onFileDrop?: (file: File, x: number, y: number) => void
 }
 
 export function MoodCanvas({
@@ -64,7 +65,8 @@ export function MoodCanvas({
     bringForward,
     sendBackward,
     isPreview = false,
-    onExitPreview
+    onExitPreview,
+    onFileDrop
 }: MoodCanvasProps) {
 
     const { t } = useTranslation()
@@ -86,6 +88,29 @@ export function MoodCanvas({
     const mvPanY = useMotionValue(0);
     const weatherIcon = blocks.find(b => b.type === 'weather')?.content?.icon;
     const weatherSync = typeof weatherIcon === 'string' ? weatherIcon : null;
+
+    const handleDrop = (e: React.DragEvent) => {
+        if (isPreview || !onFileDrop) return
+        e.preventDefault()
+        e.stopPropagation()
+
+        const file = e.dataTransfer.files[0]
+        if (!file || !file.type.startsWith('image/')) return
+
+        if (canvasRef.current) {
+            const rect = canvasRef.current.getBoundingClientRect()
+            // Calcular posição relativa ao canvas em porcentagem
+            const x = ((e.clientX - rect.left) / rect.width) * 100
+            const y = ((e.clientY - rect.top) / rect.height) * 100
+            onFileDrop(file, x, y)
+        }
+    }
+
+    const handleDragOver = (e: React.DragEvent) => {
+        if (isPreview) return
+        e.preventDefault()
+        e.stopPropagation()
+    }
 
     // Resolve primary text color based on theme to ensure WYSIWYG
     const themeConfig = themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.light
@@ -220,6 +245,8 @@ export function MoodCanvas({
                 isSpacePressed ? "cursor-grab active:cursor-grabbing" : "cursor-crosshair",
                 profile.theme === 'dark' ? "bg-zinc-950" : "bg-white"
             )}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}

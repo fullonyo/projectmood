@@ -1,7 +1,6 @@
 "use client"
 
 import { PhotoBlockContent } from "@/lib/validations"
-import Image from "next/image"
 import { useState } from "react"
 import { ImageOff } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -17,6 +16,7 @@ export function SmartPhoto({ content }: PhotoBlockPublicProps) {
         alt = '',
         filter = 'none',
         frame = 'none',
+        mask = 'none',
         caption = '',
         ambientTint = false
     } = content
@@ -62,6 +62,18 @@ export function SmartPhoto({ content }: PhotoBlockPublicProps) {
         }
     }
 
+    const getMaskStyle = () => {
+        switch (mask) {
+            case 'circle': return 'circle(50% at 50% 50%)'
+            case 'heart': return 'url(#mask-heart)'
+            case 'star': return 'url(#mask-star)'
+            case 'blob1': return 'url(#mask-blob1)'
+            case 'blob2': return 'url(#mask-blob2)'
+            case 'blob3': return 'url(#mask-blob3)'
+            default: return 'none'
+        }
+    }
+
     if (!imageUrl || imageUrl.trim() === "" || hasError) {
         return (
             <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950/50 gap-2 border border-dashed border-zinc-200 dark:border-zinc-800">
@@ -89,17 +101,21 @@ export function SmartPhoto({ content }: PhotoBlockPublicProps) {
             <div className={cn(
                 "relative flex-1 overflow-hidden",
                 (frame === 'none' || frame === 'minimal' || frame === 'shadow' || frame === 'border' || frame === 'capsule') && "rounded-[inherit]"
-            )}>
-                {/* Imagem Base */}
-                <Image
-                    src={imageUrl}
+            )}
+            style={{
+                WebkitClipPath: getMaskStyle(),
+                clipPath: getMaskStyle()
+            }}>
+                {/* Imagem Base - Usando <img> padrão para evitar conflitos de clip-path do next/image */}
+                <img
+                    src={imageUrl || ''}
                     alt={alt || "Mood photo"}
-                    fill
-                    unoptimized
-                    className="object-cover transition-all duration-700 group-hover:scale-105"
-                    style={{ filter: getFilterClass() }}
+                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+                    style={{ 
+                        filter: getFilterClass()
+                    }}
                     onError={() => setHasError(true)}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    loading="lazy"
                 />
                 
                 {/* Overlay 3D para o estilo Capsule (Fundo de Tampinha / Recessed) */}

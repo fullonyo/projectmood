@@ -38,7 +38,8 @@ export interface BlockContentBase {
     customName?: string;
     opacity?: number;
     blendMode?: string;
-    frame?: 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'border' | 'shadow' | 'glass';
+    frame?: 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'glass' | 'border' | 'shadow' | 'melt' | 'capsule';
+    mask?: 'none' | 'circle' | 'heart' | 'star' | 'blob1' | 'blob2' | 'blob3';
     groupName?: string;
     [key: string]: unknown;
 }
@@ -70,7 +71,10 @@ export interface TextContent extends BlockContentBase {
 export interface PhotoContent extends BlockContentBase {
     imageUrl: string;
     caption?: string;
-    filter?: 'none' | 'vintage' | 'bw' | 'warm' | 'cool';
+    filter?: 'none' | 'vintage' | 'bw' | 'warm' | 'cool' | 'fade' | 'cinematic';
+    frame?: 'none' | 'polaroid' | 'polaroid-dark' | 'frame' | 'minimal' | 'round' | 'glass' | 'border' | 'shadow' | 'melt' | 'capsule';
+    mask?: 'none' | 'circle' | 'heart' | 'star' | 'blob1' | 'blob2' | 'blob3';
+    ambientTint?: boolean;
     alt?: string;
 }
 

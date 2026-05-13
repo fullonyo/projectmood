@@ -19,6 +19,7 @@ import { I18nProvider } from "@/i18n/context"
 import { AudioProvider, useAudio } from "@/components/studio/audio-context"
 import { LyricsProvider } from "@/components/studio/lyrics-context"
 import { GlobalLyricsOverlay } from "@/components/studio/GlobalLyricsOverlay"
+import { SVGMasks } from "@/components/studio/SVGMasks"
 import { themeConfigs } from "@/lib/themes"
 
 const MIX_BLEND_MODES = [
@@ -162,6 +163,7 @@ function PublicMoodPageClientInner({ publicUser, roomId, profile, moodBlocks, co
 
             {/* Global Lyrics // Studio Mode */}
             <GlobalLyricsOverlay />
+            <SVGMasks />
         </>
     )
 }
