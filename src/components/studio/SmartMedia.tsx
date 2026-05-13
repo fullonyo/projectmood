@@ -201,7 +201,7 @@ const AuraPlayer = ({
     const smoothIntensity = useSpring(motionIntensity, { stiffness: 300, damping: 20 })
     
     // Derived values for animations - these update directly in the DOM
-    const orbScale = useTransform(smoothIntensity, [0, 1], [1, 1.4])
+    const orbScale = useTransform(smoothIntensity, [0, 1], [1, 1.15])
     const glowIntensity = useTransform(smoothIntensity, [0, 1], [0.2, 0.6])
     const glowSpread = useTransform(smoothIntensity, [0, 1], [20, 80])
     const meshOpacity = useTransform(smoothIntensity, [0, 1], [0.3, 1])
@@ -284,7 +284,7 @@ const AuraPlayer = ({
             />
 
             {/* Neural Orb Container */}
-            <div className="relative flex items-center justify-center" style={{ width: orbSize, height: orbSize }}>
+            <motion.div className="relative flex items-center justify-center" style={{ width: orbSize, height: orbSize, scale: orbScale }}>
                 
                 {/* Orbital Progress Ring */}
                 <svg className="absolute inset-0 -rotate-90 z-20 pointer-events-none" width={orbSize} height={orbSize}>
@@ -335,7 +335,6 @@ const AuraPlayer = ({
                     style={{ 
                         width: orbSize - 20, 
                         height: orbSize - 20,
-                        scale: orbScale,
                         boxShadow: boxShadowTransform
                     }}
                 >
@@ -359,10 +358,10 @@ const AuraPlayer = ({
                         {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
                     </div>
                 </motion.div>
-            </div>
+                </motion.div>
 
             {/* Metadata Floating Overlay */}
-            <div className="mt-6 flex flex-col items-center text-center max-w-[140%] overflow-visible pointer-events-none">
+            <div className="mt-8 flex flex-col items-center text-center max-w-[140%] overflow-visible pointer-events-none z-10">
                 <motion.h3 
                     className="font-black text-zinc-900 dark:text-white uppercase tracking-[0.3em] leading-none mb-2"
                     style={{ fontSize: Math.max(10, Math.round(14 * scale)) }}
