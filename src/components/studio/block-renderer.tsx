@@ -131,8 +131,8 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
         const mediaType = mediaContent.mediaType || (block.type === 'music' ? 'audio' : 'video')
         const isAudio = mediaType === 'audio' || mediaType === 'music' || block.type === 'music'
         
-        // Audio players never use frames, they are their own containers
-        const frame = isAudio ? 'none' : getFrameType(mediaContent.frame, 'none')
+        // Media players (YouTube, Spotify, Local) never use frames in the Neural ecosystem
+        const frame = 'none'
         
         // Audio players need to be able to overflow for their particle effects, custom shapes, and floating layouts
         const allowOverflow = isAudio

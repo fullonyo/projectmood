@@ -250,6 +250,9 @@ export interface TapeContent extends BlockContentBase {
 export interface UniversalMediaContent extends BlockContentBase {
     mediaType: 'video' | 'music' | 'audio' | 'media';
     videoId?: string;
+    videoTitle?: string;
+    videoChannel?: string;
+    videoThumbnail?: string;
     trackId?: string;
     audioUrl?: string;
     name?: string;

@@ -1,11 +1,56 @@
 "use client"
 
+// YouTube IFrame API TypeScript Declarations
+declare global {
+    interface Window {
+        YT: typeof YT
+        onYouTubeIframeAPIReady?: () => void
+    }
+    namespace YT {
+        enum PlayerState {
+            UNSTARTED = -1,
+            ENDED = 0,
+            PLAYING = 1,
+            PAUSED = 2,
+            BUFFERING = 3,
+            CUED = 5
+        }
+        interface PlayerEvent {
+            target: Player
+        }
+        interface OnStateChangeEvent {
+            data: number
+            target: Player
+        }
+        class Player {
+            constructor(element: HTMLDivElement | string, options: {
+                videoId: string
+                width?: string | number
+                height?: string | number
+                playerVars?: Record<string, number | string>
+                events?: {
+                    onReady?: (event: PlayerEvent) => void
+                    onStateChange?: (event: OnStateChangeEvent) => void
+                    onError?: (event: { data: number }) => void
+                }
+            })
+            getCurrentTime(): number
+            getDuration(): number
+            playVideo(): void
+            pauseVideo(): void
+            mute(): void
+            unMute(): void
+            destroy(): void
+        }
+    }
+}
+
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useStudioBlock } from "@/hooks/use-studio-block"
 
 import { Music, VolumeX, Play, Pause } from "lucide-react"
-import { useState, useRef, useEffect, useMemo } from "react"
+import { useState, useRef, useEffect, useMemo, useId } from "react"
 import { useAudio } from "./audio-context"
 import { useLyrics } from "./lyrics-context"
 
@@ -647,25 +692,243 @@ const PulseFieldPlayer = ({
     )
 }
 
-const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted }: {
+const VideoPlayer = ({ videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUpdate, onPlayStateChange }: {
     videoId: string;
     isPublic: boolean;
     hasInteracted: boolean;
     isGlobalMuted: boolean;
+    onTimeUpdate?: (currentTime: number, duration: number) => void;
+    onPlayStateChange?: (isPlaying: boolean) => void;
 }) => {
-    const muteParam = (hasInteracted && !isGlobalMuted) ? '0' : '1';
-    const autoplayParam = isPublic ? `&autoplay=1&mute=${muteParam}` : '';
+    const rawId = useId()
+    const ytContainerId = `yt-player-${videoId}-${rawId.replace(/:/g, '')}`
+    const playerRef = useRef<YT.Player | null>(null)
+    const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const apiReadyRef = useRef(false)
+    // Refs para leitura nos callbacks do player (closures estáticas)
+    const hasInteractedRef = useRef(hasInteracted)
+    const isGlobalMutedRef = useRef(isGlobalMuted)
+    const isPublicRef = useRef(isPublic)
+    const [apiReady, setApiReady] = useState(false)
+    const [apiFailed, setApiFailed] = useState(false)
+    const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+    const [progress, setProgress] = useState(0)
+    const [isHovered, setIsHovered] = useState(false)
+
+    // Refs espelho — atualizados sincronamente a cada render.
+    // Padrão React para leitura de props atuais em callbacks de APIs de terceiros.
+    hasInteractedRef.current = hasInteracted
+    isGlobalMutedRef.current = isGlobalMuted
+    isPublicRef.current = isPublic
+
+    const markReady = () => {
+        apiReadyRef.current = true
+        setApiReady(true)
+    }
+
+    // Carrega o script da YouTube IFrame API (uma única vez globalmente)
+    useEffect(() => {
+        if (window.YT && window.YT.Player) { markReady(); return }
+
+        if (document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+            const check = setInterval(() => {
+                if (window.YT && window.YT.Player) { markReady(); clearInterval(check) }
+            }, 100)
+            const timeout = setTimeout(() => {
+                clearInterval(check)
+                if (!apiReadyRef.current) setApiFailed(true)
+            }, 8000)
+            return () => { clearInterval(check); clearTimeout(timeout) }
+        }
+
+        const prev = window.onYouTubeIframeAPIReady
+        window.onYouTubeIframeAPIReady = () => { prev?.(); markReady() }
+
+        const script = document.createElement('script')
+        script.src = 'https://www.youtube.com/iframe_api'
+        script.async = true
+        script.onerror = () => setApiFailed(true)
+        document.head.appendChild(script)
+
+        const timeout = setTimeout(() => { if (!apiReadyRef.current) setApiFailed(true) }, 8000)
+        return () => clearTimeout(timeout)
+    }, [])
+
+    // Criar / recriar o player quando a API está pronta
+    // IMPORTANTE: passa o ID string (não o ref) para o YT.Player.
+    // A API substitui o elemento-alvo por um <iframe> no DOM.
+    // Usar ID string evita que o React perca a referência ao nó externo
+    // e cause o erro "removeChild: node is not a child" no unmount.
+    useEffect(() => {
+        if (!apiReady || apiFailed) return
+        // Aguardar o DOM montar o elemento com o ID
+        const target = document.getElementById(ytContainerId)
+        if (!target) return
+
+        if (playerRef.current) {
+            try { playerRef.current.destroy() } catch {}
+            playerRef.current = null
+        }
+
+        const muteParam = (hasInteracted && !isGlobalMuted) ? 0 : 1
+        const autoplayParam = isPublic ? 1 : 0
+
+        playerRef.current = new window.YT.Player(ytContainerId, {
+            videoId,
+            width: '100%',
+            height: '100%',
+            playerVars: {
+                autoplay: autoplayParam,
+                mute: muteParam,
+                loop: 1,
+                playlist: videoId,
+                controls: 0,
+                rel: 0,
+                modestbranding: 1,
+                playsinline: 1,
+                disablekb: 1,
+                iv_load_policy: 3,
+            },
+            events: {
+                onReady: (event: YT.PlayerEvent) => {
+                    // Ler valores ATUAIS via refs (não os valores do momento da criação)
+                    // Cobre o race condition: player termina de carregar DEPOIS
+                    // do usuário já ter clicado no overlay global
+                    if (isGlobalMutedRef.current) {
+                        event.target.mute()
+                    } else if (isPublicRef.current && hasInteractedRef.current) {
+                        event.target.unMute() // garante unmute se player nasceu muted
+                        event.target.playVideo()
+                    }
+                },
+                onStateChange: (event: YT.OnStateChangeEvent) => {
+                    const playing = event.data === window.YT.PlayerState.PLAYING
+                    const paused = event.data === window.YT.PlayerState.PAUSED
+                    const ended = event.data === window.YT.PlayerState.ENDED
+
+                    setIsVideoPlaying(playing)
+                    onPlayStateChange?.(playing)
+
+                    if (playing) {
+                        if (pollingRef.current) clearInterval(pollingRef.current)
+                        pollingRef.current = setInterval(() => {
+                            if (playerRef.current?.getCurrentTime && playerRef.current?.getDuration) {
+                                const currentTime = playerRef.current.getCurrentTime()
+                                const duration = playerRef.current.getDuration() || 1
+                                setProgress((currentTime / duration) * 100)
+                                onTimeUpdate?.(currentTime, duration)
+                            }
+                        }, 250)
+                    }
+
+                    if (paused || ended) {
+                        if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null }
+                    }
+                }
+            }
+        })
+
+        return () => {
+            if (pollingRef.current) clearInterval(pollingRef.current)
+            if (playerRef.current) {
+                try { playerRef.current.destroy() } catch {}
+                playerRef.current = null
+            }
+        }
+    }, [apiReady, videoId])
+
+    // Mute global
+    useEffect(() => {
+        if (!playerRef.current) return
+        try {
+            if (isGlobalMuted) { playerRef.current.mute() } 
+            else { playerRef.current.unMute() }
+        } catch {}
+    }, [isGlobalMuted])
+
+    // Interação do overlay global → play sem mute
+    useEffect(() => {
+        if (!playerRef.current || !isPublic || !hasInteracted) return
+        try {
+            if (isGlobalMuted) { playerRef.current.mute() }
+            else { playerRef.current.unMute(); playerRef.current.playVideo() }
+        } catch {}
+    }, [hasInteracted, isPublic, isGlobalMuted])
+
+    const togglePlay = () => {
+        if (!playerRef.current) return
+        try {
+            if (isVideoPlaying) { playerRef.current.pauseVideo() }
+            else { playerRef.current.playVideo() }
+        } catch {}
+    }
+
+    // Fallback: se a API falhar, renderiza iframe simples (zero downtime)
+    if (apiFailed) {
+        const muteParam = (hasInteracted && !isGlobalMuted) ? '0' : '1'
+        const autoplayParam = isPublic ? `&autoplay=1&mute=${muteParam}` : ''
+        return (
+            <iframe
+                src={`https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&controls=1&rel=0${autoplayParam}`}
+                width="100%" height="100%" frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+            />
+        )
+    }
 
     return (
-        <iframe
-            src={`https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&controls=1&rel=0${autoplayParam}`}
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full grayscale-[0.1] hover:grayscale-0 transition-all duration-1000 object-cover"
-        />
+        <div
+            className="w-full h-full relative group/video"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {/* Player YouTube — div alvo do IFrame API (substitui este elemento por <iframe>) */}
+            <div
+                id={ytContainerId}
+                className="w-full h-full"
+            />
+
+            {/* Overlay de controles — aparece só no hover */}
+            <div className={cn(
+                "absolute inset-0 pointer-events-none transition-opacity duration-300",
+                isHovered ? "opacity-100" : "opacity-0"
+            )}>
+                {/* Gradiente sutil na base */}
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 to-transparent rounded-b-[32px]" />
+
+                {/* Botão play/pause central */}
+                <button
+                    onClick={togglePlay}
+                    className="pointer-events-auto absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all hover:scale-110 hover:bg-white/20 active:scale-95"
+                >
+                    {isVideoPlaying
+                        ? <Pause className="w-5 h-5 text-white fill-white" />
+                        : <Play  className="w-5 h-5 text-white fill-white ml-0.5" />
+                    }
+                </button>
+
+                {/* Barra de progresso na base */}
+                <div className="pointer-events-auto absolute bottom-3 left-4 right-4">
+                    <div className="w-full h-0.5 rounded-full bg-white/20 overflow-hidden">
+                        <div
+                            className="h-full bg-white/70 rounded-full transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                </div>
+
+                {/* Watermark YouTube (obrigatório pelos ToS) */}
+                <div className="pointer-events-none absolute bottom-5 right-4 opacity-60">
+                    <svg viewBox="0 0 90 20" className="h-3 fill-white">
+                        <path d="M27.9727 3.12324C27.6435 1.89323 26.6768 0.926623 25.4468 0.597366C23.2197 2.24288e-07 14.285 0 14.285 0C14.285 0 5.35042 2.24288e-07 3.12323 0.597366C1.89323 0.926623 0.926623 1.89323 0.597366 3.12324C2.24288e-07 5.35042 0 10 0 10C0 10 2.24288e-07 14.6496 0.597366 16.8768C0.926623 18.1068 1.89323 19.0734 3.12323 19.4026C5.35042 20 14.285 20 14.285 20C14.285 20 23.2197 20 25.4468 19.4026C26.6768 19.0734 27.6435 18.1068 27.9727 16.8768C28.5701 14.6496 28.5701 10 28.5701 10C28.5701 10 28.5677 5.35042 27.9727 3.12324Z" fill="#FF0000"/>
+                        <path d="M11.4253 14.2854L18.8477 10.0004L11.4253 5.71533V14.2854Z" fill="white"/>
+                        <path d="M34.6024 13.0036L31.3945 1.41846H34.1932L35.3174 6.6701C35.6043 7.96361 35.8136 9.06662 35.95 9.97913H36.0323C36.1264 9.32532 36.3381 8.22937 36.665 6.68892L37.8291 1.41846H40.6278L37.3799 13.0036V18.561H34.6001V13.0036H34.6024Z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
     )
 }
 
@@ -781,29 +1044,43 @@ export function SmartMedia({
         }
     }
 
+    // Sincronizador Universal de Lyrics — funciona para Audio e Video
+    const syncLyrics = (current: number) => {
+        if (parsedLyrics.current.length === 0) return
+
+        let activeLine = null
+        for (let i = parsedLyrics.current.length - 1; i >= 0; i--) {
+            if (current >= parsedLyrics.current[i].time) {
+                activeLine = parsedLyrics.current[i]
+                break
+            }
+        }
+
+        if (activeLine && activeLine.text !== currentLyric) {
+            setCurrentLyric(activeLine.text)
+            setActiveLyrics(activeLine.text)
+        }
+    }
+
     const handleTimeUpdate = () => {
         if (audioRef.current) {
             const current = audioRef.current.currentTime
             const duration = audioRef.current.duration || 1
             setCurrentTime(current)
             setProgress((current / duration) * 100)
-
-            if (parsedLyrics.current.length > 0) {
-                // Otimização P0: Busca reversa sem clonagem de array para performance máxima
-                let activeLine = null;
-                for (let i = parsedLyrics.current.length - 1; i >= 0; i--) {
-                    if (current >= parsedLyrics.current[i].time) {
-                        activeLine = parsedLyrics.current[i];
-                        break;
-                    }
-                }
-
-                if (activeLine && activeLine.text !== currentLyric) {
-                    setCurrentLyric(activeLine.text)
-                    setActiveLyrics(activeLine.text)
-                }
-            }
+            syncLyrics(current)
         }
+    }
+
+    // Callback para o VideoPlayer via YouTube IFrame API
+    const handleVideoTimeUpdate = (current: number, duration: number) => {
+        setCurrentTime(current)
+        setProgress((current / duration) * 100)
+        syncLyrics(current)
+    }
+
+    const handleVideoPlayState = (playing: boolean) => {
+        setIsPlaying(playing)
     }
 
     useEffect(() => {
@@ -867,7 +1144,16 @@ export function SmartMedia({
             )
         }
     } else if (mediaType === 'video' && videoId) {
-        content = <VideoPlayer videoId={videoId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} />
+        content = (
+            <VideoPlayer 
+                videoId={videoId} 
+                isPublic={isPublic} 
+                hasInteracted={hasInteracted} 
+                isGlobalMuted={isGlobalMuted}
+                onTimeUpdate={handleVideoTimeUpdate}
+                onPlayStateChange={handleVideoPlayState}
+            />
+        )
     } else if (mediaType === 'music' && trackId) {
         content = <MusicPlayer trackId={trackId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} />
     } else {

@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useTransition, useEffect } from "react"
 import { searchSpotifyTracks } from "@/actions/spotify"
+import { searchYouTubeVideos, getYouTubeVideoInfo } from "@/actions/youtube"
 import { addMoodBlock } from "@/actions/profile"
 import { getUploadUrl } from "@/actions/upload"
 import { Input } from "@/components/ui/input"
@@ -44,9 +45,12 @@ export function UniversalMediaEditor({
     const content = block?.content as UniversalMediaContent || {}
     const [mediaType, setMediaType] = useState<MediaType>(content.mediaType || (block?.type === 'music' ? 'music' : 'video'))
     const [videoId, setVideoId] = useState(content.videoId || "")
+    const [videoTitle, setVideoTitle] = useState(content.videoTitle || "")
+    const [videoChannel, setVideoChannel] = useState(content.videoChannel || "")
+    const [videoThumbnail, setVideoThumbnail] = useState(content.videoThumbnail || "")
     const [trackId, setTrackId] = useState(content.trackId || "")
     const [audioUrl, setAudioUrl] = useState(content.audioUrl || "")
-    const [frame, setFrame] = useState<FrameType>(content.frame as FrameType || (block?.type === 'music' ? 'minimal' : 'none'))
+    const [frame, setFrame] = useState<FrameType>('none')
 
     const [trackName, setTrackName] = useState(content.name || "")
     const [trackArtist, setTrackArtist] = useState(content.artist || "")
@@ -63,9 +67,19 @@ export function UniversalMediaEditor({
         albumArt: string;
     }
 
+    interface YouTubeResult {
+        videoId: string;
+        title: string;
+        channel: string;
+        thumbnail: string;
+        duration?: string;
+    }
+
     const [urlInput, setUrlInput] = useState("")
     const [query, setQuery] = useState("")
     const [results, setResults] = useState<SpotifyTrack[]>([])
+    const [ytResults, setYtResults] = useState<YouTubeResult[]>([])
+    const [ytQuery, setYtQuery] = useState("")
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
@@ -88,17 +102,56 @@ export function UniversalMediaEditor({
         setIsLoading(false)
     }
 
-    const handleAddYoutube = () => {
+    const handleAddYoutube = async () => {
         const id = extractYoutubeId(urlInput)
         if (id) {
             setVideoId(id)
             setMediaType('video')
             setUrlInput("")
             setError(null)
-            triggerUpdate({ videoId: id, mediaType: 'video' })
+
+            // Enriquecer com metadados da API (best-effort)
+            const info = await getYouTubeVideoInfo(id)
+            if (info && !('error' in info)) {
+                setVideoTitle(info.title)
+                setVideoChannel(info.channel)
+                setVideoThumbnail(info.thumbnail)
+                triggerUpdate({ 
+                    videoId: id, mediaType: 'video',
+                    videoTitle: info.title, videoChannel: info.channel, videoThumbnail: info.thumbnail
+                })
+            } else {
+                triggerUpdate({ videoId: id, mediaType: 'video' })
+            }
         } else {
             setError(t('editors.youtube.error'))
         }
+    }
+
+    const handleYouTubeSearch = async () => {
+        if (!ytQuery || ytQuery.trim().length < 2) return
+        setError(null)
+        setIsLoading(true)
+        const results = await searchYouTubeVideos(ytQuery.trim())
+        if (results && 'error' in results) {
+            setError(results.error)
+        } else {
+            setYtResults(results as YouTubeResult[])
+        }
+        setIsLoading(false)
+    }
+
+    const handleSelectYouTubeResult = (result: YouTubeResult) => {
+        setVideoId(result.videoId)
+        setVideoTitle(result.title)
+        setVideoChannel(result.channel)
+        setVideoThumbnail(result.thumbnail)
+        setYtResults([])
+        setYtQuery("")
+        triggerUpdate({ 
+            videoId: result.videoId, mediaType: 'video',
+            videoTitle: result.title, videoChannel: result.channel, videoThumbnail: result.thumbnail
+        })
     }
 
     const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,6 +207,9 @@ export function UniversalMediaEditor({
         const currentContent: UniversalMediaContent = {
             mediaType,
             videoId,
+            videoTitle,
+            videoChannel,
+            videoThumbnail,
             trackId,
             audioUrl,
             frame,
@@ -184,6 +240,11 @@ export function UniversalMediaEditor({
             frame,
             lyrics,
             lyricsDisplay,
+            ...(mediaType === 'video' ? {
+                videoTitle,
+                videoChannel,
+                videoThumbnail
+            } : {}),
             ...((mediaType === 'music' || mediaType === 'audio') ? {
                 name: trackName,
                 artist: trackArtist,
@@ -234,40 +295,72 @@ export function UniversalMediaEditor({
             <EditorSection title="Fonte de Dados">
                 {mediaType === 'video' ? (
                     <div className="space-y-4">
+                        {/* Busca por texto */}
+                        <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-red-500 transition-colors" />
+                            <Input
+                                placeholder="Buscar vídeo no YouTube..."
+                                value={ytQuery}
+                                onChange={(e) => setYtQuery(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleYouTubeSearch()}
+                                className="bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-2xl pl-12 h-14 text-[11px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-red-500/20 placeholder:text-zinc-400"
+                            />
+                        </div>
+                        <Button
+                            onClick={handleYouTubeSearch}
+                            disabled={isLoading}
+                            className="w-full bg-red-600 hover:bg-red-700 text-white rounded-2xl h-14 font-black uppercase tracking-widest text-[9px] shadow-lg shadow-red-500/20 transition-all active:scale-95"
+                        >
+                            {isLoading ? 'Buscando...' : 'Buscar no YouTube'}
+                        </Button>
+
+                        {/* Separador visual */}
+                        <div className="flex items-center gap-4 px-2">
+                            <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
+                            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">ou cole o link</span>
+                            <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
+                        </div>
+
+                        {/* Input de URL direto (fallback) */}
                         <div className="relative group">
                             <Video className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
                             <Input
                                 placeholder={t('editors.universal_media.youtube_placeholder')}
                                 value={urlInput}
                                 onChange={(e) => setUrlInput(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleAddYoutube()}
                                 className="bg-zinc-50 dark:bg-zinc-900/50 border-none rounded-2xl pl-12 h-14 text-[11px] font-bold uppercase tracking-widest focus:ring-1 focus:ring-blue-500/20 placeholder:text-zinc-400"
                             />
                         </div>
-                        <Button
-                            onClick={handleAddYoutube}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl h-14 font-black uppercase tracking-widest text-[9px] shadow-lg shadow-blue-500/20 transition-all active:scale-95"
-                        >
-                            {t('editors.universal_media.youtube_btn')}
-                        </Button>
+                        {urlInput && (
+                            <Button
+                                onClick={handleAddYoutube}
+                                className="w-full bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl h-14 font-black uppercase tracking-widest text-[9px] transition-all active:scale-95"
+                            >
+                                {t('editors.universal_media.youtube_btn')}
+                            </Button>
+                        )}
 
+                        {/* Card de vídeo selecionado (enriquecido) */}
                         {videoId && (
                             <motion.div 
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="p-4 bg-zinc-900 rounded-2xl border border-white/5 flex items-center gap-4 overflow-hidden relative group"
+                                className="p-4 bg-red-500/5 dark:bg-red-500/10 rounded-2xl border border-red-500/20 flex items-center gap-4 overflow-hidden relative"
                             >
-                                <div className="w-20 h-12 rounded-lg bg-zinc-800 overflow-hidden flex-shrink-0 border border-white/10">
+                                <div className="w-20 h-12 rounded-lg bg-zinc-800 overflow-hidden flex-shrink-0 border border-red-500/20">
                                     <img 
-                                        src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`} 
-                                        className="w-full h-full object-cover opacity-80"
+                                        src={videoThumbnail || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`} 
+                                        className="w-full h-full object-cover"
                                         alt="Thumbnail"
                                     />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-[8px] font-black text-blue-500 uppercase tracking-widest mb-1">Vídeo Selecionado</p>
-                                    <p className="text-[10px] font-bold text-white uppercase truncate">ID: {videoId}</p>
+                                    <p className="text-[8px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-1">Vídeo Selecionado</p>
+                                    <p className="text-[10px] font-bold text-zinc-900 dark:text-white uppercase truncate">{videoTitle || `ID: ${videoId}`}</p>
+                                    {videoChannel && <p className="text-[9px] text-zinc-500 uppercase truncate">{videoChannel}</p>}
                                 </div>
-                                <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                <div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                             </motion.div>
                         )}
                     </div>
@@ -391,23 +484,35 @@ export function UniversalMediaEditor({
                 </div>
             )}
 
+            {mediaType === 'video' && ytResults.length > 0 && (
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-lg divide-y divide-zinc-50 dark:divide-zinc-800 max-h-72 overflow-y-auto custom-scrollbar">
+                    {ytResults.map((result) => (
+                        <button
+                            key={result.videoId}
+                            onClick={() => handleSelectYouTubeResult(result)}
+                            className="w-full flex items-center gap-4 p-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all text-left group"
+                        >
+                            <div className="w-16 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800 relative">
+                                <img src={result.thumbnail} alt="" className="w-full h-full object-cover" />
+                                {result.duration && (
+                                    <span className="absolute bottom-0.5 right-0.5 bg-black/80 text-white text-[7px] font-bold px-1 rounded">
+                                        {result.duration}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="overflow-hidden flex-1">
+                                <p className="text-[10px] font-bold text-zinc-900 dark:text-white uppercase truncate">{result.title}</p>
+                                <p className="text-[9px] text-zinc-500 uppercase truncate">{result.channel}</p>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            )}
+
             {(videoId || trackId || audioUrl) && (
                 <div className="space-y-10">
                     <EditorSection title="Estética">
-                        {mediaType !== 'audio' && mediaType !== 'music' && (
-                            <EditorSection title="Moldura">
-                                <ListSelector
-                                    id="frame-type"
-                                    options={FRAMES.map(f => ({ id: f.id as string, label: f.label }))}
-                                    activeId={frame as string}
-                                    onChange={(id) => {
-                                        const newFrame = id as FrameType
-                                        setFrame(newFrame)
-                                        triggerUpdate({ frame: newFrame })
-                                    }}
-                                />
-                            </EditorSection>
-                        )}
+
 
                         <div className="flex items-center justify-between px-1 mb-4">
                             <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-600">
