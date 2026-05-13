@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useStudioBlock } from "@/hooks/use-studio-block"
 
@@ -197,7 +197,19 @@ const AuraPlayer = ({
     setIsPlaying: (p: boolean) => void;
 }) => {
     const orbSize = Math.max(80, Math.round(120 * scale))
-    const [audioIntensity, setAudioIntensity] = useState(0)
+    const motionIntensity = useMotionValue(0)
+    const smoothIntensity = useSpring(motionIntensity, { stiffness: 300, damping: 20 })
+    
+    // Derived values for animations - these update directly in the DOM
+    const orbScale = useTransform(smoothIntensity, [0, 1], [1, 1.4])
+    const glowIntensity = useTransform(smoothIntensity, [0, 1], [0.2, 0.6])
+    const glowSpread = useTransform(smoothIntensity, [0, 1], [20, 80])
+    const meshOpacity = useTransform(smoothIntensity, [0, 1], [0.3, 1])
+    const meshScale = useTransform(smoothIntensity, [0, 1], [1, 1.2])
+    const boxShadowTransform = useTransform(smoothIntensity, v => 
+        `0 0 ${20 + v * 60}px rgba(244,63,94,${0.2 + v * 0.4})`
+    )
+
     const analyserRef = useRef<AnalyserNode | null>(null)
     const audioCtxRef = useRef<AudioContext | null>(null)
     const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
@@ -206,7 +218,7 @@ const AuraPlayer = ({
     // Audio Analysis Engine
     useEffect(() => {
         if (!audioRef.current || !isPlaying) {
-            setAudioIntensity(0)
+            motionIntensity.set(0)
             if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current)
             return
         }
@@ -247,7 +259,7 @@ const AuraPlayer = ({
                 // Get average of low frequencies (Bass) for the pulse
                 const lowFreqs = dataArray.slice(0, 10)
                 const average = lowFreqs.reduce((a, b) => a + b, 0) / lowFreqs.length
-                setAudioIntensity(average / 255) // Normalizado 0-1
+                motionIntensity.set(average / 255) // Updates Motion Value directly (No Re-render)
             }
             animationFrameRef.current = requestAnimationFrame(analyze)
         }
@@ -311,12 +323,10 @@ const AuraPlayer = ({
                     animate={{
                         borderRadius: isPlaying 
                             ? ["42% 58% 70% 30% / 45% 45% 55% 55%", "50% 50% 33% 67% / 55% 27% 73% 45%", "42% 58% 70% 30% / 45% 45% 55% 55%"]
-                            : "50%",
-                        scale: isPlaying ? 1 + (audioIntensity * 0.4) : 1
+                            : "50%"
                     }}
                     transition={{
-                        borderRadius: { duration: 8, repeat: Infinity, ease: "easeInOut" },
-                        scale: { type: "spring", stiffness: 300, damping: 20 }
+                        borderRadius: { duration: 8, repeat: Infinity, ease: "easeInOut" }
                     }}
                     className={cn(
                         "relative flex items-center justify-center overflow-hidden transition-all duration-500 shadow-2xl",
@@ -325,7 +335,8 @@ const AuraPlayer = ({
                     style={{ 
                         width: orbSize - 20, 
                         height: orbSize - 20,
-                        boxShadow: isPlaying ? `0 0 ${20 + audioIntensity * 60}px rgba(244,63,94,${0.2 + audioIntensity * 0.4})` : 'none'
+                        scale: isPlaying ? orbScale : 1,
+                        boxShadow: isPlaying ? boxShadowTransform : 'none'
                     }}
                 >
                     {/* Animated Mesh Background (Inside Orb) */}
@@ -333,9 +344,9 @@ const AuraPlayer = ({
                         {isPlaying && (
                             <motion.div
                                 initial={{ opacity: 0 }}
-                                animate={{ 
-                                    opacity: 0.3 + audioIntensity * 0.7,
-                                    scale: 1 + audioIntensity * 0.2
+                                style={{ 
+                                    opacity: meshOpacity,
+                                    scale: meshScale
                                 }}
                                 exit={{ opacity: 0 }}
                                 className="absolute inset-0 bg-gradient-to-tr from-rose-500/40 via-fuchsia-500/20 to-blue-500/40"
