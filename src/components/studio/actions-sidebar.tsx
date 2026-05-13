@@ -20,7 +20,8 @@ import {
     Sun,
     Moon,
     LogOut,
-    Shield
+    Shield,
+    Camera
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
@@ -44,6 +45,7 @@ import { VersionHistoryPanel } from "./version-history-panel"
 import { EditorHeader } from "./EditorUI"
 import { MinimalTooltip } from "@/components/ui/minimal-tooltip"
 import { ConfirmModal } from "@/components/ui/confirm-modal"
+import { exportMuralAsImage } from "@/lib/export-utils"
 
 interface ActionsSidebarProps {
     username: string
@@ -584,6 +586,17 @@ export function ActionsSidebar({
                                     slug={profile.slug || undefined}
                                     minimal
                                 />
+
+                                <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800" />
+
+                                <MinimalTooltip content="Exportar Snapshot (PNG)">
+                                    <button
+                                        onClick={() => exportMuralAsImage('mood-canvas-container', `mood-${profile.slug || 'main'}`)}
+                                        className="p-2 text-zinc-300 hover:text-blue-500 transition-all duration-500 hover:scale-110 active:scale-95"
+                                    >
+                                        <Camera className="w-5 h-5" />
+                                    </button>
+                                </MinimalTooltip>
                             </div>
                         </div>
 

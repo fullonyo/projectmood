@@ -240,6 +240,7 @@ export function MoodCanvas({
 
     return (
         <div
+            id="mood-canvas-container"
             className={cn(
                 "w-full h-full relative overflow-hidden select-none touch-none mood-canvas",
                 isSpacePressed ? "cursor-grab active:cursor-grabbing" : "cursor-crosshair",
@@ -256,25 +257,29 @@ export function MoodCanvas({
             {blocks.length === 0 && <TemplateChooser roomId={profile.id} />}
 
             {/* Lasso Selection */}
-            <LassoSelector 
-                canvasRef={canvasRef} 
-                isSpacePressed={isSpacePressed} 
-                onSelectionChange={(ids, isShift) => {
-                    if (isShift) {
-                        setSelectedIds(prev => [...new Set([...prev, ...ids])])
-                    } else {
-                        setSelectedIds(ids)
-                    }
-                }} 
-            />
+            <div className="no-export">
+                <LassoSelector 
+                    canvasRef={canvasRef} 
+                    isSpacePressed={isSpacePressed} 
+                    onSelectionChange={(ids, isShift) => {
+                        if (isShift) {
+                            setSelectedIds(prev => [...new Set([...prev, ...ids])])
+                        } else {
+                            setSelectedIds(ids)
+                        }
+                    }} 
+                />
+            </div>
 
             {/* Selection Aura */}
-            <SelectionAura 
-                selectedIds={selectedIds} 
-                blocks={blocks} 
-                onUpdateBlocks={onUpdateBlocks} 
-                canvasRef={canvasRef} 
-            />
+            <div className="no-export">
+                <SelectionAura 
+                    selectedIds={selectedIds} 
+                    blocks={blocks} 
+                    onUpdateBlocks={onUpdateBlocks} 
+                    canvasRef={canvasRef} 
+                />
+            </div>
 
             {/* Room Environment */}
             <RoomEnvironment
@@ -400,16 +405,20 @@ export function MoodCanvas({
                 {t('canvas.creativity_domain')}
             </div>
 
-            <MultiSelectToolbar
-                visible={selectedIds.length > 1}
-                count={selectedIds.length}
-                onAlign={alignSelected}
-                onDistribute={distributeSelected}
-                onGroup={onGroup}
-                onUngroup={onUngroup}
-            />
+            <div className="no-export">
+                <MultiSelectToolbar
+                    visible={selectedIds.length > 1}
+                    count={selectedIds.length}
+                    onAlign={alignSelected}
+                    onDistribute={distributeSelected}
+                    onGroup={onGroup}
+                    onUngroup={onUngroup}
+                />
+            </div>
 
-            <CommandCenter />
+            <div className="no-export">
+                <CommandCenter />
+            </div>
             
             <AnimatePresence>
                 {isPreview && (
