@@ -19,6 +19,7 @@ import { I18nProvider } from "@/i18n/context"
 import { AudioProvider, useAudio } from "@/components/studio/audio-context"
 import { LyricsProvider } from "@/components/studio/lyrics-context"
 import { GlobalLyricsOverlay } from "@/components/studio/GlobalLyricsOverlay"
+import { themeConfigs } from "@/lib/themes"
 
 export function PublicMoodPageClient(props: PublicMoodPageProps) {
     return (
@@ -43,6 +44,10 @@ function PublicMoodPageClientInner({ publicUser, roomId, profile, moodBlocks, co
     const activeWeather = typeof weatherIcon === 'string' ? weatherIcon : null
 
     const viewportScale = useViewportScale()
+    
+    // Resolve primary text color based on theme to prevent OS color scheme overrides
+    const themeConfig = themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.light
+    const resolvedTextColor = profile.primaryColor || themeConfig.primary || '#000000'
 
     useEffect(() => {
         const storageKey = `mood_v_${roomId}`
@@ -105,7 +110,10 @@ function PublicMoodPageClientInner({ publicUser, roomId, profile, moodBlocks, co
                 )}
             </div>
 
-            <main className="relative w-full h-full overflow-y-auto sm:overflow-hidden">
+            <main 
+                className="relative w-full h-full overflow-y-auto sm:overflow-hidden"
+                style={{ color: resolvedTextColor }}
+            >
                 <BoardStage>
                     {/* Background moved inside the same stacking context */}
                     <div className="fixed inset-0 z-0 pointer-events-none">
