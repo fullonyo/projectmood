@@ -51,7 +51,7 @@ export function UniversalMediaEditor({
     const [trackAlbumArt, setTrackAlbumArt] = useState(content.albumArt || "")
     const [lyrics, setLyrics] = useState(content.lyrics || "")
     const [lyricsDisplay, setLyricsDisplay] = useState<'integrated' | 'fullscreen'>(content.lyricsDisplay || 'integrated')
-    const [audioStyle, setAudioStyle] = useState<'classic' | 'aura'>(content.audioStyle || 'classic')
+    const [audioStyle, setAudioStyle] = useState<'classic' | 'aura' | 'dots'>(content.audioStyle || 'classic')
 
     interface SpotifyTrack {
         id: string;
@@ -407,11 +407,12 @@ export function UniversalMediaEditor({
                                     id="audio-style"
                                     options={[
                                         { id: 'classic', label: 'Classic' },
-                                        { id: 'aura', label: 'Neural Aura' }
+                                        { id: 'aura', label: 'Neural Aura' },
+                                        { id: 'dots', label: 'Neural Dots' }
                                     ]}
                                     activeId={audioStyle}
                                     onChange={(id) => {
-                                        const newStyle = id as 'classic' | 'aura'
+                                        const newStyle = id as 'classic' | 'aura' | 'dots'
                                         setAudioStyle(newStyle)
                                         triggerUpdate({ audioStyle: newStyle })
                                     }}

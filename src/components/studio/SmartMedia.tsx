@@ -25,7 +25,7 @@ interface SmartMediaProps {
     hasInteracted?: boolean
     lyrics?: string // Valid format: [mm:ss] text
     lyricsDisplay?: 'integrated' | 'fullscreen'
-    audioStyle?: 'classic' | 'aura'
+    audioStyle?: 'classic' | 'aura' | 'dots'
 }
 
 interface LyricLine {
@@ -287,7 +287,7 @@ const AuraPlayer = ({
             <div className="relative flex items-center justify-center" style={{ width: orbSize, height: orbSize }}>
                 
                 {/* Orbital Progress Ring */}
-                <svg className="absolute inset-0 -rotate-90" width={orbSize} height={orbSize}>
+                <svg className="absolute inset-0 -rotate-90 z-20 pointer-events-none" width={orbSize} height={orbSize}>
                     <circle
                         cx={orbSize / 2}
                         cy={orbSize / 2}
@@ -335,8 +335,8 @@ const AuraPlayer = ({
                     style={{ 
                         width: orbSize - 20, 
                         height: orbSize - 20,
-                        scale: isPlaying ? orbScale : 1,
-                        boxShadow: isPlaying ? boxShadowTransform : 'none'
+                        scale: orbScale,
+                        boxShadow: boxShadowTransform
                     }}
                 >
                     {/* Animated Mesh Background (Inside Orb) */}
@@ -367,14 +367,276 @@ const AuraPlayer = ({
                     className="font-black text-zinc-900 dark:text-white uppercase tracking-[0.3em] leading-none mb-2"
                     style={{ fontSize: Math.max(10, Math.round(14 * scale)) }}
                 >
-                    {audioMetadata?.name || "Neural Aura"}
+                    {audioMetadata?.name || "Unknown Audio"}
                 </motion.h3>
-                <p 
-                    className="font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.15em] opacity-60"
-                    style={{ fontSize: Math.max(8, Math.round(9 * scale)) }}
+            </div>
+
+        </div>
+    )
+}
+
+const PulseFieldPlayer = ({ 
+    audioUrl, isPlaying, togglePlay, progress, scale = 1, audioMetadata, 
+    audioRef, handleTimeUpdate, setIsPlaying
+}: {
+    audioUrl: string;
+    isPlaying: boolean;
+    togglePlay: (e: React.MouseEvent) => void;
+    progress: number;
+    scale?: number;
+    audioMetadata?: { name?: string; artist?: string };
+    audioRef: React.RefObject<HTMLAudioElement | null>;
+    handleTimeUpdate: () => void;
+    setIsPlaying: (p: boolean) => void;
+}) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const audioIntensityRef = useRef(0)
+    const analyserRef = useRef<AnalyserNode | null>(null)
+    const audioCtxRef = useRef<AudioContext | null>(null)
+    const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
+    const audioFrameRef = useRef<number | undefined>(undefined)
+    const drawFrameRef = useRef<number | undefined>(undefined)
+    const dotsRef = useRef<{x: number, y: number, vx: number, vy: number, size: number, color: string}[]>([])
+
+    // Audio Analysis Engine
+    useEffect(() => {
+        if (!audioRef.current || !isPlaying) {
+            audioIntensityRef.current = 0
+            if (audioFrameRef.current) cancelAnimationFrame(audioFrameRef.current)
+            return
+        }
+
+        const setupAudioContext = () => {
+            if (!audioRef.current) return
+            try {
+                if (!audioCtxRef.current) {
+                    const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext)
+                    audioCtxRef.current = new AudioContextClass()
+                }
+                const audioCtx = audioCtxRef.current
+                if (!sourceRef.current) {
+                    sourceRef.current = audioCtx.createMediaElementSource(audioRef.current)
+                    analyserRef.current = audioCtx.createAnalyser()
+                    analyserRef.current.fftSize = 256
+                    sourceRef.current.connect(analyserRef.current)
+                    analyserRef.current.connect(audioCtx.destination)
+                }
+                if (audioCtx.state === 'suspended') audioCtx.resume()
+            } catch (e) { console.warn(e) }
+        }
+
+        setupAudioContext()
+
+        const dataArray = new Uint8Array(analyserRef.current?.frequencyBinCount || 0)
+        const analyze = () => {
+            if (analyserRef.current) {
+                analyserRef.current.getByteFrequencyData(dataArray)
+                const lowFreqs = dataArray.slice(0, 10)
+                const average = lowFreqs.reduce((a, b) => a + b, 0) / lowFreqs.length
+                audioIntensityRef.current = average / 255
+            }
+            audioFrameRef.current = requestAnimationFrame(analyze)
+        }
+        analyze()
+
+        return () => {
+            if (audioFrameRef.current) cancelAnimationFrame(audioFrameRef.current)
+        }
+    }, [isPlaying, audioRef])
+
+    // Canvas Rendering Engine
+    useEffect(() => {
+        const canvas = canvasRef.current
+        if (!canvas) return
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+
+        const dpr = window.devicePixelRatio || 1
+        const padding = 300 // Huge padding to guarantee floating freedom
+        
+        const resize = () => {
+            if (!canvas.parentElement) return
+            const rect = canvas.parentElement.getBoundingClientRect()
+            
+            canvas.width = (rect.width + padding * 2) * dpr
+            canvas.height = (rect.height + padding * 2) * dpr
+            ctx.scale(dpr, dpr)
+            
+            // Build particles swarm near the center if empty
+            const targetCount = 180 // Fixed density
+            if (dotsRef.current.length === 0) {
+                const dots = []
+                const centerX = (rect.width + padding * 2) / 2
+                const centerY = (rect.height + padding * 2) / 2
+                
+                for(let i = 0; i < targetCount; i++) {
+                    // Spawn particles near the center, not scattered across the huge padding
+                    const radius = Math.random() * (rect.width / 2)
+                    const angle = Math.random() * Math.PI * 2
+                    
+                    dots.push({ 
+                        x: centerX + Math.cos(angle) * radius, 
+                        y: centerY + Math.sin(angle) * radius, 
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        size: Math.random() * 2 + 1,
+                        color: Math.random() > 0.5 ? '#f43f5e' : '#fb7185'
+                    })
+                }
+                dotsRef.current = dots
+            }
+        }
+
+        resize()
+        
+        // Listen to element physical dimension changes (not just window)
+        let resizeObserver: ResizeObserver | null = null
+        if (canvas.parentElement) {
+            resizeObserver = new ResizeObserver(() => resize())
+            resizeObserver.observe(canvas.parentElement)
+        }
+
+        let frame = 0
+        const draw = () => {
+            frame++
+            const w = canvas.width / dpr
+            const h = canvas.height / dpr
+            
+            // Subtle clear to maintain trails
+            // Using clearRect then a light fill to avoid black background on transparent mural
+            ctx.clearRect(0, 0, w, h)
+            
+            const intensity = audioIntensityRef.current
+            const dots = dotsRef.current
+            const centerX = w / 2
+            const centerY = h / 2
+            
+            for(const dot of dots) {
+                const dx = centerX - dot.x
+                const dy = centerY - dot.y
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1
+                
+                // Normal vectors
+                const nx = dx / dist
+                const ny = dy / dist
+                
+                // 1. Constant Attraction to center (Gravity)
+                const gravity = 0.03
+                dot.vx += nx * gravity
+                dot.vy += ny * gravity
+                
+                // 2. Orbital Force (Tangential)
+                const orbitSpeed = 0.8 * scale
+                dot.vx += ny * orbitSpeed * 0.05
+                dot.vy -= nx * orbitSpeed * 0.05
+                
+                // 3. Audio Outward Push (Explosion on Bass)
+                // Force WEAKENS as they get closer to the edge to prevent escaping
+                const maxRadius = Math.max(w, h) / 2
+                const edgeFactor = Math.max(0, 1 - (dist / maxRadius))
+                const pushForce = intensity * 4.0 * edgeFactor
+                dot.vx -= nx * pushForce
+                dot.vy -= ny * pushForce
+                
+                // 4. Subtle jitter only on high intensity
+                if (intensity > 0.6) {
+                    dot.vx += (Math.random() - 0.5) * intensity * 0.8
+                    dot.vy += (Math.random() - 0.5) * intensity * 0.8
+                }
+                
+                // 5. Speed Limit (Terminal Velocity)
+                const maxSpeed = 12 * scale
+                const speed = Math.sqrt(dot.vx * dot.vx + dot.vy * dot.vy)
+                if (speed > maxSpeed) {
+                    dot.vx = (dot.vx / speed) * maxSpeed
+                    dot.vy = (dot.vy / speed) * maxSpeed
+                }
+                
+                // Friction (Damping)
+                dot.vx *= 0.90
+                dot.vy *= 0.90
+                
+                dot.x += dot.vx
+                dot.y += dot.vy
+                
+                // Render
+                const r = (dot.size * scale) * (0.8 + intensity * 2.0)
+                ctx.shadowBlur = intensity * 15
+                ctx.shadowColor = dot.color
+                ctx.fillStyle = dot.color
+                ctx.beginPath()
+                ctx.arc(dot.x, dot.y, r, 0, Math.PI * 2)
+                ctx.fill()
+                
+                // Strong Boundary Containment - Strictly inside visible canvas
+                if (dot.x < 0) { dot.x = 0; dot.vx *= -0.5; }
+                if (dot.x > w) { dot.x = w; dot.vx *= -0.5; }
+                if (dot.y < 0) { dot.y = 0; dot.vy *= -0.5; }
+                if (dot.y > h) { dot.y = h; dot.vy *= -0.5; }
+                
+                // Progressive Gravity (Attraction increases exponentially with distance)
+                const safeZone = maxRadius * 0.4
+                if (dist > safeZone) {
+                    const pull = Math.pow((dist - safeZone) * 0.02, 1.5)
+                    dot.vx += nx * pull
+                    dot.vy += ny * pull
+                }
+            }
+
+            drawFrameRef.current = requestAnimationFrame(draw)
+        }
+        draw()
+
+        return () => {
+            if (resizeObserver) resizeObserver.disconnect()
+            if (drawFrameRef.current) cancelAnimationFrame(drawFrameRef.current)
+        }
+    }, [scale])
+
+    return (
+        <div className="w-full h-full flex flex-col items-center justify-center p-4 pointer-events-auto group/dots relative overflow-visible" onClick={togglePlay}>
+            <audio
+                ref={audioRef}
+                src={audioUrl}
+                crossOrigin="anonymous"
+                onTimeUpdate={handleTimeUpdate}
+                onEnded={() => setIsPlaying(false)}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                loop
+            />
+            
+            <canvas 
+                ref={canvasRef} 
+                className="absolute pointer-events-none overflow-visible" 
+                style={{ 
+                    left: -300,
+                    top: -300,
+                    width: 'calc(100% + 600px)',
+                    height: 'calc(100% + 600px)',
+                }}
+            />
+
+            <div className="relative z-10 flex flex-col items-center justify-center gap-6">
+                <motion.div
+                    animate={{ 
+                        scale: isPlaying ? [1, 1.15, 1] : 1,
+                        rotate: isPlaying ? [0, 5, -5, 0] : 0
+                    }}
+                    transition={{ 
+                        scale: { duration: 0.2 },
+                        rotate: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                    }}
+                    className="w-20 h-20 rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center shadow-2xl relative group-hover/dots:scale-110 transition-transform duration-500"
                 >
-                    {audioMetadata?.artist || "Atmospheric Sound"}
-                </p>
+                    <div className="absolute inset-0 bg-rose-500/10 rounded-[2rem] blur-2xl opacity-0 group-hover/dots:opacity-100 transition-opacity" />
+                    {isPlaying ? <Pause className="w-8 h-8 text-white fill-current" /> : <Play className="w-8 h-8 text-white fill-current translate-x-1" />}
+                </motion.div>
+
+                <div className="text-center">
+
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider max-w-[200px] truncate">{audioMetadata?.name || 'Unknown Audio'}</h3>
+                </div>
             </div>
         </div>
     )
@@ -619,18 +881,29 @@ export function SmartMedia({
     let content = null
     
     if (mediaType === 'audio' && audioUrl) {
-        content = audioStyle === 'aura' ? (
-            <AuraPlayer 
-                audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} scale={scale} 
-                audioMetadata={audioMetadata} audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} setIsPlaying={setIsPlaying}
-            />
-        ) : (
-            <AudioPlayer 
-                audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} setProgress={setProgress} scale={scale} 
-                audioMetadata={audioMetadata} renderLyricsOverlay={renderLyricsOverlay} isGlobalMuted={isGlobalMuted} 
-                audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} currentTime={currentTime} setCurrentTime={setCurrentTime} setIsPlaying={setIsPlaying}
-            />
-        )
+        if (audioStyle === 'dots') {
+            content = (
+                <PulseFieldPlayer 
+                    audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} scale={scale} 
+                    audioMetadata={audioMetadata} audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} setIsPlaying={setIsPlaying}
+                />
+            )
+        } else if (audioStyle === 'aura') {
+            content = (
+                <AuraPlayer 
+                    audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} scale={scale} 
+                    audioMetadata={audioMetadata} audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} setIsPlaying={setIsPlaying}
+                />
+            )
+        } else {
+            content = (
+                <AudioPlayer 
+                    audioUrl={audioUrl} isPlaying={isPlaying} togglePlay={togglePlay} progress={progress} setProgress={setProgress} scale={scale} 
+                    audioMetadata={audioMetadata} renderLyricsOverlay={renderLyricsOverlay} isGlobalMuted={isGlobalMuted} 
+                    audioRef={audioRef} handleTimeUpdate={handleTimeUpdate} currentTime={currentTime} setCurrentTime={setCurrentTime} setIsPlaying={setIsPlaying}
+                />
+            )
+        }
     } else if (mediaType === 'video' && videoId) {
         content = <VideoPlayer videoId={videoId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} renderLyricsOverlay={renderLyricsOverlay} />
     } else if (mediaType === 'music' && trackId) {
@@ -655,7 +928,7 @@ export function SmartMedia({
                 !isPublic && "cursor-pointer",
                 mediaType === 'audio' && "bg-transparent",
                 mediaType === 'audio' && audioStyle === 'classic' && isPlaying && "scale-[1.02]",
-                mediaType === 'audio' && audioStyle === 'aura' && "overflow-visible"
+                mediaType === 'audio' && (audioStyle === 'aura' || audioStyle === 'dots') && "overflow-visible"
             )}
         >
             {mediaType !== 'audio' && renderHUDMarkings()}

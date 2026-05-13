@@ -259,5 +259,5 @@ export interface UniversalMediaContent extends BlockContentBase {
     lyrics?: string;
     lyricsDisplay?: 'integrated' | 'fullscreen';
     trackName?: string;
-    audioStyle?: 'classic' | 'aura';
+    audioStyle?: 'classic' | 'aura' | 'dots';
 }
