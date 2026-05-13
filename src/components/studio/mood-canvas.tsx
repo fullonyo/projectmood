@@ -87,6 +87,10 @@ export function MoodCanvas({
     const weatherIcon = blocks.find(b => b.type === 'weather')?.content?.icon;
     const weatherSync = typeof weatherIcon === 'string' ? weatherIcon : null;
 
+    // Resolve primary text color based on theme to ensure WYSIWYG
+    const themeConfig = themeConfigs[profile.theme as keyof typeof themeConfigs] || themeConfigs.light
+    const resolvedTextColor = profile.primaryColor || themeConfig.primary || '#000000'
+
     // Pan & Space detection
     useEffect(() => {
         const hKeyDown = (e: KeyboardEvent) => {
@@ -271,7 +275,7 @@ export function MoodCanvas({
                         visible: { opacity: 1, transition: { staggerChildren: 0.03, delayChildren: 0.05 } }
                     }}
                 >
-                    <BoardStage className="mood-canvas-stage">
+                    <BoardStage className="mood-canvas-stage" style={{ color: resolvedTextColor }}>
                         <AnimatePresence mode="popLayout">
                             {blocks.map((block) => (
                                 <CanvasItem

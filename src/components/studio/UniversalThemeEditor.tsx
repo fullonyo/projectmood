@@ -100,15 +100,33 @@ export function UniversalThemeEditor({ currentTheme, currentBackgroundColor, cur
                 />
             </EditorSection>
 
-            <EditorSection title={t('editors.theme.node_luminance')}>
+            <EditorSection 
+                title={t('editors.theme.node_luminance')} 
+                description={t('editors.theme.luminance_desc')}
+            >
                 <div className="flex flex-col gap-10">
                     <GridSelector
                         id="primary-color"
-                        options={['#000000', '#FFFFFF', '#A3A3A3', '#F87171', '#34D399', '#60A5FA', '#E879F9', '#FBBF24', '#8B5CF6'].map(color => ({
-                            id: color,
-                            label: color === '#000000' ? 'Black' : color === '#FFFFFF' ? 'White' : 'Mood Color',
+                        options={[
+                            { id: '#000000', label: 'Obsidian' },
+                            { id: '#FFFFFF', label: 'Pure Ice' },
+                            { id: '#A1A1AA', label: 'Silver Ash' },
+                            { id: '#44403C', label: 'Stone' },
+                            { id: '#F87171', label: 'Coral' },
+                            { id: '#E11D48', label: 'Crimson' },
+                            { id: '#F59E0B', label: 'Sunset' },
+                            { id: '#FBBF24', label: 'Amber' },
+                            { id: '#34D399', label: 'Mint' },
+                            { id: '#10B981', label: 'Emerald' },
+                            { id: '#60A5FA', label: 'Electric Blue' },
+                            { id: '#2563EB', label: 'Ocean' },
+                            { id: '#8B5CF6', label: 'Violet' },
+                            { id: '#A78BFA', label: 'Lavender' }
+                        ].map(c => ({
+                            id: c.id,
+                            label: c.label,
                             icon: undefined,
-                            color: color
+                            color: c.id
                         }))}
                         activeId={currentPrimaryColor}
                         onChange={(id) => handleUpdate({ primaryColor: id })}
