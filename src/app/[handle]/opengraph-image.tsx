@@ -15,24 +15,25 @@ export const size = {
 export const contentType = 'image/png'
 
 // Valida se uma string é um hex color válido; retorna fallback se não for
-function safeHexColor(color: string | null | undefined, fallback = '#ffffff'): string {
-    if (!color) return fallback
-    const isHex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(color.trim())
-    return isHex ? color.trim() : fallback
+function safeHexColor(color: string | null | undefined, fallback = '#8b5cf6'): string {
+    if (!color || typeof color !== 'string') return fallback
+    const trimmed = color.trim()
+    const isHex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(trimmed)
+    return isHex ? trimmed : fallback
 }
 
 // Padding de título para garantir >= 50 caracteres
 function padTitle(name: string, username: string): string {
     const base = `${name} (@${username}) no MoodSpace`
-    const withSuffix = `${base} — Curate Your Reality`
-    // Retorna sempre o maior (com sufixo), garantindo atingir 50+
-    return withSuffix
+    // Título estendido para garantir SEO premium e evitar avisos de título curto
+    return `${base} — Mural Imersivo e Perfil Estético`
 }
 
 export default async function Image({ params }: { params: { handle: string } }) {
     let handle: string
     try {
-        handle = (await params).handle
+        const p = await params
+        handle = p.handle || ''
     } catch {
         handle = ''
     }
@@ -54,7 +55,6 @@ export default async function Image({ params }: { params: { handle: string } }) 
         })
 
         if (!user) {
-            // Fallback: imagem genérica do MoodSpace
             return new ImageResponse(
                 (
                     <div
@@ -65,7 +65,7 @@ export default async function Image({ params }: { params: { handle: string } }) 
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: '#000',
+                            backgroundColor: '#050505',
                             fontFamily: 'sans-serif',
                         }}
                     >
@@ -82,20 +82,19 @@ export default async function Image({ params }: { params: { handle: string } }) 
         }
 
         const name = user.name || username
-        const displayName = user.name || `@${username}`
         const primaryRoom = user.rooms[0]
 
         // Validações defensivas de cores
-        const rawColor = primaryRoom?.primaryColor
-        const primaryColor = safeHexColor(rawColor, '#8b5cf6')
+        const primaryColor = safeHexColor(primaryRoom?.primaryColor)
 
-        // Avatar: usa direto sem pré-validar (o ImageResponse suporta falhas de imagem
-        // internamente e nosso try/catch externo cobre qualquer crash)
-        const avatarUrl = primaryRoom?.avatarUrl || user.image || null
+        // SEGURANÇA MÁXIMA: Só usa avatar se for uma URL absoluta válida
+        // Se for "$15" ou qualquer lixo do RSC, ignoramos para não crashar o renderizador
+        const rawAvatar = primaryRoom?.avatarUrl || user.image
+        const avatarUrl = (typeof rawAvatar === 'string' && rawAvatar.startsWith('http')) 
+            ? rawAvatar 
+            : null
 
         const isVerified = user.isVerified
-
-        // Título com padding para garantir >= 50 chars
         const titleText = padTitle(name, username)
 
         return new ImageResponse(
@@ -171,7 +170,7 @@ export default async function Image({ params }: { params: { handle: string } }) 
                             {avatarUrl ? (
                                 <img
                                     src={avatarUrl}
-                                    alt={displayName}
+                                    alt={name}
                                     width={220}
                                     height={220}
                                     style={{
@@ -289,32 +288,11 @@ export default async function Image({ params }: { params: { handle: string } }) 
             { ...size }
         )
     } catch (err) {
-        console.error('[opengraph-image] Error generating OG image for:', username, err)
-
-        // Fallback seguro — nunca retorna 500 ao Discord
+        console.error('[OG_IMAGE_CRASH]', err)
         return new ImageResponse(
             (
-                <div
-                    style={{
-                        height: '100%',
-                        width: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#050505',
-                        fontFamily: 'sans-serif',
-                    }}
-                >
-                    <div style={{ fontSize: 80, fontWeight: 900, color: '#fff' }}>
-                        MoodSpace
-                    </div>
-                    <div style={{ fontSize: 28, color: 'rgba(255,255,255,0.4)', marginTop: 16 }}>
-                        @{username}
-                    </div>
-                    <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.3)', marginTop: 8 }}>
-                        moodspace.com.br
-                    </div>
+                <div style={{ height: '100%', width: '100%', backgroundColor: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 64, fontWeight: 'bold' }}>
+                    MoodSpace
                 </div>
             ),
             { ...size }
