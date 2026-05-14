@@ -41,10 +41,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const displayName = user.name || `@${user.username}`;
     const name = user.name || username;
 
-    // Título padronizado: "Nome (@user) no MoodSpace — Curate Your Reality"
-    // Garante >= 50 chars para todas as ferramentas de OG
-    const baseTitle = `${name} (@${user.username}) no MoodSpace`;
-    const title = baseTitle.length >= 50 ? baseTitle : `${baseTitle} ${separator} Curate Your Reality`;
+    // Título padronizado — Garante >= 50 chars para todas as ferramentas de OG
+    // "Nyo (@nyo) — Mural Estético e Imersivo no MoodSpace" = 52 chars ✓
+    const title = `${displayName} (@${user.username}) — Mural Estético e Imersivo no MoodSpace`;
     const description = `Explore o mural pessoal e imersivo de @${user.username} no MoodSpace. Um espaço único de expressão visual com músicas, GIFs e estética curada. Crie o seu hoje.`;
 
     // CRÍTICO: URL absoluta para o Discord conseguir buscar a imagem
