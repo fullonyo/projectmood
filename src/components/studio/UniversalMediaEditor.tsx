@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useTransition, useEffect } from "react"
 import { searchSpotifyTracks } from "@/actions/spotify"
-import { searchYouTubeVideos, getYouTubeVideoInfo, importYouTubePlaylist } from "@/actions/youtube"
+import { searchYouTubeVideos, importYouTubePlaylist } from "@/actions/youtube"
 import { addMoodBlock } from "@/actions/profile"
 import { getUploadUrl } from "@/actions/upload"
 import { Input } from "@/components/ui/input"
@@ -73,18 +73,10 @@ export function UniversalMediaEditor({
         albumArt: string;
     }
 
-    interface YouTubeResult {
-        videoId: string;
-        title: string;
-        channel: string;
-        thumbnail: string;
-        duration?: string;
-    }
-
     const [urlInput, setUrlInput] = useState("")
     const [query, setQuery] = useState("")
     const [results, setResults] = useState<SpotifyTrack[]>([])
-    const [ytResults, setYtResults] = useState<YouTubeResult[]>([])
+    const [ytResults, setYtResults] = useState<YouTubePlaylistItem[]>([])
     const [ytQuery, setYtQuery] = useState("")
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -123,70 +115,78 @@ export function UniversalMediaEditor({
         if (isUrl) {
             // Tenta importar como playlist ou vídeo único via nossa action robusta
             const results = await importYouTubePlaylist(query)
-            if (results && 'error' in results) {
+            if (results && "error" in results) {
                 setError(results.error)
             } else {
                 // Se for um link, mostramos como resultados para o usuário decidir o que fazer
                 // (Adicionar à fila ou tornar principal)
-                setYtResults(results as YouTubeResult[])
+                setYtResults(results)
                 // Limpa o input após colar um link para facilitar o próximo
                 setYtQuery("")
             }
         } else {
             // Busca normal por palavra-chave
             const results = await searchYouTubeVideos(query)
-            if (results && 'error' in results) {
+            if (results && "error" in results) {
                 setError(results.error)
             } else {
-                setYtResults(results as YouTubeResult[])
+                setYtResults(results)
             }
         }
         setIsLoading(false)
     }
 
-    const handleSelectYouTubeResult = (result: YouTubeResult) => {
+    const handleSelectYouTubeResult = (result: YouTubePlaylistItem) => {
         setVideoId(result.videoId)
-        setVideoTitle(result.title)
-        setVideoChannel(result.channel)
-        setVideoThumbnail(result.thumbnail)
+        setVideoTitle(result.title ?? "")
+        setVideoChannel(result.channel ?? "")
+        setVideoThumbnail(
+            result.thumbnail ?? `https://img.youtube.com/vi/${result.videoId}/mqdefault.jpg`,
+        )
         setYtResults([])
         setYtQuery("")
-        triggerUpdate({ 
-            videoId: result.videoId, 
-            videoTitle: result.title, 
-            videoChannel: result.channel, 
-            videoThumbnail: result.thumbnail 
+        triggerUpdate({
+            videoId: result.videoId,
+            videoTitle: result.title,
+            videoChannel: result.channel,
+            videoThumbnail: result.thumbnail,
         })
     }
 
-    const handleAddVideoToPlaylist = (video: any) => {
-        const newPlaylist = [...playlist, {
+    const handleAddVideoToPlaylist = (video: YouTubePlaylistItem) => {
+        const entry: YouTubePlaylistItem = {
             videoId: video.videoId,
             title: video.title,
             channel: video.channel,
-            thumbnail: video.thumbnail
-        }]
+            thumbnail: video.thumbnail,
+            ...(video.duration !== undefined ? { duration: video.duration } : {}),
+        }
+        const newPlaylist = [...playlist, entry]
         setPlaylist(newPlaylist)
         setPlaylistMode(true)
         
         // Auto-seleção: se não tiver vídeo principal, define este como o primeiro
         if (!videoId) {
             setVideoId(video.videoId)
-            setVideoTitle(video.title)
-            setVideoChannel(video.channel)
-            setVideoThumbnail(video.thumbnail)
+            setVideoTitle(video.title ?? "")
+            setVideoChannel(video.channel ?? "")
+            setVideoThumbnail(
+                video.thumbnail ?? `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`,
+            )
         }
 
-        triggerUpdate({ 
-            playlist: newPlaylist, 
+        triggerUpdate({
+            playlist: newPlaylist,
             playlistMode: true,
             // Inclui os dados do vídeo principal caso tenham sido setados agora
-            ...(!videoId ? {
-                videoId: video.videoId,
-                videoTitle: video.title,
-                videoChannel: video.channel,
-                videoThumbnail: video.thumbnail
-            } : {})
+            ...(!videoId
+                ? {
+                      videoId: video.videoId,
+                      videoTitle: video.title,
+                      videoChannel: video.channel,
+                      videoThumbnail: video.thumbnail,
+                  }
+                : {}),
         })
         setYtResults([])
         setYtQuery("")
@@ -536,7 +536,14 @@ export function UniversalMediaEditor({
                             }}
                         >
                             <div className="w-16 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800 relative">
-                                <img src={result.thumbnail} alt="" className="w-full h-full object-cover" />
+                                <img
+                                    src={
+                                        result.thumbnail ??
+                                        `https://img.youtube.com/vi/${result.videoId}/mqdefault.jpg`
+                                    }
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                />
                                 {result.duration && (
                                     <span className="absolute bottom-0.5 right-0.5 bg-black/80 text-white text-[7px] font-bold px-1 rounded">
                                         {result.duration}
@@ -544,8 +551,12 @@ export function UniversalMediaEditor({
                                 )}
                             </div>
                             <div className="overflow-hidden flex-1">
-                                <p className="text-[10px] font-bold text-zinc-900 dark:text-white uppercase truncate">{result.title}</p>
-                                <p className="text-[9px] text-zinc-500 uppercase truncate">{result.channel}</p>
+                                <p className="truncate text-[10px] font-bold uppercase text-zinc-900 dark:text-white">
+                                    {result.title ?? "Sem título"}
+                                </p>
+                                <p className="truncate text-[9px] uppercase text-zinc-500">
+                                    {result.channel ?? ""}
+                                </p>
                             </div>
                             <div className="flex items-center gap-2 pr-2">
                                 <button
@@ -653,9 +664,11 @@ export function UniversalMediaEditor({
                                                     </div>
                                                     <div className="min-w-0 flex-1">
                                                         <p className="truncate text-[10px] font-bold uppercase text-zinc-900 dark:text-white">
-                                                            {item.title}
+                                                            {item.title ?? `Vídeo ${idx + 1}`}
                                                         </p>
-                                                        <p className="truncate text-[8px] uppercase text-zinc-500">{item.channel}</p>
+                                                        <p className="truncate text-[8px] uppercase text-zinc-500">
+                                                            {item.channel ?? ""}
+                                                        </p>
                                                     </div>
                                                     <button
                                                         type="button"

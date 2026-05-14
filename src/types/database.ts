@@ -247,11 +247,14 @@ export interface TapeContent extends BlockContentBase {
     pattern?: string;
 }
 
+/** Vídeo na fila do bloco (persistido) ou retorno de busca/import (API). */
 export interface YouTubePlaylistItem {
     videoId: string;
     title?: string;
     channel?: string;
     thumbnail?: string;
+    /** Preenchido na UI quando a Data API devolve (opcional no JSON salvo). */
+    duration?: string;
 }
 
 export interface UniversalMediaContent extends BlockContentBase {

@@ -1,17 +1,11 @@
 "use server"
 
+import type { YouTubePlaylistItem } from "@/types/database"
+
 // ─────────────────────────────────────────────────────────────
 // YouTube Data API v3 — Server Action
 // Espelha o padrão do spotify.ts para consistência do ecossistema
 // ─────────────────────────────────────────────────────────────
-
-interface YouTubeSearchResult {
-    videoId: string
-    title: string
-    channel: string
-    thumbnail: string
-    duration?: string
-}
 
 interface YouTubeAPISnippet {
     title: string
@@ -32,6 +26,20 @@ interface YouTubeAPIVideoItem {
     id: string
     snippet: YouTubeAPISnippet
     contentDetails?: { duration: string }
+}
+
+/** Item de `playlistItems.list` (Data API v3). */
+interface YouTubeAPIPlaylistItem {
+    snippet: {
+        title: string
+        channelTitle: string
+        resourceId: { videoId: string }
+        thumbnails: {
+            medium?: { url: string }
+            default?: { url: string }
+            high?: { url: string }
+        }
+    }
 }
 
 /**
@@ -58,7 +66,7 @@ function parseDuration(iso: string): string {
  * Custo de quota: 100 units (search) + 1 unit (videos.list) = ~101 units por busca
  * Limite diário: 10.000 units = ~99 buscas/dia (suficiente para uso moderado)
  */
-export async function searchYouTubeVideos(query: string): Promise<YouTubeSearchResult[] | { error: string }> {
+export async function searchYouTubeVideos(query: string): Promise<YouTubePlaylistItem[] | { error: string }> {
     const apiKey = process.env.YOUTUBE_API_KEY
 
     if (!apiKey) {
@@ -140,7 +148,7 @@ export async function searchYouTubeVideos(query: string): Promise<YouTubeSearchR
  * Busca metadados de um vídeo específico pelo ID.
  * Útil para enriquecer vídeos adicionados por URL.
  */
-export async function getYouTubeVideoInfo(videoId: string): Promise<YouTubeSearchResult | { error: string }> {
+export async function getYouTubeVideoInfo(videoId: string): Promise<YouTubePlaylistItem | { error: string }> {
     const apiKey = process.env.YOUTUBE_API_KEY
 
     if (!apiKey) {
@@ -203,7 +211,7 @@ function extractPlaylistId(url: string): string | null {
 /**
  * Importa vídeos de uma playlist do YouTube OU um vídeo único para a fila.
  */
-export async function importYouTubePlaylist(urlOrId: string): Promise<YouTubeSearchResult[] | { error: string }> {
+export async function importYouTubePlaylist(urlOrId: string): Promise<YouTubePlaylistItem[] | { error: string }> {
     const apiKey = process.env.YOUTUBE_API_KEY
     if (!apiKey) return { error: "YOUTUBE_API_KEY não configurada" }
 
@@ -226,14 +234,22 @@ export async function importYouTubePlaylist(urlOrId: string): Promise<YouTubeSea
                 const data = await response.json()
                 const items = data.items || []
                 if (items.length > 0) {
-                    return items.map((item: any) => ({
-                        videoId: item.snippet.resourceId.videoId,
-                        title: item.snippet.title,
-                        channel: item.snippet.channelTitle,
-                        thumbnail: item.snippet.thumbnails.medium?.url 
-                            || item.snippet.thumbnails.default?.url 
-                            || `https://img.youtube.com/vi/${item.snippet.resourceId.videoId}/mqdefault.jpg`
-                    }))
+                    return (items as YouTubeAPIPlaylistItem[])
+                        .map((item): YouTubePlaylistItem | null => {
+                            const id = item.snippet?.resourceId?.videoId
+                            if (!id) return null
+                            return {
+                                videoId: id,
+                                title: item.snippet.title,
+                                channel: item.snippet.channelTitle,
+                                thumbnail:
+                                    item.snippet.thumbnails?.medium?.url
+                                    || item.snippet.thumbnails?.default?.url
+                                    || item.snippet.thumbnails?.high?.url
+                                    || `https://img.youtube.com/vi/${id}/mqdefault.jpg`,
+                            }
+                        })
+                        .filter((x): x is YouTubePlaylistItem => x !== null)
                 }
             }
         } catch (e) {
@@ -251,8 +267,8 @@ export async function importYouTubePlaylist(urlOrId: string): Promise<YouTubeSea
     if (videoId) {
         console.log(`[YouTube API] Tratando como vídeo único: ${videoId}`)
         const info = await getYouTubeVideoInfo(videoId)
-        if (info && !('error' in info)) {
-            return [info as YouTubeSearchResult]
+        if (info && !("error" in info)) {
+            return [info]
         }
     }
 
