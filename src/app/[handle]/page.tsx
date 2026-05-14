@@ -36,26 +36,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { user } = data;
     const separator = user.isVerified ? "✦" : "—";
     
-    // BigTech Standard: Titles between 50-60 chars, Descriptions 110-160
+    // BigTech Standard: URL absoluta obrigatória para Discord/Twitter/WhatsApp
+    const SITE_URL = process.env.NEXTAUTH_URL || 'https://moodspace.com.br';
     const displayName = user.name || `@${user.username}`;
-    const title = `${displayName} ${separator} MoodSpace: Curate Your Reality`;
+    // Título formatado para 50-60 chars:
+    // ex: "Maikon (@maikon) — MoodSpace" = 29 chars mínimo, acrescenta subtítulo
+    const title = `${displayName} no MoodSpace — Curate Your Reality`;
     const description = `Explore o mural pessoal e imersivo de @${user.username} no MoodSpace. Um espaço único de expressão visual com músicas, GIFs e estética curada. Crie o seu hoje.`;
 
-    const profileImage = `/@${user.username}/opengraph-image`;
+    // CRÍTICO: URL absoluta para o Discord conseguir buscar a imagem
+    const profileImage = `${SITE_URL}/@${user.username}/opengraph-image`;
 
     return {
         title: { absolute: title },
         description,
         alternates: {
-            canonical: `/@${user.username}`,
+            canonical: `${SITE_URL}/@${user.username}`,
         },
         openGraph: {
             title,
             description,
-            url: `https://moodspace.com.br/@${user.username}`,
+            url: `${SITE_URL}/@${user.username}`,
             siteName: "MoodSpace",
             type: "profile",
-            username: user.username,
+            username: user.username ?? undefined,
             images: [
                 {
                     url: profileImage,
