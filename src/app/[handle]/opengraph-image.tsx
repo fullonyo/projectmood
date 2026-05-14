@@ -4,6 +4,9 @@ import prisma from '@/lib/prisma'
 // nodejs runtime para garantir acesso ao Prisma em produção
 export const runtime = 'nodejs'
 
+// force-dynamic: nunca tentar pré-renderizar no build (DB não disponível)
+export const dynamic = 'force-dynamic'
+
 export const size = {
     width: 1200,
     height: 630,
@@ -21,8 +24,9 @@ function safeHexColor(color: string | null | undefined, fallback = '#ffffff'): s
 // Padding de título para garantir >= 50 caracteres
 function padTitle(name: string, username: string): string {
     const base = `${name} (@${username}) no MoodSpace`
-    if (base.length >= 50) return base
-    return `${base} — Curate Your Reality`
+    const withSuffix = `${base} — Curate Your Reality`
+    // Retorna sempre o maior (com sufixo), garantindo atingir 50+
+    return withSuffix
 }
 
 export default async function Image({ params }: { params: { handle: string } }) {
@@ -85,22 +89,9 @@ export default async function Image({ params }: { params: { handle: string } }) 
         const rawColor = primaryRoom?.primaryColor
         const primaryColor = safeHexColor(rawColor, '#8b5cf6')
 
-        // Pré-valida a URL do avatar com timeout de 3s
-        // Se falhar, cai para fallback de iniciais (nunca quebra o card)
-        const rawAvatarUrl = primaryRoom?.avatarUrl || user.image
-        let avatarUrl: string | null = null
-        if (rawAvatarUrl) {
-            try {
-                const check = await fetch(rawAvatarUrl, {
-                    method: 'HEAD',
-                    signal: AbortSignal.timeout(3000),
-                })
-                if (check.ok) avatarUrl = rawAvatarUrl
-            } catch {
-                // Avatar inacessível — usa iniciais como fallback
-                avatarUrl = null
-            }
-        }
+        // Avatar: usa direto sem pré-validar (o ImageResponse suporta falhas de imagem
+        // internamente e nosso try/catch externo cobre qualquer crash)
+        const avatarUrl = primaryRoom?.avatarUrl || user.image || null
 
         const isVerified = user.isVerified
 

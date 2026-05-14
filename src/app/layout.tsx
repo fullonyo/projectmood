@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     default: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
     template: "%s — MoodSpace"
   },
-  description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, músicas, GIFs e muito mais. Curate Your Reality com o MoodSpace.",
+  description: "Crie e compartilhe seu mural pessoal estético e imersivo no MoodSpace. Aesthetic moods, músicas, GIFs, contagens regressivas e muito mais. Curate Your Reality.",
   keywords: ["moodboard", "aesthetic", "creative space", "personal profile", "moodspace", "mural pessoal"],
   authors: [{ name: "MoodSpace Team" }],
   creator: "MoodSpace",
