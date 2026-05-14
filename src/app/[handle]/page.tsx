@@ -7,6 +7,7 @@ import { themeConfigs } from "@/lib/themes";
 import { PublicMoodPageClient } from "./page-client";
 import { getFeatureFlags } from "@/actions/system-config";
 import { getPrimaryRoomByUsername } from "@/lib/data-fetching";
+import { getPublicSiteUrl } from "@/lib/public-site-url";
 import { RoomVisualConfig } from "@/types/database";
 
 type Props = {
@@ -36,8 +37,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { user } = data;
     const separator = user.isVerified ? "✦" : "—";
     
-    // URL absoluta — obrigatória para Discord/Twitter/WhatsApp
-    const SITE_URL = (process.env.NEXTAUTH_URL || 'https://moodspace.com.br').replace(/\/$/, '')
+    // URL absoluta — obrigatória para Discord/Twitter; nunca usar localhost de NEXTAUTH_URL em produção
+    const SITE_URL = getPublicSiteUrl()
     const displayName = user.name || `@${user.username}`;
     const name = user.name || username;
 
@@ -47,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const description = `Explore o mural pessoal e imersivo de @${user.username} no MoodSpace. Um espaço único de expressão visual com músicas, GIFs e estética curada. Crie o seu hoje.`;
 
     // CRÍTICO: URL absoluta com cache-busting (?v=) para forçar atualização nas redes sociais
-    const profileImage = `${SITE_URL}/@${user.username}/opengraph-image?v=4`;
+    const profileImage = `${SITE_URL}/@${user.username}/opengraph-image?v=5`;
 
     return {
         title: { absolute: title },

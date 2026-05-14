@@ -1,11 +1,18 @@
 import NextAuth from "next-auth"
+import { NextResponse } from "next/server"
 import authConfig from "./auth.config"
 
 const { auth } = NextAuth(authConfig)
 
 export default auth((req) => {
-    const isLoggedIn = !!req.auth
     const pathname = req.nextUrl.pathname
+    // Rotas de metadata (OG / Twitter) ficam sob /[handle]/… — o matcher antigo só excluía "/opengraph-image" na raiz.
+    // Sem isso, auth() roda em cada fetch do Discord e pode falhar ou atrasar (502 / "unreachable").
+    if (pathname.endsWith("/opengraph-image") || pathname.endsWith("/twitter-image")) {
+        return NextResponse.next()
+    }
+
+    const isLoggedIn = !!req.auth
     const isAuthPage = pathname.startsWith("/auth/") || pathname === "/auth"
     const isStudioPage = pathname.startsWith("/studio/") || pathname === "/studio"
     const isRootPage = pathname === "/"

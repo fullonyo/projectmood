@@ -6,7 +6,8 @@ import { I18nProvider } from "@/i18n/context";
 import { ScaleProvider } from "@/lib/contexts/ScaleProvider";
 import { GoogleOneTap } from "@/components/auth/google-one-tap";
 import { SessionProvider } from "@/components/auth/session-provider";
-
+import { STUDIO_THEME } from "@/lib/studio-theme";
+import { getPublicSiteUrl } from "@/lib/public-site-url";
 import ReactDOM from "react-dom";
 
 ReactDOM.preconnect("https://fonts.googleapis.com");
@@ -22,8 +23,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 //teste
+const siteUrl = getPublicSiteUrl();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://moodspace.com.br'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
     template: "%s — MoodSpace"
@@ -35,13 +38,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://moodspace.com.br",
+    url: siteUrl,
     siteName: "MoodSpace",
     title: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
     description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, músicas, GIFs e muito mais.",
     images: [
       {
-        url: "https://moodspace.com.br/og-base.png",
+        url: `${siteUrl}/og-base.png`,
         width: 1200,
         height: 630,
         alt: "MoodSpace — Curate Your Reality",
@@ -52,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
     description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, músicas, GIFs e muito mais.",
-    images: ["https://moodspace.com.br/og-base.png"],
+    images: [`${siteUrl}/og-base.png`],
   },
   icons: {
     icon: "/icon.png",
@@ -60,8 +63,6 @@ export const metadata: Metadata = {
     apple: "/icon.png",
   },
 };
-
-import { STUDIO_THEME } from "@/lib/studio-theme";
 
 export default function RootLayout({
   children,

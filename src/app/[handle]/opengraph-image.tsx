@@ -44,8 +44,9 @@ export default async function Image({ params }: { params: { handle: string } }) 
         : handle.toLowerCase()
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { username },
+        // Mesma regra que a página pública: busca case-insensitive (findUnique é sensível a maiúsculas no PG).
+        const user = await prisma.user.findFirst({
+            where: { username: { equals: username, mode: "insensitive" } },
             include: {
                 rooms: {
                     where: { isPrimary: true },
