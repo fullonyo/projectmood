@@ -75,7 +75,7 @@ export default function LoginForm() {
                             name="email"
                             type="email"
                             placeholder={t('auth.login.placeholder_email')}
-                            className="h-12 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 transition-all font-mono text-[10px] placeholder:text-zinc-700"
+                            className="h-12 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 transition-all font-mono text-[10px] text-white placeholder:text-zinc-500"
                             required
                         />
                     </div>
@@ -88,7 +88,7 @@ export default function LoginForm() {
                             name="password"
                             type="password"
                             placeholder={t('auth.login.placeholder_password')}
-                            className="h-12 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 transition-all font-mono text-[10px] placeholder:text-zinc-700"
+                            className="h-12 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 transition-all font-mono text-[10px] text-white placeholder:text-zinc-500"
                             required
                         />
                     </div>

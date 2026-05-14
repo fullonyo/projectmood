@@ -90,7 +90,7 @@ export default function RegisterForm() {
                             name="username"
                             defaultValue={initialUsername}
                             placeholder={t('auth.register.placeholder_username')}
-                            className="h-11 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 font-mono text-[10px] placeholder:text-zinc-700"
+                            className="h-11 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 font-mono text-[10px] text-white placeholder:text-zinc-500"
                             required
                         />
                     </div>
@@ -103,7 +103,7 @@ export default function RegisterForm() {
                             name="email"
                             type="email"
                             placeholder={t('auth.register.placeholder_email')}
-                            className="h-11 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 font-mono text-[10px] placeholder:text-zinc-700"
+                            className="h-11 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 font-mono text-[10px] text-white placeholder:text-zinc-500"
                             required
                         />
                     </div>
@@ -116,7 +116,7 @@ export default function RegisterForm() {
                             name="password"
                             type="password"
                             placeholder={t('auth.register.placeholder_password')}
-                            className="h-11 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 font-mono text-[10px] placeholder:text-zinc-700"
+                            className="h-11 rounded-none border-white/10 bg-white/5 shadow-none focus:ring-0 focus:border-white/40 font-mono text-[10px] text-white placeholder:text-zinc-500"
                             required
                         />
                     </div>
