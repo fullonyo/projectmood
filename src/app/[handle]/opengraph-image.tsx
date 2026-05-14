@@ -53,6 +53,8 @@ export default async function Image({ params }: { params: { handle: string } }) 
     const name = user.name || user.username
     const primaryRoom = user.rooms[0]
     const avatarUrl = primaryRoom?.avatarUrl || user.image
+    const primaryColor = primaryRoom?.primaryColor || '#ffffff'
+    const isVerified = user.isVerified
 
     return new ImageResponse(
         (
@@ -65,66 +67,122 @@ export default async function Image({ params }: { params: { handle: string } }) 
                     alignItems: 'center',
                     justifyContent: 'center',
                     backgroundColor: '#000',
-                    backgroundImage: 'radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%)',
+                    backgroundImage: `radial-gradient(circle at 0% 0%, ${primaryColor}22 0%, transparent 50%), radial-gradient(circle at 100% 100%, ${primaryColor}11 0%, transparent 50%)`,
                     fontFamily: 'sans-serif',
+                    position: 'relative',
+                    overflow: 'hidden',
                 }}
             >
-                {/* Decorative elements */}
+                {/* Background Pattern */}
                 <div style={{
                     position: 'absolute',
-                    top: 40,
-                    left: 40,
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    opacity: 0.03,
+                    backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)',
+                    backgroundSize: '40px 40px',
+                }} />
+
+                {/* Top Label */}
+                <div style={{
+                    position: 'absolute',
+                    top: 60,
                     display: 'flex',
-                    fontSize: 20,
-                    letterSpacing: '0.4em',
-                    fontWeight: 900,
-                    color: 'rgba(255,255,255,0.4)',
+                    alignItems: 'center',
+                    gap: 12,
                 }}>
-                    MOODSPACE // SYSTEM
+                    <div style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 6,
+                        backgroundColor: primaryColor,
+                        boxShadow: `0 0 10px ${primaryColor}`,
+                    }} />
+                    <div style={{
+                        fontSize: 20,
+                        letterSpacing: '0.4em',
+                        fontWeight: 900,
+                        color: 'rgba(255,255,255,0.5)',
+                        textTransform: 'uppercase',
+                    }}>
+                        MoodSpace // Profile
+                    </div>
                 </div>
 
+                {/* Main Content */}
                 <div style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 24,
+                    gap: 40,
+                    zIndex: 10,
                 }}>
-                    {avatarUrl ? (
-                        <img
-                            src={avatarUrl}
-                            alt={name || "User Avatar"}
-                            style={{
-                                width: 200,
-                                height: 200,
-                                borderRadius: 100,
-                                border: '4px solid #fff',
-                            }}
-                        />
-                    ) : (
-                        <div style={{
-                            width: 200,
-                            height: 200,
-                            borderRadius: 100,
-                            backgroundColor: '#333',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 80,
-                            color: '#fff',
-                            border: '4px solid #fff',
-                        }}>
-                            {username[0].toUpperCase()}
-                        </div>
-                    )}
+                    <div style={{ position: 'relative', display: 'flex' }}>
+                        {avatarUrl ? (
+                            <img
+                                src={avatarUrl}
+                                alt={name || "User Avatar"}
+                                style={{
+                                    width: 240,
+                                    height: 240,
+                                    borderRadius: 120,
+                                    border: `1px solid rgba(255,255,255,0.1)`,
+                                    padding: 8,
+                                    backgroundColor: 'rgba(255,255,255,0.05)',
+                                }}
+                            />
+                        ) : (
+                            <div style={{
+                                width: 240,
+                                height: 240,
+                                borderRadius: 120,
+                                backgroundColor: '#111',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 100,
+                                color: '#fff',
+                                border: `1px solid rgba(255,255,255,0.1)`,
+                            }}>
+                                {username[0].toUpperCase()}
+                            </div>
+                        )}
+                        
+                        {isVerified && (
+                            <div style={{
+                                position: 'absolute',
+                                bottom: 10,
+                                right: 10,
+                                width: 50,
+                                height: 50,
+                                borderRadius: 25,
+                                backgroundColor: primaryColor,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#000',
+                                fontSize: 24,
+                                fontWeight: 900,
+                                border: '4px solid #000',
+                            }}>
+                                ✦
+                            </div>
+                        )}
+                    </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                         <div
                             style={{
-                                fontSize: 64,
+                                fontSize: 84,
                                 fontWeight: 900,
                                 color: '#fff',
                                 textAlign: 'center',
-                                marginBottom: 8,
+                                letterSpacing: '-0.02em',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 16,
                             }}
                         >
                             {name}
@@ -132,28 +190,31 @@ export default async function Image({ params }: { params: { handle: string } }) 
                         <div
                             style={{
                                 fontSize: 32,
-                                color: 'rgba(255,255,255,0.6)',
-                                fontWeight: 400,
+                                color: 'rgba(255,255,255,0.4)',
+                                fontWeight: 500,
+                                letterSpacing: '0.05em',
                             }}
                         >
-                            @{username}
+                            moodspace.com.br/@{username}
                         </div>
                     </div>
                 </div>
 
+                {/* Footer Branding */}
                 <div style={{
                     position: 'absolute',
-                    bottom: 40,
+                    bottom: 60,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 12,
-                    padding: '8px 20px',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    borderRadius: 20,
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    gap: 16,
+                    padding: '12px 32px',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    borderRadius: 100,
+                    border: '1px solid rgba(255,255,255,0.08)',
                 }}>
-                    <div style={{ fontSize: 18, color: '#fff', fontWeight: 600 }}>Create your board</div>
-                    <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)' }}>— mood.space</div>
+                    <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>CURATE YOUR REALITY</div>
+                    <div style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.2)' }} />
+                    <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.4)' }}>STUDIO</div>
                 </div>
             </div>
         ),

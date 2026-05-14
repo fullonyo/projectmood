@@ -36,17 +36,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { user } = data;
     const separator = user.isVerified ? "✦" : "—";
     const title = `@${user.username} ${separator} moodspace`;
-    const description = `Confira a room de @${user.username} no MoodSpace. moods, music & GIFs.`;
+    const description = user.name 
+        ? `${user.name} (@${user.username}) no MoodSpace. Confira este mural pessoal estético com músicas, GIFs e vibes únicas.`
+        : `Confira o espaço criativo de @${user.username} no MoodSpace. Aesthetic moods, music & GIFs.`;
+
+    const profileImage = `/@${user.username}/opengraph-image`;
 
     return {
         title: { absolute: title },
         description,
+        alternates: {
+            canonical: `/@${user.username}`,
+        },
         openGraph: {
             title,
             description,
             type: "profile",
             username: user.username,
-            images: [{ url: `/@${user.username}/opengraph-image`, width: 1200, height: 630 }],
+            images: [
+                {
+                    url: profileImage,
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                }
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [profileImage],
         },
     };
 }
