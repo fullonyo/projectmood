@@ -48,7 +48,7 @@ export default function LandingPage() {
             >
               <div className="flex items-center justify-center gap-3 mb-8">
                 <div className="w-8 h-[1px] bg-white/20" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">{t('landing.studio_platform')}</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">{t('landing.studio_platform')}</span>
                 <div className="w-8 h-[1px] bg-white/20" />
               </div>
               
@@ -80,7 +80,7 @@ export default function LandingPage() {
 
           {/* Floating Details */}
           <div className="absolute bottom-12 left-12 hidden md:block">
-            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-800 rotate-90 origin-left">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 rotate-90 origin-left">
               v2.0.4 — STUDIO_READY
             </div>
           </div>
@@ -113,9 +113,8 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 className="space-y-6"
               >
-                  <div className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-600 mb-4">{t('landing.essence_feature_1_label')}</div>
                   <h3 className="text-2xl font-black uppercase tracking-tighter italic">{t('landing.essence_feature_1_title')}</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed font-medium">
+                  <p className="text-zinc-400 text-sm leading-relaxed font-medium">
                       {t('landing.essence_feature_1_desc')}
                   </p>
               </motion.div>
@@ -127,9 +126,8 @@ export default function LandingPage() {
                 transition={{ delay: 0.1 }}
                 className="space-y-6"
               >
-                  <div className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-600 mb-4">{t('landing.essence_feature_2_label')}</div>
                   <h3 className="text-2xl font-black uppercase tracking-tighter">{t('landing.essence_feature_2_title')}</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed font-medium">
+                  <p className="text-zinc-400 text-sm leading-relaxed font-medium">
                       {t('landing.essence_feature_2_desc')}
                   </p>
               </motion.div>
@@ -141,9 +139,8 @@ export default function LandingPage() {
                 transition={{ delay: 0.2 }}
                 className="space-y-6"
               >
-                  <div className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-600 mb-4">{t('landing.essence_feature_3_label')}</div>
                   <h3 className="text-2xl font-black uppercase tracking-tighter italic">{t('landing.essence_feature_3_title')}</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed font-medium">
+                  <p className="text-zinc-400 text-sm leading-relaxed font-medium">
                       {t('landing.essence_feature_3_desc')}
                   </p>
               </motion.div>
@@ -218,7 +215,7 @@ export default function LandingPage() {
                 </div>
               </div>
               
-              <div className="text-[8px] font-mono text-zinc-800 flex gap-4">
+              <div className="text-[8px] font-mono text-zinc-600 flex gap-4">
                 <span>V2.0.4</span>
                 <span>BR_EST_01</span>
               </div>

@@ -12,6 +12,16 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
   - **Fonte Inter**: O sistema é padronizado com a fonte **Inter** globalmente para garantir clareza e consistência.
   - **Estilos Específicos de Bloco**: Alguns estilos do `SmartText` (como `vhs`, `typewriter` e `quote`) utilizam fontes específicas (`font-mono`, `font-serif`) para preservar sua identidade artística.
 
+## Conceito & Contexto do Ecossistema 🌌✨
+
+O **MoodSpace** é um espaço digital para a curadoria de sentimentos, memórias e momentos criativos. É um ecossistema visual projetado para transformar o que você sente em experiências únicas e duradouras.
+
+- **Studio**: O ambiente de criação pessoal e íntimo do usuário. É o seu lugar para dar forma à sua identidade.
+- **Mural (ou Diorama)**: O espaço de visualização final. É onde suas memórias são organizadas livremente em um layout que flui com você.
+- **Memórias (ou Elementos)**: São os blocos que compõem o mural. Podem ser vídeos, músicas do Spotify, fotos, desenhos, citações ou áudios com legendas sincronizadas.
+- **Subrooms**: Salas temáticas ou ambientes dedicados a momentos específicos, permitindo que cada espaço tenha seu próprio **Clima** e **Vibe**.
+- **Liberdade Criativa**: A essência do sistema. Não se trata apenas de personalização, mas de dar forma às suas memórias e guardar o que é importante.
+
 ## Modern Standards & Studio Design Tokens 🪐✨
 
 Para garantir que o MoodSpace seja escalável e mantenha uma estética premium constante, seguimos rigorosamente estes padrões:
