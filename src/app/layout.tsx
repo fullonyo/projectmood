@@ -25,34 +25,34 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://moodspace.com.br'),
   title: {
-    default: "moodspace — curate your reality",
-    template: "%s — moodspace"
+    default: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
+    template: "%s — MoodSpace"
   },
-  description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, music & GIFs.",
-  keywords: ["moodboard", "aesthetic", "creative space", "personal profile", "moodspace"],
+  description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, músicas, GIFs e muito mais. Curate Your Reality com o MoodSpace.",
+  keywords: ["moodboard", "aesthetic", "creative space", "personal profile", "moodspace", "mural pessoal"],
   authors: [{ name: "MoodSpace Team" }],
   creator: "MoodSpace",
   openGraph: {
     type: "website",
     locale: "pt_BR",
     url: "https://moodspace.com.br",
-    siteName: "moodspace",
-    title: "MoodSpace | Seu espaço, seu mood",
-    description: "Crie e compartilhe seu mural pessoal estético e imersivo.",
+    siteName: "MoodSpace",
+    title: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
+    description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, músicas, GIFs e muito mais.",
     images: [
       {
-        url: "/og-base.png",
+        url: "https://moodspace.com.br/og-base.png",
         width: 1200,
         height: 630,
-        alt: "MoodSpace",
+        alt: "MoodSpace — Curate Your Reality",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MoodSpace | Seu espaço, seu mood",
-    description: "Crie e compartilhe seu mural pessoal estético e imersivo.",
-    images: ["/og-base.png"],
+    title: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
+    description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, músicas, GIFs e muito mais.",
+    images: ["https://moodspace.com.br/og-base.png"],
   },
   icons: {
     icon: "/icon.png",
