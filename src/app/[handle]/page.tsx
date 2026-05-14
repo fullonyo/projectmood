@@ -35,10 +35,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const { user } = data;
     const separator = user.isVerified ? "✦" : "—";
-    const title = `@${user.username} ${separator} moodspace`;
-    const description = user.name 
-        ? `${user.name} (@${user.username}) no MoodSpace. Confira este mural pessoal estético com músicas, GIFs e vibes únicas.`
-        : `Confira o espaço criativo de @${user.username} no MoodSpace. Aesthetic moods, music & GIFs.`;
+    
+    // BigTech Standard: Titles between 50-60 chars, Descriptions 110-160
+    const displayName = user.name || `@${user.username}`;
+    const title = `${displayName} ${separator} MoodSpace: Curate Your Reality`;
+    const description = `Explore o mural pessoal e imersivo de @${user.username} no MoodSpace. Um espaço único de expressão visual com músicas, GIFs e estética curada. Crie o seu hoje.`;
 
     const profileImage = `/@${user.username}/opengraph-image`;
 
@@ -51,6 +52,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
             title,
             description,
+            url: `https://moodspace.com.br/@${user.username}`,
+            siteName: "MoodSpace",
             type: "profile",
             username: user.username,
             images: [
@@ -58,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
                     url: profileImage,
                     width: 1200,
                     height: 630,
-                    alt: title,
+                    alt: `Mural de ${displayName} no MoodSpace`,
                 }
             ],
         },
