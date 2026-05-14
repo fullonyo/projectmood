@@ -85,7 +85,23 @@ export default async function Image({ params }: { params: { handle: string } }) 
         const rawColor = primaryRoom?.primaryColor
         const primaryColor = safeHexColor(rawColor, '#8b5cf6')
 
-        const avatarUrl = primaryRoom?.avatarUrl || user.image
+        // Pré-valida a URL do avatar com timeout de 3s
+        // Se falhar, cai para fallback de iniciais (nunca quebra o card)
+        const rawAvatarUrl = primaryRoom?.avatarUrl || user.image
+        let avatarUrl: string | null = null
+        if (rawAvatarUrl) {
+            try {
+                const check = await fetch(rawAvatarUrl, {
+                    method: 'HEAD',
+                    signal: AbortSignal.timeout(3000),
+                })
+                if (check.ok) avatarUrl = rawAvatarUrl
+            } catch {
+                // Avatar inacessível — usa iniciais como fallback
+                avatarUrl = null
+            }
+        }
+
         const isVerified = user.isVerified
 
         // Título com padding para garantir >= 50 chars
