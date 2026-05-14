@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
     Search, Music, Youtube, Plus, Video,
-    Upload, Maximize2, Flag, Languages, ListMusic, Trash2, ListPlus, Loader2
+    Upload, Maximize2, Flag, Languages, ListMusic, Trash2, ListPlus, Loader2, PanelBottom
 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { SpotifyIcon } from "@/components/icons"
@@ -22,7 +22,7 @@ import { MediaType } from "./SmartMedia"
 import { getFrameOptions } from "@/lib/editor-constants"
 import { EditorHeader, EditorSection, PillSelector, GridSelector, EditorActionButton, ListSelector } from "./EditorUI"
 
-import { MoodBlock, UniversalMediaContent } from "@/types/database"
+import { MoodBlock, UniversalMediaContent, YouTubePlaylistItem } from "@/types/database"
 
 interface UniversalMediaEditorProps {
     block?: MoodBlock | null
@@ -62,7 +62,8 @@ export function UniversalMediaEditor({
     
     // Playlist States
     const [playlistMode, setPlaylistMode] = useState(content.playlistMode || false)
-    const [playlist, setPlaylist] = useState<any[]>(content.playlist || [])
+    const [jukeboxMode, setJukeboxMode] = useState(content.jukeboxMode || false)
+    const [playlist, setPlaylist] = useState<YouTubePlaylistItem[]>(content.playlist || [])
     const [playlistUrl, setPlaylistUrl] = useState("")
 
     interface SpotifyTrack {
@@ -199,7 +200,13 @@ export function UniversalMediaEditor({
     const removeFromPlaylist = (index: number) => {
         const newPlaylist = playlist.filter((_, i) => i !== index)
         setPlaylist(newPlaylist)
-        triggerUpdate({ playlist: newPlaylist })
+        if (newPlaylist.length === 0) {
+            setJukeboxMode(false)
+            setPlaylistMode(false)
+            triggerUpdate({ playlist: newPlaylist, jukeboxMode: false, playlistMode: false })
+        } else {
+            triggerUpdate({ playlist: newPlaylist })
+        }
     }
 
     const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -269,6 +276,7 @@ export function UniversalMediaEditor({
             audioStyle,
             playlist,
             playlistMode,
+            jukeboxMode,
             ...updates
         }
 
@@ -292,6 +300,7 @@ export function UniversalMediaEditor({
             lyricsDisplay,
             playlist,
             playlistMode,
+            jukeboxMode,
             ...(mediaType === 'video' ? {
                 videoTitle,
                 videoChannel,
@@ -559,48 +568,101 @@ export function UniversalMediaEditor({
                 <div className="space-y-10">
                     {/* Modular Playlist Section */}
                     {mediaType === 'video' && (
-                        <EditorSection title="Playlist Modular">
-                            <div className="flex items-center justify-between px-1 mb-6">
-                                <div className="flex items-center gap-3">
-                                    <ListMusic className="w-4 h-4 text-zinc-400" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Modo Sequencial</span>
+                        <EditorSection title={t('editors.universal_media.playlist_section')}>
+                            <div className="flex items-center justify-between gap-3 px-1 mb-4">
+                                <div className="flex min-w-0 flex-1 items-start gap-3">
+                                    <ListMusic className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" />
+                                    <div className="min-w-0">
+                                        <span className="block text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                            {t('editors.universal_media.sequential_mode')}
+                                        </span>
+                                        <p className="mt-1 max-w-[260px] text-[8px] font-medium uppercase leading-relaxed tracking-wide text-zinc-400">
+                                            {t('editors.universal_media.sequential_hint')}
+                                        </p>
+                                    </div>
                                 </div>
-                                <Switch 
-                                    checked={playlistMode} 
+                                <Switch
+                                    checked={playlistMode}
                                     onCheckedChange={(val) => {
                                         setPlaylistMode(val)
-                                        triggerUpdate({ playlistMode: val })
+                                        if (!val) setJukeboxMode(false)
+                                        triggerUpdate({
+                                            playlistMode: val,
+                                            ...(!val ? { jukeboxMode: false } : {}),
+                                        })
                                     }}
-                                    className="scale-75 data-[state=checked]:bg-red-500"
+                                    className="scale-75 shrink-0 data-[state=checked]:bg-red-500"
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between gap-3 px-1 mb-6">
+                                <div
+                                    className={cn(
+                                        "flex min-w-0 flex-1 items-start gap-3",
+                                        playlist.length === 0 && "opacity-45",
+                                    )}
+                                >
+                                    <PanelBottom className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" />
+                                    <div className="min-w-0">
+                                        <span className="block text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                            {t('editors.universal_media.jukebox_mode')}
+                                        </span>
+                                        <p className="mt-1 max-w-[280px] text-[8px] font-medium uppercase leading-relaxed tracking-wide text-zinc-400">
+                                            {t('editors.universal_media.jukebox_hint')}
+                                        </p>
+                                    </div>
+                                </div>
+                                <Switch
+                                    disabled={playlist.length === 0}
+                                    checked={jukeboxMode}
+                                    onCheckedChange={(val) => {
+                                        setJukeboxMode(val)
+                                        if (val && !playlistMode) {
+                                            setPlaylistMode(true)
+                                            triggerUpdate({ jukeboxMode: val, playlistMode: true })
+                                        } else {
+                                            triggerUpdate({ jukeboxMode: val })
+                                        }
+                                    }}
+                                    className="scale-75 shrink-0 data-[state=checked]:bg-rose-500"
                                 />
                             </div>
 
                             {playlistMode && (
                                 <div className="space-y-6">
-                                    {/* Queue List */}
                                     {playlist.length > 0 && (
-                                        <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                                        <div className="custom-scrollbar max-h-60 space-y-2 overflow-y-auto pr-2">
                                             {playlist.map((item, idx) => (
                                                 <motion.div
                                                     layout
                                                     key={`${item.videoId}-${idx}`}
-                                                    className="flex items-center gap-3 p-2 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl group/item hover:border-zinc-200 dark:hover:border-zinc-700 transition-all shadow-sm"
+                                                    className="group/item flex items-center gap-3 rounded-2xl border border-zinc-100 bg-white p-2 shadow-sm transition-all hover:border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
                                                 >
-                                                    <div className="w-12 h-8 rounded-lg overflow-hidden flex-shrink-0 relative">
-                                                        <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
-                                                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity">
-                                                            <span className="text-[8px] text-white font-black">{idx + 1}</span>
+                                                    <div className="relative h-8 w-12 shrink-0 overflow-hidden rounded-lg bg-zinc-800">
+                                                        <img
+                                                            src={
+                                                                item.thumbnail ||
+                                                                `https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg`
+                                                            }
+                                                            className="h-full w-full object-cover"
+                                                            alt=""
+                                                        />
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover/item:opacity-100">
+                                                            <span className="text-[8px] font-black text-white">{idx + 1}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-[10px] font-bold text-zinc-900 dark:text-white uppercase truncate">{item.title}</p>
-                                                        <p className="text-[8px] text-zinc-500 uppercase truncate">{item.channel}</p>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="truncate text-[10px] font-bold uppercase text-zinc-900 dark:text-white">
+                                                            {item.title}
+                                                        </p>
+                                                        <p className="truncate text-[8px] uppercase text-zinc-500">{item.channel}</p>
                                                     </div>
                                                     <button
+                                                        type="button"
                                                         onClick={() => removeFromPlaylist(idx)}
-                                                        className="w-7 h-7 rounded-lg bg-zinc-50 dark:bg-zinc-950 text-zinc-400 hover:text-red-500 transition-colors flex items-center justify-center opacity-0 group-hover/item:opacity-100"
+                                                        className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-50 text-zinc-400 opacity-0 transition-colors hover:text-red-500 group-hover/item:opacity-100 dark:bg-zinc-950"
                                                     >
-                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                        <Trash2 className="h-3.5 w-3.5" />
                                                     </button>
                                                 </motion.div>
                                             ))}

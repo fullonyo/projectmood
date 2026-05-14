@@ -266,7 +266,12 @@ export const en: Dictionary = {
             lyrics_placeholder: "[00:00] Song starts\n[00:12] First lyric line...",
             lyrics_hint: "Use [mm:ss] format for each line.",
             update_btn: "Update Media",
-            deploy_btn: "Hang Media"
+            deploy_btn: "Hang Media",
+            playlist_section: "YouTube queue",
+            sequential_mode: "Sequential mode",
+            sequential_hint: "Auto-advances when a video ends.",
+            jukebox_mode: "Jukebox mode",
+            jukebox_hint: "Shows the player and queue on the wall so visitors can switch tracks."
         },
         theme: {
             title: "1. Weather & Vibe",

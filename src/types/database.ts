@@ -247,6 +247,13 @@ export interface TapeContent extends BlockContentBase {
     pattern?: string;
 }
 
+export interface YouTubePlaylistItem {
+    videoId: string;
+    title?: string;
+    channel?: string;
+    thumbnail?: string;
+}
+
 export interface UniversalMediaContent extends BlockContentBase {
     mediaType: 'video' | 'music' | 'audio' | 'media';
     videoId?: string;
@@ -263,4 +270,9 @@ export interface UniversalMediaContent extends BlockContentBase {
     lyricsDisplay?: 'integrated' | 'fullscreen';
     trackName?: string;
     audioStyle?: 'classic' | 'aura' | 'dots';
+    /** Vários vídeos em sequência (avanço automático ao terminar). */
+    playlist?: YouTubePlaylistItem[];
+    playlistMode?: boolean;
+    /** Lista visível no bloco para escolher faixa (jukebox). Requer fila com itens. */
+    jukeboxMode?: boolean;
 }

@@ -50,9 +50,10 @@ import { cn } from "@/lib/utils"
 import { useStudioBlock } from "@/hooks/use-studio-block"
 
 import { Music, VolumeX, Play, Pause } from "lucide-react"
-import { useState, useRef, useEffect, useMemo, useId } from "react"
+import { useState, useRef, useEffect, useLayoutEffect, useMemo, useId } from "react"
 import { useAudio } from "./audio-context"
 import { useLyrics } from "./lyrics-context"
+import type { YouTubePlaylistItem } from "@/types/database"
 
 export type MediaType = 'video' | 'music' | 'audio' | 'media'
 
@@ -71,7 +72,9 @@ interface SmartMediaProps {
     lyrics?: string // Valid format: [mm:ss] text
     audioStyle?: 'classic' | 'aura' | 'dots'
     playlistMode?: boolean
-    playlist?: any[]
+    playlist?: YouTubePlaylistItem[]
+    /** Lista visível no bloco para escolher faixa (requer fila com itens). */
+    jukeboxMode?: boolean
 }
 
 interface LyricLine {
@@ -695,7 +698,15 @@ const PulseFieldPlayer = ({
 }
 
 const VideoPlayer = ({ 
-    videoId, isPublic, hasInteracted, isGlobalMuted, onTimeUpdate, onPlayStateChange, playlistMode, playlist 
+    videoId,
+    isPublic,
+    hasInteracted,
+    isGlobalMuted,
+    onTimeUpdate,
+    onPlayStateChange,
+    playlistMode,
+    playlist,
+    jukeboxMode = false,
 }: {
     videoId: string;
     isPublic: boolean;
@@ -704,10 +715,11 @@ const VideoPlayer = ({
     onTimeUpdate?: (currentTime: number, duration: number) => void;
     onPlayStateChange?: (isPlaying: boolean) => void;
     playlistMode?: boolean;
-    playlist?: any[];
+    playlist?: YouTubePlaylistItem[];
+    jukeboxMode?: boolean;
 }) => {
     const rawId = useId()
-    const ytContainerId = `yt-player-${videoId}-${rawId.replace(/:/g, '')}`
+    const ytContainerId = useMemo(() => `yt-player-${rawId.replace(/:/g, "")}`, [rawId])
     const playerRef = useRef<YT.Player | null>(null)
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
     const apiReadyRef = useRef(false)
@@ -720,11 +732,38 @@ const VideoPlayer = ({
     const [isVideoPlaying, setIsVideoPlaying] = useState(false)
     const [progress, setProgress] = useState(0)
     const [isHovered, setIsHovered] = useState(false)
-    const [currentIndex, setCurrentIndex] = useState(0)
+    const playlistKey = useMemo(
+        () => (playlist?.map((p) => p.videoId).join("|") ?? ""),
+        [playlist],
+    )
+    const [currentIndex, setCurrentIndex] = useState(() => {
+        if (!playlistMode || !playlist?.length) return 0
+        const i = videoId ? playlist.findIndex((p) => p.videoId === videoId) : -1
+        return i >= 0 ? i : 0
+    })
+
+    const playlistSyncKeyRef = useRef<string | null>(null)
+    useLayoutEffect(() => {
+        const syncKey = `${playlistMode ? 1 : 0}|${playlistKey}|${videoId ?? ""}`
+        if (playlistSyncKeyRef.current === syncKey) return
+        playlistSyncKeyRef.current = syncKey
+
+        if (!playlistMode || !playlist?.length) {
+            setCurrentIndex(0)
+            return
+        }
+        const i = videoId ? playlist.findIndex((p) => p.videoId === videoId) : -1
+        setCurrentIndex((prev) => {
+            if (i >= 0) return i
+            return Math.min(prev, Math.max(0, playlist.length - 1))
+        })
+    }, [videoId, playlistMode, playlistKey, playlist])
 
     const playlistRef = useRef(playlist)
     const playlistModeRef = useRef(playlistMode)
     const currentIndexRef = useRef(currentIndex)
+    /** Evita recriar o iframe a cada troca de faixa; sincroniza só com loadVideoById. */
+    const lastLoadedVideoIdRef = useRef<string | null>(null)
 
     // Refs espelho — atualizados sincronamente a cada render.
     hasInteractedRef.current = hasInteracted
@@ -784,30 +823,49 @@ const VideoPlayer = ({
 
         const muteParam = (hasInteracted && !isGlobalMuted) ? 0 : 1
         const autoplayParam = isPublic ? 1 : 0
-        
-        // Blindagem: Se for playlist, garante que começa pelo ID correto
-        const initialVideoId = (playlistMode && playlist && playlist.length > 0) 
-            ? playlist[0].videoId 
-            : videoId
+
+        const resolvedStartIndex =
+            playlistMode && playlist && playlist.length > 0
+                ? (() => {
+                      const j = videoId ? playlist.findIndex((p) => p.videoId === videoId) : -1
+                      return j >= 0 ? j : 0
+                  })()
+                : 0
+
+        const initialVideoId =
+            playlistMode && playlist && playlist.length > 0
+                ? playlist[resolvedStartIndex]?.videoId || playlist[0].videoId
+                : videoId
+
+        lastLoadedVideoIdRef.current = initialVideoId
+
+        // Modo fila: nunca enviar `playlist: ""` — o iframe trata como playlist inválida e
+        // mostra "vídeo não disponível". Trocas de faixa ficam a cargo de loadVideoById.
+        const playerVars: Record<string, number | string> = {
+            autoplay: autoplayParam,
+            mute: muteParam,
+            controls: 0,
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            disablekb: 1,
+            iv_load_policy: 3,
+        }
+        if (playlistMode) {
+            playerVars.loop = 0
+        } else {
+            playerVars.loop = 1
+            playerVars.playlist = initialVideoId
+        }
 
         playerRef.current = new window.YT.Player(ytContainerId, {
             videoId: initialVideoId,
             width: '100%',
             height: '100%',
-            playerVars: {
-                autoplay: autoplayParam,
-                mute: muteParam,
-                loop: playlistMode ? 0 : 1,
-                playlist: (playlistMode ? "" : initialVideoId) as string,
-                controls: 0,
-                rel: 0,
-                modestbranding: 1,
-                playsinline: 1,
-                disablekb: 1,
-                iv_load_policy: 3,
-            },
+            playerVars,
             events: {
                 onReady: (event: YT.PlayerEvent) => {
+                    lastLoadedVideoIdRef.current = initialVideoId
                     // Sincronização forçada de volume/mute no nascimento do player
                     if (isGlobalMutedRef.current) {
                         event.target.mute()
@@ -818,16 +876,9 @@ const VideoPlayer = ({
                     }
                 },
                 onError: (event: { data: number }) => {
-                    console.warn("[YouTube Player] Vídeo restrito ou indisponível (Erro " + event.data + "). Pulando...", event.data)
-                    // Se der erro no vídeo (ex: bloqueado), pula para o próximo se for playlist
-                    if (playlistModeRef.current && playlistRef.current && playlistRef.current.length > 1) {
-                        const nextIndex = (currentIndexRef.current + 1) % playlistRef.current.length
-                        const nextVideo = playlistRef.current[nextIndex]
-                        if (nextVideo?.videoId) {
-                            setCurrentIndex(nextIndex)
-                            ;(playerRef.current as any)?.loadVideoById(nextVideo.videoId)
-                        }
-                    }
+                    // Não avançar automaticamente: erros 101/150 (embed) ou indisponível em sequência
+                    // recriavam o player + loadVideoById e geravam loop visível ("vídeo indisponível").
+                    console.warn("[YouTube Player] Erro no player:", event.data)
                 },
                 onStateChange: (event: YT.OnStateChangeEvent) => {
                     const playing = event.data === window.YT.PlayerState.PLAYING
@@ -870,7 +921,6 @@ const VideoPlayer = ({
                             
                             if (nextVideo && nextVideo.videoId) {
                                 setCurrentIndex(nextIndex)
-                                ;(playerRef.current as any)?.loadVideoById(nextVideo.videoId)
                             }
                         }
                     }
@@ -880,12 +930,33 @@ const VideoPlayer = ({
 
         return () => {
             if (pollingRef.current) clearInterval(pollingRef.current)
+            lastLoadedVideoIdRef.current = null
             if (playerRef.current) {
                 try { playerRef.current.destroy() } catch {}
                 playerRef.current = null
             }
         }
-    }, [apiReady, videoId, playlistMode])
+    }, [apiReady, apiFailed, videoId, playlistMode, playlistKey, ytContainerId])
+
+    // Troca de vídeo sem destruir o iframe (índice da fila, fim da faixa, etc.)
+    useEffect(() => {
+        if (!apiReady || apiFailed || !playerRef.current) return
+
+        const targetId =
+            playlistMode && playlist && playlist.length > 0
+                ? playlist[currentIndex]?.videoId
+                : videoId
+
+        if (!targetId || lastLoadedVideoIdRef.current === targetId) return
+
+        try {
+            const p = playerRef.current as unknown as { loadVideoById?: (id: string) => void }
+            p.loadVideoById?.(targetId)
+            lastLoadedVideoIdRef.current = targetId
+        } catch {
+            /* API ainda não pronta */
+        }
+    }, [apiReady, apiFailed, currentIndex, videoId, playlistMode, playlistKey, playlist])
 
     // Mute global
     useEffect(() => {
@@ -913,6 +984,15 @@ const VideoPlayer = ({
         } catch {}
     }
 
+    const hasJukeboxQueue =
+        !!jukeboxMode && !!playlistMode && !!playlist?.length
+
+    const selectPlaylistIndex = (idx: number) => {
+        if (!playlist?.length || idx < 0 || idx >= playlist.length) return
+        if (idx === currentIndex) return
+        setCurrentIndex(idx)
+    }
+
     // Fallback: se a API falhar, renderiza iframe simples (zero downtime)
     if (apiFailed) {
         const muteParam = (hasInteracted && !isGlobalMuted) ? '0' : '1'
@@ -930,54 +1010,133 @@ const VideoPlayer = ({
 
     return (
         <div
-            className="w-full h-full relative group/video"
+            className={cn(
+                "w-full h-full min-h-0 flex flex-col",
+                hasJukeboxQueue ? "gap-1.5" : "relative",
+            )}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {/* Player YouTube — div alvo do IFrame API (substitui este elemento por <iframe>) */}
             <div
-                id={ytContainerId}
-                className="w-full h-full"
-            />
+                className={cn(
+                    "relative min-w-0 w-full group/video",
+                    hasJukeboxQueue ? "flex-1 min-h-[52%]" : "h-full",
+                )}
+            >
+                {/* Player YouTube — div alvo do IFrame API (substitui este elemento por <iframe>) */}
+                <div id={ytContainerId} className="w-full h-full min-h-0" />
 
-            {/* Overlay de controles — aparece só no hover */}
-            <div className={cn(
-                "absolute inset-0 pointer-events-none transition-opacity duration-300",
-                isHovered ? "opacity-100" : "opacity-0"
-            )}>
-                {/* Gradiente sutil na base */}
-                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 to-transparent rounded-b-[32px]" />
-
-                {/* Botão play/pause central */}
-                <button
-                    onClick={togglePlay}
-                    className="pointer-events-auto absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all hover:scale-110 hover:bg-white/20 active:scale-95"
+                {/* Overlay de controles — aparece só no hover */}
+                <div
+                    className={cn(
+                        "absolute inset-0 pointer-events-none transition-opacity duration-300",
+                        isHovered ? "opacity-100" : "opacity-0",
+                    )}
                 >
-                    {isVideoPlaying
-                        ? <Pause className="w-5 h-5 text-white fill-white" />
-                        : <Play  className="w-5 h-5 text-white fill-white ml-0.5" />
-                    }
-                </button>
+                    {/* Gradiente sutil na base */}
+                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 to-transparent rounded-b-[32px]" />
 
-                {/* Barra de progresso na base */}
-                <div className="pointer-events-auto absolute bottom-3 left-4 right-4">
-                    <div className="w-full h-0.5 rounded-full bg-white/20 overflow-hidden">
-                        <div
-                            className="h-full bg-white/70 rounded-full transition-all duration-300"
-                            style={{ width: `${progress}%` }}
-                        />
+                    {/* Botão play/pause central */}
+                    <button
+                        type="button"
+                        onClick={togglePlay}
+                        className="pointer-events-auto absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all hover:scale-110 hover:bg-white/20 active:scale-95"
+                    >
+                        {isVideoPlaying ? (
+                            <Pause className="w-5 h-5 text-white fill-white" />
+                        ) : (
+                            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                        )}
+                    </button>
+
+                    {/* Barra de progresso na base */}
+                    <div className="pointer-events-auto absolute bottom-3 left-4 right-4">
+                        <div className="w-full h-0.5 rounded-full bg-white/20 overflow-hidden">
+                            <div
+                                className="h-full bg-white/70 rounded-full transition-all duration-300"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Watermark YouTube (obrigatório pelos ToS) */}
+                    <div className="pointer-events-none absolute bottom-5 right-4 opacity-60">
+                        <svg viewBox="0 0 90 20" className="h-3 fill-white">
+                            <path d="M27.9727 3.12324C27.6435 1.89323 26.6768 0.926623 25.4468 0.597366C23.2197 2.24288e-07 14.285 0 14.285 0C14.285 0 5.35042 2.24288e-07 3.12323 0.597366C1.89323 0.926623 0.926623 1.89323 0.597366 3.12324C2.24288e-07 5.35042 0 10 0 10C0 10 2.24288e-07 14.6496 0.597366 16.8768C0.926623 18.1068 1.89323 19.0734 3.12323 19.4026C5.35042 20 14.285 20 14.285 20C14.285 20 23.2197 20 25.4468 19.4026C26.6768 19.0734 27.6435 18.1068 27.9727 16.8768C28.5701 14.6496 28.5701 10 28.5701 10C28.5701 10 28.5677 5.35042 27.9727 3.12324Z" fill="#FF0000" />
+                            <path d="M11.4253 14.2854L18.8477 10.0004L11.4253 5.71533V14.2854Z" fill="white" />
+                            <path d="M34.6024 13.0036L31.3945 1.41846H34.1932L35.3174 6.6701C35.6043 7.96361 35.8136 9.06662 35.95 9.97913H36.0323C36.1264 9.32532 36.3381 8.22937 36.665 6.68892L37.8291 1.41846H40.6278L37.3799 13.0036V18.561H34.6001V13.0036H34.6024Z" />
+                        </svg>
                     </div>
                 </div>
-
-                {/* Watermark YouTube (obrigatório pelos ToS) */}
-                <div className="pointer-events-none absolute bottom-5 right-4 opacity-60">
-                    <svg viewBox="0 0 90 20" className="h-3 fill-white">
-                        <path d="M27.9727 3.12324C27.6435 1.89323 26.6768 0.926623 25.4468 0.597366C23.2197 2.24288e-07 14.285 0 14.285 0C14.285 0 5.35042 2.24288e-07 3.12323 0.597366C1.89323 0.926623 0.926623 1.89323 0.597366 3.12324C2.24288e-07 5.35042 0 10 0 10C0 10 2.24288e-07 14.6496 0.597366 16.8768C0.926623 18.1068 1.89323 19.0734 3.12323 19.4026C5.35042 20 14.285 20 14.285 20C14.285 20 23.2197 20 25.4468 19.4026C26.6768 19.0734 27.6435 18.1068 27.9727 16.8768C28.5701 14.6496 28.5701 10 28.5701 10C28.5701 10 28.5677 5.35042 27.9727 3.12324Z" fill="#FF0000"/>
-                        <path d="M11.4253 14.2854L18.8477 10.0004L11.4253 5.71533V14.2854Z" fill="white"/>
-                        <path d="M34.6024 13.0036L31.3945 1.41846H34.1932L35.3174 6.6701C35.6043 7.96361 35.8136 9.06662 35.95 9.97913H36.0323C36.1264 9.32532 36.3381 8.22937 36.665 6.68892L37.8291 1.41846H40.6278L37.3799 13.0036V18.561H34.6001V13.0036H34.6024Z"/>
-                    </svg>
-                </div>
             </div>
+
+            {hasJukeboxQueue && playlist && (
+                <div
+                    role="listbox"
+                    aria-label="Fila do jukebox"
+                    className={cn(
+                        "custom-scrollbar pointer-events-auto min-h-0 shrink-0 flex-[0_1_42%] max-h-[42%] overflow-y-auto overflow-x-hidden overscroll-y-contain rounded-2xl border border-zinc-200/25 bg-zinc-100/90 py-1.5 pl-1.5 pr-1 -mr-0.5 backdrop-blur-md dark:border-zinc-700/40 dark:bg-zinc-950/90",
+                    )}
+                >
+                    <div className="flex flex-col gap-1">
+                        {playlist.map((item, idx) => {
+                            const active = idx === currentIndex
+                            const thumb =
+                                item.thumbnail ||
+                                `https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg`
+                            return (
+                                <button
+                                    key={`${item.videoId}-${idx}`}
+                                    type="button"
+                                    role="option"
+                                    aria-selected={active}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        selectPlaylistIndex(idx)
+                                    }}
+                                    className={cn(
+                                        "flex w-full items-center gap-2 rounded-xl px-1.5 py-1.5 text-left transition-colors",
+                                        active
+                                            ? "bg-rose-500/25 ring-1 ring-rose-400/80"
+                                            : "bg-white/5 hover:bg-white/10",
+                                    )}
+                                >
+                                    <div className="relative h-10 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-800">
+                                        <img
+                                            src={thumb}
+                                            alt=""
+                                            className="h-full w-full object-cover"
+                                        />
+                                        {active && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/35">
+                                                <Play className="h-3.5 w-3.5 fill-white text-white" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p
+                                            className={cn(
+                                                "truncate text-[10px] font-bold uppercase tracking-tight",
+                                                active ? "text-white" : "text-zinc-200",
+                                            )}
+                                        >
+                                            {item.title || `Vídeo ${idx + 1}`}
+                                        </p>
+                                        {item.channel && (
+                                            <p className="truncate text-[8px] font-medium uppercase tracking-wider text-zinc-400">
+                                                {item.channel}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <span className="shrink-0 tabular-nums text-[9px] font-black text-zinc-500">
+                                        {idx + 1}
+                                    </span>
+                                </button>
+                            )
+                        })}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
@@ -1028,7 +1187,8 @@ export function SmartMedia({
     lyrics,
     audioStyle = 'classic',
     playlistMode = false,
-    playlist = []
+    playlist = [],
+    jukeboxMode = false,
 }: SmartMediaProps) {
     const { ref, fluidScale } = useStudioBlock()
     const { isGlobalMuted, globalVolume } = useAudio()
@@ -1206,6 +1366,7 @@ export function SmartMedia({
                 onPlayStateChange={handleVideoPlayState}
                 playlistMode={playlistMode}
                 playlist={playlist}
+                jukeboxMode={jukeboxMode}
             />
         )
     } else if (mediaType === 'music' && trackId) {
@@ -1221,11 +1382,19 @@ export function SmartMedia({
         )
     }
 
+    const jukeboxActive =
+        mediaType === "video" &&
+        !!jukeboxMode &&
+        !!playlistMode &&
+        Array.isArray(playlist) &&
+        playlist.length > 0
+
     return (
         <div 
             ref={ref} 
             className={cn(
-                "w-full h-full relative transition-all duration-700 flex items-center justify-center group",
+                "w-full h-full relative transition-all duration-700 flex min-h-0 group",
+                jukeboxActive ? "items-stretch justify-stretch" : "items-center justify-center",
                 mediaType !== 'audio' && "overflow-hidden bg-white/40 dark:bg-zinc-950/40 backdrop-blur-3xl border border-white/50 dark:border-white/10 rounded-[32px] shadow-xl",
                 !isPublic && "cursor-pointer",
                 mediaType === 'audio' && "bg-transparent",
@@ -1234,7 +1403,11 @@ export function SmartMedia({
             )}
         >
             {mediaType !== 'audio' && renderHUDMarkings()}
-            {content}
+            {jukeboxActive ? (
+                <div className="flex min-h-0 w-full flex-1 flex-col">{content}</div>
+            ) : (
+                content
+            )}
             {!isPublic && <div className="absolute inset-0 bg-transparent z-10" />}
         </div>
     )

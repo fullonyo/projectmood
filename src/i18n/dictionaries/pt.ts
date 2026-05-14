@@ -266,7 +266,12 @@ export const pt = {
             lyrics_placeholder: "[00:00] Início da música\n[00:12] Primeira frase...",
             lyrics_hint: "Use o formato [mm:ss] para cada linha.",
             update_btn: "Atualizar Mídia",
-            deploy_btn: "Pendurar Mídia"
+            deploy_btn: "Pendurar Mídia",
+            playlist_section: "Fila YouTube",
+            sequential_mode: "Modo sequencial",
+            sequential_hint: "Avança sozinho para a próxima ao acabar.",
+            jukebox_mode: "Modo jukebox",
+            jukebox_hint: "Mostra player e fila no mural para trocar de vídeo."
         },
         theme: {
             title: "1. Clima e Vibe",
