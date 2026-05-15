@@ -124,6 +124,9 @@ function StudioClientLayoutInner({
             
             if (type === 'text' || type === 'quote') {
                 options = { ...options, width: 300, height: 120 };
+            } else if (type === 'social') {
+                const isGrid = (content as any)?.isGrid;
+                options = { ...options, width: isGrid ? 50 : 150, height: isGrid ? 50 : 45 };
             }
 
             const res = await addMoodBlock(type, content as MoodBlockContent, options);

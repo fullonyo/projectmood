@@ -19,7 +19,9 @@ import {
     Sparkles,
     LayoutList,
     Box,
-    Ghost
+    Ghost,
+    Wand2,
+    Loader2
 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { DiscordIcon, TikTokIcon, SpotifyIcon, TwitchIcon, PinterestIcon, SteamIcon, RobloxIcon, VRChatIcon, RiotGamesIcon, LOLIcon } from "@/components/icons"
@@ -56,11 +58,13 @@ const STYLES = [
     { id: 'ghost', label: 'ghost' },
     { id: 'clay', label: 'clay' },
     { id: 'retro', label: 'retro' },
-    { id: 'aura', label: 'aura' }
+    { id: 'aura', label: 'aura' },
+    { id: 'native', label: 'native' }
 ]
 
 import { MoodBlock, SocialContent } from "@/types/database"
 import { EditorHeader, EditorSection, GridSelector, EditorActionButton, PillSelector, EditorSwitch, ListSelector } from "./EditorUI"
+import { fetchLinkMetadata } from "@/actions/link-metadata"
 
 type TabType = 'connection' | 'esthetics'
 
@@ -93,6 +97,60 @@ export function UniversalSocialEditor({
     const [layoutMode, setLayoutMode] = useState<'classic' | 'bento' | 'floating'>(initialLayout)
     const [isPending, startTransition] = useTransition()
     const [activeTab, setActiveTab] = useState<TabType>('connection')
+    const [isFetchingMeta, setIsFetchingMeta] = useState(false)
+
+    const handleAutoFetch = async () => {
+        if (!url) return
+        setIsFetchingMeta(true)
+        
+        try {
+            let detectedPlatform = selectedPlatform.id
+            let newLabel = label
+            
+            const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`)
+            const hostname = urlObj.hostname.toLowerCase()
+            const pathname = urlObj.pathname
+            
+            if (hostname.includes('instagram.com')) detectedPlatform = 'instagram'
+            else if (hostname.includes('twitter.com') || hostname.includes('x.com')) detectedPlatform = 'twitter'
+            else if (hostname.includes('discord.gg') || hostname.includes('discord.com')) detectedPlatform = 'discord'
+            else if (hostname.includes('tiktok.com')) detectedPlatform = 'tiktok'
+            else if (hostname.includes('steamcommunity.com') || hostname.includes('store.steampowered.com')) detectedPlatform = 'steam'
+            else if (hostname.includes('spotify.com')) detectedPlatform = 'spotify'
+            else if (hostname.includes('twitch.tv')) detectedPlatform = 'twitch'
+            else if (hostname.includes('pinterest.com')) detectedPlatform = 'pinterest'
+            else if (hostname.includes('github.com')) detectedPlatform = 'github'
+            else if (hostname.includes('linkedin.com')) detectedPlatform = 'linkedin'
+            else if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) detectedPlatform = 'youtube'
+            else if (hostname.includes('roblox.com')) detectedPlatform = 'roblox'
+            else detectedPlatform = 'custom'
+            
+            const p = PLATFORMS.find(platform => platform.id === detectedPlatform)
+            if (p) setSelectedPlatform(p)
+            
+            if (!newLabel) {
+                const pathParts = pathname.split('/').filter(Boolean)
+                if (detectedPlatform === 'instagram' && pathParts[0]) newLabel = `@${pathParts[0]}`
+                else if (detectedPlatform === 'twitter' && pathParts[0]) newLabel = `@${pathParts[0]}`
+                else if (detectedPlatform === 'github' && pathParts[0]) newLabel = pathParts[0]
+                else if (detectedPlatform === 'twitch' && pathParts[0]) newLabel = pathParts[0]
+                else if (detectedPlatform === 'discord' && hostname.includes('discord.gg') && pathParts[0]) newLabel = 'Join Server'
+                else {
+                    const res = await fetchLinkMetadata(url.startsWith('http') ? url : `https://${url}`)
+                    if (res.success && res.title) {
+                        newLabel = res.title
+                    }
+                }
+                if (newLabel) setLabel(newLabel)
+            }
+            
+            toast.success("Dados extraídos com sucesso!")
+        } catch(e) {
+            toast.error("URL inválida ou erro na busca")
+        } finally {
+            setIsFetchingMeta(false)
+        }
+    }
 
     // 2. Real-time Preview
     useEffect(() => {
@@ -215,8 +273,17 @@ export function UniversalSocialEditor({
                                         placeholder={selectedPlatform.id === 'discord' ? 'https://discord.gg/...' : (t('editors.social.link_placeholder') || 'https://...')}
                                         value={url}
                                         onChange={(e) => setUrl(e.target.value)}
-                                        className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl pl-16 h-14 text-[13px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20"
+                                        className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl pl-16 pr-12 h-14 text-[13px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20"
                                     />
+                                    <button 
+                                        type="button"
+                                        onClick={handleAutoFetch}
+                                        disabled={!url || isFetchingMeta}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50 transition-colors text-zinc-400 hover:text-blue-500"
+                                        title="Preencher automaticamente"
+                                    >
+                                        {isFetchingMeta ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                    </button>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-6">

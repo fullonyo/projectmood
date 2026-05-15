@@ -59,7 +59,7 @@ interface SocialBlockPublicProps {
         label: string
         subLabel?: string
         url: string
-        style: 'tag' | 'glass' | 'minimal' | 'neon' | 'pill' | 'brutalist' | 'ghost' | 'clay' | 'retro' | 'aura'
+        style: 'tag' | 'glass' | 'minimal' | 'neon' | 'pill' | 'brutalist' | 'ghost' | 'clay' | 'retro' | 'aura' | 'native'
         isGrid?: boolean
         showBg?: boolean
     }
@@ -96,7 +96,7 @@ export function SmartSocial({ content, isPublic = false, isInsideFrame = false }
                 "flex items-center w-full h-full transition-all duration-300 shadow-none overflow-hidden group",
                 content.isGrid ? "justify-center" : "justify-start",
                 !isPublic && "pointer-events-none",
-                shouldShowBg && [
+                shouldShowBg && content.style !== 'native' && [
                     "border border-zinc-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 rounded-2xl",
                     content.style !== 'ghost' && "backdrop-blur-md",
                     // Old Styles
@@ -112,7 +112,7 @@ export function SmartSocial({ content, isPublic = false, isInsideFrame = false }
                     content.style === 'retro' && "bg-[#c0c0c0] text-black border-[3px] border-t-[#ffffff] border-l-[#ffffff] border-b-[#808080] border-r-[#808080] !rounded-none hover:border-t-[#808080] hover:border-l-[#808080] hover:border-b-[#ffffff] hover:border-r-[#ffffff] active:bg-[#a0a0a0]",
                     content.style === 'aura' && "text-white border border-white/10 !rounded-xl transition-shadow hover:shadow-[0_0_20px_var(--aura-color)] hover:border-[var(--aura-color)]",
                 ],
-                !shouldShowBg && [
+                !shouldShowBg && content.style !== 'native' && [
                     "bg-transparent border-transparent text-current",
                     content.style === 'tag' && "font-serif italic hover:translate-x-1",
                     content.style === 'glass' && "hover:scale-[1.05] hover:opacity-80",
@@ -124,6 +124,9 @@ export function SmartSocial({ content, isPublic = false, isInsideFrame = false }
                     content.style === 'clay' && "hover:scale-[1.03] hover:-rotate-1 text-zinc-800 dark:text-zinc-300",
                     content.style === 'retro' && "hover:opacity-70",
                     content.style === 'aura' && "text-white hover:drop-shadow-[0_0_15px_var(--aura-color)]",
+                ],
+                content.style === 'native' && [
+                    "bg-transparent border-transparent shadow-none hover:scale-110 transition-transform hover:drop-shadow-md",
                 ],
 
                 // Grid specific padding overrides
@@ -137,6 +140,7 @@ export function SmartSocial({ content, isPublic = false, isInsideFrame = false }
                 // Pass dynamic color for Social Aura hover effect
                 '--aura-color': platformColor,
                 backgroundColor: content.style === 'aura' && shouldShowBg ? `color-mix(in srgb, ${platformColor} 5%, #09090b)` : undefined,
+                color: content.style === 'native' ? platformColor : undefined,
             } as React.CSSProperties}
         >
             <div className={cn(
@@ -148,7 +152,8 @@ export function SmartSocial({ content, isPublic = false, isInsideFrame = false }
                     content.style === 'retro' && "bg-transparent",
                     content.style === 'brutalist' && "bg-black text-white !rounded-none",
                     content.style === 'clay' && "bg-transparent",
-                    !['minimal', 'pill', 'ghost', 'retro', 'brutalist', 'clay'].includes(content.style) && "bg-black/5 dark:bg-white/5 !rounded-none",
+                    content.style === 'native' && "bg-transparent",
+                    !['minimal', 'pill', 'ghost', 'retro', 'brutalist', 'clay', 'native'].includes(content.style) && "bg-black/5 dark:bg-white/5 !rounded-none",
                 ],
                 content.isGrid && "w-full h-full !bg-transparent"
             )} style={content.isGrid ? {} : { width: Math.round(32 * scale), height: Math.round(32 * scale) }}>

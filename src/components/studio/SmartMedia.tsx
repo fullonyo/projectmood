@@ -1147,24 +1147,89 @@ const MusicPlayer = ({ trackId, isPublic, hasInteracted, isGlobalMuted }: {
     hasInteracted: boolean;
     isGlobalMuted: boolean;
 }) => {
-    const spotifyAutoplay = isPublic && hasInteracted && !isGlobalMuted ? '&autoplay=1' : '';
+    const containerRef = useRef<HTMLDivElement>(null);
+    const controllerRef = useRef<any>(null);
+
+    useEffect(() => {
+        if (isGlobalMuted || !containerRef.current) return;
+
+        let controller: any = null;
+
+        const initSpotify = (IFrameAPI: any) => {
+            if (!containerRef.current) return;
+            
+            // Clean up old container child if any
+            containerRef.current.innerHTML = '';
+            const div = document.createElement('div');
+            containerRef.current.appendChild(div);
+
+            const options = {
+                uri: `spotify:track:${trackId}`,
+                width: '100%',
+                height: '100%',
+                theme: '0'
+            };
+
+            const callback = (EmbedController: any) => {
+                controller = EmbedController;
+                controllerRef.current = EmbedController;
+                
+                EmbedController.addListener('ready', () => {
+                    if (hasInteracted && !isGlobalMuted) {
+                        EmbedController.play();
+                    }
+                });
+            };
+
+            IFrameAPI.createController(div, options, callback);
+        };
+
+        if ((window as any).SpotifyIframeApi) {
+            initSpotify((window as any).SpotifyIframeApi);
+        } else {
+            if (!(window as any)._spotifyReadyCallbacks) {
+                (window as any)._spotifyReadyCallbacks = [];
+                (window as any).onSpotifyIframeApiReady = (IFrameAPI: any) => {
+                    (window as any).SpotifyIframeApi = IFrameAPI;
+                    (window as any)._spotifyReadyCallbacks?.forEach((cb: any) => cb(IFrameAPI));
+                };
+                const script = document.createElement('script');
+                script.src = "https://open.spotify.com/embed/iframe-api/v1";
+                script.async = true;
+                document.body.appendChild(script);
+            }
+            (window as any)._spotifyReadyCallbacks.push(initSpotify);
+        }
+
+        return () => {
+            if (controller) {
+                controller.destroy();
+                controllerRef.current = null;
+            }
+        };
+    }, [trackId, isGlobalMuted]);
+
+    useEffect(() => {
+        if (controllerRef.current) {
+            if (hasInteracted && !isGlobalMuted) {
+                controllerRef.current.play();
+            } else {
+                controllerRef.current.pause();
+            }
+        }
+    }, [hasInteracted, isGlobalMuted]);
 
     return (
-        <div className="w-full h-full relative rounded-[32px] overflow-hidden p-4 flex flex-col">
+        <div className="w-full h-full relative overflow-hidden flex flex-col">
             {isGlobalMuted ? (
-                <div className="w-full h-full bg-zinc-100/10 dark:bg-zinc-900/10 border border-dashed border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl flex flex-col items-center justify-center gap-3 animate-in fade-in duration-500">
+                <div className="w-full h-full bg-zinc-100/10 dark:bg-zinc-900/10 flex flex-col items-center justify-center gap-3 animate-in fade-in duration-500">
                     <VolumeX className="w-6 h-6 text-zinc-400" />
                     <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">Audio Suspended</span>
                 </div>
             ) : (
-                <iframe
-                    src={`https://open.spotify.com/embed/track/${trackId}?utm_source=generator${spotifyAutoplay}`}
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                    className="transition-all duration-1000 grayscale-[0.2] hover:grayscale-0 flex-1 rounded-2xl shadow-inner"
+                <div 
+                    ref={containerRef} 
+                    className="w-full h-full flex-1 transition-all duration-1000 grayscale-[0.2] hover:grayscale-0 [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0 [&>iframe]:rounded-none" 
                 />
             )}
         </div>
@@ -1395,14 +1460,14 @@ export function SmartMedia({
             className={cn(
                 "w-full h-full relative transition-all duration-700 flex min-h-0 group",
                 jukeboxActive ? "items-stretch justify-stretch" : "items-center justify-center",
-                mediaType !== 'audio' && "overflow-hidden bg-white/40 dark:bg-zinc-950/40 backdrop-blur-3xl border border-white/50 dark:border-white/10 rounded-[32px] shadow-xl",
+                mediaType === 'video' && "overflow-hidden bg-white/40 dark:bg-zinc-950/40 backdrop-blur-3xl border border-white/50 dark:border-white/10 rounded-[32px] shadow-xl",
                 !isPublic && "cursor-pointer",
-                mediaType === 'audio' && "bg-transparent",
+                (mediaType === 'audio' || mediaType === 'music') && "bg-transparent",
                 mediaType === 'audio' && audioStyle === 'classic' && isPlaying && "scale-[1.02]",
                 mediaType === 'audio' && (audioStyle === 'aura' || audioStyle === 'dots') && "overflow-visible"
             )}
         >
-            {mediaType !== 'audio' && renderHUDMarkings()}
+            {mediaType === 'video' && renderHUDMarkings()}
             {jukeboxActive ? (
                 <div className="flex min-h-0 w-full flex-1 flex-col">{content}</div>
             ) : (

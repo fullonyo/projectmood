@@ -60,6 +60,7 @@ export function BlockEditorRegistry({
         if (!Editor) return null
         return (
             <Editor
+                key={`draft-${draftBlockType}`}
                 onAdd={(content: MoodBlockContent) => onAddBlock?.(draftBlockType, content)}
                 onClose={onClose}
             />
@@ -83,6 +84,7 @@ export function BlockEditorRegistry({
                             </span>
                         </div>
                         <Editor
+                            key={`multi-${firstBlock.type}-${selectedIdsString}`}
                             block={firstBlock} 
                             selectedBlocks={selectedBlocks} 
                             onUpdate={handleUpdate}
@@ -96,6 +98,7 @@ export function BlockEditorRegistry({
         // Mixed Selection or fallback: Common Properties Editor
         return (
             <UniversalCommonEditor
+                key={`common-${selectedIdsString}`}
                 selectedBlocks={selectedBlocks}
                 onUpdateBlocks={onUpdateBlocks}
                 onClose={onClose}
@@ -114,6 +117,7 @@ export function BlockEditorRegistry({
 
     return (
         <Editor
+            key={firstBlock.id}
             block={firstBlock}
             onUpdate={handleUpdate}
             onClose={onClose}

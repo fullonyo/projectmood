@@ -686,48 +686,45 @@ export function UniversalMediaEditor({
                         </EditorSection>
                     )}
 
-                    <EditorSection title="Estética">
+                    {mediaType === 'audio' && (
+                        <EditorSection title="Estética">
+                            <ListSelector
+                                id="audio-style"
+                                options={[
+                                    { id: 'classic', label: 'Classic' },
+                                    { id: 'aura', label: 'Neural Aura' },
+                                    { id: 'dots', label: 'Neural Dots' }
+                                ]}
+                                activeId={audioStyle}
+                                onChange={(id) => {
+                                    const newStyle = id as 'classic' | 'aura' | 'dots'
+                                    setAudioStyle(newStyle)
+                                    
+                                    const recommendedSizes = {
+                                        classic: { width: 320, height: 160 },
+                                        aura: { width: 280, height: 280 },
+                                        dots: { width: 400, height: 240 }
+                                    }
 
+                                    triggerUpdate({ audioStyle: newStyle }, recommendedSizes[newStyle])
+                                }}
+                            />
+                        </EditorSection>
+                    )}
 
+                    <EditorSection title="Configurações">
                         <div className="flex items-center justify-between px-1 mb-4">
-                            <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-600">
-                                Configurações
-                            </h4>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400/60">Lyrics</span>
-                                <Switch 
-                                    checked={showLyrics} 
-                                    onCheckedChange={setShowLyrics}
-                                    className="scale-75 data-[state=checked]:bg-rose-500"
-                                />
+                            <div className="flex items-center gap-3">
+                                <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-600">
+                                    Letras (Lyrics)
+                                </h4>
                             </div>
+                            <Switch 
+                                checked={showLyrics} 
+                                onCheckedChange={setShowLyrics}
+                                className="scale-75 data-[state=checked]:bg-rose-500"
+                            />
                         </div>
-
-                        {mediaType === 'audio' && (
-                            <EditorSection title="Estilo do Player">
-                                <ListSelector
-                                    id="audio-style"
-                                    options={[
-                                        { id: 'classic', label: 'Classic' },
-                                        { id: 'aura', label: 'Neural Aura' },
-                                        { id: 'dots', label: 'Neural Dots' }
-                                    ]}
-                                    activeId={audioStyle}
-                                    onChange={(id) => {
-                                        const newStyle = id as 'classic' | 'aura' | 'dots'
-                                        setAudioStyle(newStyle)
-                                        
-                                        const recommendedSizes = {
-                                            classic: { width: 320, height: 160 },
-                                            aura: { width: 280, height: 280 },
-                                            dots: { width: 400, height: 240 }
-                                        }
-
-                                        triggerUpdate({ audioStyle: newStyle }, recommendedSizes[newStyle])
-                                    }}
-                                />
-                            </EditorSection>
-                        )}
                     </EditorSection>
 
                     <AnimatePresence>
