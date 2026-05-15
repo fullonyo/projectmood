@@ -98,6 +98,14 @@ export const pt = {
             dynamic_weight: "Peso cromático dinâmico dos nós ativos"
         },
         bottom_tip: "Clique nos blocos do mural para girar ou deletar",
+        theme_light: "Mudar para modo claro",
+        theme_dark: "Mudar para modo escuro",
+        export_snapshot: "Exportar Snapshot (PNG)",
+        changes_saved: "Alterações Salvas",
+        total_items: "Total de Itens",
+        space_type: "Tipo de Espaço",
+        admin_panel: "Painel Admin",
+        sign_out: "Desconectar"
     },
     modals: {
         clear_wall: {
@@ -504,6 +512,43 @@ export const pt = {
             style_manifesto: "Estilo do Botão",
             deploy: "Adicionar link",
             custom_link: "Link Personalizado",
+            meta_success: "Dados extraídos com sucesso!",
+            meta_error: "URL inválida ou erro na busca",
+            config_title: "Configurações do Link",
+            auto_fill: "Preencher automaticamente",
+            layout_title: "Modo de Exibição (Layout)",
+            layout_classic: "Lista Clássica",
+            platforms: {
+                instagram: "Instagram",
+                twitter: "Twitter/X",
+                discord: "Discord",
+                tiktok: "TikTok",
+                steam: "Steam",
+                spotify: "Spotify",
+                twitch: "Twitch",
+                pinterest: "Pinterest",
+                github: "GitHub",
+                linkedin: "LinkedIn",
+                youtube: "YouTube",
+                roblox: "Roblox",
+                vrchat: "VRChat",
+                riot: "Riot Games",
+                lol: "League of Legends",
+                custom: "Link Personalizado"
+            },
+            fields: {
+                url_label: "Link / URL *",
+                url_placeholder: "https://...",
+                text_label: "Nome / Label *",
+                text_placeholder: "ex: Meu Canal",
+                sub_label: "Sub-label",
+                sub_label_placeholder: "Secundário",
+                discord_url: "Link do Servidor",
+                discord_user: "Username *",
+                riot_id: "Riot ID *",
+                steam_nick: "Nickname *",
+                vrchat_user: "Username *"
+            },
             styles: {
                 tag: "Tag",
                 glass: "Vidro",
@@ -676,7 +721,10 @@ export const pt = {
             sync_btn: "sincronizar identidade",
             syncing: "sincronizando...",
             success: "identidade atualizada com sucesso",
-            error_in_use: "este nome de usuário já está em uso por outra conta."
+            error_in_use: "este nome de usuário já está em uso por outra conta.",
+            avatar_success: "Avatar atualizado com sucesso!",
+            avatar_error: "Erro ao atualizar o avatar",
+            avatar_click: "Alterar avatar"
         }
     },
     canvas: {
@@ -836,7 +884,13 @@ export const pt = {
         destroy_confirm_title: "Colapsar Espaço Mood?",
         destroy_confirm_message: "Isso apagará permanentemente todos os blocos e configurações deste espaço. Esta ação não pode ser desfeita.",
         destroy_success: "Espaço colapsado com sucesso.",
-        destroy_error: "Falha ao colapsar espaço"
+        destroy_error: "Falha ao colapsar espaço",
+        no_name_space: "Espaço Sem Nome",
+        create_error_empty: "Dê um nome para seu novo espaço",
+        origin_space: "Origem",
+        no_additional_spaces: "Nenhum espaço adicional",
+        primary_space_label: "Espaço Principal",
+        additional_spaces_label: "Espaços Adicionais"
     },
     templates: {
         chooser_title: "Qual é a sua vibe hoje?",

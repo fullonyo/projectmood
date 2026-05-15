@@ -98,6 +98,14 @@ export const en: Dictionary = {
         },
 
         bottom_tip: "Click on blocks to rotate or delete them",
+        theme_light: "Switch to light mode",
+        theme_dark: "Switch to dark mode",
+        export_snapshot: "Export Snapshot (PNG)",
+        changes_saved: "Changes Saved",
+        total_items: "Total Items",
+        space_type: "Space Type",
+        admin_panel: "Admin Panel",
+        sign_out: "Sign Out"
     },
     modals: {
         clear_wall: {
@@ -504,6 +512,43 @@ export const en: Dictionary = {
             style_manifesto: "Button Style",
             deploy: "Add link",
             custom_link: "Custom Link",
+            meta_success: "Data extracted successfully!",
+            meta_error: "Invalid URL or search error",
+            config_title: "Link Settings",
+            auto_fill: "Fill automatically",
+            layout_title: "Display Mode (Layout)",
+            layout_classic: "Classic List",
+            platforms: {
+                instagram: "Instagram",
+                twitter: "Twitter/X",
+                discord: "Discord",
+                tiktok: "TikTok",
+                steam: "Steam",
+                spotify: "Spotify",
+                twitch: "Twitch",
+                pinterest: "Pinterest",
+                github: "GitHub",
+                linkedin: "LinkedIn",
+                youtube: "YouTube",
+                roblox: "Roblox",
+                vrchat: "VRChat",
+                riot: "Riot Games",
+                lol: "League of Legends",
+                custom: "Custom Link"
+            },
+            fields: {
+                url_label: "Link / URL *",
+                url_placeholder: "https://...",
+                text_label: "Name / Label *",
+                text_placeholder: "ex: My Channel",
+                sub_label: "Sub-label",
+                sub_label_placeholder: "Secondary",
+                discord_url: "Server Link",
+                discord_user: "Username *",
+                riot_id: "Riot ID *",
+                steam_nick: "Nickname *",
+                vrchat_user: "Username *"
+            },
             styles: {
                 tag: "Tag",
                 glass: "Glass",
@@ -676,7 +721,10 @@ export const en: Dictionary = {
             sync_btn: "sync identity",
             syncing: "syncing...",
             success: "identity updated successfully",
-            error_in_use: "this username is already in use by another account."
+            error_in_use: "this username is already in use by another account.",
+            avatar_success: "Avatar updated successfully!",
+            avatar_error: "Error updating avatar",
+            avatar_click: "Change avatar"
         }
     },
     canvas: {
@@ -836,7 +884,13 @@ export const en: Dictionary = {
         destroy_confirm_title: "Collapse Mood Space?",
         destroy_confirm_message: "This will permanently delete all blocks and settings of this space. This action cannot be undone.",
         destroy_success: "Mood space collapsed successfully.",
-        destroy_error: "Failed to collapse space"
+        destroy_error: "Failed to collapse space",
+        no_name_space: "Unnamed Space",
+        create_error_empty: "Give your new space a name",
+        origin_space: "Origin",
+        no_additional_spaces: "No additional spaces",
+        primary_space_label: "Primary Space",
+        additional_spaces_label: "Additional Spaces"
     },
     templates: {
         chooser_title: "What's your vibe today?",

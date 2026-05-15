@@ -8,6 +8,7 @@ interface TooltipProps {
   children: React.ReactNode
   content: string
   side?: "top" | "bottom" | "left" | "right"
+  align?: "start" | "center" | "end"
   className?: string
 }
 
@@ -15,15 +16,25 @@ export function MinimalTooltip({
   children, 
   content, 
   side = "top",
+  align = "center",
   className 
 }: TooltipProps) {
   const [show, setShow] = React.useState(false)
 
+  let alignStyle = ""
+  if (side === "top" || side === "bottom") {
+    if (align === "center") alignStyle = "left-1/2 -translate-x-1/2"
+    if (align === "start") alignStyle = "left-0"
+    if (align === "end") alignStyle = "right-0"
+  } else {
+    alignStyle = "top-1/2 -translate-y-1/2"
+  }
+
   const sideStyles = {
-    top: "-top-10 left-1/2 -translate-x-1/2 mb-2",
-    bottom: "-bottom-10 left-1/2 -translate-x-1/2 mt-2",
-    left: "right-full top-1/2 -translate-y-1/2 mr-2",
-    right: "left-full top-1/2 -translate-y-1/2 ml-2",
+    top: `-top-10 mb-2 ${alignStyle}`,
+    bottom: `-bottom-10 mt-2 ${alignStyle}`,
+    left: `right-full mr-2 ${alignStyle}`,
+    right: `left-full ml-2 ${alignStyle}`,
   }
 
   return (

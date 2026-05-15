@@ -66,6 +66,7 @@ interface ActionsSidebarProps {
 // ─── SPACES PANEL ──────────────────────────────────────────────────────────
 
 const RoomItem = memo(({ room, isActive, onSwitch, onDelete, username }: { room: Room, isActive: boolean, onSwitch: (id: string) => void, onDelete: (id: string) => void, username: string }) => {
+    const { dict } = useTranslation()
     return (
         <div
             onClick={() => onSwitch(room.id)}
@@ -88,7 +89,7 @@ const RoomItem = memo(({ room, isActive, onSwitch, onDelete, username }: { room:
                         "text-[11px] font-black uppercase tracking-widest truncate transition-colors",
                         isActive ? "text-zinc-950 dark:text-white" : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
                     )}>
-                        {room.title || "Espaço Sem Nome"}
+                        {room.title || dict.multiverse.no_name_space}
                     </span>
                     <span className="text-[7px] font-bold tracking-[0.05em] text-zinc-400/60 truncate italic mt-0.5">
                         {room.slug ? `/@${username}/${room.slug}` : `/@${username}`}
@@ -143,7 +144,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
             const { deleteRoom } = await import("@/actions/profile")
             const res = await deleteRoom(roomId)
             if (res.success) {
-                toast.success("Espaço removido")
+                toast.success(dict.multiverse.destroy_success)
                 if (roomId === currentRoomId) router.push('/studio')
                 router.refresh()
                 setRoomToDelete(null)
@@ -153,7 +154,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
 
     const handleCreateSpace = () => {
         if (!newTitle) {
-            toast.error("Dê um nome para seu novo espaço")
+            toast.error(dict.multiverse.create_error_empty)
             return
         }
 
@@ -167,11 +168,11 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
             })
 
             if (res.success && res.room) {
-                toast.success("Novo portal aberto com sucesso!")
+                toast.success(dict.multiverse.create_success)
                 router.push(`/studio/${res.room.slug}`)
                 onClose()
             } else {
-                toast.error(res.error || "Falha ao criar espaço")
+                toast.error(res.error || dict.multiverse.create_error)
             }
         })
     }
@@ -191,7 +192,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
                                 <ShieldCheck className={cn("w-4 h-4", primaryRoom.id === currentRoomId ? "text-blue-500" : "text-zinc-300")} />
-                                <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400">Espaço Principal</span>
+                                <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400">{dict.multiverse.primary_space_label}</span>
                             </div>
                             {primaryRoom.id === currentRoomId && (
                                 <span className="flex h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
@@ -210,7 +211,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                                 "text-4xl font-black italic tracking-tighter leading-none transition-all duration-300",
                                 primaryRoom.id === currentRoomId ? "text-zinc-950 dark:text-white scale-105 origin-left" : "text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white"
                             )}>
-                                {primaryRoom.title || "Origem"}
+                                {primaryRoom.title || dict.multiverse.origin_space}
                             </h2>
                         </div>
                     </section>
@@ -219,7 +220,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                 {/* LIST: SECONDARY SPACES */}
                 <section className="space-y-10 pt-10 border-t border-zinc-50 dark:border-white/[0.03]">
                     <div className="flex items-center justify-between px-2">
-                        <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400 italic">Espaços Adicionais</span>
+                        <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400 italic">{dict.multiverse.additional_spaces_label}</span>
                         <button
                             onClick={() => setIsCreatingForm(true)}
                             className="w-8 h-8 rounded-full flex items-center justify-center bg-zinc-50 dark:bg-white/5 text-zinc-400 hover:bg-blue-500 hover:text-white transition-all active:scale-90"
@@ -243,7 +244,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                         ) : (
                             <div className="py-12 flex flex-col items-center justify-center opacity-20">
                                 <Globe className="w-8 h-8 mb-4 stroke-[1px]" />
-                                <span className="text-[9px] font-black uppercase tracking-[0.3em]">Nenhum espaço adicional</span>
+                                <span className="text-[9px] font-black uppercase tracking-[0.3em]">{dict.multiverse.no_additional_spaces}</span>
                             </div>
                         )}
                     </div>
@@ -253,10 +254,10 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                     isOpen={!!roomToDelete}
                     onClose={() => setRoomToDelete(null)}
                     onConfirm={() => roomToDelete && handleDeleteRoom(roomToDelete)}
-                    title="Remover Espaço?"
-                    message="Esta ação não pode ser desfeita. Todo o conteúdo deste espaço será permanentemente deletado."
-                    confirmText="Remover"
-                    cancelText="Manter"
+                    title={dict.multiverse.destroy_confirm_title}
+                    message={dict.multiverse.destroy_confirm_message}
+                    confirmText={dict.common.delete}
+                    cancelText={dict.common.cancel}
                     type="danger"
                     isLoading={isDeleting}
                 />
@@ -273,18 +274,18 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                 >
                     <div className="space-y-6 pt-4">
                         <div className="space-y-2">
-                            <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Título do Espaço</label>
+                            <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">{dict.multiverse.field_title}</label>
                             <input
                                 autoFocus
                                 value={newTitle}
                                 onChange={(e) => setNewTitle(e.target.value)}
-                                placeholder="Ex: Galeria, Diário..."
+                                placeholder={dict.multiverse.field_title_placeholder}
                                 className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border-none text-[12px] font-bold tracking-widest focus:ring-1 focus:ring-blue-500/20 outline-none shadow-sm"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Tipo de Espaço</label>
+                            <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">{dict.multiverse.field_type}</label>
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     onClick={() => setNewType('PERMANENT')}
@@ -293,7 +294,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                                         newType === 'PERMANENT' ? "bg-zinc-900 text-white dark:bg-white dark:text-black" : "bg-zinc-50 dark:bg-zinc-900 text-zinc-400"
                                     )}
                                 >
-                                    Permanente
+                                    {dict.multiverse.type_permanent}
                                 </button>
                                 <button
                                     onClick={() => setNewType('TEMPORARY')}
@@ -302,7 +303,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                                         newType === 'TEMPORARY' ? "bg-zinc-900 text-white dark:bg-white dark:text-black" : "bg-zinc-50 dark:bg-zinc-900 text-zinc-400"
                                     )}
                                 >
-                                    Temporário
+                                    {dict.multiverse.type_temporary}
                                 </button>
                             </div>
                         </div>
@@ -310,7 +311,7 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                         {newType === 'TEMPORARY' && (
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-2">
-                                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Expiração</label>
+                                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">{dict.multiverse.field_expiration}</label>
                                     <input
                                         type="datetime-local"
                                         value={newExpiresAt}
@@ -319,12 +320,12 @@ function SpacesPanel({ rooms, currentRoomId, username, onClose }: { rooms: Room[
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">Limite de Vistas</label>
+                                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1">{dict.multiverse.field_max_views}</label>
                                     <input
                                         type="number"
                                         value={newMaxViews}
                                         onChange={(e) => setNewMaxViews(e.target.value)}
-                                        placeholder="Ilimitado se vazio"
+                                        placeholder={dict.multiverse.field_max_views_placeholder}
                                         className="w-full h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border-none text-[12px] font-bold tracking-widest outline-none shadow-sm"
                                     />
                                 </div>
@@ -410,11 +411,11 @@ export function ActionsSidebar({
             await updateProfile({ avatarUrl: res.publicUrl }, targetRoomId)
             setCurrentAvatar(res.publicUrl)
             
-            toast.success("Avatar atualizado com sucesso!")
+            toast.success(dict.editors.identity.avatar_success)
             setIsUploading(false)
         } catch (error) {
             console.error(error)
-            toast.error("Erro ao atualizar o avatar")
+            toast.error(dict.editors.identity.avatar_error)
             setIsUploading(false)
         }
     }
@@ -436,7 +437,7 @@ export function ActionsSidebar({
     const isDraft = hasUnpublishedChanges ?? !publishedAt
 
     return (
-        <aside className="relative w-80 h-full bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 flex flex-col shadow-xl z-50 overflow-hidden">
+        <aside className="relative w-80 h-full bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 flex flex-col shadow-xl z-50">
             <AnimatePresence mode="wait">
                 {activeTab === 'identity' && (
                     <motion.div
@@ -498,13 +499,13 @@ export function ActionsSidebar({
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: 20, opacity: 0 }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className={cn("flex flex-col h-full overflow-hidden", isPreview && "opacity-60 pointer-events-none")}
+                        className={cn("flex flex-col h-full", isPreview && "opacity-60 pointer-events-none")}
                     >
                         <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
                             <button
                                 onClick={() => onUpdateProfile?.({ uiTheme: profile.uiTheme === 'dark' ? 'light' : 'dark' })}
                                 className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-50 dark:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all active:scale-90"
-                                title={profile.uiTheme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+                                title={profile.uiTheme === 'dark' ? dict.sidebar.theme_light : dict.sidebar.theme_dark}
                             >
                                 {profile.uiTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                             </button>
@@ -589,7 +590,7 @@ export function ActionsSidebar({
 
                                 <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800" />
 
-                                <MinimalTooltip content="Exportar Snapshot (PNG)">
+                                <MinimalTooltip content={dict.sidebar.export_snapshot} align="end">
                                     <button
                                         onClick={() => exportMuralAsImage('mood-canvas-container', `mood-${profile.slug || 'main'}`)}
                                         className="p-2 text-zinc-300 hover:text-blue-500 transition-all duration-500 hover:scale-110 active:scale-95"
@@ -644,20 +645,20 @@ export function ActionsSidebar({
                                 <div className="px-1 space-y-8">
                                     <div className="flex items-center gap-3 opacity-60">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" />
-                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">Alterações Salvas</span>
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">{dict.sidebar.changes_saved}</span>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-8">
                                         <div className="space-y-1">
-                                            <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">Total de Itens</p>
+                                            <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">{dict.sidebar.total_items}</p>
                                             <p className="text-sm font-black text-zinc-900 dark:text-white tabular-nums leading-none italic">
                                                 {blocksCount || 0}
                                             </p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">Tipo de Espaço</p>
+                                            <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">{dict.sidebar.space_type}</p>
                                             <p className="text-[9px] font-black uppercase text-zinc-900 dark:text-white leading-none tracking-widest italic">
-                                                {profile.type === 'TEMPORARY' ? 'Efêmero' : 'Permanente'}
+                                                {profile.type === 'TEMPORARY' ? dict.multiverse.protocol_ephemeral : dict.multiverse.protocol_eternal}
                                             </p>
                                         </div>
                                     </div>
@@ -670,7 +671,7 @@ export function ActionsSidebar({
                                                     className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white transition-all text-[9px] font-black uppercase tracking-widest border border-transparent hover:shadow-xl hover:shadow-blue-500/20"
                                                 >
                                                     <Shield className="w-3.5 h-3.5" />
-                                                    Painel Admin
+                                                    {dict.sidebar.admin_panel}
                                                 </Link>
                                             )}
                                             <button
@@ -678,7 +679,7 @@ export function ActionsSidebar({
                                                 className="w-full h-10 flex items-center justify-center gap-2 rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 hover:bg-red-500 hover:text-white transition-all text-[9px] font-black uppercase tracking-widest border border-transparent hover:shadow-xl hover:shadow-red-500/20"
                                             >
                                                 <LogOut className="w-3.5 h-3.5" />
-                                                Desconectar
+                                                {dict.sidebar.sign_out}
                                             </button>
                                         </div>
 

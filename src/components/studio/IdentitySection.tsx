@@ -49,7 +49,7 @@ export function IdentitySection({
                             !onAvatarClick && "cursor-default",
                             isUploading && "opacity-60"
                         )}
-                        aria-label="Alterar avatar"
+                        aria-label={t('editors.identity.avatar_click') || "Alterar avatar"}
                     >
                         <img
                             src={avatarSrc}

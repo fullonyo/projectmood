@@ -144,9 +144,9 @@ export function UniversalSocialEditor({
                 if (newLabel) setLabel(newLabel)
             }
 
-            toast.success("Dados extraídos com sucesso!")
+            toast.success(t('editors.social.meta_success'))
         } catch (e) {
-            toast.error("URL inválida ou erro na busca")
+            toast.error(t('editors.social.meta_error'))
         } finally {
             setIsFetchingMeta(false)
         }
@@ -236,56 +236,56 @@ export function UniversalSocialEditor({
         switch (platformId) {
             case 'discord':
                 return {
-                    urlLabel: 'Link do Servidor',
+                    urlLabel: t('editors.social.fields.discord_url'),
                     urlPlaceholder: 'https://discord.gg/...',
-                    textLabel: 'Username *',
+                    textLabel: t('editors.social.fields.discord_user'),
                     textPlaceholder: 'ex: maikon#1234'
                 }
             case 'riot':
             case 'lol':
                 return {
-                    urlLabel: 'Link do Perfil',
-                    urlPlaceholder: 'Deixe vazio para copiar...',
-                    textLabel: 'Riot ID *',
+                    urlLabel: t('editors.social.fields.url_label'),
+                    urlPlaceholder: t('editors.social.fields.url_placeholder'),
+                    textLabel: t('editors.social.fields.riot_id'),
                     textPlaceholder: 'ex: Faker#KR1'
                 }
             case 'steam':
                 return {
-                    urlLabel: 'URL do Perfil',
+                    urlLabel: t('editors.social.fields.url_label'),
                     urlPlaceholder: 'https://steamcommunity.com/id/...',
-                    textLabel: 'Nickname *',
+                    textLabel: t('editors.social.fields.steam_nick'),
                     textPlaceholder: 'ex: 123456789'
                 }
             case 'vrchat':
             case 'roblox':
                 return {
-                    urlLabel: 'URL do Perfil',
-                    urlPlaceholder: 'Deixe vazio para copiar...',
-                    textLabel: 'Username *',
+                    urlLabel: t('editors.social.fields.url_label'),
+                    urlPlaceholder: t('editors.social.fields.url_placeholder'),
+                    textLabel: t('editors.social.fields.vrchat_user'),
                     textPlaceholder: 'ex: Jogador123'
                 }
             case 'instagram':
             case 'twitter':
             case 'tiktok':
                 return {
-                    urlLabel: 'URL do Perfil *',
+                    urlLabel: t('editors.social.fields.url_label'),
                     urlPlaceholder: 'https://...',
-                    textLabel: 'Username (@) *',
+                    textLabel: t('editors.social.fields.text_label'),
                     textPlaceholder: 'ex: @username'
                 }
             case 'custom':
                 return {
-                    urlLabel: 'Link Externo *',
+                    urlLabel: t('editors.social.fields.url_label'),
                     urlPlaceholder: 'https://...',
-                    textLabel: 'Texto *',
+                    textLabel: t('editors.social.fields.text_label'),
                     textPlaceholder: 'ex: Meu Portfólio'
                 }
             default:
                 return {
-                    urlLabel: 'Link / URL *',
-                    urlPlaceholder: 'https://...',
-                    textLabel: 'Nome / Label *',
-                    textPlaceholder: 'ex: Meu Canal'
+                    urlLabel: t('editors.social.fields.url_label'),
+                    urlPlaceholder: t('editors.social.fields.url_placeholder'),
+                    textLabel: t('editors.social.fields.text_label'),
+                    textPlaceholder: t('editors.social.fields.text_placeholder')
                 }
         }
     }
@@ -305,8 +305,8 @@ export function UniversalSocialEditor({
 
             <PillSelector
                 options={[
-                    { id: 'connection', label: "Conexão", icon: Globe },
-                    { id: 'esthetics', label: "Estética", icon: Sparkles },
+                    { id: 'connection', label: t('guestbook.tabs.connection'), icon: Globe },
+                    { id: 'esthetics', label: t('guestbook.tabs.esthetics'), icon: Sparkles },
                 ]}
                 activeId={activeTab}
                 onChange={(id) => setActiveTab(id as TabType)}
@@ -315,9 +315,9 @@ export function UniversalSocialEditor({
 
             {activeTab === 'connection' ? (
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <EditorSection title={t('editors.social.nodes') || "Plataforma"}>
+                    <EditorSection title={t('editors.social.nodes')}>
                         <GridSelector
-                            options={PLATFORMS.map(p => ({ id: p.id, label: p.label, icon: p.icon, color: p.color }))}
+                            options={PLATFORMS.map(p => ({ id: p.id, label: t(`editors.social.platforms.${p.id}`) || p.label, icon: p.icon, color: p.color }))}
                             activeId={selectedPlatform.id}
                             onChange={(id) => {
                                 const p = PLATFORMS.find(platform => platform.id === id)
@@ -329,7 +329,7 @@ export function UniversalSocialEditor({
                         />
                     </EditorSection>
 
-                    <EditorSection title="Configurações do Link">
+                    <EditorSection title={t('editors.social.config_title')}>
                         <div className="space-y-5">
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
@@ -348,7 +348,7 @@ export function UniversalSocialEditor({
                                         onClick={handleAutoFetch}
                                         disabled={!url || isFetchingMeta}
                                         className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50 transition-colors text-zinc-400 hover:text-blue-500"
-                                        title="Preencher automaticamente"
+                                        title={t('editors.social.auto_fill')}
                                     >
                                         {isFetchingMeta ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
                                     </button>
@@ -368,10 +368,10 @@ export function UniversalSocialEditor({
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
-                                        Sub-label
+                                        {t('editors.social.fields.sub_label')}
                                     </Label>
                                     <Input
-                                        placeholder="Secundário"
+                                        placeholder={t('editors.social.fields.sub_label_placeholder')}
                                         value={subLabel}
                                         onChange={(e) => setSubLabel(e.target.value)}
                                         className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50 rounded-2xl px-4 h-14 text-[12px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20 placeholder:text-zinc-400/70 shadow-sm"
@@ -383,12 +383,12 @@ export function UniversalSocialEditor({
                 </div>
             ) : (
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <EditorSection title="Modo de Exibição (Layout)">
+                    <EditorSection title={t('editors.social.layout_title')}>
                         <GridSelector
                             options={[
-                                { id: 'classic', label: 'Lista Clássica', icon: LayoutList },
-                                { id: 'bento', label: t('editors.social.layout_bento') || 'Bento Box', icon: Box },
-                                { id: 'floating', label: t('editors.social.layout_borderless') || 'Flutuante', icon: Ghost }
+                                { id: 'classic', label: t('editors.social.layout_classic'), icon: LayoutList },
+                                { id: 'bento', label: t('editors.social.layout_bento'), icon: Box },
+                                { id: 'floating', label: t('editors.social.layout_borderless'), icon: Ghost }
                             ]}
                             activeId={layoutMode}
                             onChange={(id) => setLayoutMode(id as 'classic' | 'bento' | 'floating')}
