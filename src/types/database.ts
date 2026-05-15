@@ -221,6 +221,7 @@ export interface ShapeContent extends BlockContentBase {
     points?: number;
     blendMode?: string;
     gradient?: boolean;
+    gradientColors?: string[];
     seed?: number;
     glowIntensity?: number;
     isFloating?: boolean;

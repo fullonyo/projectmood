@@ -203,6 +203,7 @@ function BlockRendererInner({ block, isPublic = false, hasInteracted = false }: 
                         isFloating={shapeContent.isFloating}
                         floatSpeed={shapeContent.floatSpeed}
                         gradient={shapeContent.gradient}
+                        gradientColors={shapeContent.gradientColors}
                         gradientType={shapeContent.gradientType as "linear" | "radial"}
                     />
                 )

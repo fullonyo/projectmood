@@ -67,9 +67,12 @@ export const SmartShape = React.memo(({
         willChange: isFloating ? 'transform, filter' : 'filter'
     }
 
+    const uid = React.useId().replace(/:/g, '')
+    const gradId = `grad-${type}-${uid}`
+
     const renderShape = () => {
         const fill = gradient
-            ? `url(#grad-${type})`
+            ? `url(#${gradId})`
             : color
 
         const commonStrokeProps = {
@@ -217,7 +220,7 @@ export const SmartShape = React.memo(({
                 {gradient && (
                     <defs>
                         {gradientType === 'linear' ? (
-                            <linearGradient id={`grad-${type}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
                                 {gradientColors.length > 1 ? gradientColors.map((c, i) => (
                                     <stop key={i} offset={`${(i / (gradientColors.length - 1)) * 100}%`} stopColor={c} />
                                 )) : (
@@ -228,7 +231,7 @@ export const SmartShape = React.memo(({
                                 )}
                             </linearGradient>
                         ) : (
-                            <radialGradient id={`grad-${type}`} cx="50%" cy="50%" r="50%">
+                            <radialGradient id={gradId} cx="50%" cy="50%" r="50%">
                                 {gradientColors.length > 1 ? gradientColors.map((c, i) => (
                                     <stop key={i} offset={`${(i / (gradientColors.length - 1)) * 100}%`} stopColor={c} />
                                 )) : (
