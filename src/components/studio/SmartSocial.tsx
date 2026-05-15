@@ -74,14 +74,29 @@ export function SmartSocial({ content, isPublic = false, isInsideFrame = false }
 
     const shouldShowBg = content.showBg !== false && !isInsideFrame
 
+    // Defense in depth: Sanitize URL for React href to prevent XSS (javascript:)
+    const getSafeUrl = (url?: string) => {
+        if (!url) return undefined
+        try {
+            const parsed = new URL(url)
+            if (['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol)) {
+                return url
+            }
+            return undefined
+        } catch {
+            return undefined
+        }
+    }
+
+    const safeUrl = getSafeUrl(content.url)
     const isCopyMode = !content.url && !!content.label
     const actionLabel = isCopyMode ? `Copiar ${content.label}` : content.label
 
     return (
         <a
-            href={content.url || undefined}
-            target={content.url ? "_blank" : undefined}
-            rel={content.url ? "noopener noreferrer" : undefined}
+            href={safeUrl}
+            target={safeUrl ? "_blank" : undefined}
+            rel={safeUrl ? "noopener noreferrer" : undefined}
             aria-label={actionLabel}
             title={actionLabel}
             onClick={(e) => {
