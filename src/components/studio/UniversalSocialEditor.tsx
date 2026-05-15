@@ -84,7 +84,7 @@ export function UniversalSocialEditor({
     const { t } = useTranslation()
     const content = block?.content as SocialContent | undefined
     const initialPlatform = PLATFORMS.find(p => p.id === content?.platform) || PLATFORMS[0]
-    
+
     let initialLayout: 'classic' | 'bento' | 'floating' = 'classic'
     if (content?.isGrid && content?.showBg !== false) initialLayout = 'bento'
     if (content?.showBg === false) initialLayout = 'floating'
@@ -102,15 +102,15 @@ export function UniversalSocialEditor({
     const handleAutoFetch = async () => {
         if (!url) return
         setIsFetchingMeta(true)
-        
+
         try {
             let detectedPlatform = selectedPlatform.id
             let newLabel = label
-            
+
             const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`)
             const hostname = urlObj.hostname.toLowerCase()
             const pathname = urlObj.pathname
-            
+
             if (hostname.includes('instagram.com')) detectedPlatform = 'instagram'
             else if (hostname.includes('twitter.com') || hostname.includes('x.com')) detectedPlatform = 'twitter'
             else if (hostname.includes('discord.gg') || hostname.includes('discord.com')) detectedPlatform = 'discord'
@@ -124,10 +124,10 @@ export function UniversalSocialEditor({
             else if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) detectedPlatform = 'youtube'
             else if (hostname.includes('roblox.com')) detectedPlatform = 'roblox'
             else detectedPlatform = 'custom'
-            
+
             const p = PLATFORMS.find(platform => platform.id === detectedPlatform)
             if (p) setSelectedPlatform(p)
-            
+
             if (!newLabel) {
                 const pathParts = pathname.split('/').filter(Boolean)
                 if (detectedPlatform === 'instagram' && pathParts[0]) newLabel = `@${pathParts[0]}`
@@ -143,9 +143,9 @@ export function UniversalSocialEditor({
                 }
                 if (newLabel) setLabel(newLabel)
             }
-            
+
             toast.success("Dados extraídos com sucesso!")
-        } catch(e) {
+        } catch (e) {
             toast.error("URL inválida ou erro na busca")
         } finally {
             setIsFetchingMeta(false)
@@ -236,55 +236,55 @@ export function UniversalSocialEditor({
         switch (platformId) {
             case 'discord':
                 return {
-                    urlLabel: 'Link do Servidor (Opcional)',
+                    urlLabel: 'Link do Servidor',
                     urlPlaceholder: 'https://discord.gg/...',
-                    textLabel: 'Discord Tag / Username',
+                    textLabel: 'Username *',
                     textPlaceholder: 'ex: maikon#1234'
                 }
             case 'riot':
             case 'lol':
                 return {
-                    urlLabel: 'Link (Opcional - Deixe Vazio)',
-                    urlPlaceholder: 'Deixe vazio para botão de copiar...',
-                    textLabel: 'Riot ID (Nome#Tag)',
+                    urlLabel: 'Link do Perfil',
+                    urlPlaceholder: 'Deixe vazio para copiar...',
+                    textLabel: 'Riot ID *',
                     textPlaceholder: 'ex: Faker#KR1'
                 }
             case 'steam':
                 return {
-                    urlLabel: 'URL do Perfil (Opcional)',
+                    urlLabel: 'URL do Perfil',
                     urlPlaceholder: 'https://steamcommunity.com/id/...',
-                    textLabel: 'Steam ID ou Nickname',
+                    textLabel: 'Nickname *',
                     textPlaceholder: 'ex: 123456789'
                 }
             case 'vrchat':
             case 'roblox':
                 return {
-                    urlLabel: 'URL do Perfil (Opcional)',
-                    urlPlaceholder: 'Deixe vazio para botão de copiar...',
-                    textLabel: 'Username',
+                    urlLabel: 'URL do Perfil',
+                    urlPlaceholder: 'Deixe vazio para copiar...',
+                    textLabel: 'Username *',
                     textPlaceholder: 'ex: Jogador123'
                 }
             case 'instagram':
             case 'twitter':
             case 'tiktok':
                 return {
-                    urlLabel: 'URL do Perfil',
+                    urlLabel: 'URL do Perfil *',
                     urlPlaceholder: 'https://...',
-                    textLabel: 'Username (@)',
+                    textLabel: 'Username (@) *',
                     textPlaceholder: 'ex: @username'
                 }
             case 'custom':
                 return {
-                    urlLabel: 'Link Externo',
+                    urlLabel: 'Link Externo *',
                     urlPlaceholder: 'https://...',
-                    textLabel: 'Texto do Botão',
+                    textLabel: 'Texto *',
                     textPlaceholder: 'ex: Meu Portfólio'
                 }
             default:
                 return {
-                    urlLabel: 'Link / URL',
+                    urlLabel: 'Link / URL *',
                     urlPlaceholder: 'https://...',
-                    textLabel: 'Nome / Label',
+                    textLabel: 'Nome / Label *',
                     textPlaceholder: 'ex: Meu Canal'
                 }
         }
@@ -297,8 +297,8 @@ export function UniversalSocialEditor({
             "space-y-12 pb-20",
             highlight ? "p-6 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800" : ""
         )}>
-            <EditorHeader 
-                title={block ? t('editors.social.edit_title') || "Editar Link" : t('editors.social.add_title')} 
+            <EditorHeader
+                title={block ? t('editors.social.edit_title') || "Editar Link" : t('editors.social.add_title')}
                 subtitle={t('editors.social.subtitle')}
                 onClose={onClose}
             />
@@ -330,22 +330,20 @@ export function UniversalSocialEditor({
                     </EditorSection>
 
                     <EditorSection title="Configurações do Link">
-                        <div className="space-y-6 px-1">
+                        <div className="space-y-5">
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
                                     {platformUI.urlLabel}
                                 </Label>
                                 <div className="relative group">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center transition-all group-focus-within:scale-110 group-focus-within:text-blue-500">
-                                        <LinkIcon className="w-4 h-4" />
-                                    </div>
+                                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
                                     <Input
                                         placeholder={platformUI.urlPlaceholder}
                                         value={url}
                                         onChange={(e) => setUrl(e.target.value)}
-                                        className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl pl-16 pr-12 h-14 text-[13px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20"
+                                        className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50 rounded-2xl pl-12 pr-12 h-14 text-[12px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20 placeholder:text-zinc-400/70 shadow-sm"
                                     />
-                                    <button 
+                                    <button
                                         type="button"
                                         onClick={handleAutoFetch}
                                         disabled={!url || isFetchingMeta}
@@ -356,25 +354,27 @@ export function UniversalSocialEditor({
                                     </button>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
                                         {platformUI.textLabel}
                                     </Label>
                                     <Input
                                         placeholder={platformUI.textPlaceholder}
                                         value={label}
                                         onChange={(e) => setLabel(e.target.value)}
-                                        className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl h-14 text-[13px] font-medium px-4 focus-visible:ring-1 focus-visible:ring-blue-500/20"
+                                        className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50 rounded-2xl px-4 h-14 text-[12px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20 placeholder:text-zinc-400/70 shadow-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">{t('editors.social.sub_label') || 'Sub-label'}</Label>
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
+                                        Sub-label
+                                    </Label>
                                     <Input
-                                        placeholder={t('editors.social.sub_label_placeholder') || 'Secundário'}
+                                        placeholder="Secundário"
                                         value={subLabel}
                                         onChange={(e) => setSubLabel(e.target.value)}
-                                        className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl h-14 text-[13px] font-medium px-4 focus-visible:ring-1 focus-visible:ring-blue-500/20"
+                                        className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50 rounded-2xl px-4 h-14 text-[12px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20 placeholder:text-zinc-400/70 shadow-sm"
                                     />
                                 </div>
                             </div>
@@ -400,9 +400,9 @@ export function UniversalSocialEditor({
 
                     <EditorSection title={t('editors.social.style_manifesto') || "Estilo do Botão"}>
                         <ListSelector
-                            options={STYLES.map(s => ({ 
-                                id: s.id as any, 
-                                label: t(`editors.social.styles.${s.id}`) || s.label 
+                            options={STYLES.map(s => ({
+                                id: s.id as any,
+                                label: t(`editors.social.styles.${s.id}`) || s.label
                             }))}
                             activeId={style}
                             onChange={(id) => setStyle(id as string)}
@@ -411,9 +411,9 @@ export function UniversalSocialEditor({
                 </div>
             )}
 
-            <EditorActionButton 
-                onClick={handleAction} 
-                isLoading={isPending} 
+            <EditorActionButton
+                onClick={handleAction}
+                isLoading={isPending}
                 disabled={!url && !label && !block?.id}
                 label={block?.id ? t('common.close') : t('editors.social.deploy')}
             />
