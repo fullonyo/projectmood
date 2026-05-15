@@ -40,6 +40,7 @@ declare global {
             pauseVideo(): void
             mute(): void
             unMute(): void
+            setVolume(volume: number): void
             destroy(): void
         }
     }
@@ -702,6 +703,7 @@ const VideoPlayer = ({
     isPublic,
     hasInteracted,
     isGlobalMuted,
+    globalVolume,
     onTimeUpdate,
     onPlayStateChange,
     playlistMode,
@@ -712,6 +714,7 @@ const VideoPlayer = ({
     isPublic: boolean;
     hasInteracted: boolean;
     isGlobalMuted: boolean;
+    globalVolume: number;
     onTimeUpdate?: (currentTime: number, duration: number) => void;
     onPlayStateChange?: (isPlaying: boolean) => void;
     playlistMode?: boolean;
@@ -727,6 +730,7 @@ const VideoPlayer = ({
     const hasInteractedRef = useRef(hasInteracted)
     const isGlobalMutedRef = useRef(isGlobalMuted)
     const isPublicRef = useRef(isPublic)
+    const globalVolumeRef = useRef(globalVolume)
     const [apiReady, setApiReady] = useState(false)
     const [apiFailed, setApiFailed] = useState(false)
     const [isVideoPlaying, setIsVideoPlaying] = useState(false)
@@ -768,6 +772,7 @@ const VideoPlayer = ({
     // Refs espelho — atualizados sincronamente a cada render.
     hasInteractedRef.current = hasInteracted
     isGlobalMutedRef.current = isGlobalMuted
+    globalVolumeRef.current = globalVolume
     isPublicRef.current = isPublic
     playlistRef.current = playlist
     playlistModeRef.current = playlistMode
@@ -869,6 +874,11 @@ const VideoPlayer = ({
                     // Sincronização forçada de volume/mute no nascimento do player
                     if (isGlobalMutedRef.current) {
                         event.target.mute()
+                    } else {
+                        event.target.unMute()
+                    }
+                    if (typeof event.target.setVolume === 'function') {
+                        event.target.setVolume(Math.round(globalVolumeRef.current * 100))
                     } else if (hasInteractedRef.current) {
                         event.target.unMute()
                         // No estúdio ou público, se já interagiu, tentamos dar play
@@ -958,14 +968,20 @@ const VideoPlayer = ({
         }
     }, [apiReady, apiFailed, currentIndex, videoId, playlistMode, playlistKey, playlist])
 
-    // Mute global
+    // Mute global & Volume
     useEffect(() => {
         if (!playerRef.current) return
         try {
-            if (isGlobalMuted) { playerRef.current.mute() } 
-            else { playerRef.current.unMute() }
+            if (isGlobalMuted) { 
+                playerRef.current.mute() 
+            } else { 
+                playerRef.current.unMute() 
+                if (typeof playerRef.current.setVolume === 'function') {
+                    playerRef.current.setVolume(Math.round(globalVolume * 100))
+                }
+            }
         } catch {}
-    }, [isGlobalMuted])
+    }, [isGlobalMuted, globalVolume])
 
     // Interação do overlay global → play sem mute
     useEffect(() => {
@@ -1141,11 +1157,12 @@ const VideoPlayer = ({
     )
 }
 
-const MusicPlayer = ({ trackId, isPublic, hasInteracted, isGlobalMuted }: {
+const MusicPlayer = ({ trackId, isPublic, hasInteracted, isGlobalMuted, globalVolume }: {
     trackId: string;
     isPublic: boolean;
     hasInteracted: boolean;
     isGlobalMuted: boolean;
+    globalVolume: number;
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const controllerRef = useRef<any>(null);
@@ -1427,6 +1444,7 @@ export function SmartMedia({
                 isPublic={isPublic} 
                 hasInteracted={hasInteracted} 
                 isGlobalMuted={isGlobalMuted}
+                globalVolume={globalVolume}
                 onTimeUpdate={handleVideoTimeUpdate}
                 onPlayStateChange={handleVideoPlayState}
                 playlistMode={playlistMode}
@@ -1435,7 +1453,7 @@ export function SmartMedia({
             />
         )
     } else if (mediaType === 'music' && trackId) {
-        content = <MusicPlayer trackId={trackId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} />
+        content = <MusicPlayer trackId={trackId} isPublic={isPublic} hasInteracted={hasInteracted} isGlobalMuted={isGlobalMuted} globalVolume={globalVolume} />
     } else {
         content = (
             <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/50 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-[32px] p-6 text-center">
