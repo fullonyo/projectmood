@@ -152,6 +152,16 @@ export function UniversalSocialEditor({
         }
     }
 
+    // URL formatter helper
+    const formatUrl = (rawUrl: string) => {
+        if (!rawUrl) return rawUrl
+        // Ignore if it already has a protocol, or if it's a mailto/tel link
+        if (/^(https?:\/\/|mailto:|tel:)/i.test(rawUrl.trim())) {
+            return rawUrl.trim()
+        }
+        return `https://${rawUrl.trim()}`
+    }
+
     // 2. Real-time Preview
     useEffect(() => {
         if (!block?.id || !onUpdate) return
@@ -161,7 +171,7 @@ export function UniversalSocialEditor({
 
         const updates = {
             platform: selectedPlatform.id,
-            url,
+            url: formatUrl(url),
             label: label || selectedPlatform.label,
             subLabel,
             style,
@@ -189,7 +199,7 @@ export function UniversalSocialEditor({
 
             const content = {
                 platform: selectedPlatform.id,
-                url,
+                url: formatUrl(url),
                 label: label || selectedPlatform.label,
                 subLabel,
                 style,
@@ -222,6 +232,66 @@ export function UniversalSocialEditor({
             }
         })
     }
+    const getPlatformLabels = (platformId: string) => {
+        switch (platformId) {
+            case 'discord':
+                return {
+                    urlLabel: 'Link do Servidor (Opcional)',
+                    urlPlaceholder: 'https://discord.gg/...',
+                    textLabel: 'Discord Tag / Username',
+                    textPlaceholder: 'ex: maikon#1234'
+                }
+            case 'riot':
+            case 'lol':
+                return {
+                    urlLabel: 'Link (Opcional - Deixe Vazio)',
+                    urlPlaceholder: 'Deixe vazio para botão de copiar...',
+                    textLabel: 'Riot ID (Nome#Tag)',
+                    textPlaceholder: 'ex: Faker#KR1'
+                }
+            case 'steam':
+                return {
+                    urlLabel: 'URL do Perfil (Opcional)',
+                    urlPlaceholder: 'https://steamcommunity.com/id/...',
+                    textLabel: 'Steam ID ou Nickname',
+                    textPlaceholder: 'ex: 123456789'
+                }
+            case 'vrchat':
+            case 'roblox':
+                return {
+                    urlLabel: 'URL do Perfil (Opcional)',
+                    urlPlaceholder: 'Deixe vazio para botão de copiar...',
+                    textLabel: 'Username',
+                    textPlaceholder: 'ex: Jogador123'
+                }
+            case 'instagram':
+            case 'twitter':
+            case 'tiktok':
+                return {
+                    urlLabel: 'URL do Perfil',
+                    urlPlaceholder: 'https://...',
+                    textLabel: 'Username (@)',
+                    textPlaceholder: 'ex: @username'
+                }
+            case 'custom':
+                return {
+                    urlLabel: 'Link Externo',
+                    urlPlaceholder: 'https://...',
+                    textLabel: 'Texto do Botão',
+                    textPlaceholder: 'ex: Meu Portfólio'
+                }
+            default:
+                return {
+                    urlLabel: 'Link / URL',
+                    urlPlaceholder: 'https://...',
+                    textLabel: 'Nome / Label',
+                    textPlaceholder: 'ex: Meu Canal'
+                }
+        }
+    }
+
+    const platformUI = getPlatformLabels(selectedPlatform.id)
+
     return (
         <div className={cn(
             "space-y-12 pb-20",
@@ -263,14 +333,14 @@ export function UniversalSocialEditor({
                         <div className="space-y-6 px-1">
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">
-                                    {selectedPlatform.id === 'discord' ? 'Link de Convite (Opcional)' : (t('editors.social.link_protocol') || 'Link / URL')}
+                                    {platformUI.urlLabel}
                                 </Label>
                                 <div className="relative group">
                                     <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center transition-all group-focus-within:scale-110 group-focus-within:text-blue-500">
                                         <LinkIcon className="w-4 h-4" />
                                     </div>
                                     <Input
-                                        placeholder={selectedPlatform.id === 'discord' ? 'https://discord.gg/...' : (t('editors.social.link_placeholder') || 'https://...')}
+                                        placeholder={platformUI.urlPlaceholder}
                                         value={url}
                                         onChange={(e) => setUrl(e.target.value)}
                                         className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl pl-16 pr-12 h-14 text-[13px] font-medium focus-visible:ring-1 focus-visible:ring-blue-500/20"
@@ -289,10 +359,10 @@ export function UniversalSocialEditor({
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1">
-                                        {selectedPlatform.id === 'discord' ? 'Username' : (t('editors.social.visual_alias') || 'Label')}
+                                        {platformUI.textLabel}
                                     </Label>
                                     <Input
-                                        placeholder={selectedPlatform.id === 'discord' ? 'ex: login.jsx' : (t('editors.social.alias_placeholder') || 'Texto do botão')}
+                                        placeholder={platformUI.textPlaceholder}
                                         value={label}
                                         onChange={(e) => setLabel(e.target.value)}
                                         className="bg-zinc-50/50 dark:bg-zinc-900/50 border-none rounded-2xl h-14 text-[13px] font-medium px-4 focus-visible:ring-1 focus-visible:ring-blue-500/20"

@@ -74,11 +74,16 @@ export function SmartSocial({ content, isPublic = false, isInsideFrame = false }
 
     const shouldShowBg = content.showBg !== false && !isInsideFrame
 
+    const isCopyMode = !content.url && !!content.label
+    const actionLabel = isCopyMode ? `Copiar ${content.label}` : content.label
+
     return (
         <a
             href={content.url || undefined}
             target={content.url ? "_blank" : undefined}
             rel={content.url ? "noopener noreferrer" : undefined}
+            aria-label={actionLabel}
+            title={actionLabel}
             onClick={(e) => {
                 if (!isPublic) {
                     e.preventDefault()
@@ -94,8 +99,9 @@ export function SmartSocial({ content, isPublic = false, isInsideFrame = false }
             }}
             className={cn(
                 "flex items-center w-full h-full transition-all duration-300 shadow-none overflow-hidden group",
+                isCopyMode ? "cursor-copy" : "cursor-pointer",
                 content.isGrid ? "justify-center" : "justify-start",
-                !isPublic && "pointer-events-none",
+                !isPublic && "!pointer-events-none",
                 shouldShowBg && content.style !== 'native' && [
                     "border border-zinc-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 rounded-2xl",
                     content.style !== 'ghost' && "backdrop-blur-md",
