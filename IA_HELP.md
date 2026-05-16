@@ -9,8 +9,8 @@ Este arquivo centraliza a documentação de funcionalidades e componentes do **M
 - **Tom de Voz**: Amigável, acolhedor e artístico. Evitar termos industriais ou "hackers" (ex: Protocolo, Essência, Cidadão, Nó, Infraestrutura, Manifesto). Use termos como Espaço, Mural, Elementos, Vibe e Sincronia.
 - **Símbolos de Status**: Travessão (—) como separador, evite barras duplas (//) que remetem a código de programação na interface final.
 - **Tipografia Padronizada**:
-  - **Fonte Inter**: O sistema é padronizado com a fonte **Inter** globalmente para garantir clareza e consistência.
-  - **Estilos Específicos de Bloco**: Alguns estilos do `SmartText` (como `vhs`, `typewriter` e `quote`) utilizam fontes específicas (`font-mono`, `font-serif`) para preservar sua identidade artística.
+  - **Base Técnica (Sans-serif & Mono)**: O sistema é padronizado com **Geist Sans** (para UI, logo e cabeçalhos em caixa alta) e **Geist Mono** (para dados e metadados técnicos), fornecendo o aspecto "BigTech" de alta precisão.
+  - **A Alma Artística (Serif)**: Padronizado com a fonte **Instrument Serif** (Google Fonts) carregada como a `font-serif` oficial do ecossistema. Usada exclusivamente para palavras de destaque, citações e termos que trazem o calor orgânico e humano ("Soul") ao layout.
 
 ## Conceito & Contexto do Ecossistema 🌌✨
 

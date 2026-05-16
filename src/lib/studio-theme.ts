@@ -40,6 +40,7 @@ export const STUDIO_THEME = {
         },
         fontMono: "font-mono",
         fontSans: "font-sans",
+        fontSerif: "font-serif",
     },
 
     // UI Patterns

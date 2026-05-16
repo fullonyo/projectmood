@@ -54,9 +54,9 @@ export default function LandingPage() {
                 <div className="w-8 h-[1px] bg-white/20" />
               </div>
               
-              <h1 className="text-6xl md:text-[120px] font-bold tracking-tight leading-[0.8]">
+              <h1 className="text-6xl md:text-[120px] font-black uppercase tracking-tighter leading-[0.8]">
                 {t('landing.hero_title_curate')} <br /> 
-                <span className="text-zinc-500 italic serif font-light lowercase">{t('landing.hero_title_your')}</span> <br />
+                <span className="text-zinc-500 italic font-serif font-light normal-case lowercase">{t('landing.hero_title_your')}</span> <br />
                 {t('landing.hero_title_reality')}
               </h1>
             </motion.div>
@@ -94,9 +94,9 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="max-w-3xl mx-auto mb-32"
             >
-              <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-8 leading-[0.9]">
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 leading-[0.9]">
                 {t('landing.essence_title')} <br /> 
-                <span className="italic serif font-light text-zinc-500 lowercase">{t('landing.essence_title_italic')}</span>
+                <span className="italic font-serif font-light text-zinc-500 normal-case lowercase">{t('landing.essence_title_italic')}</span>
               </h2>
               <p className="text-zinc-400 text-lg font-medium tracking-tight leading-relaxed">
                 {t('landing.essence_subtitle')}
@@ -110,7 +110,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 className="space-y-6"
               >
-                  <h3 className="text-2xl font-bold tracking-tight italic">{t('landing.essence_feature_1_title')}</h3>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter italic">{t('landing.essence_feature_1_title')}</h3>
                   <p className="text-zinc-400 text-sm leading-relaxed font-medium">
                       {t('landing.essence_feature_1_desc')}
                   </p>
@@ -123,7 +123,7 @@ export default function LandingPage() {
                 transition={{ delay: 0.1 }}
                 className="space-y-6"
               >
-                  <h3 className="text-2xl font-bold tracking-tight">{t('landing.essence_feature_2_title')}</h3>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter">{t('landing.essence_feature_2_title')}</h3>
                   <p className="text-zinc-400 text-sm leading-relaxed font-medium">
                       {t('landing.essence_feature_2_desc')}
                   </p>
@@ -136,7 +136,7 @@ export default function LandingPage() {
                 transition={{ delay: 0.2 }}
                 className="space-y-6"
               >
-                  <h3 className="text-2xl font-bold tracking-tight italic">{t('landing.essence_feature_3_title')}</h3>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter italic">{t('landing.essence_feature_3_title')}</h3>
                   <p className="text-zinc-400 text-sm leading-relaxed font-medium">
                       {t('landing.essence_feature_3_desc')}
                   </p>
@@ -149,8 +149,8 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto">
             {/* CTA Final */}
             <div className="mb-24 flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
-              <h2 className="text-4xl md:text-6xl font-bold tracking-tight leading-none text-white max-w-xl">
-                {t('landing.footer_cta_title_1')} <br /> {t('landing.footer_cta_title_2')} <span className="italic serif font-light text-zinc-500 lowercase">{t('landing.footer_cta_title_3')}</span>
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none text-white max-w-xl">
+                {t('landing.footer_cta_title_1')} <br /> {t('landing.footer_cta_title_2')} <span className="italic font-serif font-light text-zinc-500 normal-case lowercase">{t('landing.footer_cta_title_3')}</span>
               </h2>
               <Link href="/auth/register" className="bg-white text-black px-10 py-5 font-black uppercase tracking-[0.2em] text-[11px] hover:bg-zinc-200 transition-all active:scale-95 whitespace-nowrap shadow-2xl">
                 {t('landing.btn_create_studio')}
