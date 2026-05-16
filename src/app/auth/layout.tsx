@@ -1,5 +1,4 @@
 import { BackgroundEffect } from "@/components/effects/background-effect"
-import { StaticTextures } from "@/components/effects/static-textures"
 import { LanguageSwitcher } from "@/components/studio/language-switcher"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -19,15 +18,12 @@ export default async function AuthLayout({
     return (
         <div className={`min-h-screen flex flex-col bg-zinc-950 text-white selection:bg-white selection:text-black overflow-hidden relative ${STUDIO_THEME.typography.fontSans}`}>
             {/* BACKGROUND LAYER (Centralizada via Tokens) */}
-            <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
                 <BackgroundEffect 
                     type={STUDIO_THEME.effects.background.type} 
                     primaryColor={STUDIO_THEME.effects.background.primaryColor} 
                     showDots={true}
                 />
-            </div>
-            <div className="absolute inset-0 z-[1] pointer-events-none" style={{ opacity: STUDIO_THEME.effects.texture.opacity }}>
-                <StaticTextures type={STUDIO_THEME.effects.texture.type} />
             </div>
 
             {/* SHARED STUDIO HEADER */}
