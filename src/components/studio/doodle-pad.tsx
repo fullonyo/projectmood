@@ -24,7 +24,7 @@ export function DoodlePad({ block, onUpdate, onClose }: DoodlePadProps) {
         <div className="space-y-12">
             <EditorHeader 
                 title={t('editors.doodle.title') || "Rascunho Livre"}
-                subtitle="Expressão Cinética"
+                subtitle="Rabiscos e artes"
                 onClose={onClose}
             />
 
@@ -68,7 +68,7 @@ export function DoodlePad({ block, onUpdate, onClose }: DoodlePadProps) {
                 <div className="flex flex-col items-center gap-4 py-4 opacity-40">
                     <div className="flex items-center gap-3">
                         <Sparkles className="w-3 h-3 text-blue-500" />
-                        <span className="text-[8px] font-black uppercase tracking-[0.3em]">Precision Drawing v2.1</span>
+                        <span className="text-[8px] font-black uppercase tracking-[0.3em]">Arte à mão livre</span>
                     </div>
                     <p className="text-[7px] text-zinc-400 font-bold uppercase tracking-widest text-center max-w-[200px]">
                         {t('editors.doodle.manifest') || "Desenhe livremente e nós cuidamos do resto."}
