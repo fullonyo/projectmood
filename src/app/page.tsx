@@ -80,21 +80,13 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Floating Details */}
-          <div className="absolute bottom-12 left-12 hidden md:block opacity-20">
-            <div className="flex items-center gap-3">
-              <div className="h-[1px] w-6 bg-white" />
-              <div className="text-[9px] font-black uppercase tracking-[0.3em] text-white">
-                v2.0.4 — STUDIO_READY
-              </div>
-            </div>
-          </div>
+          {/* Floating Details removidos */}
         </section>
 
         <TemplateShowcase />
 
         {/* Seção de Essência */}
-        <section className="relative py-40 overflow-hidden border-t border-white/5">
+        <section className="relative py-40 overflow-hidden">
           <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 text-center">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
@@ -153,10 +145,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <footer className="relative z-10 pt-32 pb-12 px-6 md:px-12 border-t border-white/5 bg-zinc-950/20 backdrop-blur-sm">
+        <footer className="relative z-10 pt-24 pb-12 px-6 md:px-12 bg-zinc-950/20 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto">
             {/* CTA Final */}
-            <div className="mb-32 flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
+            <div className="mb-24 flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
               <h2 className="text-4xl md:text-6xl font-bold tracking-tight leading-none text-white max-w-xl">
                 {t('landing.footer_cta_title_1')} <br /> {t('landing.footer_cta_title_2')} <span className="italic serif font-light text-zinc-500 lowercase">{t('landing.footer_cta_title_3')}</span>
               </h2>
@@ -166,32 +158,34 @@ export default function LandingPage() {
             </div>
 
             {/* Main Info Area */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-24 mb-32 border-t border-white/5 pt-16">
-              <div className="space-y-8">
-                <div className="text-2xl font-black tracking-tighter uppercase italic opacity-80">MoodSpace</div>
-                <p className="text-zinc-500 text-sm font-medium tracking-tight leading-relaxed max-w-sm">
-                  {t('landing.essence_subtitle')}
-                </p>
-                <div className="flex items-center gap-4">
-                   <LiveCurators />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mb-20 pt-12">
+              <div className="flex flex-col justify-between gap-12">
+                <div className="space-y-6">
+                  <div className="text-2xl font-black tracking-tighter uppercase italic opacity-80">MoodSpace</div>
+                  <p className="text-zinc-500 text-sm font-medium tracking-tight leading-relaxed max-w-sm">
+                    {t('landing.essence_subtitle')}
+                  </p>
                 </div>
+                <LiveCurators />
               </div>
 
-              <div className="space-y-6">
-                <p className="text-zinc-500 text-sm font-medium tracking-tight">
-                  {t('landing.footer_contact_label')}
-                </p>
-                <a 
-                  href="mailto:desenvolvimento@moodspace.com.br" 
-                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight hover:text-emerald-500 transition-colors duration-500 block whitespace-nowrap"
-                >
-                  desenvolvimento@moodspace.com.br
-                </a>
+              <div className="flex flex-col justify-end gap-6 md:text-right">
+                <div className="space-y-3">
+                  <p className="text-zinc-500 text-sm font-medium tracking-tight">
+                    {t('landing.footer_contact_label')}
+                  </p>
+                  <a 
+                    href="mailto:desenvolvimento@moodspace.com.br" 
+                    className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight hover:text-emerald-500 transition-colors duration-500 block whitespace-nowrap"
+                  >
+                    desenvolvimento@moodspace.com.br
+                  </a>
+                </div>
               </div>
             </div>
 
             {/* Bottom Bar */}
-            <div className="flex flex-col md:flex-row justify-between items-center gap-8 pt-8 border-t border-white/5 text-zinc-600">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-8 pt-8 text-zinc-600">
               <div className="text-[10px] font-medium text-zinc-500">
                 &copy; {new Date().getFullYear()} {t('landing.footer_rights')}
               </div>
