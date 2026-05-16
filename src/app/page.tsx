@@ -4,7 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { HeroClaimInput } from "@/components/landing/hero-claim-input"
-import { BlockShowcase } from "@/components/landing/block-showcase"
+import { TemplateShowcase } from "@/components/landing/template-showcase"
 import { LiveCurators } from "@/components/landing/live-curators"
 import { BackgroundEffect } from "@/components/effects/background-effect"
 import { STUDIO_THEME } from "@/lib/studio-theme"
@@ -88,7 +88,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <BlockShowcase />
+        <TemplateShowcase />
 
         {/* Seção de Essência */}
         <section className="relative py-40 overflow-hidden border-t border-white/5">
