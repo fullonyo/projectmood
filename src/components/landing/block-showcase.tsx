@@ -33,7 +33,7 @@ export function BlockShowcase() {
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-8">
                                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Live Studio Feed</span>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">{t('landing.showcase_live_feed')}</span>
                             </div>
 
                             <h3 className="text-4xl font-black uppercase tracking-tighter mb-4 leading-none">
@@ -71,7 +71,7 @@ export function BlockShowcase() {
                         </div>
 
                         <div className="relative z-10 flex items-center justify-between mt-12 pt-8 border-t border-white/5">
-                            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Sincronia YouTube & Spotify</p>
+                            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">{t('landing.showcase_sync_label')}</p>
                             <Play className="text-white w-4 h-4" />
                         </div>
                     </motion.div>
@@ -124,7 +124,7 @@ export function BlockShowcase() {
                                     <Share2 className="w-5 h-5 text-white" />
                                 </div>
                                 <div className="px-2 py-1 bg-black/5 border border-black/10 rounded-full text-[7px] font-black uppercase tracking-tighter text-black">
-                                    Verified Space
+                                    {t('landing.showcase_verified_space')}
                                 </div>
                             </div>
                             
@@ -141,7 +141,7 @@ export function BlockShowcase() {
                         </div>
 
                         <div className="relative z-10 mt-12">
-                            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-black/30 mb-2 block">Módulo: Social Nodes</span>
+                            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-black/30 mb-2 block">{t('landing.showcase_module_social')}</span>
                             <div className="bg-black text-white p-4 rounded-sm">
                                 <p className="text-[11px] font-mono tracking-tighter">moodspace.com.br/<span className="text-purple-400 font-bold">@seu_nome</span></p>
                             </div>
@@ -159,19 +159,19 @@ export function BlockShowcase() {
                         
                         <div className="space-y-6 mt-4 relative z-10">
                             <div className="space-y-2">
-                                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-purple-500">Módulo: Quote</span>
+                                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-purple-500">{t('landing.showcase_module_quote')}</span>
                                 <p className="text-2xl md:text-3xl font-serif italic text-white leading-tight tracking-tighter">
-                                    "A arquitetura do silêncio é feita de memórias que insistimos em guardar."
+                                    {t('landing.showcase_quote_text')}
                                 </p>
-                                <p className="text-[10px] font-mono uppercase text-zinc-600">— Manifesto MoodSpace v2</p>
+                                <p className="text-[10px] font-mono uppercase text-zinc-600">{t('landing.showcase_quote_author')}</p>
                             </div>
                             
                             <div className="w-12 h-[1px] bg-zinc-800" />
                             
                             <div className="space-y-1">
-                                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-500">Módulo: Typography</span>
+                                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-500">{t('landing.showcase_module_typography')}</span>
                                 <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 leading-relaxed">
-                                    Curate your soul, <br /> sync your reality.
+                                    {t('landing.showcase_typography_text_1')} <br /> {t('landing.showcase_typography_text_2')}
                                 </p>
                             </div>
                         </div>

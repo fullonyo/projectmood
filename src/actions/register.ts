@@ -51,3 +51,17 @@ export async function registerUser(values: z.infer<typeof RegisterSchema>) {
         return { error: "Ocorreu um erro ao criar a conta." };
     }
 }
+
+export async function checkUsernameAvailability(username: string) {
+    if (!username) return true;
+    const cleanUsername = username.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    
+    const existingUser = await prisma.user.findFirst({
+        where: {
+            username: { equals: cleanUsername, mode: 'insensitive' }
+        },
+        select: { id: true }
+    });
+
+    return !existingUser;
+}

@@ -42,10 +42,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const displayName = user.name || `@${user.username}`;
     const name = user.name || username;
 
-    // Título padronizado — Garante >= 50 chars para todas as ferramentas de OG
-    // "Nome (@user) — Mural Estético e Perfil Imersivo no MoodSpace"
-    const title = `${displayName} (@${user.username}) — Mural Estético e Perfil Imersivo no MoodSpace`;
-    const description = `Explore o mural pessoal e imersivo de @${user.username} no MoodSpace. Um espaço único de expressão visual com músicas, GIFs e estética curada. Crie o seu hoje.`;
+    // Título padronizado — Busca a média de 50-60 chars
+    // "Nome (@user) — Espaço Digital no MoodSpace"
+    const title = `${displayName} (@${user.username}) — Espaço Digital no MoodSpace`;
+    const description = `Explore o mural de @${user.username} no MoodSpace. Músicas, imagens e conexões reais em um espaço digital curado.`;
 
     // CRÍTICO: URL absoluta com cache-busting (?v=) para forçar atualização nas redes sociais
     const profileImage = `${SITE_URL}/@${user.username}/opengraph-image?v=5`;

@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     default: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
     template: "%s — MoodSpace"
   },
-  description: "Crie e compartilhe seu mural pessoal estético e imersivo no MoodSpace. Aesthetic moods, músicas, GIFs, contagens regressivas e muito mais. Curate Your Reality.",
+  description: "Crie seu espaço digital no MoodSpace. Um mural pessoal para organizar suas memórias, músicas e conexões de forma criativa e imersiva.",
   keywords: ["moodboard", "aesthetic", "creative space", "personal profile", "moodspace", "mural pessoal"],
   authors: [{ name: "MoodSpace Team" }],
   creator: "MoodSpace",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "MoodSpace",
     title: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
-    description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, músicas, GIFs e muito mais.",
+    description: "Crie seu espaço digital no MoodSpace. Um mural pessoal para organizar suas memórias, músicas e conexões de forma criativa e imersiva.",
     images: [
       {
         url: `${siteUrl}/og-base.png`,
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MoodSpace — Crie seu mural estético e compartilhe seu mood",
-    description: "Crie e compartilhe seu mural pessoal estético e imersivo. Aesthetic moods, músicas, GIFs e muito mais.",
+    description: "Crie seu espaço digital no MoodSpace. Um mural pessoal para organizar suas memórias, músicas e conexões de forma criativa e imersiva.",
     images: [`${siteUrl}/og-base.png`],
   },
   icons: {
@@ -70,7 +70,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
