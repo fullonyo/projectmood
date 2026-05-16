@@ -195,7 +195,7 @@ export const pt = {
         footer_link_help: "Central de Ajuda",
         footer_status_online: "Systems: Online",
         footer_col_social: "Social",
-        footer_rights: "STUDIO SYSTEMS",
+        footer_rights: "MoodSpace Studio. Todos os direitos reservados.",
         showcase_live_feed: "Ambiente ao Vivo",
         showcase_sync_label: "Sincronia Criativa",
         showcase_module_social: "Redes & Conexões",
@@ -224,7 +224,8 @@ export const pt = {
         showcase_label_playlist: "Sincronia Criativa",
         showcase_label_editorial: "Curadoria Editorial",
         showcase_label_doodle: "Caderno de Ideias",
-        showcase_label_photo: "Galeria de Memórias"
+        showcase_label_photo: "Galeria de Memórias",
+        footer_contact_label: "Dúvidas, sugestões ou parcerias?"
     },
     auth: {
         login: {

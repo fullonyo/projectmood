@@ -195,7 +195,7 @@ export const en: Dictionary = {
         footer_link_help: "Help Center",
         footer_status_online: "Systems: Online",
         footer_col_social: "Social",
-        footer_rights: "STUDIO SYSTEMS",
+        footer_rights: "MoodSpace Studio. All rights reserved.",
         showcase_live_feed: "Live Environment",
         showcase_sync_label: "Creative Sync",
         showcase_module_social: "Nodes & Connections",
@@ -224,7 +224,8 @@ export const en: Dictionary = {
         showcase_label_playlist: "Creative Sync",
         showcase_label_editorial: "Editorial Curating",
         showcase_label_doodle: "Idea Notebook",
-        showcase_label_photo: "Memory Gallery"
+        showcase_label_photo: "Memory Gallery",
+        footer_contact_label: "Questions, suggestions or partnerships?"
     },
     auth: {
         login: {
