@@ -850,7 +850,8 @@ export const en: Dictionary = {
         },
         share: {
             title: "Space Link",
-            copied: "Link Saved"
+            copied: "Link Saved",
+            action: "Copy Link"
         },
         catalog: {
             title: "Connection Registry"

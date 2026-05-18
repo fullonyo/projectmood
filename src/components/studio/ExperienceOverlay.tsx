@@ -49,7 +49,7 @@ export function ExperienceOverlay({ isVisible, onEnter, username }: ExperienceOv
                                 </h3>
                             </div>
 
-                            <p className="text-white text-6xl md:text-8xl font-black italic tracking-tighter leading-none opacity-90">
+                            <p className="text-white text-4xl sm:text-6xl md:text-8xl font-black italic tracking-tighter leading-none opacity-90 break-all px-4">
                                 @{username}
                             </p>
                             <div className="h-[2px] w-24 bg-white/10 mx-auto" />

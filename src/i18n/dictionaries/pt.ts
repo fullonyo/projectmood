@@ -850,7 +850,8 @@ export const pt = {
         },
         share: {
             title: "Link do Espaço",
-            copied: "Link Salvo"
+            copied: "Link Salvo",
+            action: "Copiar Link"
         },
         catalog: {
             title: "Registro de Conexão"

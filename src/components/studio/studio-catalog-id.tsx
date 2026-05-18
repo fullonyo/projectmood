@@ -30,18 +30,18 @@ export const StudioCatalogID = memo(function StudioCatalogID({ profileId, create
     }, [profileId, createdAt, views])
 
     return (
-        <div className="fixed top-10 right-10 z-[60] mix-blend-difference pointer-events-none group">
+        <div className="fixed top-4 right-4 sm:top-10 sm:right-10 z-[60] mix-blend-difference pointer-events-none group">
             <div className="flex flex-col items-end">
-                <span className="text-[7px] font-black uppercase tracking-[0.5em] opacity-30 group-hover:opacity-100 transition-opacity">
+                <span className="hidden sm:block text-[7px] font-black uppercase tracking-[0.5em] opacity-30 group-hover:opacity-100 transition-opacity">
                     {t('public_page.catalog.title')}
                 </span>
-                <div className="flex items-center gap-3">
-                    <div className="h-[1px] w-8 bg-current opacity-20" />
-                    <span className="text-sm font-light tracking-[0.3em] font-mono opacity-40">
+                <div className="flex items-center gap-1.5 sm:gap-3">
+                    <div className="hidden sm:block h-[1px] w-8 bg-current opacity-20" />
+                    <span className="text-[10px] sm:text-sm font-light tracking-[0.2em] sm:tracking-[0.3em] font-mono opacity-40">
                         {catalogNumber}
                     </span>
                 </div>
-                <div className="mt-1 flex gap-1">
+                <div className="hidden sm:flex mt-1 gap-1">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="w-1 h-1 bg-current opacity-10" />
                     ))}

@@ -31,11 +31,11 @@ export const ProfileSignature = memo(function ProfileSignature({
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
 
     return (
-        <header className="fixed top-10 left-10 z-[100] group pointer-events-none">
-            <div className="flex items-start gap-5">
+        <header className="fixed top-4 left-4 sm:top-10 sm:left-10 z-[100] group pointer-events-none">
+            <div className="flex items-start gap-3 sm:gap-5">
                 {/* Studio Avatar - High Fashion Style */}
                 <div className="relative pointer-events-auto">
-                    <div className="w-16 h-16 bg-white dark:bg-zinc-950 overflow-hidden border border-black dark:border-white transition-all duration-500 group-hover:scale-105 rounded-none shadow-2xl">
+                    <div className="w-10 h-10 sm:w-16 sm:h-16 bg-white dark:bg-zinc-950 overflow-hidden border border-black dark:border-white transition-all duration-500 group-hover:scale-105 rounded-none shadow-2xl">
                         <img
                             src={avatarUrl || `https://avatar.vercel.sh/${username}`}
                             alt={username}
@@ -43,19 +43,19 @@ export const ProfileSignature = memo(function ProfileSignature({
                         />
                     </div>
                     {/* Active Indicator Restore */}
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white dark:bg-zinc-950 flex items-center justify-center rounded-none border border-black dark:border-white shadow-none">
-                        <div className="w-1.5 h-1.5 bg-green-500 rounded-none animate-pulse" />
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-white dark:bg-zinc-950 flex items-center justify-center rounded-none border border-black dark:border-white shadow-none">
+                        <div className="w-1 sm:w-1.5 h-1 sm:h-1.5 bg-green-500 rounded-none animate-pulse" />
                     </div>
                 </div>
 
                 {/* Studio Credentials & HUD */}
-                <div className="flex flex-col pt-1 pointer-events-auto">
-                    <div className="flex items-center gap-2 mb-1">
+                <div className="flex flex-col pt-0 sm:pt-1 pointer-events-auto">
+                    <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
                         <span className="text-[8px] font-black uppercase tracking-[0.5em] opacity-40">{t('public_page.signature.role')}</span>
-                        {isVerified && <VerificationBadge isVerified={isVerified} type={verificationType} className="opacity-60" />}
+                        {isVerified && <VerificationBadge isVerified={isVerified} type={verificationType} className="opacity-60 scale-75 sm:scale-100 origin-left" />}
                     </div>
 
-                    <h1 className="text-2xl font-black tracking-tighter leading-none mb-3 mix-blend-difference text-white">
+                    <h1 className="text-lg sm:text-2xl font-black tracking-tighter leading-none mb-2 sm:mb-3 mix-blend-difference text-white">
                         {name || username}
                     </h1>
 
@@ -113,7 +113,7 @@ export const ProfileSignature = memo(function ProfileSignature({
                         </div>
 
                         {/* ID Badge Mini */}
-                        <div className="flex flex-col opacity-20 hover:opacity-100 transition-opacity duration-700 select-none">
+                        <div className="hidden sm:flex flex-col opacity-20 hover:opacity-100 transition-opacity duration-700 select-none">
                             <span className="text-[10px] font-bold tracking-tighter italic mix-blend-difference text-white">@{username.toLowerCase()}</span>
                             <span className="text-[7px] font-black uppercase tracking-[0.2em]">{t('public_page.signature.studio')}</span>
                         </div>

@@ -27,13 +27,13 @@ export function GuestPromotion({ username }: GuestPromotionProps) {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    initial={{ y: -100, opacity: 0 }}
+                    initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -100, opacity: 0 }}
+                    exit={{ y: 50, opacity: 0 }}
                     transition={{ type: "spring", damping: 20, stiffness: 100 }}
-                    className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] max-w-xl pointer-events-auto font-sans"
+                    className="fixed bottom-4 sm:bottom-auto sm:top-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] max-w-xl pointer-events-auto font-sans"
                 >
-                    <div className="bg-zinc-950/90 backdrop-blur-2xl border border-white/10 p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
+                    <div className="bg-zinc-950/90 backdrop-blur-2xl border border-white/10 p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 shadow-2xl relative overflow-hidden">
                         {/* Status Label (Signature Industrial Style) */}
                         <div className="absolute top-0 right-0 bg-white text-black text-[7px] font-black px-3 py-1 uppercase tracking-[0.3em] leading-none">
                             {t('auth.promotion.official_registry')}

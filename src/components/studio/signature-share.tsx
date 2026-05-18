@@ -56,7 +56,12 @@ export const SignatureShare = memo(function SignatureShare({ username }: Signatu
                             "text-[10px] font-mono tracking-[0.2em] uppercase transition-all duration-500",
                             status === 'copied' ? "text-green-500 font-black italic" : "opacity-60 group-hover:opacity-100"
                         )}>
-                            {status === 'copied' ? t('public_page.share.copied') : `moodspace.me/@${username.toLowerCase()}`}
+                            {status === 'copied' ? t('public_page.share.copied') : (
+                                <>
+                                    <span className="hidden sm:inline">moodspace.me/@{username.toLowerCase()}</span>
+                                    <span className="sm:hidden inline">{t('public_page.share.action')}</span>
+                                </>
+                            )}
                         </span>
                     </div>
 
