@@ -99,14 +99,14 @@ export function TemplateShowcase() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    {/* Navegação por Tabs (Padrão Industrial) */}
-                    <div className="lg:col-span-1 flex flex-col justify-center gap-2">
+                    {/* Navegação por Tabs (Padrão Industrial & Responsiva) */}
+                    <div className="lg:col-span-1 flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 gap-2 scrollbar-none snap-x snap-mandatory w-full scroll-smooth">
                         {TEMPLATES.map((template, idx) => (
                             <button
                                 key={template.id}
                                 onClick={() => setActiveIndex(idx)}
                                 className={cn(
-                                    "text-left p-6 border transition-all duration-300 relative overflow-hidden group",
+                                    "text-left p-4 sm:p-6 border transition-all duration-300 relative overflow-hidden group min-w-[150px] sm:min-w-[180px] lg:min-w-0 flex-shrink-0 snap-start",
                                     activeIndex === idx 
                                         ? "border-white/20 bg-white/5" 
                                         : "border-transparent hover:bg-white/5"
@@ -115,14 +115,14 @@ export function TemplateShowcase() {
                                 {activeIndex === idx && (
                                     <motion.div 
                                         layoutId="activeTemplateIndicator"
-                                        className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"
+                                        className="absolute left-0 right-0 lg:right-auto bottom-0 lg:top-0 w-full lg:w-1 h-1 lg:h-full bg-emerald-500"
                                     />
                                 )}
                                 <span className="block text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-2">
                                     {t(template.categoryKey)}
                                 </span>
                                 <span className={cn(
-                                    "block text-xl font-black uppercase tracking-tighter transition-colors",
+                                    "block text-lg sm:text-xl font-black uppercase tracking-tighter transition-colors",
                                     activeIndex === idx ? "text-white" : "text-zinc-400 group-hover:text-zinc-300"
                                 )}>
                                     {t(template.nameKey)}
@@ -198,29 +198,30 @@ export function TemplateShowcase() {
                                                     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                                                         <BackgroundEffect type="liquid" primaryColor="#1e3a8a" showDots={false} />
                                                     </div>
-                                                    <div className="w-full h-full flex flex-col md:flex-row items-center justify-center gap-8 p-6 md:p-12 z-10">
-                                                        <div className="w-full md:w-[60%] aspect-video bg-black rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
-                                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                                  <div className="w-16 h-11 bg-[#FF0000] rounded-xl flex items-center justify-center">
-                                                                      <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1" />
+                                                    <div className="w-full h-full flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 p-4 sm:p-6 md:p-12 z-10">
+                                                         <div className="w-full max-w-[280px] md:max-w-none md:w-[60%] aspect-video bg-black rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden flex-shrink-0">
+                                                              <div className="absolute inset-0 flex items-center justify-center">
+                                                                   <div className="w-12 h-8 md:w-16 md:h-11 bg-[#FF0000] rounded-lg md:rounded-xl flex items-center justify-center">
+                                                                       <div className="w-0 h-0 border-t-[6px] md:border-t-[8px] border-t-transparent border-l-[10px] md:border-l-[14px] border-l-white border-b-[6px] md:border-b-[8px] border-b-transparent ml-1" />
+                                                                   </div>
+                                                              </div>
+                                                         </div>
+                                                         <div className="w-full max-w-[280px] md:max-w-none md:w-[35%] h-auto md:h-[80%] bg-[#121212] rounded-2xl border border-white/10 shadow-2xl p-4 md:p-8 flex flex-col justify-between gap-4 md:gap-0 flex-shrink-0">
+                                                              <div className="flex gap-3 md:gap-4 items-center md:items-start">
+                                                                   <div className="w-12 h-12 md:w-20 md:h-20 bg-zinc-800 rounded-lg flex-shrink-0" />
+                                                                   <div className="flex-1 space-y-2">
+                                                                       <div className="h-3 md:h-4 w-full bg-white/10 rounded-full animate-pulse" />
+                                                                       <div className="h-2 md:h-3 w-2/3 bg-white/5 rounded-full" />
+                                                                   </div>
+                                                              </div>
+                                                              <div className="flex items-center gap-3 md:gap-4">
+                                                                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#1DB954] flex items-center justify-center flex-shrink-0">
+                                                                      <div className="w-0 h-0 border-t-[4px] md:border-t-[5px] border-t-transparent border-l-[6px] md:border-l-[8px] border-l-black border-b-[4px] md:border-b-[5px] border-b-transparent ml-0.5" />
                                                                   </div>
-                                                             </div>
-                                                        </div>
-                                                        <div className="w-full md:w-[35%] h-[80%] bg-[#121212] rounded-2xl border border-white/10 shadow-2xl p-8 flex flex-col justify-between">
-                                                             <div className="flex gap-4">
-                                                                  <div className="w-20 h-20 bg-zinc-800 rounded-lg" />
-                                                                  <div className="flex-1 space-y-2">
-                                                                      <div className="h-4 w-full bg-white/10 rounded-full" />
-                                                                  </div>
-                                                             </div>
-                                                             <div className="flex items-center gap-4">
-                                                                 <div className="w-10 h-10 rounded-full bg-[#1DB954] flex items-center justify-center">
-                                                                     <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-black border-b-[5px] border-b-transparent ml-0.5" />
-                                                                 </div>
-                                                                 <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden" />
-                                                             </div>
-                                                        </div>
-                                                    </div>
+                                                                  <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden" />
+                                                              </div>
+                                                         </div>
+                                                     </div>
                                                 </>
                                             ) : TEMPLATES[activeIndex].id === "minimal" ? (
                                                 <>
@@ -276,13 +277,13 @@ export function TemplateShowcase() {
                                                     </div>
                                                 </div>
                                             ) : TEMPLATES[activeIndex].id === "visuals" ? (
-                                                <div className="w-full h-full flex items-center justify-center p-6 md:p-12 z-10 gap-8 md:gap-16">
+                                                <div className="w-full h-full flex flex-col md:flex-row items-center justify-center p-4 sm:p-6 md:p-12 z-10 gap-4 sm:gap-6 md:gap-16">
                                                     <motion.div 
                                                         initial={{ opacity: 0, y: 20 }}
                                                         animate={{ opacity: 1, y: 0 }}
-                                                        className="relative group w-[280px] md:w-[400px]"
+                                                        className="relative group w-[180px] sm:w-[280px] md:w-[400px] flex-shrink-0"
                                                     >
-                                                        <div className="rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 aspect-[4/3]">
+                                                        <div className="rounded-xl md:rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 aspect-[4/3]">
                                                             <img 
                                                                 src="/placeholders/anime-scenery.png" 
                                                                 className="w-full h-full object-cover" 
@@ -294,7 +295,7 @@ export function TemplateShowcase() {
                                                     <motion.div 
                                                         initial={{ opacity: 0, x: 20, rotate: 5 }}
                                                         animate={{ opacity: 1, x: 0, rotate: 3 }}
-                                                        className="bg-white dark:bg-zinc-950 p-4 pb-12 shadow-2xl ring-1 ring-black/5 rotate-[3deg] w-[200px] md:w-[260px] flex flex-col"
+                                                        className="bg-white dark:bg-zinc-950 p-2 md:p-4 pb-6 md:pb-12 shadow-2xl ring-1 ring-black/5 rotate-[3deg] w-[120px] sm:w-[200px] md:w-[260px] flex flex-col flex-shrink-0"
                                                     >
                                                         <div className="aspect-square bg-zinc-100 dark:bg-zinc-900 overflow-hidden relative">
                                                             <img 
@@ -303,9 +304,9 @@ export function TemplateShowcase() {
                                                                 alt="GIF" 
                                                             />
                                                         </div>
-                                                        <div className="mt-6 space-y-1.5">
-                                                            <div className="h-1.5 w-2/3 bg-zinc-100 dark:bg-zinc-800 rounded-full" />
-                                                            <div className="h-1.5 w-1/3 bg-zinc-100 dark:bg-zinc-800 rounded-full" />
+                                                        <div className="mt-3 md:mt-6 space-y-1 md:space-y-1.5">
+                                                            <div className="h-1 md:h-1.5 w-2/3 bg-zinc-100 dark:bg-zinc-800 rounded-full" />
+                                                            <div className="h-1 md:h-1.5 w-1/3 bg-zinc-100 dark:bg-zinc-800 rounded-full" />
                                                         </div>
                                                     </motion.div>
                                                 </div>

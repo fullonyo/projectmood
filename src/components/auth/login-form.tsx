@@ -59,7 +59,7 @@ export default function LoginForm() {
                 </h1>
             </div>
 
-            <div className="p-8 sm:p-12 border border-white/10 bg-zinc-900/60 backdrop-blur-2xl relative rounded-none shadow-2xl">
+            <div className="p-6 sm:p-12 border border-white/10 bg-zinc-900/60 backdrop-blur-2xl relative rounded-none shadow-2xl">
                 {/* Technical corner accents (Architectural) */}
                 <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-white/20" />
                 <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-white/20" />

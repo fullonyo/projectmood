@@ -65,14 +65,14 @@ export function HeroClaimInput() {
                 {/* Efeito de Glow */}
                 <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-focus-within:opacity-100 blur-sm transition-opacity duration-500 pointer-events-none" />
 
-                <div className="flex-1 flex items-center px-6 py-4 border-r border-white/10 sm:border-r">
-                    <span className="text-zinc-400 font-mono text-sm tracking-tighter mr-2 select-none">moodspace.com.br/</span>
+                <div className="flex-1 flex items-center px-4 sm:px-6 py-4 border-b sm:border-b-0 sm:border-r border-white/10">
+                    <span className="text-zinc-400 font-mono text-xs sm:text-sm tracking-tighter mr-2 select-none flex-shrink-0">moodspace.com.br/</span>
                     <input
                         type="text"
                         value={username}
                         onChange={handleChange}
                         placeholder={t('landing.claim_username_placeholder')}
-                        className="flex-1 w-full bg-transparent border-none outline-none text-white font-mono text-sm tracking-tighter placeholder:text-zinc-500"
+                        className="flex-1 bg-transparent border-none outline-none text-white font-mono text-xs sm:text-sm tracking-tighter placeholder:text-zinc-500 min-w-0"
                     />
                     
                     {/* Status Indicator */}

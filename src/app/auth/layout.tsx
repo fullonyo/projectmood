@@ -16,7 +16,7 @@ export default async function AuthLayout({
     const t = rawDict || dictionaries.pt;
 
     return (
-        <div className={`min-h-screen flex flex-col bg-zinc-950 text-white selection:bg-white selection:text-black overflow-hidden relative ${STUDIO_THEME.typography.fontSans}`}>
+        <div className={`min-h-screen flex flex-col bg-zinc-950 text-white selection:bg-white selection:text-black overflow-y-auto overflow-x-hidden relative ${STUDIO_THEME.typography.fontSans}`}>
             {/* BACKGROUND LAYER (Centralizada via Tokens) */}
             <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
                 <BackgroundEffect 

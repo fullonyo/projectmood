@@ -27,21 +27,21 @@ export default function LandingPage() {
 
       <div className="relative z-10">
         {/* Navigation */}
-        <nav className="fixed top-0 w-full z-50 px-6 py-8 md:px-12 flex justify-between items-center mix-blend-difference">
-          <div className="text-xl font-black tracking-tighter uppercase italic">MoodSpace</div>
-          <div className="flex gap-8 items-center">
+        <nav className="fixed top-0 w-full z-50 px-4 sm:px-8 md:px-12 py-6 md:py-8 flex justify-between items-center mix-blend-difference">
+          <div className="text-lg sm:text-xl font-black tracking-tighter uppercase italic">MoodSpace</div>
+          <div className="flex gap-4 sm:gap-8 items-center">
             <LanguageSwitcher lightText />
-            <Link href="/auth/login" className="text-[10px] font-black uppercase tracking-widest hover:text-zinc-400 transition-colors">
+            <Link href="/auth/login" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:text-zinc-400 transition-colors">
               {t('landing.login_btn')}
             </Link>
-            <Link href="/auth/register" className="bg-white text-black px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-colors">
+            <Link href="/auth/register" className="bg-white text-black px-4 py-1.5 sm:px-6 sm:py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-colors">
               {t('landing.btn_create_studio')}
             </Link>
           </div>
         </nav>
 
         {/* Hero Section */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20">
+        <section className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 pt-20">
           <div className="max-w-5xl w-full text-center space-y-12">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -54,7 +54,7 @@ export default function LandingPage() {
                 <div className="w-8 h-[1px] bg-white/20" />
               </div>
               
-              <h1 className="text-6xl md:text-[120px] font-black uppercase tracking-tighter leading-[0.8]">
+              <h1 className="text-4xl sm:text-6xl md:text-[120px] font-black uppercase tracking-tighter leading-[0.9] md:leading-[0.8]">
                 {t('landing.hero_title_curate')} <br /> 
                 <span className="text-zinc-500 italic font-serif font-light normal-case lowercase">{t('landing.hero_title_your')}</span> <br />
                 {t('landing.hero_title_reality')}
@@ -176,7 +176,7 @@ export default function LandingPage() {
                   </p>
                   <a 
                     href="mailto:desenvolvimento@moodspace.com.br" 
-                    className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight hover:text-emerald-500 transition-colors duration-500 block whitespace-nowrap"
+                    className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight hover:text-emerald-500 transition-colors duration-500 block break-all md:whitespace-nowrap"
                   >
                     desenvolvimento@moodspace.com.br
                   </a>
