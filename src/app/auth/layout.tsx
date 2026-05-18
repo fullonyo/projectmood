@@ -27,17 +27,17 @@ export default async function AuthLayout({
             </div>
 
             {/* SHARED STUDIO HEADER */}
-            <nav className="relative z-50 flex items-center justify-between px-6 py-8 md:px-12 flex-shrink-0">
+            <nav className="relative z-50 flex items-center justify-between px-4 sm:px-8 md:px-12 py-6 md:py-8 flex-shrink-0">
                 <Link href="/" className="flex flex-col group">
                     <span className="text-[8px] font-black uppercase tracking-[0.5em] opacity-40 leading-none mb-1 group-hover:opacity-60 transition-opacity">
                         {t.landing.studio_platform}
                     </span>
-                    <div className="text-2xl font-black tracking-tighter uppercase italic">MoodSpace</div>
+                    <div className="text-xl sm:text-2xl font-black tracking-tighter uppercase italic">MoodSpace</div>
                 </Link>
-                <div className="flex items-center gap-6">
-                    <LanguageSwitcher className="opacity-50 hover:opacity-100 transition-opacity" />
+                <div className="flex items-center gap-3 sm:gap-6">
+                    <LanguageSwitcher className="hidden sm:flex opacity-50 hover:opacity-100 transition-opacity" />
                     <Link href="/">
-                        <Button variant="ghost" className="text-[9px] font-black uppercase tracking-[0.3em] gap-2 opacity-40 hover:opacity-100 border border-transparent hover:border-white/10 hover:bg-white/5 transition-all">
+                        <Button variant="ghost" className="text-[9px] font-black uppercase tracking-[0.3em] gap-1.5 sm:gap-2 opacity-40 hover:opacity-100 border border-transparent hover:border-white/10 hover:bg-white/5 transition-all px-2 py-1 sm:px-4 sm:py-2 h-auto">
                             <ShieldEllipsis className="w-3.5 h-3.5" />
                             {t.auth.login.abort}
                         </Button>

@@ -29,12 +29,12 @@ export default function LandingPage() {
         {/* Navigation */}
         <nav className="fixed top-0 w-full z-50 px-4 sm:px-8 md:px-12 py-6 md:py-8 flex justify-between items-center mix-blend-difference">
           <div className="text-lg sm:text-xl font-black tracking-tighter uppercase italic">MoodSpace</div>
-          <div className="flex gap-4 sm:gap-8 items-center">
-            <LanguageSwitcher lightText />
-            <Link href="/auth/login" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:text-zinc-400 transition-colors">
+          <div className="flex gap-3 sm:gap-8 items-center">
+            <LanguageSwitcher lightText className="hidden sm:flex" />
+            <Link href="/auth/login" className="hidden sm:inline-block text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:text-zinc-400 transition-colors">
               {t('landing.login_btn')}
             </Link>
-            <Link href="/auth/register" className="bg-white text-black px-4 py-1.5 sm:px-6 sm:py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-colors">
+            <Link href="/auth/register" className="bg-white text-black px-4 py-1.5 sm:px-6 sm:py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-colors whitespace-nowrap">
               {t('landing.btn_create_studio')}
             </Link>
           </div>
